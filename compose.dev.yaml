@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: { target: development }
+    environment: { ASPNETCORE_ENVIRONMENT: Development }
+    volumes:
+      - .:/workspace
+      - nuget_cache:/root/.nuget/packages
+    command: ["dotnet", "watch", "--project", "src/backend/SportPneus.Api", "run", "--no-launch-profile"]
+  frontend:
+    build: { target: development }
+    volumes:
+      - ./src/frontend/sport-pneus-web:/app
+      - frontend_node_modules:/app/node_modules
+    command: ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "1000"]
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200"]
+  nginx:
+    depends_on:
+      backend: { condition: service_started }
+      frontend: { condition: service_started }
+volumes:
+  nuget_cache:
+  frontend_node_modules:

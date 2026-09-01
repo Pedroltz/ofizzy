@@ -1,0 +1,15 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?Defina BACKEND_IMAGE}
+    build: null
+  migrate:
+    image: ${BACKEND_IMAGE:?Defina BACKEND_IMAGE}
+  frontend:
+    image: ${FRONTEND_IMAGE:?Defina FRONTEND_IMAGE}
+    build: null
+  nginx:
+    ports: ["80:80", "443:443"]
+    environment: { APP_DOMAIN: "${APP_DOMAIN:?Defina APP_DOMAIN}" }
+    volumes:
+      - ./deploy/nginx/production.conf:/etc/nginx/templates/default.conf.template:ro
+      - ${LETSENCRYPT_PATH:-/etc/letsencrypt}:/etc/letsencrypt:ro

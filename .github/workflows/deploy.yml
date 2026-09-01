@@ -1,0 +1,42 @@
+name: Build and deploy
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+permissions: { contents: read, packages: write }
+
+jobs:
+  validate:
+    uses: ./.github/workflows/pull-request.yml
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      registry: ${{ steps.meta.outputs.registry }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: '${{ github.actor }}', password: '${{ secrets.GITHUB_TOKEN }}' }
+      - id: meta
+        run: echo "registry=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with: { context: ., file: src/backend/SportPneus.Api/Dockerfile, target: runtime, push: true, tags: '${{ steps.meta.outputs.registry }}/sport-pneus-backend:${{ github.sha }}' }
+      - uses: docker/build-push-action@v6
+        with: { context: ., file: src/frontend/sport-pneus-web/Dockerfile, target: runtime, push: true, tags: '${{ steps.meta.outputs.registry }}/sport-pneus-frontend:${{ github.sha }}' }
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          install -m 700 -d ~/.ssh
+          printf '%s' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+          tar -czf /tmp/sport-pneus-deploy.tgz compose.yaml compose.prod.yaml deploy
+          scp -P "${{ secrets.SSH_PORT }}" /tmp/sport-pneus-deploy.tgz "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/"
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "mkdir -p '${{ secrets.DEPLOY_PATH }}' && tar -xzf /tmp/sport-pneus-deploy.tgz -C '${{ secrets.DEPLOY_PATH }}' && cd '${{ secrets.DEPLOY_PATH }}' && echo '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io -u '${{ secrets.GHCR_USERNAME }}' --password-stdin && BACKEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-backend:${{ github.sha }}' FRONTEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-frontend:${{ github.sha }}' docker compose -f compose.yaml -f compose.prod.yaml pull && BACKEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-backend:${{ github.sha }}' FRONTEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-frontend:${{ github.sha }}' docker compose -f compose.yaml -f compose.prod.yaml --profile tools run --rm migrate && BACKEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-backend:${{ github.sha }}' FRONTEND_IMAGE='${{ needs.publish.outputs.registry }}/sport-pneus-frontend:${{ github.sha }}' docker compose -f compose.yaml -f compose.prod.yaml up -d --remove-orphans"

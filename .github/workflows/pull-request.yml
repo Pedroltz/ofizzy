@@ -1,0 +1,38 @@
+name: Pull request
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '10.0.x' }
+      - run: dotnet restore SportPneus.slnx
+      - run: dotnet build SportPneus.slnx --configuration Release --no-restore
+      - run: dotnet test SportPneus.slnx --configuration Release --no-build
+        env:
+          ConnectionStrings__Postgres: Host=localhost;Database=unused
+          Jwt__SigningKey: ci-only-signing-key-with-at-least-32-bytes
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: src/frontend/sport-pneus-web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: npm, cache-dependency-path: src/frontend/sport-pneus-web/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --watch=false
+      - run: npm run build
+
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config --quiet

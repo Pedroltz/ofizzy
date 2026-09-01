@@ -1,0 +1,71 @@
+name: sport-pneus
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sport_pneus}
+      POSTGRES_USER: ${POSTGRES_USER:-sport_pneus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sport_pneus} -d ${POSTGRES_DB:-sport_pneus}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/SportPneus.Api/Dockerfile
+      target: runtime
+    image: ${BACKEND_IMAGE:-sport-pneus-backend:local}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-sport_pneus};Username=${POSTGRES_USER:-sport_pneus};Password=${POSTGRES_PASSWORD}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Defina JWT_SIGNING_KEY no arquivo .env}
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  migrate:
+    image: ${BACKEND_IMAGE:-sport-pneus-backend:local}
+    profiles: ["tools"]
+    command: ["--migrate"]
+    environment:
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-sport_pneus};Username=${POSTGRES_USER:-sport_pneus};Password=${POSTGRES_PASSWORD}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY}
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/sport-pneus-web/Dockerfile
+      target: runtime
+    image: ${FRONTEND_IMAGE:-sport-pneus-frontend:local}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    ports: ["${APP_PORT:-8080}:8080"]
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      backend: { condition: service_healthy }
+      frontend: { condition: service_healthy }
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
