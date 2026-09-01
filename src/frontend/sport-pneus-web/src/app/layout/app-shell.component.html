@@ -1,0 +1,10 @@
+<div class="app-layout">
+  <aside class="desktop-sidebar">
+    <a routerLink="/" class="sidebar-brand"><span class="brand-mark small"><i class="pi pi-wrench"></i></span><strong>Sport Pneus</strong></a>
+    <nav><a routerLink="/" class="nav-item active"><i class="pi pi-home"></i><span>Início</span></a></nav>
+    <button type="button" class="profile-button" (click)="logout()"><span class="avatar">{{ user()?.name?.charAt(0) }}</span><span><strong>{{ user()?.name }}</strong><small>Sair</small></span><i class="pi pi-sign-out"></i></button>
+  </aside>
+  <header class="mobile-header"><button type="button" class="icon-button" (click)="mobileMenu.set(true)" aria-label="Abrir menu"><i class="pi pi-bars"></i></button><strong>Sport Pneus</strong><span class="avatar">{{ user()?.name?.charAt(0) }}</span></header>
+  <p-drawer header="Sport Pneus" [(visible)]="mobileMenu"><nav><a routerLink="/" class="nav-item active" (click)="mobileMenu.set(false)"><i class="pi pi-home"></i><span>Início</span></a></nav><p-button label="Sair" icon="pi pi-sign-out" severity="secondary" [text]="true" (onClick)="logout()" /></p-drawer>
+  <main class="app-content"><router-outlet /></main>
+</div>

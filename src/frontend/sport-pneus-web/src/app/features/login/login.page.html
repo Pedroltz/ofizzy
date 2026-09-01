@@ -1,0 +1,17 @@
+<main class="auth-page login-layout">
+  <section class="auth-intro">
+    <span class="brand-mark"><i class="pi pi-wrench"></i></span>
+    <p class="eyebrow">SPORT PNEUS</p>
+    <h1>Sua oficina, sem complicação.</h1>
+    <p>Ordens de serviço organizadas e rápidas, do jeito que o trabalho precisa.</p>
+  </section>
+  <p-card styleClass="auth-card login-card">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
+      <header><h2>Entrar</h2><p>Use os dados criados no primeiro acesso.</p></header>
+      <label>E-mail<input pInputText formControlName="email" type="email" autocomplete="email" /></label>
+      <label>Senha<p-password formControlName="password" [toggleMask]="true" [feedback]="false" autocomplete="current-password" styleClass="full-control" inputStyleClass="full-control" /></label>
+      @if (invalidCredentials()) { <p class="field-error">E-mail ou senha inválidos.</p> }
+      <p-button type="submit" label="Entrar" icon="pi pi-arrow-right" iconPos="right" size="large" [loading]="saving()" [disabled]="saving()" styleClass="full-control" />
+    </form>
+  </p-card>
+</main>
