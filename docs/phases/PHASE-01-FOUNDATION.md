@@ -14,7 +14,7 @@
 ## Evidências
 
 - `dotnet test`: 5 testes unitários e 1 integração aprovados com PostgreSQL 18/Testcontainers.
-- `npm run lint`, `npm run build` e `npm test -- --watch=false`: aprovados.
+- `npm run lint`, `npm run build` e `npm test`: aprovados.
 - `docker compose config` local e produção: aprovados.
 - Imagens backend/frontend: construídas com sucesso.
 - PostgreSQL, backend e frontend: healthy; Nginx ativo.
