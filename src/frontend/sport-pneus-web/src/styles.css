@@ -1815,6 +1815,109 @@ label {
     gap: .6rem;
 }
 
+/* Enhanced Editable Work Order Lines */
+.wo-line-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: .85rem 1rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    transition: border-color .15s ease;
+}
+
+.wo-line-card:hover {
+    border-color: #cbd5e1;
+}
+
+.wo-line-main {
+    display: flex;
+    align-items: flex-end;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
+.wo-field-label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #64748b;
+    margin-bottom: .3rem;
+}
+
+.wo-line-field-desc {
+    flex: 1 1 200px;
+    min-width: 170px;
+}
+
+.wo-line-field-code {
+    flex: 0 1 100px;
+    min-width: 80px;
+}
+
+.wo-line-field-qty {
+    flex: 0 1 85px;
+    min-width: 75px;
+}
+
+.wo-line-field-price {
+    flex: 0 1 125px;
+    min-width: 105px;
+}
+
+.wo-line-field-total {
+    flex: 0 1 110px;
+    min-width: 95px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.wo-line-subtotal-val {
+    display: block;
+    padding: .5rem 0;
+    font-size: .95rem;
+    font-weight: 800;
+    color: #0f172a !important;
+    text-align: right;
+}
+
+.wo-line-field-action {
+    flex: 0 0 auto;
+    padding-bottom: .15rem;
+}
+
+.wo-catalog-select {
+    width: auto !important;
+    min-width: 10.5rem;
+    padding: .4rem .75rem !important;
+    font-size: .84rem !important;
+    border-radius: 6px !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.wo-section-subtotal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .75rem;
+    padding: .65rem .85rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: .86rem;
+    color: #475569;
+}
+
+.wo-section-subtotal-bar strong {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a !important;
+}
+
 /* Auth Pages (Login & Setup) */
 .auth-page {
     min-height: 100vh;

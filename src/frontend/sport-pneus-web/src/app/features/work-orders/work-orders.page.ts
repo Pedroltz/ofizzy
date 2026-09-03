@@ -59,8 +59,16 @@ export class WorkOrdersPage {
     notes: ['']
   });
 
+  readonly servicesSubtotal = computed(() =>
+    this.services().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0)
+  );
+
+  readonly partsSubtotal = computed(() =>
+    this.parts().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0)
+  );
+
   readonly orderTotal = computed(() =>
-    [...this.services(), ...this.parts()].reduce((sum, x) => sum + x.quantity * x.unitPrice, 0)
+    this.servicesSubtotal() + this.partsSubtotal()
   );
 
   readonly statusLabels: Record<WorkOrderStatus, string> = {
@@ -146,6 +154,7 @@ export class WorkOrdersPage {
       this.parts.set(order.parts.map(p => ({
         catalogId: p.catalogId,
         description: p.description,
+        code: p.code,
         quantity: p.quantity,
         unitPrice: p.unitPrice
       })));
@@ -176,16 +185,30 @@ export class WorkOrdersPage {
     }
   }
 
+  addManualService(): void {
+    this.services.update(lines => [
+      ...lines,
+      { catalogId: null, description: '', quantity: 1, unitPrice: 0 }
+    ]);
+  }
+
   addPart(id: string): void {
     const item = this.partsCatalog().find(x => x.id === id);
     if (item) {
-      this.parts.update(lines => [...lines, { catalogId: item.id, description: item.name, quantity: 1, unitPrice: item.salePrice }]);
+      this.parts.update(lines => [...lines, { catalogId: item.id, description: item.name, code: item.code, quantity: 1, unitPrice: item.salePrice }]);
     }
   }
 
-  updateLine(kind: 'services' | 'parts', index: number, field: 'quantity' | 'unitPrice', value: number | null): void {
+  addManualPart(): void {
+    this.parts.update(lines => [
+      ...lines,
+      { catalogId: null, description: '', code: '', quantity: 1, unitPrice: 0 }
+    ]);
+  }
+
+  updateLine(kind: 'services' | 'parts', index: number, field: string, value: unknown): void {
     const target = kind === 'services' ? this.services : this.parts;
-    target.update(lines => lines.map((line, i) => i === index ? { ...line, [field]: value ?? 0 } : line));
+    target.update(lines => lines.map((line, i) => i === index ? { ...line, [field]: value } : line));
   }
 
   removeLine(kind: 'services' | 'parts', index: number): void {
@@ -198,6 +221,20 @@ export class WorkOrdersPage {
       this.form.markAllAsTouched();
       return;
     }
+
+    // Validação de linhas
+    const emptyServices = this.services().filter(s => !s.description || !s.description.trim());
+    if (emptyServices.length > 0) {
+      this.messages.add({ severity: 'warn', summary: 'Serviço sem descrição', detail: 'Preencha a descrição de todos os serviços incluídos.' });
+      return;
+    }
+
+    const emptyParts = this.parts().filter(p => !p.description || !p.description.trim());
+    if (emptyParts.length > 0) {
+      this.messages.add({ severity: 'warn', summary: 'Peça sem descrição', detail: 'Preencha a descrição de todas as peças incluídas.' });
+      return;
+    }
+
     this.saving.set(true);
     try {
       const value = this.form.getRawValue();

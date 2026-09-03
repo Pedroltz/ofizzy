@@ -64,7 +64,11 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
         var partIds = request.Parts.Where(x => x.CatalogId.HasValue).Select(x => x.CatalogId!.Value).Distinct().ToList(); var validParts = await db.Parts.Where(x => partIds.Contains(x.Id) && x.IsActive).ToDictionaryAsync(x => x.Id, ct);
         if (validServiceIds.Count != serviceIds.Count || validParts.Count != partIds.Count) throw new ConflictException("Um serviço ou peça selecionado não está mais disponível.");
         foreach (var s in request.Services) db.WorkOrderServices.Add(new WorkOrderService { WorkOrderId = item.Id, ServiceId = s.CatalogId, Description = s.Description.Trim(), Quantity = s.Quantity, UnitPrice = s.UnitPrice });
-        foreach (var p in request.Parts) db.WorkOrderParts.Add(new WorkOrderPart { WorkOrderId = item.Id, PartId = p.CatalogId, Description = p.Description.Trim(), Code = p.CatalogId.HasValue ? validParts[p.CatalogId.Value].Code : null, Quantity = p.Quantity, UnitPrice = p.UnitPrice });
+        foreach (var p in request.Parts)
+        {
+            var code = !string.IsNullOrWhiteSpace(p.Code) ? p.Code.Trim() : (p.CatalogId.HasValue ? validParts[p.CatalogId.Value].Code : null);
+            db.WorkOrderParts.Add(new WorkOrderPart { WorkOrderId = item.Id, PartId = p.CatalogId, Description = p.Description.Trim(), Code = code, Quantity = p.Quantity, UnitPrice = p.UnitPrice });
+        }
     }
     private async Task<WorkOrderResponse?> LoadResponse(Guid id, CancellationToken ct) { var x = await db.WorkOrders.AsNoTracking().Include(o => o.Services).ThenInclude(i => i.Service).Include(o => o.Parts).ThenInclude(i => i.Part).SingleOrDefaultAsync(o => o.Id == id, ct); if (x is null) return null; var services = x.Services.Select(i => new WorkOrderLineResponse(i.Id, i.ServiceId, i.Description, null, i.Quantity, i.UnitPrice, i.Quantity * i.UnitPrice)).ToList(); var parts = x.Parts.Select(i => new WorkOrderLineResponse(i.Id, i.PartId, i.Description, i.Code ?? i.Part?.Code, i.Quantity, i.UnitPrice, i.Quantity * i.UnitPrice)).ToList(); var st = services.Sum(i => i.Total); var pt = parts.Sum(i => i.Total); return new(x.Id, x.Number, x.CustomerId, x.VehicleId, x.CustomerName, x.CustomerDocument, x.CustomerPhone, x.VehiclePlate, x.VehicleDescription, x.Mileage, x.Complaint, x.Diagnosis, x.Notes, x.Status, st, pt, st + pt, x.CreatedAt, x.CompletedAt, services, parts); }
 }

@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace SportPneus.Api.Modules.WorkOrders;
 
-public sealed record WorkOrderLineRequest(Guid? CatalogId, string Description, decimal Quantity, decimal UnitPrice);
+public sealed record WorkOrderLineRequest(Guid? CatalogId, string Description, decimal Quantity, decimal UnitPrice, string? Code = null);
 public sealed record WorkOrderRequest(Guid CustomerId, Guid VehicleId, int? Mileage, string? Complaint, string? Diagnosis, string? Notes, IReadOnlyList<WorkOrderLineRequest> Services, IReadOnlyList<WorkOrderLineRequest> Parts);
 public sealed record WorkOrderStatusRequest(WorkOrderStatus Status);
 public sealed record WorkOrderLineResponse(Guid Id, Guid? CatalogId, string Description, string? Code, decimal Quantity, decimal UnitPrice, decimal Total);
@@ -23,5 +23,11 @@ public sealed class WorkOrderRequestValidator : AbstractValidator<WorkOrderReque
 
 public sealed class WorkOrderLineRequestValidator : AbstractValidator<WorkOrderLineRequest>
 {
-    public WorkOrderLineRequestValidator() { RuleFor(x => x.Description).NotEmpty().MaximumLength(300); RuleFor(x => x.Quantity).GreaterThan(0).LessThanOrEqualTo(9999); RuleFor(x => x.UnitPrice).GreaterThanOrEqualTo(0).LessThanOrEqualTo(999999999); }
+    public WorkOrderLineRequestValidator()
+    {
+        RuleFor(x => x.Description).NotEmpty().MaximumLength(300);
+        RuleFor(x => x.Quantity).GreaterThan(0).LessThanOrEqualTo(9999);
+        RuleFor(x => x.UnitPrice).GreaterThanOrEqualTo(0).LessThanOrEqualTo(999999999);
+        RuleFor(x => x.Code).MaximumLength(100).When(x => !string.IsNullOrEmpty(x.Code));
+    }
 }

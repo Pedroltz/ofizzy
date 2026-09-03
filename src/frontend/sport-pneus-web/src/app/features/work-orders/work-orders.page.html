@@ -478,66 +478,181 @@
         <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Aprovado orçamento complementar via contato telefônico"></textarea>
       </label>
 
-      <!-- Linhas de Serviço -->
+      <!-- Linhas de Serviço / Mão de Obra -->
       <div class="wo-block">
-        <div class="wo-block-header">
+        <div class="wo-block-header flex-wrap">
           <div class="flex items-center gap-2">
             <i class="pi pi-wrench text-slate-500"></i>
-            <h3>Serviços a Realizar</h3>
+            <h3 class="m-0 text-sm font-bold text-slate-800">Serviços e Mão de Obra</h3>
           </div>
-          <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço">
-            <option value="">+ Selecionar do catálogo</option>
-            @for (item of servicesCatalog(); track item.id) {
-              <option [value]="item.id">{{ item.name }} · {{ money(item.defaultPrice) }}</option>
-            }
-          </select>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p-button label="Novo Serviço Avulso" icon="pi pi-plus" size="small" [outlined]="true" severity="info" type="button" (onClick)="addManualService()" />
+            <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço do catálogo" class="wo-catalog-select">
+              <option value="">+ Do Catálogo...</option>
+              @for (item of servicesCatalog(); track item.id) {
+                <option [value]="item.id">{{ item.name }} ({{ money(item.defaultPrice) }})</option>
+              }
+            </select>
+          </div>
         </div>
-        <div class="p-3 flex flex-col gap-2">
+
+        <div class="p-3 flex flex-col gap-2.5">
           @for (line of services(); track $index) {
-            <div class="order-line">
-              <div class="order-line-desc">
-                <strong>{{ line.description }}</strong>
-              </div>
-              <div class="order-line-inputs">
-                <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('services',$index,'quantity',$event)" />
-                <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('services',$index,'unitPrice',$event)" />
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('services',$index)" ariaLabel="Remover linha de serviço" />
+            <div class="wo-line-card">
+              <div class="wo-line-main">
+                <div class="wo-line-field-desc">
+                  <label class="wo-field-label">Descrição do Serviço / Mão de Obra</label>
+                  <input
+                    pInputText
+                    [ngModel]="line.description"
+                    [ngModelOptions]="{standalone:true}"
+                    placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
+                    (ngModelChange)="updateLine('services', $index, 'description', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-qty">
+                  <label class="wo-field-label">Qtd</label>
+                  <p-inputnumber
+                    [ngModel]="line.quantity"
+                    [ngModelOptions]="{standalone:true}"
+                    [min]="0.01"
+                    [maxFractionDigits]="2"
+                    placeholder="1"
+                    (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-price">
+                  <label class="wo-field-label">Valor Unit.</label>
+                  <p-inputnumber
+                    [ngModel]="line.unitPrice"
+                    [ngModelOptions]="{standalone:true}"
+                    mode="currency"
+                    currency="BRL"
+                    locale="pt-BR"
+                    placeholder="R$ 0,00"
+                    (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-total">
+                  <label class="wo-field-label">Subtotal</label>
+                  <span class="wo-line-subtotal-val">{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                </div>
+
+                <div class="wo-line-field-action">
+                  <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
+                </div>
               </div>
             </div>
           } @empty {
-            <div class="text-center py-4 text-sm text-slate-400">Nenhum serviço selecionado. Utilize o seletor acima para adicionar.</div>
+            <div class="text-center py-5 text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
+              <i class="pi pi-wrench text-2xl text-slate-300 block mb-1"></i>
+              Nenhum serviço incluído. Clique em <strong>Novo Serviço Avulso</strong> ou escolha do <strong>Catálogo</strong>.
+            </div>
+          }
+
+          @if (services().length > 0) {
+            <div class="wo-section-subtotal-bar">
+              <span>Subtotal Mão de Obra ({{ services().length }} {{ services().length === 1 ? 'item' : 'itens' }}):</span>
+              <strong>{{ money(servicesSubtotal()) }}</strong>
+            </div>
           }
         </div>
       </div>
 
-      <!-- Linhas de Peça -->
+      <!-- Linhas de Peças e Insumos -->
       <div class="wo-block">
-        <div class="wo-block-header">
+        <div class="wo-block-header flex-wrap">
           <div class="flex items-center gap-2">
             <i class="pi pi-box text-slate-500"></i>
-            <h3>Peças e Insumos</h3>
+            <h3 class="m-0 text-sm font-bold text-slate-800">Peças e Insumos</h3>
           </div>
-          <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça">
-            <option value="">+ Selecionar do catálogo</option>
-            @for (item of partsCatalog(); track item.id) {
-              <option [value]="item.id">{{ item.name }} · {{ money(item.salePrice) }}</option>
-            }
-          </select>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p-button label="Nova Peça Avulsa" icon="pi pi-plus" size="small" [outlined]="true" severity="info" type="button" (onClick)="addManualPart()" />
+            <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça do catálogo" class="wo-catalog-select">
+              <option value="">+ Do Catálogo...</option>
+              @for (item of partsCatalog(); track item.id) {
+                <option [value]="item.id">{{ item.name }} ({{ money(item.salePrice) }})</option>
+              }
+            </select>
+          </div>
         </div>
-        <div class="p-3 flex flex-col gap-2">
+
+        <div class="p-3 flex flex-col gap-2.5">
           @for (line of parts(); track $index) {
-            <div class="order-line">
-              <div class="order-line-desc">
-                <strong>{{ line.description }}</strong>
-              </div>
-              <div class="order-line-inputs">
-                <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('parts',$index,'quantity',$event)" />
-                <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('parts',$index,'unitPrice',$event)" />
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('parts',$index)" ariaLabel="Remover linha de peça" />
+            <div class="wo-line-card">
+              <div class="wo-line-main">
+                <div class="wo-line-field-desc">
+                  <label class="wo-field-label">Descrição da Peça / Insumo</label>
+                  <input
+                    pInputText
+                    [ngModel]="line.description"
+                    [ngModelOptions]="{standalone:true}"
+                    placeholder="Ex: Pneu 175/70 R14, Válvula, Pastilha dianteira..."
+                    (ngModelChange)="updateLine('parts', $index, 'description', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-code">
+                  <label class="wo-field-label">Cód / Ref <small class="text-slate-400">opcional</small></label>
+                  <input
+                    pInputText
+                    [ngModel]="line.code"
+                    [ngModelOptions]="{standalone:true}"
+                    placeholder="Ex: SKU-102"
+                    (ngModelChange)="updateLine('parts', $index, 'code', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-qty">
+                  <label class="wo-field-label">Qtd</label>
+                  <p-inputnumber
+                    [ngModel]="line.quantity"
+                    [ngModelOptions]="{standalone:true}"
+                    [min]="0.01"
+                    [maxFractionDigits]="2"
+                    placeholder="1"
+                    (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-price">
+                  <label class="wo-field-label">Valor Unit.</label>
+                  <p-inputnumber
+                    [ngModel]="line.unitPrice"
+                    [ngModelOptions]="{standalone:true}"
+                    mode="currency"
+                    currency="BRL"
+                    locale="pt-BR"
+                    placeholder="R$ 0,00"
+                    (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
+                  />
+                </div>
+
+                <div class="wo-line-field-total">
+                  <label class="wo-field-label">Subtotal</label>
+                  <span class="wo-line-subtotal-val">{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                </div>
+
+                <div class="wo-line-field-action">
+                  <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
+                </div>
               </div>
             </div>
           } @empty {
-            <div class="text-center py-4 text-sm text-slate-400">Nenhuma peça selecionada. Utilize o seletor acima para adicionar.</div>
+            <div class="text-center py-5 text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
+              <i class="pi pi-box text-2xl text-slate-300 block mb-1"></i>
+              Nenhuma peça incluída. Clique em <strong>Nova Peça Avulsa</strong> ou escolha do <strong>Catálogo</strong>.
+            </div>
+          }
+
+          @if (parts().length > 0) {
+            <div class="wo-section-subtotal-bar">
+              <span>Subtotal Peças ({{ parts().length }} {{ parts().length === 1 ? 'item' : 'itens' }}):</span>
+              <strong>{{ money(partsSubtotal()) }}</strong>
+            </div>
           }
         </div>
       </div>

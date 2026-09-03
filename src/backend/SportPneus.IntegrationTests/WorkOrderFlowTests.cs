@@ -16,10 +16,31 @@ public sealed class WorkOrderFlowTests(SportPneusFactory factory) : IClassFixtur
         var vehicleId = (await vehicleResponse.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
         var serviceResponse = await client.PostAsJsonAsync("/api/services", new { name = "Alinhamento", description = (string?)null, defaultPrice = 100m }); var serviceId = (await serviceResponse.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
         var partResponse = await client.PostAsJsonAsync("/api/parts", new { name = "Válvula", code = "VAL-1", costPrice = 5m, salePrice = 12.5m }); var partId = (await partResponse.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
-        var created = await client.PostAsJsonAsync("/api/work-orders", new { customerId, vehicleId, mileage = 51000, complaint = "Puxa para a direita", diagnosis = "Geometria", notes = (string?)null, services = new[] { new { catalogId = (Guid?)serviceId, description = "Alinhamento", quantity = 1m, unitPrice = 100m } }, parts = new[] { new { catalogId = (Guid?)partId, description = "Válvula", quantity = 4m, unitPrice = 12.5m } } });
-        Assert.Equal(HttpStatusCode.Created, created.StatusCode); var order = await created.Content.ReadFromJsonAsync<JsonElement>(); Assert.Equal(150m, order.GetProperty("total").GetDecimal()); Assert.True(order.GetProperty("number").GetInt64() > 0); var id = order.GetProperty("id").GetGuid();
-        var updated = await client.PutAsJsonAsync($"/api/work-orders/{id}", new { customerId, vehicleId, mileage = 52000, complaint = "Puxa para a direita", diagnosis = "Geometria e balanceamento", notes = "Adicionado serviço extra", services = new[] { new { catalogId = (Guid?)serviceId, description = "Alinhamento", quantity = 1m, unitPrice = 120m } }, parts = new[] { new { catalogId = (Guid?)partId, description = "Válvula", quantity = 2m, unitPrice = 12.5m } } });
-        Assert.Equal(HttpStatusCode.OK, updated.StatusCode); var updatedOrder = await updated.Content.ReadFromJsonAsync<JsonElement>(); Assert.Equal(145m, updatedOrder.GetProperty("total").GetDecimal()); Assert.Equal(52000, updatedOrder.GetProperty("mileage").GetInt32());
+        var created = await client.PostAsJsonAsync("/api/work-orders", new {
+            customerId, vehicleId, mileage = 51000, complaint = "Puxa para a direita", diagnosis = "Geometria", notes = (string?)null,
+            services = new object[] {
+                new { catalogId = (Guid?)serviceId, description = "Alinhamento", quantity = 1m, unitPrice = 100m },
+                new { catalogId = (Guid?)null, description = "Desempeno de roda", quantity = 2m, unitPrice = 50m }
+            },
+            parts = new object[] {
+                new { catalogId = (Guid?)partId, description = "Válvula", quantity = 4m, unitPrice = 12.5m },
+                new { catalogId = (Guid?)null, description = "Abraçadeira inox", code = "ABR-01", quantity = 3m, unitPrice = 10m }
+            }
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var order = await created.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(280m, order.GetProperty("total").GetDecimal());
+        Assert.True(order.GetProperty("number").GetInt64() > 0);
+        var id = order.GetProperty("id").GetGuid();
+        var updated = await client.PutAsJsonAsync($"/api/work-orders/{id}", new {
+            customerId, vehicleId, mileage = 52000, complaint = "Puxa para a direita", diagnosis = "Geometria e balanceamento", notes = "Adicionado serviço extra",
+            services = new[] { new { catalogId = (Guid?)serviceId, description = "Alinhamento especial", quantity = 1m, unitPrice = 120m } },
+            parts = new[] { new { catalogId = (Guid?)partId, description = "Válvula", quantity = 2m, unitPrice = 12.5m } }
+        });
+        Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
+        var updatedOrder = await updated.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(145m, updatedOrder.GetProperty("total").GetDecimal());
+        Assert.Equal(52000, updatedOrder.GetProperty("mileage").GetInt32());
         Assert.Equal(HttpStatusCode.OK, (await client.PatchAsJsonAsync($"/api/work-orders/{id}/status", new { status = "InProgress" })).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await client.PatchAsJsonAsync($"/api/work-orders/{id}/status", new { status = "Completed" })).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await client.PutAsJsonAsync($"/api/work-orders/{id}", new { customerId, vehicleId, mileage = 51000, complaint = "Alterada", diagnosis = (string?)null, notes = (string?)null, services = Array.Empty<object>(), parts = Array.Empty<object>() })).StatusCode);
