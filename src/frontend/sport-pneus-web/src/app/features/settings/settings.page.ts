@@ -10,13 +10,28 @@ import { TextareaModule } from 'primeng/textarea';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Part, ServiceItem } from '../../core/api/catalog.models';
 import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
-import { PageHeaderComponent } from '../../shared/components/page-header.component';
+import {
+  EmptyStateComponent,
+  PageHeaderComponent,
+  SectionCardComponent,
+} from '../../shared/components';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [ReactiveFormsModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, TabsModule, TextareaModule, PageHeaderComponent],
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    DialogModule,
+    InputNumberModule,
+    InputTextModule,
+    TabsModule,
+    TextareaModule,
+    PageHeaderComponent,
+    EmptyStateComponent,
+    SectionCardComponent,
+  ],
   templateUrl: './settings.page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPage {
   private readonly api = inject(CatalogApiService);
@@ -201,5 +216,11 @@ export class SettingsPage {
 
   money(value: number): string {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  marginPercent(part: Part): string {
+    if (!part.costPrice || part.costPrice <= 0) return '';
+    const margin = ((part.salePrice - part.costPrice) / part.costPrice) * 100;
+    return `+${margin.toFixed(0)}% margem`;
   }
 }

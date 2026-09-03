@@ -40,32 +40,31 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R7 concluído / R8 — Configurações e Catálogo preparado
+R8 concluído / R9 — Autenticação preparado
 
 Última tarefa concluída:
-R7 — Clientes e Veículos (DataToolbar com contagem reativa, busca ágil integrada, visualização em tabela desktop com avatares e badges de placa, cards mobile com contatos rápidos, modais padronizados com validação e suporte completo a Dark Mode)
+R8 — Configurações e Catálogo (Reorganização em abas, catálogo de serviços com preço padrão monoespaçado, catálogo de peças com SKU e cálculo de margem comercial, formulário estruturado de dados da empresa com SectionCard e suporte total a Dark Mode)
 
 Próxima tarefa:
-R8 — Configurações e Catálogo (Configurações da oficina, catálogo de serviços e peças, dados da empresa e termos de garantia)
+R9 — Autenticação (Telas de Login e Setup Inicial modernizadas no estilo Linear/Vercel, Dark Mode completo, botão de alternância de tema no cabeçalho/canto superior e feedback claro de validações)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/features/customers/customers.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/customers/customers.page.html`
-- `src/frontend/sport-pneus-web/src/app/features/vehicles/vehicles.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/vehicles/vehicles.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/settings/settings.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/settings/settings.page.html`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R7.
+- Nenhuma para R8.
 
 Problemas conhecidos:
-- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~721 kB contra 500 kB).
+- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~722 kB contra 500 kB).
 
 Testes:
 - `npm test`: 22/22 testes unitários aprovados.
 - `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 

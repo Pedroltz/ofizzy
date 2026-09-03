@@ -409,6 +409,24 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
 
+## 2026-09-03 — UI/UX Redesign: R8 — Configurações e Catálogo Concluído
+
+- **Reorganização Modular em Abas (`settings.page.*`)**:
+  - **Catálogo de Serviços**: listagem limpa de serviços com título, descrição complementar, preço padrão em tipografia monoespaçada (`var(--font-mono)`), ações rápidas de edição e arquivamento, e integração com `EmptyStateComponent`.
+  - **Catálogo de Peças e Insumos**: visualização de SKU em badge monoespaçado, preço de custo, preço de venda e cálculo automático de margem comercial com pílula de destaque visual (`.margin-pill`), com suporte a `EmptyStateComponent`.
+  - **Dados da Oficina & Impressão**: formulário completo segmentado por finalidade com `SectionCardComponent`:
+    - *Identificação*: Nome fantasia, razão social e CNPJ/CPF com validação visual.
+    - *Canais de Contato*: Telefone comercial, WhatsApp e e-mail.
+    - *Endereço e Localização*: Logradouro, cidade, UF e CEP em grid responsivo.
+    - *Termos Operacionais*: Termo de garantia padrão impresso nas OSs e notas de fechamento aos clientes.
+  - **Feedback Operacional**: botão de ação com indicador de carregamento e notificação via `MessageService`.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
+
+
 
 
 

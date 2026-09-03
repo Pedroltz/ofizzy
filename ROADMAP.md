@@ -87,11 +87,11 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Dark Mode
 
 ### R8 — Configurações e Catálogo
-- [ ] Configurações
-- [ ] Serviços
-- [ ] Peças
-- [ ] Empresa
-- [ ] Dark Mode
+- [x] Configurações
+- [x] Serviços
+- [x] Peças
+- [x] Empresa
+- [x] Dark Mode
 
 ### R9 — Autenticação
 - [ ] Login
