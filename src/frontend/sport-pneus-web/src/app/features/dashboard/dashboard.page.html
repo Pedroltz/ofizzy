@@ -91,6 +91,144 @@
     </article>
   </div>
 
+  <!-- Ordens de Serviço Ativas na Oficina -->
+  <section class="dashboard-active-section">
+    <div class="dashboard-section-header">
+      <div>
+        <p class="eyebrow">PÁTIO DA OFICINA</p>
+        <h2>Ordens de Serviço em Aberto e em Execução</h2>
+        <p class="section-subtitle">Acompanhe os atendimentos e veículos presentes na oficina em tempo real</p>
+      </div>
+      <div class="flex items-center gap-3">
+        @if (activeOrders().length > 0) {
+          <span class="active-pill">
+            <span class="active-dot"></span>
+            <strong>{{ activeOrders().length }}</strong> {{ activeOrders().length === 1 ? 'ordem ativa' : 'ordens ativas' }}
+          </span>
+        }
+        <a routerLink="/ordens" class="view-all-link">
+          <span>Ver Todas as Ordens</span>
+          <i class="pi pi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="order-grid">
+        @for (_ of [1, 2, 3]; track $index) {
+          <div class="order-card surface-card">
+            <p-skeleton width="40%" height="1.8rem" />
+            <p-skeleton width="75%" height="1.5rem" />
+            <p-skeleton width="100%" height="3.5rem" />
+          </div>
+        }
+      </div>
+    } @else if (activeOrders().length === 0) {
+      <div class="dashboard-empty-card surface-card">
+        <div class="dashboard-empty-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <h3>Pátio Livre de Pendências</h3>
+        <p>Não há ordens de serviço abertas ou em andamento no momento. Todos os atendimentos foram concluídos ou liberados.</p>
+        <a routerLink="/ordens" class="quick-action-btn highlight mt-2">
+          <i class="pi pi-plus"></i>
+          <span>Abrir Nova Ordem de Serviço</span>
+        </a>
+      </div>
+    } @else {
+      <div class="order-grid">
+        @for (item of activeOrders(); track item.id) {
+          <article class="order-card surface-card">
+            <!-- Topo do Bloquinho: Badge OS + Status -->
+            <div class="order-card-header">
+              <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
+              <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'">
+                @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
+                @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+                <span>{{ statusLabels[item.status] }}</span>
+              </span>
+            </div>
+
+            <!-- Identidade: Cliente & Veículo -->
+            <div class="order-card-identity">
+              <h2 title="{{ item.customerName }}">{{ item.customerName }}</h2>
+              <div class="order-vehicle-line">
+                <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                <span title="{{ item.vehicleDescription }}">{{ item.vehicleDescription }}</span>
+              </div>
+            </div>
+
+            <!-- Informações: Abertura e Total -->
+            <div class="order-summary-row">
+              <div class="order-date-block">
+                <small>Abertura</small>
+                <span><i class="pi pi-calendar text-teal-600 mr-1"></i>{{ formatDate(item.createdAt) }}</span>
+              </div>
+              <div class="order-total-val">
+                <small>Valor da OS</small>
+                <strong>{{ money(item.total) }}</strong>
+              </div>
+            </div>
+
+            <!-- Rodapé de Ações -->
+            <div class="order-card-actions">
+              <a routerLink="/ordens" class="w-full">
+                <p-button label="Gerenciar no Módulo de Ordens" icon="pi pi-external-link" [outlined]="true" severity="secondary" size="small" styleClass="w-full" />
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Métricas Rápidas Operacionais -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card surface-card">
+      <div class="stat-icon-wrapper bg-blue-50 text-blue-600">
+        <i class="pi pi-file-edit text-xl"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Ordens Ativas</span>
+        <strong class="stat-value text-slate-900">{{ totalActiveOrders() }}</strong>
+        <span class="stat-hint">No pátio da oficina</span>
+      </div>
+    </div>
+
+    <div class="stat-card surface-card">
+      <div class="stat-icon-wrapper bg-emerald-50 text-emerald-600">
+        <i class="pi pi-users text-xl"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Clientes Cadastrados</span>
+        <strong class="stat-value text-slate-900">{{ totalCustomers() }}</strong>
+        <span class="stat-hint">Base total ativa</span>
+      </div>
+    </div>
+
+    <div class="stat-card surface-card">
+      <div class="stat-icon-wrapper bg-amber-50 text-amber-600">
+        <i class="pi pi-car text-xl"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Veículos na Base</span>
+        <strong class="stat-value text-slate-900">{{ totalVehicles() }}</strong>
+        <span class="stat-hint">Frota de clientes</span>
+      </div>
+    </div>
+
+    <div class="stat-card surface-card">
+      <div class="stat-icon-wrapper bg-purple-50 text-purple-600">
+        <i class="pi pi-check-circle text-xl"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Ordens Concluídas</span>
+        <strong class="stat-value text-slate-900">{{ totalCompletedOrders() }}</strong>
+        <span class="stat-hint">Histórico finalizado</span>
+      </div>
+    </div>
+  </div>
+
   <section class="workflow-section surface-card">
     <header class="workflow-header">
       <div>

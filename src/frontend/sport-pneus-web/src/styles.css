@@ -615,6 +615,173 @@ select:focus {
     gap: .65rem;
 }
 
+/* Dashboard Active Orders & Stats */
+.dashboard-active-section {
+    margin-bottom: 2rem;
+}
+
+.dashboard-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-section-header h2 {
+    margin: .2rem 0 .25rem;
+    font-size: 1.28rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.section-subtitle {
+    margin: 0;
+    font-size: .88rem;
+    color: #64748b;
+}
+
+.active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #0369a1;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    padding: .3rem .75rem;
+    border-radius: 9999px;
+}
+
+.active-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0284c7;
+    animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .35; transform: scale(.8); }
+}
+
+.view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--app-primary);
+    text-decoration: none;
+    transition: gap .15s ease;
+}
+
+.view-all-link:hover {
+    gap: .65rem;
+}
+
+.dashboard-empty-card {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.dashboard-empty-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #16a34a;
+    display: grid;
+    place-items: center;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-empty-card h3 {
+    margin: 0 0 .5rem;
+    font-size: 1.15rem;
+    font-weight: 750;
+    color: #0f172a;
+}
+
+.dashboard-empty-card p {
+    max-width: 30rem;
+    margin: 0 0 1.25rem;
+    font-size: .9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Dashboard Stats Grid */
+.dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+.stat-icon-wrapper {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: .76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #64748b;
+}
+
+.stat-value {
+    font-size: 1.6rem;
+    font-weight: 850;
+    line-height: 1.2;
+    color: #0f172a !important;
+}
+
+.stat-hint {
+    font-size: .75rem;
+    color: #94a3b8;
+}
+
 /* Workflow Section */
 .workflow-section {
     padding: 1.75rem;
