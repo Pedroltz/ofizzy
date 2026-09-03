@@ -77,17 +77,17 @@
               <table class="dashboard-table table-fixed" aria-label="Ordens ativas na oficina">
                 <colgroup>
                   <col style="width: 4.2rem" />
-                  <col style="width: 8.8rem" />
                   <col style="width: auto" />
-                  <col style="width: 6.2rem" />
+                  <col style="width: 8.8rem" />
+                  <col style="width: 5.8rem" />
                   <col style="width: 7.2rem" />
                   <col style="width: 5.2rem" />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>OS</th>
-                    <th>Status</th>
                     <th>Cliente / Veículo</th>
+                    <th>Status</th>
                     <th>Entrada</th>
                     <th class="text-right">Valor</th>
                     <th class="text-right">Ação</th>
@@ -100,9 +100,6 @@
                         <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
                       </td>
                       <td>
-                        <app-status-badge [status]="item.status" />
-                      </td>
-                      <td>
                         <div class="customer-vehicle-cell">
                           <strong class="cell-title" [title]="item.customerName">{{ item.customerName }}</strong>
                           <div class="vehicle-subline">
@@ -112,7 +109,13 @@
                         </div>
                       </td>
                       <td>
-                        <span class="date-cell">{{ formatDate(item.createdAt) }}</span>
+                        <app-status-badge [status]="item.status" />
+                      </td>
+                      <td>
+                        <div class="date-cell-stacked">
+                          <span class="date-main">{{ formatDateOnly(item.createdAt) }}</span>
+                          <span class="date-time">{{ formatTimeOnly(item.createdAt) }}</span>
+                        </div>
                       </td>
                       <td class="text-right font-mono font-medium">
                         {{ money(item.total) }}

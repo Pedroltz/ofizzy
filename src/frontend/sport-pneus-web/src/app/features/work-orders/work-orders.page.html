@@ -99,17 +99,17 @@
       <table class="data-table table-fixed" aria-label="Lista de ordens de serviço">
         <colgroup>
           <col style="width: 4.5rem" />
-          <col style="width: 8.8rem" />
           <col style="width: auto" />
-          <col style="width: 6.5rem" />
-          <col style="width: 8.2rem" />
           <col style="width: 9.2rem" />
+          <col style="width: 6rem" />
+          <col style="width: 8.2rem" />
+          <col style="width: 9.5rem" />
         </colgroup>
         <thead>
           <tr>
             <th>OS</th>
-            <th>Status</th>
             <th>Cliente / Veículo</th>
+            <th>Status</th>
             <th>Entrada</th>
             <th class="text-right">Total</th>
             <th class="text-right">Ações</th>
@@ -124,9 +124,6 @@
                 </span>
               </td>
               <td>
-                <app-status-badge [status]="item.status" />
-              </td>
-              <td>
                 <div class="customer-vehicle-cell">
                   <strong class="cell-title cursor-pointer hover:underline" (click)="viewDetail(item)" [title]="item.customerName">
                     {{ item.customerName }}
@@ -138,7 +135,13 @@
                 </div>
               </td>
               <td>
-                <span class="date-cell">{{ formatDate(item.createdAt) }}</span>
+                <app-status-badge [status]="item.status" />
+              </td>
+              <td>
+                <div class="date-cell-stacked">
+                  <span class="date-main">{{ formatDateOnly(item.createdAt) }}</span>
+                  <span class="date-time">{{ formatTimeOnly(item.createdAt) }}</span>
+                </div>
               </td>
               <td class="text-right font-mono font-bold">
                 {{ money(item.total) }}
