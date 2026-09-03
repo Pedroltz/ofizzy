@@ -1,0 +1,58 @@
+using SportPneus.Api.Modules.Customers;
+using SportPneus.Api.Modules.Parts;
+using SportPneus.Api.Modules.Services;
+using SportPneus.Api.Modules.Vehicles;
+
+namespace SportPneus.Api.Modules.WorkOrders;
+
+public enum WorkOrderStatus { Open, InProgress, Completed, Cancelled }
+
+public sealed class WorkOrder
+{
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public long Number { get; set; }
+    public Guid CustomerId { get; set; }
+    public Customer Customer { get; set; } = null!;
+    public Guid VehicleId { get; set; }
+    public Vehicle Vehicle { get; set; } = null!;
+    public string CustomerName { get; set; } = string.Empty;
+    public string? CustomerDocument { get; set; }
+    public string? CustomerPhone { get; set; }
+    public string VehiclePlate { get; set; } = string.Empty;
+    public string VehicleDescription { get; set; } = string.Empty;
+    public int? Mileage { get; set; }
+    public string? Complaint { get; set; }
+    public string? Diagnosis { get; set; }
+    public string? Notes { get; set; }
+    public WorkOrderStatus Status { get; set; } = WorkOrderStatus.Open;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? CompletedAt { get; set; }
+    public List<WorkOrderService> Services { get; set; } = [];
+    public List<WorkOrderPart> Parts { get; set; } = [];
+}
+
+public sealed class WorkOrderService
+{
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid WorkOrderId { get; set; }
+    public WorkOrder WorkOrder { get; set; } = null!;
+    public Guid? ServiceId { get; set; }
+    public ServiceItem? Service { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public decimal Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+}
+
+public sealed class WorkOrderPart
+{
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid WorkOrderId { get; set; }
+    public WorkOrder WorkOrder { get; set; } = null!;
+    public Guid? PartId { get; set; }
+    public Part? Part { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string? Code { get; set; }
+    public decimal Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+}
