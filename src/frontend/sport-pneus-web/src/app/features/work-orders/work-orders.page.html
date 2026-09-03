@@ -182,7 +182,7 @@
   position="right"
   [modal]="true"
   [blockScroll]="true"
-  [style]="{ width: 'min(780px, 100vw)' }"
+  [style]="{ width: 'min(920px, 100vw)' }"
   styleClass="wo-drawer"
 >
   <ng-template #header>
@@ -423,7 +423,7 @@
   position="right"
   [modal]="true"
   [blockScroll]="true"
-  [style]="{ width: 'min(820px, 100vw)' }"
+  [style]="{ width: 'min(940px, 100vw)' }"
   styleClass="wo-drawer"
 >
   <ng-template #header>
@@ -507,61 +507,63 @@
 
         <div class="p-3">
           @if (services().length > 0) {
-            <div class="wo-grid-table">
-              <div class="wo-grid-header services">
-                <div>Descrição da Mão de Obra / Serviço</div>
-                <div class="text-center">Qtd</div>
-                <div class="text-right">Valor Unit.</div>
-                <div class="text-right">Subtotal</div>
-                <div class="text-center">Ações</div>
-              </div>
-
-              @for (line of services(); track $index) {
-                <div class="wo-grid-row services">
-                  <div class="wo-grid-cell">
-                    <input
-                      pInputText
-                      [ngModel]="line.description"
-                      [ngModelOptions]="{standalone:true}"
-                      placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
-                      (ngModelChange)="updateLine('services', $index, 'description', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell">
-                    <p-inputnumber
-                      [ngModel]="line.quantity"
-                      [ngModelOptions]="{standalone:true}"
-                      [min]="0.01"
-                      [maxFractionDigits]="2"
-                      placeholder="1"
-                      styleClass="w-full"
-                      (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell">
-                    <p-inputnumber
-                      [ngModel]="line.unitPrice"
-                      [ngModelOptions]="{standalone:true}"
-                      mode="currency"
-                      currency="BRL"
-                      locale="pt-BR"
-                      placeholder="R$ 0,00"
-                      styleClass="w-full"
-                      (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell wo-cell-total">
-                    <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                  </div>
-
-                  <div class="wo-grid-cell wo-cell-action">
-                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
-                  </div>
+            <div class="wo-grid-table-container">
+              <div class="wo-grid-table">
+                <div class="wo-grid-header services">
+                  <div>Descrição da Mão de Obra / Serviço</div>
+                  <div class="text-center">Qtd</div>
+                  <div class="text-right">Valor Unit.</div>
+                  <div class="text-right">Subtotal</div>
+                  <div class="text-center">Ações</div>
                 </div>
-              }
+
+                @for (line of services(); track $index) {
+                  <div class="wo-grid-row services">
+                    <div class="wo-grid-cell">
+                      <input
+                        pInputText
+                        [ngModel]="line.description"
+                        [ngModelOptions]="{standalone:true}"
+                        placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
+                        (ngModelChange)="updateLine('services', $index, 'description', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell">
+                      <p-inputnumber
+                        [ngModel]="line.quantity"
+                        [ngModelOptions]="{standalone:true}"
+                        [min]="0.01"
+                        [maxFractionDigits]="2"
+                        placeholder="1"
+                        styleClass="w-full"
+                        (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell">
+                      <p-inputnumber
+                        [ngModel]="line.unitPrice"
+                        [ngModelOptions]="{standalone:true}"
+                        mode="currency"
+                        currency="BRL"
+                        locale="pt-BR"
+                        placeholder="R$ 0,00"
+                        styleClass="w-full"
+                        (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell wo-cell-total">
+                      <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                    </div>
+
+                    <div class="wo-grid-cell wo-cell-action">
+                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
 
             <div class="wo-section-subtotal-bar mt-2.5">
@@ -597,72 +599,74 @@
 
         <div class="p-3">
           @if (parts().length > 0) {
-            <div class="wo-grid-table">
-              <div class="wo-grid-header parts">
-                <div>Descrição da Peça / Insumo</div>
-                <div>Cód / Ref</div>
-                <div class="text-center">Qtd</div>
-                <div class="text-right">Valor Unit.</div>
-                <div class="text-right">Subtotal</div>
-                <div class="text-center">Ações</div>
-              </div>
-
-              @for (line of parts(); track $index) {
-                <div class="wo-grid-row parts">
-                  <div class="wo-grid-cell">
-                    <input
-                      pInputText
-                      [ngModel]="line.description"
-                      [ngModelOptions]="{standalone:true}"
-                      placeholder="Ex: Pneu 175/70 R14, Pastilha, Válvula..."
-                      (ngModelChange)="updateLine('parts', $index, 'description', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell">
-                    <input
-                      pInputText
-                      [ngModel]="line.code"
-                      [ngModelOptions]="{standalone:true}"
-                      placeholder="Ex: SKU-01"
-                      (ngModelChange)="updateLine('parts', $index, 'code', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell">
-                    <p-inputnumber
-                      [ngModel]="line.quantity"
-                      [ngModelOptions]="{standalone:true}"
-                      [min]="0.01"
-                      [maxFractionDigits]="2"
-                      placeholder="1"
-                      styleClass="w-full"
-                      (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell">
-                    <p-inputnumber
-                      [ngModel]="line.unitPrice"
-                      [ngModelOptions]="{standalone:true}"
-                      mode="currency"
-                      currency="BRL"
-                      locale="pt-BR"
-                      placeholder="R$ 0,00"
-                      styleClass="w-full"
-                      (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
-                    />
-                  </div>
-
-                  <div class="wo-grid-cell wo-cell-total">
-                    <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                  </div>
-
-                  <div class="wo-grid-cell wo-cell-action">
-                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
-                  </div>
+            <div class="wo-grid-table-container">
+              <div class="wo-grid-table">
+                <div class="wo-grid-header parts">
+                  <div>Descrição da Peça / Insumo</div>
+                  <div>Cód / Ref</div>
+                  <div class="text-center">Qtd</div>
+                  <div class="text-right">Valor Unit.</div>
+                  <div class="text-right">Subtotal</div>
+                  <div class="text-center">Ações</div>
                 </div>
-              }
+
+                @for (line of parts(); track $index) {
+                  <div class="wo-grid-row parts">
+                    <div class="wo-grid-cell">
+                      <input
+                        pInputText
+                        [ngModel]="line.description"
+                        [ngModelOptions]="{standalone:true}"
+                        placeholder="Ex: Pneu 175/70 R14, Pastilha, Válvula..."
+                        (ngModelChange)="updateLine('parts', $index, 'description', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell">
+                      <input
+                        pInputText
+                        [ngModel]="line.code"
+                        [ngModelOptions]="{standalone:true}"
+                        placeholder="Ex: SKU-01"
+                        (ngModelChange)="updateLine('parts', $index, 'code', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell">
+                      <p-inputnumber
+                        [ngModel]="line.quantity"
+                        [ngModelOptions]="{standalone:true}"
+                        [min]="0.01"
+                        [maxFractionDigits]="2"
+                        placeholder="1"
+                        styleClass="w-full"
+                        (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell">
+                      <p-inputnumber
+                        [ngModel]="line.unitPrice"
+                        [ngModelOptions]="{standalone:true}"
+                        mode="currency"
+                        currency="BRL"
+                        locale="pt-BR"
+                        placeholder="R$ 0,00"
+                        styleClass="w-full"
+                        (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
+                      />
+                    </div>
+
+                    <div class="wo-grid-cell wo-cell-total">
+                      <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                    </div>
+
+                    <div class="wo-grid-cell wo-cell-action">
+                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
 
             <div class="wo-section-subtotal-bar mt-2.5">

@@ -1657,6 +1657,7 @@ select:focus {
     display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
+    min-height: 0 !important;
     overflow: hidden !important;
 }
 
@@ -1664,12 +1665,14 @@ select:focus {
     padding: 1.25rem 1.75rem !important;
     border-bottom: 1px solid var(--app-border) !important;
     background: #f8fafc !important;
+    flex-shrink: 0 !important;
 }
 
 .wo-drawer .p-drawer-footer {
     padding: 1rem 1.75rem !important;
     border-top: 1px solid var(--app-border) !important;
     background: #f8fafc !important;
+    flex-shrink: 0 !important;
 }
 
 .wo-drawer-header {
@@ -1703,20 +1706,23 @@ select:focus {
 }
 
 .wo-drawer-body {
-    padding: 1.75rem;
+    padding: 1.5rem 1.75rem;
     display: flex;
     flex-direction: column;
-    gap: 1.35rem;
-    flex: 1;
-    overflow-y: auto;
+    gap: 1.25rem;
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .wo-drawer-form {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
 .wo-meta-bar {
@@ -1874,11 +1880,15 @@ select:focus {
 }
 
 .wo-table-wrapper {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
 }
 
 .wo-table {
     width: 100%;
+    min-width: 520px;
     border-collapse: collapse;
     font-size: .86rem;
     text-align: left;
@@ -1893,27 +1903,44 @@ select:focus {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
+    white-space: nowrap;
 }
 
 .wo-table td {
     padding: .75rem 1.15rem;
     border-bottom: 1px solid var(--app-border-subtle);
+    white-space: nowrap;
+}
+
+.wo-table td:first-child,
+.wo-table th:first-child {
+    white-space: normal;
+    min-width: 180px;
 }
 
 .wo-table tfoot td {
     padding: .85rem 1.15rem;
     border-bottom: 0;
     background: #f8fafc;
+    white-space: nowrap;
 }
 
 .wo-grand-total {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .75rem;
     padding: 1.15rem 1.35rem;
     background: #ecfdf5;
     border: 1.5px solid #6ee7b7;
     border-radius: var(--app-radius-sm);
+}
+
+.wo-grand-total-info {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
 }
 
 .wo-grand-total-label {
@@ -1934,6 +1961,7 @@ select:focus {
     font-size: 1.75rem;
     font-weight: 800;
     color: #065f46;
+    white-space: nowrap;
 }
 
 .wo-drawer-footer {
@@ -1941,13 +1969,15 @@ select:focus {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 1rem;
+    gap: .75rem;
+    flex-wrap: wrap;
 }
 
 .wo-footer-left,
 .wo-footer-right {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: .5rem;
 }
 
@@ -2027,14 +2057,22 @@ label {
 }
 
 /* Structured CSS Grid for Work Order Items */
-.wo-grid-table {
-    display: flex;
-    flex-direction: column;
+.wo-grid-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #ffffff;
-    overflow: hidden;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.wo-grid-table {
+    display: flex;
+    flex-direction: column;
+    min-width: 580px;
+    background: #ffffff;
+    overflow: hidden;
 }
 
 .wo-grid-header {
@@ -2389,13 +2427,39 @@ label {
         grid-template-columns: 1fr;
     }
 
+    .wo-drawer-body {
+        padding: 1.15rem 1.25rem !important;
+        gap: 1rem !important;
+    }
+
     .wo-drawer-footer {
         flex-direction: column;
         align-items: stretch;
+        gap: .75rem;
     }
 
+    .wo-footer-left,
     .wo-footer-right {
-        justify-content: flex-end;
+        width: 100%;
+        justify-content: stretch;
+        flex-wrap: wrap;
+    }
+
+    .wo-footer-left p-button,
+    .wo-footer-right p-button,
+    .wo-footer-left button,
+    .wo-footer-right button {
+        flex: 1 1 auto;
+    }
+
+    .wo-grand-total {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem;
+    }
+
+    .wo-grand-total-value {
+        font-size: 1.5rem;
     }
 }
 
