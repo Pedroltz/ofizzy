@@ -53,10 +53,20 @@ select {
     padding: .75rem .9rem;
     border: 1px solid var(--app-border);
     border-radius: var(--app-radius-sm);
-    background: var(--app-surface);
-    color: var(--app-text);
+    background-color: #ffffff;
+    color: #0f172a;
     font-size: .92rem;
     transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+select option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    padding: .4rem .6rem;
+}
+
+select option:disabled {
+    color: #94a3b8 !important;
 }
 
 input:focus,
@@ -828,7 +838,7 @@ select:focus {
     margin: 0;
     font-size: 1.05rem;
     font-weight: 700;
-    color: var(--app-text);
+    color: #0f172a !important;
 }
 
 .order-vehicle-line {
@@ -836,7 +846,11 @@ select:focus {
     align-items: center;
     gap: .5rem;
     font-size: .84rem;
-    color: var(--app-muted);
+    color: #334155 !important;
+}
+
+.order-vehicle-line span {
+    color: #334155 !important;
 }
 
 .order-summary-row {
@@ -1099,6 +1113,21 @@ select:focus {
     padding: 1rem 1.15rem;
 }
 
+.wo-card-content {
+    color: #0f172a;
+}
+
+.wo-card-content strong {
+    color: #0f172a !important;
+    font-size: 1.05rem;
+    font-weight: 750;
+    display: inline-block;
+}
+
+.wo-card-content p {
+    color: #475569 !important;
+}
+
 .wo-card-header {
     display: flex;
     align-items: center;
@@ -1111,7 +1140,7 @@ select:focus {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: var(--app-muted);
+    color: #64748b !important;
     margin: 0;
 }
 

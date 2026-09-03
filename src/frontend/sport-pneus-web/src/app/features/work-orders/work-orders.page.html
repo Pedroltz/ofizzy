@@ -19,10 +19,10 @@
         <div class="order-card-header" (click)="viewDetail(item)">
           <div class="order-card-identity">
             <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-            <h2>{{ item.customerName }}</h2>
+            <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</h2>
             <div class="order-vehicle-line">
               <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-              <span>{{ item.vehicleDescription }}</span>
+              <span class="text-slate-700 font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
             </div>
           </div>
           <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
@@ -128,11 +128,11 @@
         <div class="wo-info-card">
           <div class="wo-card-header">
             <i class="pi pi-user text-slate-500"></i>
-            <h3>Cliente</h3>
+            <h3 style="color: #64748b !important;">Cliente</h3>
           </div>
           <div class="wo-card-content">
-            <strong>{{ order.customerName }}</strong>
-            <p class="text-sm text-slate-600 m-0 mt-1">{{ order.customerPhone || 'Telefone não informado' }}</p>
+            <strong class="text-slate-900 block font-bold text-base" style="color: #0f172a !important;">{{ order.customerName }}</strong>
+            <p class="text-sm text-slate-600 m-0 mt-1" style="color: #475569 !important;">{{ order.customerPhone || 'Telefone não informado' }}</p>
             @if (order.customerDocument) {
               <div class="mt-2">
                 <span class="doc-badge"><i class="pi pi-id-card"></i> {{ order.customerDocument }}</span>
@@ -144,15 +144,15 @@
         <div class="wo-info-card">
           <div class="wo-card-header">
             <i class="pi pi-car text-slate-500"></i>
-            <h3>Veículo</h3>
+            <h3 style="color: #64748b !important;">Veículo</h3>
           </div>
           <div class="wo-card-content">
             <div class="flex items-center gap-2 mb-1">
               <span class="plate-badge">{{ order.vehiclePlate }}</span>
-              <strong>{{ order.vehicleDescription }}</strong>
+              <strong class="text-slate-900 font-bold text-base" style="color: #0f172a !important;">{{ order.vehicleDescription }}</strong>
             </div>
             @if (order.mileage !== null) {
-              <p class="text-sm text-slate-600 m-0 mt-2">
+              <p class="text-sm text-slate-600 m-0 mt-2" style="color: #475569 !important;">
                 <i class="pi pi-compass mr-1 text-slate-400"></i>
                 <span>{{ order.mileage.toLocaleString('pt-BR') }} km</span>
               </p>
@@ -343,10 +343,10 @@
     <div class="wo-drawer-body">
       <div class="two-columns">
         <label>Cliente (Proprietário)
-          <select formControlName="customerId">
-            <option value="">Selecione o cliente cadastrado</option>
+          <select formControlName="customerId" style="color: #0f172a !important; background-color: #ffffff !important;">
+            <option value="" style="color: #64748b !important; background-color: #ffffff !important;">Selecione o cliente cadastrado</option>
             @for (item of customers(); track item.id) {
-              <option [value]="item.id">{{ item.name }}</option>
+              <option [value]="item.id" style="color: #0f172a !important; background-color: #ffffff !important;">{{ item.name }}</option>
             }
           </select>
           @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
@@ -355,10 +355,10 @@
         </label>
 
         <label>Veículo Atendido
-          <select formControlName="vehicleId">
-            <option value="">Selecione o veículo</option>
+          <select formControlName="vehicleId" style="color: #0f172a !important; background-color: #ffffff !important;">
+            <option value="" style="color: #64748b !important; background-color: #ffffff !important;">Selecione o veículo</option>
             @for (item of vehicles(); track item.id) {
-              <option [value]="item.id">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
+              <option [value]="item.id" style="color: #0f172a !important; background-color: #ffffff !important;">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
             }
           </select>
           @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
