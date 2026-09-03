@@ -14,22 +14,21 @@
       <input pInputText [formControl]="search" placeholder="Pesquisar por número da OS, cliente ou placa do veículo..." />
     </div>
     <div class="view-mode-toggle">
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Visualização em Tabela">
-        <i class="pi pi-table"></i>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'spacious'" (click)="viewMode.set('spacious')" title="Lista Ampla">
+        <i class="pi pi-bars"></i>
       </button>
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Cartões">
-        <i class="pi pi-th-large"></i>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Tabela Compacta">
+        <i class="pi pi-table"></i>
       </button>
     </div>
   </div>
 
   @if (loading()) {
-    <div class="order-grid">
-      @for (_ of [1,2,3,4,5,6]; track $index) {
-        <div class="order-card surface-card">
-          <p-skeleton width="45%" />
-          <p-skeleton width="75%" styleClass="my-2" />
-          <p-skeleton width="35%" />
+    <div class="spacious-list">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="spacious-row">
+          <p-skeleton width="60%" height="2rem" />
+          <p-skeleton width="100%" height="1.5rem" />
         </div>
       }
     </div>
@@ -40,7 +39,63 @@
       <p>{{ search.value ? 'Nenhuma OS corresponde aos filtros pesquisados.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.' }}</p>
       <p-button label="Nova Ordem" icon="pi pi-plus" (onClick)="open()" />
     </div>
-  } @else if (viewMode() === 'table') {
+  } @else if (viewMode() === 'spacious') {
+    <div class="spacious-list">
+      @for (item of items(); track item.id) {
+        <article class="spacious-row">
+          <div class="spacious-main-line">
+            <div class="spacious-id-block">
+              <span class="spacious-wo-badge" (click)="viewDetail(item)">OS #{{ item.number.toString().padStart(4, '0') }}</span>
+              <div class="spacious-title-group">
+                <h2 class="text-slate-900 font-bold cursor-pointer hover:underline" style="color: #0f172a !important;" (click)="viewDetail(item)">{{ item.customerName }}</h2>
+                <div class="spacious-owner-tag">
+                  <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                  <span class="text-slate-700 font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="spacious-attributes-block">
+              <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
+                @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
+                @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+                @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
+                @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
+                <span>{{ statusLabels[item.status] }}</span>
+              </span>
+
+              <div class="flex flex-col items-end">
+                <span class="text-xs text-slate-400">Total da OS</span>
+                <span class="spacious-wo-total">{{ money(item.total) }}</span>
+              </div>
+            </div>
+
+            <div class="spacious-actions-block">
+              <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Detalhes" (onClick)="viewDetail(item)" />
+              @if (item.status === 'Open') {
+                <p-button icon="pi pi-play" [rounded]="true" severity="info" ariaLabel="Iniciar" (onClick)="status(item, 'InProgress')" />
+              }
+              @if (item.status === 'InProgress') {
+                <p-button icon="pi pi-check" [rounded]="true" severity="success" ariaLabel="Finalizar" (onClick)="status(item, 'Completed')" />
+              }
+              @if (item.status === 'Open' || item.status === 'InProgress') {
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+                <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
+              }
+            </div>
+          </div>
+
+          <div class="spacious-sub-line">
+            <div class="spacious-details-group">
+              <span class="text-xs text-slate-500">
+                <i class="pi pi-calendar mr-1"></i> Abertura: {{ formatDate(item.openedAt) }}
+              </span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
     <div class="data-table-card">
       <div class="data-table-wrapper">
         <table class="data-table">
@@ -107,52 +162,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-  } @else {
-    <div class="catalog-grid order-grid">
-      @for (item of items(); track item.id) {
-        <article class="order-card surface-card">
-          <div class="order-card-header" (click)="viewDetail(item)">
-            <div class="order-card-identity">
-              <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-              <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</h2>
-              <div class="order-vehicle-line">
-                <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                <span class="text-slate-700 font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
-              </div>
-            </div>
-            <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
-              @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
-              @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
-              @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
-              @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
-              <span>{{ statusLabels[item.status] }}</span>
-            </span>
-          </div>
-
-          <div class="order-summary-row" (click)="viewDetail(item)">
-            <span class="order-date"><i class="pi pi-calendar"></i> {{ formatDate(item.openedAt) }}</span>
-            <div class="order-total-val">
-              <small>Valor Total</small>
-              <strong>{{ money(item.total) }}</strong>
-            </div>
-          </div>
-
-          <div class="card-actions flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-            <p-button label="Detalhes" icon="pi pi-eye" [text]="true" severity="secondary" size="small" (onClick)="viewDetail(item)" />
-            @if (item.status === 'Open') {
-              <p-button label="Iniciar" icon="pi pi-play" severity="info" size="small" (onClick)="status(item, 'InProgress')" />
-            }
-            @if (item.status === 'InProgress') {
-              <p-button label="Finalizar" icon="pi pi-check" severity="success" size="small" (onClick)="status(item, 'Completed')" />
-            }
-            @if (item.status === 'Open' || item.status === 'InProgress') {
-              <p-button label="Editar" icon="pi pi-pencil" [text]="true" severity="secondary" size="small" (onClick)="open(item)" />
-              <p-button label="Cancelar" icon="pi pi-times" severity="danger" [text]="true" size="small" (onClick)="status(item, 'Cancelled')" />
-            }
-          </div>
-        </article>
-      }
     </div>
   }
 
@@ -462,21 +471,22 @@
       }
 
       <div class="two-columns">
-        <label>Quilometragem Atual (KM)
+        <label>Quilometragem do Veículo (KM)
           <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" suffix=" km" styleClass="full-control" />
         </label>
-        <label>Queixa Relatada pelo Cliente
-          <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Ruído na frenagem e volante puxando para direita"></textarea>
+        <label>Observações Internas <small class="text-slate-400">opcional</small>
+          <input pInputText formControlName="notes" placeholder="Ex: Aprovado orçamento complementar por telefone" />
         </label>
       </div>
 
-      <label>Diagnóstico Técnico da Oficina
-        <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilhas dianteiras no limite de desgaste; alinhamento necessário"></textarea>
-      </label>
-
-      <label>Observações Internas <small class="text-slate-400">opcional</small>
-        <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Aprovado orçamento complementar via contato telefônico"></textarea>
-      </label>
+      <div class="two-columns">
+        <label>Queixa Relatada pelo Cliente
+          <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Ruído na frenagem e volante puxando para direita"></textarea>
+        </label>
+        <label>Diagnóstico Técnico da Oficina
+          <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilhas dianteiras no limite; alinhamento necessário"></textarea>
+        </label>
+      </div>
 
       <!-- Linhas de Serviço / Mão de Obra -->
       <div class="wo-block">
@@ -496,67 +506,73 @@
           </div>
         </div>
 
-        <div class="p-3 flex flex-col gap-2.5">
-          @for (line of services(); track $index) {
-            <div class="wo-line-card">
-              <div class="wo-line-main">
-                <div class="wo-line-field-desc">
-                  <label class="wo-field-label">Descrição do Serviço / Mão de Obra</label>
-                  <input
-                    pInputText
-                    [ngModel]="line.description"
-                    [ngModelOptions]="{standalone:true}"
-                    placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
-                    (ngModelChange)="updateLine('services', $index, 'description', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-qty">
-                  <label class="wo-field-label">Qtd</label>
-                  <p-inputnumber
-                    [ngModel]="line.quantity"
-                    [ngModelOptions]="{standalone:true}"
-                    [min]="0.01"
-                    [maxFractionDigits]="2"
-                    placeholder="1"
-                    (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-price">
-                  <label class="wo-field-label">Valor Unit.</label>
-                  <p-inputnumber
-                    [ngModel]="line.unitPrice"
-                    [ngModelOptions]="{standalone:true}"
-                    mode="currency"
-                    currency="BRL"
-                    locale="pt-BR"
-                    placeholder="R$ 0,00"
-                    (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-total">
-                  <label class="wo-field-label">Subtotal</label>
-                  <span class="wo-line-subtotal-val">{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                </div>
-
-                <div class="wo-line-field-action">
-                  <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <div class="text-center py-5 text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
-              <i class="pi pi-wrench text-2xl text-slate-300 block mb-1"></i>
-              Nenhum serviço incluído. Clique em <strong>Novo Serviço Avulso</strong> ou escolha do <strong>Catálogo</strong>.
-            </div>
-          }
-
+        <div class="p-3">
           @if (services().length > 0) {
-            <div class="wo-section-subtotal-bar">
-              <span>Subtotal Mão de Obra ({{ services().length }} {{ services().length === 1 ? 'item' : 'itens' }}):</span>
+            <div class="wo-grid-table">
+              <div class="wo-grid-header services">
+                <div>Descrição da Mão de Obra / Serviço</div>
+                <div class="text-center">Qtd</div>
+                <div class="text-right">Valor Unit.</div>
+                <div class="text-right">Subtotal</div>
+                <div class="text-center">Ações</div>
+              </div>
+
+              @for (line of services(); track $index) {
+                <div class="wo-grid-row services">
+                  <div class="wo-grid-cell">
+                    <input
+                      pInputText
+                      [ngModel]="line.description"
+                      [ngModelOptions]="{standalone:true}"
+                      placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
+                      (ngModelChange)="updateLine('services', $index, 'description', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell">
+                    <p-inputnumber
+                      [ngModel]="line.quantity"
+                      [ngModelOptions]="{standalone:true}"
+                      [min]="0.01"
+                      [maxFractionDigits]="2"
+                      placeholder="1"
+                      styleClass="w-full"
+                      (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell">
+                    <p-inputnumber
+                      [ngModel]="line.unitPrice"
+                      [ngModelOptions]="{standalone:true}"
+                      mode="currency"
+                      currency="BRL"
+                      locale="pt-BR"
+                      placeholder="R$ 0,00"
+                      styleClass="w-full"
+                      (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell wo-cell-total">
+                    <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                  </div>
+
+                  <div class="wo-grid-cell wo-cell-action">
+                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="wo-section-subtotal-bar mt-2.5">
+              <span>Subtotal Serviços ({{ services().length }} {{ services().length === 1 ? 'item' : 'itens' }}):</span>
               <strong>{{ money(servicesSubtotal()) }}</strong>
+            </div>
+          } @else {
+            <div class="wo-table-empty border border-dashed border-slate-200 rounded-lg">
+              <i class="pi pi-wrench"></i>
+              <span>Nenhum serviço incluído. Clique em <strong>Novo Serviço Avulso</strong> ou selecione do <strong>Catálogo</strong>.</span>
             </div>
           }
         </div>
@@ -580,78 +596,84 @@
           </div>
         </div>
 
-        <div class="p-3 flex flex-col gap-2.5">
-          @for (line of parts(); track $index) {
-            <div class="wo-line-card">
-              <div class="wo-line-main">
-                <div class="wo-line-field-desc">
-                  <label class="wo-field-label">Descrição da Peça / Insumo</label>
-                  <input
-                    pInputText
-                    [ngModel]="line.description"
-                    [ngModelOptions]="{standalone:true}"
-                    placeholder="Ex: Pneu 175/70 R14, Válvula, Pastilha dianteira..."
-                    (ngModelChange)="updateLine('parts', $index, 'description', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-code">
-                  <label class="wo-field-label">Cód / Ref <small class="text-slate-400">opcional</small></label>
-                  <input
-                    pInputText
-                    [ngModel]="line.code"
-                    [ngModelOptions]="{standalone:true}"
-                    placeholder="Ex: SKU-102"
-                    (ngModelChange)="updateLine('parts', $index, 'code', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-qty">
-                  <label class="wo-field-label">Qtd</label>
-                  <p-inputnumber
-                    [ngModel]="line.quantity"
-                    [ngModelOptions]="{standalone:true}"
-                    [min]="0.01"
-                    [maxFractionDigits]="2"
-                    placeholder="1"
-                    (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-price">
-                  <label class="wo-field-label">Valor Unit.</label>
-                  <p-inputnumber
-                    [ngModel]="line.unitPrice"
-                    [ngModelOptions]="{standalone:true}"
-                    mode="currency"
-                    currency="BRL"
-                    locale="pt-BR"
-                    placeholder="R$ 0,00"
-                    (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
-                  />
-                </div>
-
-                <div class="wo-line-field-total">
-                  <label class="wo-field-label">Subtotal</label>
-                  <span class="wo-line-subtotal-val">{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                </div>
-
-                <div class="wo-line-field-action">
-                  <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <div class="text-center py-5 text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
-              <i class="pi pi-box text-2xl text-slate-300 block mb-1"></i>
-              Nenhuma peça incluída. Clique em <strong>Nova Peça Avulsa</strong> ou escolha do <strong>Catálogo</strong>.
-            </div>
-          }
-
+        <div class="p-3">
           @if (parts().length > 0) {
-            <div class="wo-section-subtotal-bar">
+            <div class="wo-grid-table">
+              <div class="wo-grid-header parts">
+                <div>Descrição da Peça / Insumo</div>
+                <div>Cód / Ref</div>
+                <div class="text-center">Qtd</div>
+                <div class="text-right">Valor Unit.</div>
+                <div class="text-right">Subtotal</div>
+                <div class="text-center">Ações</div>
+              </div>
+
+              @for (line of parts(); track $index) {
+                <div class="wo-grid-row parts">
+                  <div class="wo-grid-cell">
+                    <input
+                      pInputText
+                      [ngModel]="line.description"
+                      [ngModelOptions]="{standalone:true}"
+                      placeholder="Ex: Pneu 175/70 R14, Pastilha, Válvula..."
+                      (ngModelChange)="updateLine('parts', $index, 'description', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell">
+                    <input
+                      pInputText
+                      [ngModel]="line.code"
+                      [ngModelOptions]="{standalone:true}"
+                      placeholder="Ex: SKU-01"
+                      (ngModelChange)="updateLine('parts', $index, 'code', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell">
+                    <p-inputnumber
+                      [ngModel]="line.quantity"
+                      [ngModelOptions]="{standalone:true}"
+                      [min]="0.01"
+                      [maxFractionDigits]="2"
+                      placeholder="1"
+                      styleClass="w-full"
+                      (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell">
+                    <p-inputnumber
+                      [ngModel]="line.unitPrice"
+                      [ngModelOptions]="{standalone:true}"
+                      mode="currency"
+                      currency="BRL"
+                      locale="pt-BR"
+                      placeholder="R$ 0,00"
+                      styleClass="w-full"
+                      (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
+                    />
+                  </div>
+
+                  <div class="wo-grid-cell wo-cell-total">
+                    <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
+                  </div>
+
+                  <div class="wo-grid-cell wo-cell-action">
+                    <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="wo-section-subtotal-bar mt-2.5">
               <span>Subtotal Peças ({{ parts().length }} {{ parts().length === 1 ? 'item' : 'itens' }}):</span>
               <strong>{{ money(partsSubtotal()) }}</strong>
+            </div>
+          } @else {
+            <div class="wo-table-empty border border-dashed border-slate-200 rounded-lg">
+              <i class="pi pi-box"></i>
+              <span>Nenhuma peça incluída. Clique em <strong>Nova Peça Avulsa</strong> ou selecione do <strong>Catálogo</strong>.</span>
             </div>
           }
         </div>
