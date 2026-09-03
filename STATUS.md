@@ -40,30 +40,31 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R4 concluído / R5 — Dashboard preparado
+R5 concluído / R6 — Ordens de Serviço preparado
 
 Última tarefa concluída:
-R4 — App Shell (Sidebar desktop minimalista, Header desktop operacional, Navegação por rotas, Perfil de usuário, Theme Toggle integrado na barra superior, no menu lateral e no drawer móvel)
+R5 — Dashboard (Remoção de cards explicativos, 4 KPIs operacionais em tempo real, tabela de veículos no pátio com cards para mobile, barras CSS de distribuição e base cadastral com suporte completo a Dark Mode)
 
 Próxima tarefa:
-R5 — Dashboard (Header operacional, KPIs reais da oficina, Veículos na oficina, Ordens recentes, Distribuição de status e suporte total a Dark Mode)
+R6 — Ordens de Serviço (DataToolbar, busca, filtros de status, visualização em lista/cards, editor de linhas, drawer de edição e integração com API)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.ts`
-- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.html`
+- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.html`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R4.
+- Nenhuma para R5.
 
 Problemas conhecidos:
-- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~718 kB contra 500 kB).
+- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~719 kB contra 500 kB).
 
 Testes:
 - `npm test`: 22/22 testes unitários aprovados.
 - `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 

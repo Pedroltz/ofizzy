@@ -354,6 +354,26 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
 
+## 2026-09-03 — UI/UX Redesign: R5 — Dashboard Concluído
+
+- **Remoção de Elementos Promocionais Estáticos**:
+  - Eliminados os antigos cartões estáticos dos módulos que ocupavam espaço vertical com descrições genéricas.
+- **Painel Operacional Baseado em Dados Reais (`src/app/features/dashboard/`)**:
+  - **4 KPIs Operacionais**: `OS em Aberto` (warning), `Em Execução` (info), `Ordens Concluídas` (success) e `Total no Pátio` (primary, com a soma em reais dos valores de ordens ativas), alimentados diretamente pelos dados reais de `/api/dashboard/summary`.
+  - **Área Central — Veículos na Oficina (8 colunas no Desktop)**:
+    - No desktop, tabela limpa com bordas sutis e números monoespaçados (`DataTableWrapperComponent`), exibindo código da OS, cliente, placa em badge, veículo, data de entrada formatada, `StatusBadgeComponent` e botão de acesso direto.
+    - Em celulares e tablets (<=900px), chaveamento automático para cartões táticos individuais com botões de toque >= 44px e zero rolagem horizontal.
+    - Integração de `EmptyStateComponent` quando o pátio estiver sem pendências e `LoadingStateComponent` com PrimeNG Skeleton durante o carregamento inicial.
+  - **Painel Lateral — Distribuição e Base (4 colunas no Desktop)**:
+    - `Situação das Ordens`: barras de progresso CSS nativas com cálculo proporcional em tempo real para ordens Abertas, Em Execução e Concluídas.
+    - `Base Operacional`: resumo cadastral da oficina com total de clientes e veículos e atalhos diretos para gerenciamento.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
+
+
 
 
 

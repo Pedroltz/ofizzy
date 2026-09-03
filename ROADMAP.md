@@ -57,14 +57,14 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Responsividade
 
 ### R5 — Dashboard
-- [ ] Header operacional
-- [ ] KPIs
-- [ ] Veículos na oficina
-- [ ] Ordens recentes
-- [ ] Atividade recente
-- [ ] Distribuição de status
-- [ ] Dashboard responsivo
-- [ ] Dark Mode
+- [x] Header operacional
+- [x] KPIs
+- [x] Veículos na oficina
+- [x] Ordens recentes
+- [x] Atividade recente
+- [x] Distribuição de status
+- [x] Dashboard responsivo
+- [x] Dark Mode
 
 ### R6 — Ordens de Serviço
 - [ ] Toolbar

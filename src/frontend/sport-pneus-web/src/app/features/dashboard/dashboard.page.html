@@ -1,306 +1,260 @@
-<section class="page-container">
-  <header class="page-header">
-    <div class="page-header-text">
-      <p class="eyebrow">PAINEL DE CONTROLE</p>
-      <h1>Visão Geral da Oficina</h1>
-      <p class="page-description">
-        Controle operacional de ordens de serviço, veículos e clientes.
-      </p>
-    </div>
-  </header>
-
-  <div class="quick-actions-bar">
-    <span class="quick-actions-label">Ações rápidas:</span>
-    <div class="quick-actions-buttons">
-      <a routerLink="/ordens" class="quick-action-btn highlight">
-        <i class="pi pi-plus"></i>
+<section class="page-container dashboard-page-container">
+  <app-page-header
+    eyebrow="Painel Operacional"
+    title="Visão Geral da Oficina"
+    description="Controle em tempo real de veículos no pátio, ordens em andamento e produtividade"
+  >
+    <div page-actions class="dashboard-header-actions">
+      <a routerLink="/ordens" class="primary-button">
+        <i class="pi pi-plus" aria-hidden="true"></i>
         <span>Nova Ordem de Serviço</span>
       </a>
-      <a routerLink="/clientes" class="quick-action-btn">
-        <i class="pi pi-user-plus"></i>
-        <span>Cadastrar Cliente</span>
-      </a>
-      <a routerLink="/veiculos" class="quick-action-btn">
-        <i class="pi pi-car"></i>
-        <span>Cadastrar Veículo</span>
-      </a>
     </div>
-  </div>
+  </app-page-header>
 
-  <div class="dashboard-grid">
-    <article class="dashboard-card surface-card">
-      <div class="card-icon-header">
-        <div class="card-icon-badge">
-          <i class="pi pi-file-edit"></i>
+  <!-- Linha 1: KPIs Operacionais -->
+  <section class="dashboard-kpi-grid" aria-label="Métricas principais">
+    <app-stat-card
+      label="OS em Aberto"
+      [value]="openOrders().length"
+      hint="Aguardando diagnóstico/início"
+      icon="pi pi-clock"
+      severity="warning"
+    />
+    <app-stat-card
+      label="Em Execução"
+      [value]="inProgressOrders().length"
+      hint="No pátio / bancada"
+      icon="pi pi-sync"
+      severity="info"
+    />
+    <app-stat-card
+      label="Ordens Concluídas"
+      [value]="totalCompletedOrders()"
+      hint="Histórico finalizado"
+      icon="pi pi-check-circle"
+      severity="success"
+    />
+    <app-stat-card
+      label="Total no Pátio"
+      [value]="money(totalActiveValue())"
+      hint="Soma das OS ativas"
+      icon="pi pi-dollar"
+      severity="primary"
+    />
+  </section>
+
+  <!-- Linha 2: Grid 8 / 4 (Veículos na Oficina + Situação & Cadastros) -->
+  <div class="dashboard-main-grid">
+    <!-- Coluna Principal (8 colunas no desktop) -->
+    <div class="dashboard-main-col">
+      <app-section-card
+        title="Veículos na Oficina"
+        subtitle="Ordens de serviço ativas no pátio"
+        icon="pi pi-car"
+      >
+        <div card-actions>
+          <a routerLink="/ordens" class="section-link">
+            <span>Ver todas as ordens</span>
+            <i class="pi pi-arrow-right" aria-hidden="true"></i>
+          </a>
         </div>
-        <span class="card-tag">Operação</span>
-      </div>
-      <h2>Ordens de Serviço</h2>
-      <p>
-        Gerencie o ciclo completo de ordens abertas, em execução e concluídas com snapshots de
-        preços.
-      </p>
-      <a routerLink="/ordens" class="card-action-link">
-        <span>Acessar Ordens</span>
-        <i class="pi pi-arrow-right"></i>
-      </a>
-    </article>
 
-    <article class="dashboard-card surface-card">
-      <div class="card-icon-header">
-        <div class="card-icon-badge">
-          <i class="pi pi-users"></i>
-        </div>
-        <span class="card-tag">Cadastros</span>
-      </div>
-      <h2>Clientes</h2>
-      <p>
-        Registro completo de clientes com validação de CPF/CNPJ, telefones de contato e endereços.
-      </p>
-      <a routerLink="/clientes" class="card-action-link">
-        <span>Gerenciar Clientes</span>
-        <i class="pi pi-arrow-right"></i>
-      </a>
-    </article>
+        @if (loading()) {
+          <app-loading-state mode="table" [count]="4" />
+        } @else if (activeOrders().length === 0) {
+          <app-empty-state
+            icon="pi pi-check-circle"
+            title="Pátio Livre de Pendências"
+            description="Não há ordens abertas ou em execução neste momento. Todos os veículos foram liberados."
+            actionLabel="+ Nova Ordem de Serviço"
+            (action)="navigateToNewOrder()"
+          />
+        } @else {
+          <!-- Visualização em Tabela para Desktop -->
+          <div class="dashboard-table-desktop">
+            <app-data-table-wrapper>
+              <table class="dashboard-table" aria-label="Ordens ativas na oficina">
+                <thead>
+                  <tr>
+                    <th>OS</th>
+                    <th>Cliente / Veículo</th>
+                    <th>Entrada</th>
+                    <th>Status</th>
+                    <th class="text-right">Valor</th>
+                    <th class="text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of activeOrders(); track item.id) {
+                    <tr>
+                      <td>
+                        <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
+                      </td>
+                      <td>
+                        <div class="customer-vehicle-cell">
+                          <strong class="cell-title">{{ item.customerName }}</strong>
+                          <div class="vehicle-subline">
+                            <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                            <span class="vehicle-desc">{{ item.vehicleDescription }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="date-cell">{{ formatDate(item.createdAt) }}</span>
+                      </td>
+                      <td>
+                        <app-status-badge [status]="item.status" />
+                      </td>
+                      <td class="text-right font-mono font-medium">
+                        {{ money(item.total) }}
+                      </td>
+                      <td class="text-right">
+                        <a routerLink="/ordens" class="row-manage-btn" title="Acessar ordem">
+                          <span>Acessar</span>
+                          <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </app-data-table-wrapper>
+          </div>
 
-    <article class="dashboard-card surface-card">
-      <div class="card-icon-header">
-        <div class="card-icon-badge">
-          <i class="pi pi-car"></i>
-        </div>
-        <span class="card-tag">Frota</span>
-      </div>
-      <h2>Veículos</h2>
-      <p>
-        Controle de modelos, marcas, placas automotivas, quilometragem e vínculos com os
-        proprietários.
-      </p>
-      <a routerLink="/veiculos" class="card-action-link">
-        <span>Consultar Veículos</span>
-        <i class="pi pi-arrow-right"></i>
-      </a>
-    </article>
-
-    <article class="dashboard-card surface-card">
-      <div class="card-icon-header">
-        <div class="card-icon-badge">
-          <i class="pi pi-sliders-h"></i>
-        </div>
-        <span class="card-tag">Catálogo</span>
-      </div>
-      <h2>Catálogo & Ajustes</h2>
-      <p>
-        Tabela de serviços e peças com preços sugeridos para inserção ágil durante o atendimento.
-      </p>
-      <a routerLink="/configuracoes" class="card-action-link">
-        <span>Configurar Catálogo</span>
-        <i class="pi pi-arrow-right"></i>
-      </a>
-    </article>
-  </div>
-
-  <!-- Ordens de Serviço Ativas na Oficina -->
-  <section class="dashboard-active-section">
-    <div class="dashboard-section-header">
-      <div>
-        <p class="eyebrow">PÁTIO DA OFICINA</p>
-        <h2>Ordens de Serviço em Aberto e em Execução</h2>
-        <p class="section-subtitle">
-          Acompanhe os atendimentos e veículos presentes na oficina em tempo real
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        @if (activeOrders().length > 0) {
-          <span class="active-pill">
-            <span class="active-dot"></span>
-            <strong>{{ activeOrders().length }}</strong>
-            {{ activeOrders().length === 1 ? 'ordem ativa' : 'ordens ativas' }}
-          </span>
-        }
-        <a routerLink="/ordens" class="view-all-link">
-          <span>Ver Todas as Ordens</span>
-          <i class="pi pi-arrow-right"></i>
-        </a>
-      </div>
-    </div>
-
-    @if (loading()) {
-      <div class="order-grid">
-        @for (_ of [1, 2, 3]; track $index) {
-          <div class="order-card surface-card">
-            <p-skeleton width="40%" height="1.8rem" />
-            <p-skeleton width="75%" height="1.5rem" />
-            <p-skeleton width="100%" height="3.5rem" />
+          <!-- Visualização em Cartões para Mobile/Tablet -->
+          <div class="dashboard-cards-mobile">
+            @for (item of activeOrders(); track item.id) {
+              <article class="dashboard-order-card surface-card">
+                <div class="dashboard-order-card__header">
+                  <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
+                  <app-status-badge [status]="item.status" />
+                </div>
+                <div class="dashboard-order-card__body">
+                  <strong class="customer-name">{{ item.customerName }}</strong>
+                  <div class="vehicle-row">
+                    <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                    <span>{{ item.vehicleDescription }}</span>
+                  </div>
+                </div>
+                <div class="dashboard-order-card__footer">
+                  <span class="entry-time"><i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}</span>
+                  <strong class="order-val font-mono">{{ money(item.total) }}</strong>
+                </div>
+                <div class="dashboard-order-card__action">
+                  <a routerLink="/ordens" class="secondary-button w-full">
+                    <span>Gerenciar no Módulo</span>
+                    <i class="pi pi-external-link" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </article>
+            }
           </div>
         }
-      </div>
-    } @else if (activeOrders().length === 0) {
-      <div class="dashboard-empty-card surface-card">
-        <div class="dashboard-empty-icon">
-          <i class="pi pi-check-circle"></i>
+      </app-section-card>
+    </div>
+
+    <!-- Coluna Lateral (4 colunas no desktop) -->
+    <div class="dashboard-side-col">
+      <!-- Situação das Ordens (Barras CSS proporcionais) -->
+      <app-section-card
+        title="Situação das Ordens"
+        subtitle="Distribuição no sistema"
+        icon="pi pi-chart-bar"
+      >
+        <div class="order-distribution">
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Abertas</span>
+              <strong>{{ openOrders().length }} ({{ openPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-warning"
+                [style.width.%]="openPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="openPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Em Execução</span>
+              <strong>{{ inProgressOrders().length }} ({{ inProgressPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-info"
+                [style.width.%]="inProgressPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="inProgressPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Concluídas</span>
+              <strong>{{ totalCompletedOrders() }} ({{ completedPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-success"
+                [style.width.%]="completedPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="completedPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
         </div>
-        <h3>Pátio Livre de Pendências</h3>
-        <p>
-          Não há ordens de serviço abertas ou em andamento no momento. Todos os atendimentos foram
-          concluídos ou liberados.
-        </p>
-        <a routerLink="/ordens" class="quick-action-btn highlight mt-2">
-          <i class="pi pi-plus"></i>
-          <span>Abrir Nova Ordem de Serviço</span>
-        </a>
-      </div>
-    } @else {
-      <div class="order-grid">
-        @for (item of activeOrders(); track item.id) {
-          <article class="order-card surface-card">
-            <!-- Topo do Bloquinho: Badge OS + Status -->
-            <div class="order-card-header">
-              <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-              <span
-                class="status-tag"
-                [class.open]="item.status === 'Open'"
-                [class.in-progress]="item.status === 'InProgress'"
-              >
-                @if (item.status === 'Open') {
-                  <i class="pi pi-clock"></i>
-                }
-                @if (item.status === 'InProgress') {
-                  <i class="pi pi-sync"></i>
-                }
-                <span>{{ statusLabels[item.status] }}</span>
-              </span>
+
+        <div card-footer class="distribution-footer">
+          <span class="text-muted">Total de Ordens Registradas:</span>
+          <strong>{{ totalAllOrders() }}</strong>
+        </div>
+      </app-section-card>
+
+      <!-- Base Operacional (Cadastros) -->
+      <app-section-card
+        title="Base Operacional"
+        subtitle="Cadastros ativos na oficina"
+        icon="pi pi-database"
+      >
+        <div class="operational-base-list">
+          <div class="operational-base-item">
+            <div class="operational-base-icon">
+              <i class="pi pi-users" aria-hidden="true"></i>
             </div>
-
-            <!-- Identidade: Cliente & Veículo -->
-            <div class="order-card-identity">
-              <h2 title="{{ item.customerName }}">{{ item.customerName }}</h2>
-              <div class="order-vehicle-line">
-                <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                <span title="{{ item.vehicleDescription }}">{{ item.vehicleDescription }}</span>
-              </div>
+            <div class="operational-base-info">
+              <span class="operational-base-label">Clientes Cadastrados</span>
+              <strong class="operational-base-value font-mono">{{ totalCustomers() }}</strong>
             </div>
+            <a routerLink="/clientes" class="operational-base-link" title="Gerenciar clientes">
+              <i class="pi pi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
 
-            <!-- Informações: Abertura e Total -->
-            <div class="order-summary-row">
-              <div class="order-date-block">
-                <small>Abertura</small>
-                <span
-                  ><i class="pi pi-calendar text-teal-600 mr-1"></i
-                  >{{ formatDate(item.createdAt) }}</span
-                >
-              </div>
-              <div class="order-total-val">
-                <small>Valor da OS</small>
-                <strong>{{ money(item.total) }}</strong>
-              </div>
+          <div class="operational-base-item">
+            <div class="operational-base-icon">
+              <i class="pi pi-car" aria-hidden="true"></i>
             </div>
-
-            <!-- Rodapé de Ações -->
-            <div class="order-card-actions">
-              <a routerLink="/ordens" class="w-full">
-                <p-button
-                  label="Gerenciar no Módulo de Ordens"
-                  icon="pi pi-external-link"
-                  [outlined]="true"
-                  severity="secondary"
-                  size="small"
-                  styleClass="w-full"
-                />
-              </a>
+            <div class="operational-base-info">
+              <span class="operational-base-label">Veículos Cadastrados</span>
+              <strong class="operational-base-value font-mono">{{ totalVehicles() }}</strong>
             </div>
-          </article>
-        }
-      </div>
-    }
-  </section>
-
-  <!-- Métricas Rápidas Operacionais -->
-  <div class="dashboard-stats-grid">
-    <div class="stat-card surface-card">
-      <div class="stat-icon-wrapper bg-blue-50 text-blue-600">
-        <i class="pi pi-file-edit text-xl"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-label">Ordens Ativas</span>
-        <strong class="stat-value text-slate-900">{{ totalActiveOrders() }}</strong>
-        <span class="stat-hint">No pátio da oficina</span>
-      </div>
-    </div>
-
-    <div class="stat-card surface-card">
-      <div class="stat-icon-wrapper bg-emerald-50 text-emerald-600">
-        <i class="pi pi-users text-xl"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-label">Clientes Cadastrados</span>
-        <strong class="stat-value text-slate-900">{{ totalCustomers() }}</strong>
-        <span class="stat-hint">Base total ativa</span>
-      </div>
-    </div>
-
-    <div class="stat-card surface-card">
-      <div class="stat-icon-wrapper bg-amber-50 text-amber-600">
-        <i class="pi pi-car text-xl"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-label">Veículos na Base</span>
-        <strong class="stat-value text-slate-900">{{ totalVehicles() }}</strong>
-        <span class="stat-hint">Frota de clientes</span>
-      </div>
-    </div>
-
-    <div class="stat-card surface-card">
-      <div class="stat-icon-wrapper bg-purple-50 text-purple-600">
-        <i class="pi pi-check-circle text-xl"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-label">Ordens Concluídas</span>
-        <strong class="stat-value text-slate-900">{{ totalCompletedOrders() }}</strong>
-        <span class="stat-hint">Histórico finalizado</span>
-      </div>
+            <a routerLink="/veiculos" class="operational-base-link" title="Consultar veículos">
+              <i class="pi pi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </app-section-card>
     </div>
   </div>
-
-  <section class="workflow-section surface-card">
-    <header class="workflow-header">
-      <div>
-        <p class="eyebrow">FLUXO OPERACIONAL</p>
-        <h3>Ciclo de Atendimento da Oficina</h3>
-      </div>
-      <span class="workflow-badge">Padrão Sport Pneus</span>
-    </header>
-    <div class="workflow-steps">
-      <div class="workflow-step">
-        <div class="step-icon"><i class="pi pi-sign-in"></i></div>
-        <div class="step-info">
-          <strong>1. Entrada</strong>
-          <span>Identificação do cliente, veículo e registro de queixas</span>
-        </div>
-      </div>
-      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
-      <div class="workflow-step">
-        <div class="step-icon"><i class="pi pi-search"></i></div>
-        <div class="step-info">
-          <strong>2. Diagnóstico</strong>
-          <span>Avaliação técnica, seleção de serviços e peças</span>
-        </div>
-      </div>
-      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
-      <div class="workflow-step">
-        <div class="step-icon"><i class="pi pi-wrench"></i></div>
-        <div class="step-info">
-          <strong>3. Execução</strong>
-          <span>Status Em Andamento e realização dos serviços</span>
-        </div>
-      </div>
-      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
-      <div class="workflow-step">
-        <div class="step-icon"><i class="pi pi-check-circle"></i></div>
-        <div class="step-info">
-          <strong>4. Conclusão</strong>
-          <span>Finalização da OS e liberação do veículo</span>
-        </div>
-      </div>
-    </div>
-  </section>
 </section>
