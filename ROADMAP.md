@@ -35,16 +35,16 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Criar ThemeService
 
 ### R3 — Componentes compartilhados
-- [ ] PageHeader
-- [ ] SectionCard
-- [ ] StatCard
-- [ ] StatusBadge
-- [ ] DataToolbar
-- [ ] SearchField
-- [ ] EmptyState
-- [ ] LoadingState
-- [ ] DataTableWrapper
-- [ ] ThemeToggle
+- [x] PageHeader
+- [x] SectionCard
+- [x] StatCard
+- [x] StatusBadge
+- [x] DataToolbar
+- [x] SearchField
+- [x] EmptyState
+- [x] LoadingState
+- [x] DataTableWrapper
+- [x] ThemeToggle
 
 ### R4 — App Shell
 - [ ] Sidebar desktop

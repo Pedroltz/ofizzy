@@ -321,4 +321,25 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção aprovada.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
 
+## 2026-09-03 — UI/UX Redesign: R3 — Componentes Compartilhados Concluído
+
+- **Biblioteca de Componentes do Design System (`src/app/shared/components/`)**:
+  - `PageHeaderComponent`: evoluído com slot de projeção para ações secundárias ou botões compostos, preservando a ação primária declarativa (`actionLabel` e `actionIcon`).
+  - `SectionCardComponent`: container de card padronizado com suporte a título, subtítulo, ícone semântico, opções de padding (`none`, `sm`, `md`, `lg`) e slots para ações de cabeçalho e rodapé.
+  - `StatCardComponent`: card de métricas e KPIs operacionais com severidades semânticas (`primary`, `success`, `warning`, `danger`, `info`, `neutral`), números tabulares de alto contraste, dica explicativa e indicador de tendência (`up`, `down`).
+  - `StatusBadgeComponent`: componente universal de status com mapeamento semântico para o domínio da oficina (`Open`, `InProgress`, `Completed`, `Cancelled`, além de variantes semânticas), ícones contextuais e estilos contrastantes para Light e Dark Mode.
+  - `SearchFieldComponent`: campo de busca reutilizável com `ControlValueAccessor` (suporte a `ngModel` e Reactive Forms), ícone de lupa, botão de limpeza rápida quando preenchido e anel de foco baseado em tokens.
+  - `DataToolbarComponent`: barra de ferramentas para listagens operacionais unificando busca, filtros, contadores numéricos e seletor de modo de visualização (Tabela/Blocos) com ocultação automática do seletor em telas móveis.
+  - `EmptyStateComponent`: estado vazio minimalista com ícone discreto, título, mensagem explicativa e botão de ação primária.
+  - `LoadingStateComponent`: componente de carregamento baseado em PrimeNG Skeleton com múltiplos layouts de placeholder (`table`, `cards`, `stats`, `lines`), eliminando spinners centrais pesados.
+  - `DataTableWrapperComponent`: container estrutural com bordas e sombras sutis, scroll horizontal seguro com toque tátil no mobile/tablet e slot de paginação/rodapé.
+  - `ThemeToggleComponent`: controle de alternância de aparência acessível (`role="menu"`, `role="menuitemradio"`), exibindo as opções Sistema, Claro e Escuro, com fechamento via teclado (`Escape`), foco visível e detecção de clique externo.
+  - `index.ts`: arquivo barrel centralizando as exportações dos componentes compartilhados.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados (11 testes dedicados aos componentes compartilhados em `shared-components.spec.ts`).
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: bundle compilado com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
+
 

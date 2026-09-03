@@ -40,35 +40,39 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R2 concluído / R3 — Componentes compartilhados preparado
+R3 concluído / R4 — App Shell preparado
 
 Última tarefa concluída:
-R2 — Design System (Tokens de cores Light/Dark com verde primário, escalas tipográficas e de espaçamento, radius, sombras, ThemeService com Light/Dark/System, anti-FOUC e integração PrimeNG)
+R3 — Componentes compartilhados (PageHeader evoluído, SectionCard, StatCard, StatusBadge, DataToolbar, SearchField, EmptyState, LoadingState, DataTableWrapper e ThemeToggle com 11 testes unitários dedicados)
 
 Próxima tarefa:
-R3 — Componentes compartilhados (PageHeader evoluído, SectionCard, StatCard, StatusBadge, DataToolbar, SearchField, EmptyState, LoadingState, DataTableWrapper e ThemeToggle)
+R4 — App Shell (Sidebar desktop minimalista, Header desktop operacional, Navegação por rotas, Perfil de usuário, Theme Toggle integrado, Drawer mobile fluido e responsividade)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/styles/tokens.css` (novo)
-- `src/frontend/sport-pneus-web/src/styles/themes.css` (novo)
-- `src/frontend/sport-pneus-web/src/app/core/theme/theme.models.ts` (novo)
-- `src/frontend/sport-pneus-web/src/app/core/theme/theme.service.ts` (novo)
-- `src/frontend/sport-pneus-web/src/app/core/theme/theme.service.spec.ts` (novo)
-- `src/frontend/sport-pneus-web/src/app/app.config.ts`
-- `src/frontend/sport-pneus-web/src/app/app.ts`
-- `src/frontend/sport-pneus-web/src/index.html`
-- `src/frontend/sport-pneus-web/src/styles.css`
+- `src/frontend/sport-pneus-web/src/app/shared/components/page-header.component.ts`
+- `src/frontend/sport-pneus-web/src/app/shared/components/section-card.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/stat-card.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/status-badge.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/search-field.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/data-toolbar.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/empty-state.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/loading-state.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/data-table-wrapper.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/theme-toggle.component.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/index.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/shared/components/shared-components.spec.ts` (novo)
 
 Pendências:
-- Nenhuma para R2.
+- Nenhuma para R3.
 
 Problemas conhecidos:
-- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~713 kB contra 500 kB).
+- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~715 kB contra 500 kB).
 
 Testes:
-- `npm test`: 11/11 testes aprovados (9 novos testes unitários para `ThemeService`).
+- `npm test`: 22/22 testes unitários aprovados (11 testes novos para componentes compartilhados).
 - `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
