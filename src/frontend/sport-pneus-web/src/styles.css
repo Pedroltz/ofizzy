@@ -2884,14 +2884,22 @@ label {
 
 /* Auth Pages (Login & Setup) */
 .auth-page {
+  position: relative;
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(280px, 420px) minmax(360px, 500px);
   justify-content: center;
   align-items: center;
   gap: clamp(2.5rem, 7vw, 7rem);
-  padding: 2.5rem;
-  background: radial-gradient(circle at 15% 20%, #f0fdfa 0, transparent 40%), var(--app-bg);
+  padding: var(--space-8) var(--space-4);
+  background: radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.08) 0, transparent 40%), var(--surface-secondary);
+}
+
+.auth-top-bar {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
 }
 
 .auth-intro {
@@ -2903,71 +2911,77 @@ label {
   height: 3.5rem;
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  background: var(--app-primary);
-  color: white;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  margin-bottom: var(--space-6);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
 }
 
 .auth-intro h1 {
-  font-size: clamp(2rem, 3.5vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  font-weight: 800;
-  margin: 0 0 1rem;
-  color: var(--app-text);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: var(--font-extrabold);
+  margin: 0 0 var(--space-3);
+  color: var(--text-primary);
 }
 
 .auth-intro p {
-  color: var(--app-muted);
+  color: var(--text-secondary);
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: var(--text-sm);
   margin: 0;
 }
 
 .auth-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: clamp(1.5rem, 3.5vw, 2.5rem);
+  box-shadow: var(--shadow-modal);
 }
 
 .auth-card header {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .auth-card header h2 {
   margin: 0 0 0.35rem;
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
 }
 
 .auth-card header p {
   margin: 0;
-  font-size: 0.88rem;
-  color: var(--app-muted);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
 }
 
 .form-stack {
   display: grid;
-  gap: 1.25rem;
+  gap: var(--space-4);
 }
 
 .form-section {
   display: grid;
-  gap: 1rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--app-border);
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .form-section > div:first-child {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: var(--space-2);
 }
 
 .form-section h2 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
 }
 
 .step-number {
@@ -2975,19 +2989,19 @@ label {
   height: 1.6rem;
   display: grid;
   place-items: center;
-  border-radius: 6px;
-  background: var(--app-primary-soft);
-  color: var(--app-primary);
-  font-weight: 700;
+  border-radius: var(--radius-xs);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: var(--font-bold);
 }
 
 .field-error {
   display: flex;
   align-items: center;
-  color: #e11d48;
-  font-size: 0.82rem;
-  font-weight: 500;
-  margin: -0.35rem 0 0;
+  color: var(--danger);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  margin: -0.25rem 0 0;
 }
 
 /* Mobile Layout */

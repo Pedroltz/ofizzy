@@ -40,21 +40,23 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R8 concluído / R9 — Autenticação preparado
+R9 concluído / R10 — Polish preparado
 
 Última tarefa concluída:
-R8 — Configurações e Catálogo (Reorganização em abas, catálogo de serviços com preço padrão monoespaçado, catálogo de peças com SKU e cálculo de margem comercial, formulário estruturado de dados da empresa com SectionCard e suporte total a Dark Mode)
+R9 — Autenticação (Telas de Login e Setup Inicial no padrão Linear/Vercel, alternador de tema flutuante no topo, mensagens claras de validação e loading states ergonômicos)
 
 Próxima tarefa:
-R9 — Autenticação (Telas de Login e Setup Inicial modernizadas no estilo Linear/Vercel, Dark Mode completo, botão de alternância de tema no cabeçalho/canto superior e feedback claro de validações)
+R10 — Polish (Auditoria final de consistência visual, microinterações, foco por teclado e atalhos, skeletons adaptativos em todas as transições e refinamento de contraste Dark/Light)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/features/settings/settings.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/settings/settings.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/login/login.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/login/login.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/setup/setup.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/setup/setup.page.html`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R8.
+- Nenhuma para R9.
 
 Problemas conhecidos:
 - Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~722 kB contra 500 kB).
@@ -64,6 +66,7 @@ Testes:
 - `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 

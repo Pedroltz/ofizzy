@@ -426,6 +426,20 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
 
+## 2026-09-03 — UI/UX Redesign: R9 — Autenticação Concluído
+
+- **Telas de Acesso e Setup Inicial Modernizadas (`login.page.*` e `setup.page.*`)**:
+  - **Identidade Visual Linear/Vercel**: layout limpo em duas colunas responsivas, tipografia com tracking ajustado, marca com ícone esportivo em fundo esmeralda e gradiente radial sutil.
+  - **Alternador de Tema em Destaque**: componente `ThemeToggleComponent` posicionado no canto superior direito (`.auth-top-bar`) para permitir alternância imediata entre Modo Claro, Escuro e Sistema.
+  - **Formulário de Login**: inputs ergonômicos para e-mail e senha, botão de login em largura total com spinner em tempo real durante requisições e mensagens de erro de credenciais com ícones de aviso.
+  - **Formulário de Setup**: estrutura dividida em seções numeradas (*Dados da Oficina* e *Acesso do Administrador*), validação interativa dos requisitos de complexidade de senha e tratamento de máscara limpa de CNPJ e telefone.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet (incluindo testes de `/login` e `/setup` em todos os viewports sem scroll horizontal).
+
+
 
 
 

@@ -1,27 +1,36 @@
 <main class="auth-page login-layout">
+  <div class="auth-top-bar">
+    <app-theme-toggle />
+  </div>
+
   <section class="auth-intro">
     <div class="brand-mark">
-      <i class="pi pi-car text-3xl"></i>
+      <i class="pi pi-car text-2xl"></i>
     </div>
     <p class="eyebrow">SPORT PNEUS</p>
     <h1>Gestão inteligente para sua oficina.</h1>
-    <p>Acompanhe ordens de serviço, veículos e clientes com rapidez e total controle operacional.</p>
+    <p>Acompanhe ordens de serviço, veículos e clientes com rapidez, clareza e total controle operacional.</p>
   </section>
+
   <section class="auth-card login-card surface-card">
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
       <header>
         <h2>Acessar o sistema</h2>
-        <p>Informe suas credenciais para entrar.</p>
+        <p>Informe suas credenciais para entrar na oficina.</p>
       </header>
-      <label>E-mail
+
+      <label>E-mail corporativo
         <input pInputText formControlName="email" type="email" autocomplete="email" placeholder="seu.email@empresa.com" />
       </label>
-      <label>Senha
+
+      <label>Senha de acesso
         <input pInputText formControlName="password" type="password" autocomplete="current-password" placeholder="••••••••" />
       </label>
+
       @if (invalidCredentials()) {
-        <p class="field-error"><i class="pi pi-exclamation-triangle mr-1"></i> E-mail ou senha inválidos.</p>
+        <p class="field-error"><i class="pi pi-exclamation-triangle mr-1.5"></i> E-mail ou senha incorretos. Verifique suas credenciais.</p>
       }
+
       <button type="submit" class="primary-button full-control flex items-center justify-center gap-2" [disabled]="saving()">
         @if (saving()) {
           <i class="pi pi-spin pi-spinner"></i>

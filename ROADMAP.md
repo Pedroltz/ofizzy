@@ -94,11 +94,11 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Dark Mode
 
 ### R9 — Autenticação
-- [ ] Login
-- [ ] Setup inicial
-- [ ] Dark Mode
-- [ ] Estados de erro
-- [ ] Estados de loading
+- [x] Login
+- [x] Setup inicial
+- [x] Dark Mode
+- [x] Estados de erro
+- [x] Estados de loading
 
 ### R10 — Polish
 - [ ] Skeletons
