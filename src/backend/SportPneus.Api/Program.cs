@@ -11,8 +11,47 @@ using SportPneus.Api.Infrastructure.Errors;
 using SportPneus.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("Postgres")
-    ?? throw new InvalidOperationException("ConnectionStrings:Postgres is required.");
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+
+    if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Postgres")) ||
+        string.IsNullOrWhiteSpace(builder.Configuration["Jwt:SigningKey"]))
+    {
+        for (var dir = new DirectoryInfo(Directory.GetCurrentDirectory()); dir != null; dir = dir.Parent)
+        {
+            var envPath = Path.Combine(dir.FullName, ".env");
+            if (File.Exists(envPath))
+            {
+                var dict = new Dictionary<string, string?>();
+                foreach (var line in File.ReadAllLines(envPath))
+                {
+                    var trimmed = line.Trim();
+                    if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith('#')) continue;
+                    var parts = trimmed.Split('=', 2);
+                    if (parts.Length == 2)
+                    {
+                        var key = parts[0].Trim();
+                        var val = parts[1].Trim().Trim('"').Trim('\'');
+                        if (key == "JWT_SIGNING_KEY" && string.IsNullOrWhiteSpace(builder.Configuration["Jwt:SigningKey"]))
+                            dict["Jwt:SigningKey"] = val;
+                        else if (key == "POSTGRES_PASSWORD" && string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Postgres")))
+                            dict["ConnectionStrings:Postgres"] = $"Host=localhost;Port=5432;Database=sport_pneus;Username=sport_pneus;Password={val}";
+                    }
+                }
+                if (dict.Count > 0)
+                    builder.Configuration.AddInMemoryCollection(dict);
+                break;
+            }
+        }
+    }
+}
+
+var connectionString = builder.Configuration.GetConnectionString("Postgres");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException("ConnectionStrings:Postgres is required.");
+
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
 if (Encoding.UTF8.GetByteCount(jwt.SigningKey) < 32)
     throw new InvalidOperationException("Jwt:SigningKey must contain at least 32 bytes.");
@@ -31,12 +70,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
+    var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? jwt;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true, ValidIssuer = jwt.Issuer,
-        ValidateAudience = true, ValidAudience = jwt.Audience,
+        ValidateIssuer = true, ValidIssuer = jwtOptions.Issuer,
+        ValidateAudience = true, ValidAudience = jwtOptions.Audience,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
         ValidateLifetime = true, ClockSkew = TimeSpan.FromSeconds(30)
     };
     options.Events = new JwtBearerEvents
