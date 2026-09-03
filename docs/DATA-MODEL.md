@@ -2,7 +2,7 @@
 
 ## Fundação
 
-- `Company`: configuração única da oficina.
+- `Company`: configuração única da oficina, incluindo razão social, nome fantasia, CNPJ, contatos, endereço e textos usados nos documentos da OS.
 - `User`: administrador, email normalizado único e hash de senha.
 - `RefreshToken`: somente hash SHA-256, família, expiração, revogação e substituição.
 
@@ -24,3 +24,5 @@
 ## Convenções
 
 UUID v7 para chaves; `timestamptz` em UTC; `numeric(14,2)` para dinheiro; quantidades com três casas decimais; número da OS por sequence. Cadastros são arquivados e documentos históricos não são apagados.
+
+Índices de consulta cobrem status/data e snapshots de cliente/placa em `WorkOrder`, cliente/atividade em `Vehicle` e atividade em `Customer`. O resumo do dashboard é derivado dessas entidades e não possui tabela própria.

@@ -57,13 +57,15 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.Property(x => x.Name).HasMaxLength(160).IsRequired(); entity.Property(x => x.Document).HasMaxLength(14);
             entity.Property(x => x.Phone).HasMaxLength(20); entity.Property(x => x.WhatsApp).HasMaxLength(20); entity.Property(x => x.Email).HasMaxLength(254);
             entity.Property(x => x.Address).HasMaxLength(500); entity.Property(x => x.Notes).HasMaxLength(2000);
-            entity.HasIndex(x => x.Name); entity.HasIndex(x => x.Phone); entity.HasIndex(x => x.Document).IsUnique().HasFilter("\"Document\" IS NOT NULL");
+            entity.HasIndex(x => x.Name); entity.HasIndex(x => x.Phone); entity.HasIndex(x => x.IsActive);
+            entity.HasIndex(x => x.Document).IsUnique().HasFilter("\"Document\" IS NOT NULL");
         });
         modelBuilder.Entity<Vehicle>(entity =>
         {
             entity.ToTable("vehicles"); entity.HasKey(x => x.Id); entity.Property(x => x.Plate).HasMaxLength(8).IsRequired();
             entity.Property(x => x.Brand).HasMaxLength(80); entity.Property(x => x.Model).HasMaxLength(120).IsRequired(); entity.Property(x => x.Color).HasMaxLength(50);
-            entity.Property(x => x.Chassis).HasMaxLength(40); entity.Property(x => x.Notes).HasMaxLength(2000); entity.HasIndex(x => x.Plate).IsUnique(); entity.HasIndex(x => x.Model);
+            entity.Property(x => x.Chassis).HasMaxLength(40); entity.Property(x => x.Notes).HasMaxLength(2000);
+            entity.HasIndex(x => x.Plate).IsUnique(); entity.HasIndex(x => x.Model); entity.HasIndex(x => x.IsActive); entity.HasIndex(x => x.CustomerId);
             entity.HasOne(x => x.Customer).WithMany(x => x.Vehicles).HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ServiceItem>(entity =>
@@ -78,7 +80,14 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         });
         modelBuilder.Entity<WorkOrder>(entity =>
         {
-            entity.ToTable("work_orders"); entity.HasKey(x => x.Id); entity.Property(x => x.Number).HasDefaultValueSql("nextval('sport_pneus.work_order_number_seq')"); entity.HasIndex(x => x.Number).IsUnique(); entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20); entity.Property(x => x.CustomerName).HasMaxLength(160); entity.Property(x => x.CustomerDocument).HasMaxLength(14); entity.Property(x => x.CustomerPhone).HasMaxLength(20); entity.Property(x => x.VehiclePlate).HasMaxLength(8); entity.Property(x => x.VehicleDescription).HasMaxLength(300); entity.Property(x => x.Complaint).HasMaxLength(3000); entity.Property(x => x.Diagnosis).HasMaxLength(5000); entity.Property(x => x.Notes).HasMaxLength(3000); entity.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict); entity.HasOne(x => x.Vehicle).WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable("work_orders"); entity.HasKey(x => x.Id); entity.Property(x => x.Number).HasDefaultValueSql("nextval('sport_pneus.work_order_number_seq')");
+            entity.HasIndex(x => x.Number).IsUnique();
+            entity.HasIndex(x => x.Status);
+            entity.HasIndex(x => x.CreatedAt);
+            entity.HasIndex(x => new { x.Status, x.CreatedAt });
+            entity.HasIndex(x => x.CustomerName);
+            entity.HasIndex(x => x.VehiclePlate);
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20); entity.Property(x => x.CustomerName).HasMaxLength(160); entity.Property(x => x.CustomerDocument).HasMaxLength(14); entity.Property(x => x.CustomerPhone).HasMaxLength(20); entity.Property(x => x.VehiclePlate).HasMaxLength(8); entity.Property(x => x.VehicleDescription).HasMaxLength(300); entity.Property(x => x.Complaint).HasMaxLength(3000); entity.Property(x => x.Diagnosis).HasMaxLength(5000); entity.Property(x => x.Notes).HasMaxLength(3000); entity.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict); entity.HasOne(x => x.Vehicle).WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<WorkOrderService>(entity =>
         {

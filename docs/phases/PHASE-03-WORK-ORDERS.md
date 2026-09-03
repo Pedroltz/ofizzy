@@ -24,10 +24,9 @@ Concluída e validada. Abertura, listagem, visualização detalhada, edição de
 
 Nenhuma pendência técnica. Todos os itens de aceite foram atendidos e comprovados com testes automatizados e smoke test real.
 
-## Evidências atuais
+## Evidências do aceite da fase
 
 - Backend: build sem avisos; 10 testes unitários e 3 testes de integração aprovados em PostgreSQL real (Testcontainers).
 - Frontend: lint com 0 erros/avisos, 1 teste Vitest aprovado e build de produção aprovado (`dist/sport-pneus-web`).
 - Compose & Nginx: stack completa em execução saudável na porta 8080 (`postgres`, `backend`, `frontend`, `nginx`).
 - Persistência e Smoke: criação, edição, avanço de status para `InProgress` e `Completed` validados com sucesso via Nginx em `http://localhost:8080` e dados persistidos no PostgreSQL após reinício do Docker Compose.
-

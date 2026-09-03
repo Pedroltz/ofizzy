@@ -28,3 +28,21 @@ Requisições mutáveis exigem `X-XSRF-TOKEN`, obtido pelo cookie legível `XSRF
 - `PATCH /api/work-orders/{id}/status` com `Open`, `InProgress`, `Completed` ou `Cancelled`
 
 O número é sequencial no PostgreSQL. Dados do cliente, veículo e itens são preservados como snapshots; subtotais e total são calculados pelo backend. OS finalizada ou cancelada é imutável.
+
+## Fase 4
+
+- `GET /api/company`
+- `PUT /api/company`
+- `GET /api/work-orders/{id}/pdf`
+
+Os dados da oficina alimentam a impressão e o PDF. O PDF é devolvido como `application/pdf` com nome `OS-NNNN.pdf`.
+
+## Dashboard
+
+- `GET /api/dashboard/summary`
+
+Retorna totais de clientes, veículos, ordens ativas/finalizadas e a lista resumida de ordens ativas em uma única consulta agregada.
+
+## Convenções de listagem
+
+Listagens usam `q`, `page` e `pageSize`; veículos também aceitam `customerId` e ordens aceitam `status`. Respostas paginadas usam `items`, `total`, `page` e `pageSize`.

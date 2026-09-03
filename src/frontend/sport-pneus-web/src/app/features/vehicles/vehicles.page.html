@@ -14,24 +14,42 @@
       <input pInputText [formControl]="search" placeholder="Pesquisar por placa, modelo, marca ou proprietário..." />
     </div>
     <div class="view-mode-toggle">
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'spacious'" (click)="viewMode.set('spacious')" title="Lista Ampla">
-        <i class="pi pi-bars"></i>
-      </button>
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Tabela Compacta">
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Lista">
         <i class="pi pi-table"></i>
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Blocos">
+        <i class="pi pi-th-large"></i>
       </button>
     </div>
   </div>
 
   @if (loading()) {
-    <div class="spacious-list">
-      @for (_ of [1,2,3,4]; track $index) {
-        <div class="spacious-row">
-          <p-skeleton width="50%" height="2rem" />
-          <p-skeleton width="100%" height="1.5rem" />
+      @if (effectiveViewMode() === 'cards') {
+      <div class="catalog-grid">
+        @for (_ of [1,2,3,4,5,6]; track $index) {
+          <div class="catalog-card">
+            <div class="flex items-center justify-between">
+              <p-skeleton width="35%" height="2rem" />
+              <p-skeleton width="25%" height="1.5rem" />
+            </div>
+            <p-skeleton width="70%" height="1.8rem" />
+            <p-skeleton width="100%" height="4.5rem" />
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <p-skeleton width="35%" height="1rem" />
+              <p-skeleton width="25%" height="2rem" />
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="data-table-card">
+        <div class="p-4 flex flex-col gap-3">
+          @for (_ of [1,2,3,4,5]; track $index) {
+            <p-skeleton width="100%" height="2.2rem" />
+          }
         </div>
-      }
-    </div>
+      </div>
+    }
   } @else if (items().length === 0) {
     <div class="empty-state surface-card">
       <div class="empty-icon"><i class="pi pi-car"></i></div>
@@ -39,64 +57,74 @@
       <p>{{ search.value ? 'Nenhum veículo corresponde à placa ou modelo buscado.' : 'Cadastre um cliente e vincule seu primeiro veículo para iniciar os atendimentos.' }}</p>
       <p-button label="Novo Veículo" icon="pi pi-plus" (onClick)="open()" />
     </div>
-  } @else if (viewMode() === 'spacious') {
-    <div class="spacious-list">
+  } @else if (effectiveViewMode() === 'cards') {
+    <div class="catalog-grid">
       @for (item of items(); track item.id) {
-        <article class="spacious-row">
-          <div class="spacious-main-line">
-            <div class="spacious-id-block">
-              <span class="plate-badge large">{{ item.plate }}</span>
-              <div class="spacious-title-group">
-                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</h2>
-                <div class="spacious-owner-tag">
-                  <i class="pi pi-user text-slate-400"></i>
-                  <span>Proprietário: <strong>{{ item.customerName }}</strong></span>
-                </div>
-              </div>
-            </div>
+        <article class="catalog-card">
+          <!-- Cabeçalho: Placa e Ano/Cor ou Badge de Carro -->
+          <div class="catalog-card-header">
+            <span class="plate-badge large">{{ item.plate }}</span>
+            @if (item.year || item.color) {
+              <span class="doc-badge">
+                <i class="pi pi-calendar"></i> {{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}
+              </span>
+            } @else {
+              <span class="text-xs text-slate-400 font-medium italic"><i class="pi pi-car mr-1"></i>Veículo</span>
+            }
+          </div>
 
-            <div class="spacious-attributes-block">
-              @if (item.year || item.color) {
-                <span class="spacious-pill">
-                  <i class="pi pi-calendar"></i>
-                  <span>{{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}</span>
-                </span>
-              }
+          <!-- Identidade: Modelo e Proprietário -->
+          <div class="catalog-card-identity">
+            <h2 [title]="(item.brand ? item.brand + ' ' : '') + item.model">
+              {{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}
+            </h2>
+            <span class="catalog-card-subtitle" [title]="'Proprietário: ' + item.customerName">
+              <i class="pi pi-user text-slate-400"></i>
+              <span>Proprietário: <strong class="text-slate-800">{{ item.customerName }}</strong></span>
+            </span>
+          </div>
+
+          <!-- Painel de Especificações do Veículo -->
+          <div class="catalog-card-meta-box">
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"><i class="pi pi-compass text-teal-600"></i> Quilometragem</span>
               @if (item.mileage !== null) {
-                <span class="spacious-pill">
-                  <i class="pi pi-compass"></i>
-                  <span>{{ item.mileage.toLocaleString('pt-BR') }} km</span>
-                </span>
-              }
-              @if (item.chassis) {
-                <span class="spacious-pill font-mono text-xs">
-                  <i class="pi pi-id-card"></i>
-                  <span>Chassi: {{ item.chassis }}</span>
-                </span>
+                <span class="catalog-meta-value font-mono font-bold">{{ item.mileage.toLocaleString('pt-BR') }} km</span>
+              } @else {
+                <span class="text-xs text-slate-400 italic">Não informada</span>
               }
             </div>
 
-            <div class="spacious-actions-block">
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"><i class="pi pi-id-card text-slate-400"></i> Chassi</span>
+              @if (item.chassis) {
+                <span class="catalog-meta-value font-mono text-xs text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded" [title]="item.chassis">
+                  {{ item.chassis }}
+                </span>
+              } @else {
+                <span class="text-xs text-slate-400 italic">Não informado</span>
+              }
+            </div>
+          </div>
+
+          <!-- Observação técnica (se houver) -->
+          @if (item.notes) {
+            <div class="catalog-card-notes" [title]="item.notes">
+              <i class="pi pi-info-circle flex-shrink-0"></i>
+              <span class="truncate">{{ item.notes }}</span>
+            </div>
+          }
+
+          <!-- Rodapé do Card -->
+          <div class="catalog-card-footer">
+            <span class="spacious-date">
+              <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
+            </span>
+            <div class="card-actions">
               <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
               <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
             </div>
           </div>
-
-          @if (item.notes || item.createdAt) {
-            <div class="spacious-sub-line">
-              <div class="spacious-details-group">
-                @if (item.notes) {
-                  <span class="spacious-notes">
-                    <i class="pi pi-info-circle"></i>
-                    <span>{{ item.notes }}</span>
-                  </span>
-                }
-              </div>
-              <span class="spacious-date">
-                <i class="pi pi-clock"></i> Cadastrado em {{ formatDate(item.createdAt) }}
-              </span>
-            </div>
-          }
         </article>
       }
     </div>

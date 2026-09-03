@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -14,16 +14,34 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Vehicle } from '../../core/api/catalog.models';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
+import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
 
 @Component({ selector:'app-vehicles-page', imports:[ReactiveFormsModule, AutoCompleteModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, PaginatorModule, SkeletonModule, TextareaModule, PageHeaderComponent], templateUrl:'./vehicles.page.html', changeDetection:ChangeDetectionStrategy.OnPush })
 export class VehiclesPage {
   private readonly api=inject(CatalogApiService); private readonly fb=inject(FormBuilder); private readonly messages=inject(MessageService); private readonly confirmation=inject(ConfirmationService);
+  private readonly responsive = inject(ResponsiveLayoutService);
   readonly items=signal<Vehicle[]>([]); readonly total=signal(0); readonly loading=signal(true); readonly saving=signal(false); readonly dialog=signal(false); readonly editing=signal<Vehicle|null>(null); readonly customerSuggestions=signal<Customer[]>([]);
   readonly search=this.fb.nonNullable.control(''); readonly page=signal(1); readonly pageSize=12;
-  readonly viewMode = signal<'spacious' | 'table'>('spacious');
+  readonly viewMode = signal<'cards' | 'table'>('table');
+  readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
   readonly form=this.fb.group({ customer:this.fb.control<Customer|null>(null,Validators.required), plate:this.fb.nonNullable.control('',[Validators.required,Validators.minLength(7)]), brand:this.fb.nonNullable.control(''), model:this.fb.nonNullable.control('',Validators.required), year:this.fb.control<number|null>(null), color:this.fb.nonNullable.control(''), mileage:this.fb.control<number|null>(null), chassis:this.fb.nonNullable.control(''), notes:this.fb.nonNullable.control('') });
-  constructor(){this.search.valueChanges.pipe(debounceTime(250),distinctUntilChanged(),takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>{this.page.set(1);void this.load();});void this.load();}
-  async load():Promise<void>{this.loading.set(true);try{const result=await this.api.vehicles(this.search.value,this.page(),this.pageSize);this.items.set(result.items);this.total.set(result.total);}finally{this.loading.set(false);}}
+  private loadVersion = 0;
+  constructor(){this.search.valueChanges.pipe(debounceTime(300),distinctUntilChanged(),takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>{this.page.set(1);void this.load();});void this.load();}
+  async load():Promise<void>{
+    const current = ++this.loadVersion;
+    this.loading.set(true);
+    try{
+      const result=await this.api.vehicles(this.search.value,this.page(),this.pageSize);
+      if (current === this.loadVersion) {
+        this.items.set(result.items);
+        this.total.set(result.total);
+      }
+    } finally {
+      if (current === this.loadVersion) {
+        this.loading.set(false);
+      }
+    }
+  }
   async searchCustomers(event: AutoCompleteCompleteEvent): Promise<void> {
     const q = event?.query ?? '';
     const res = await this.api.customers(q, 1, 20);

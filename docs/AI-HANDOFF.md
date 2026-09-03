@@ -30,13 +30,14 @@ Atualizado em: 2026-09-02
 
 Use os containers oficiais descritos no README. Testes de integração precisam do socket Docker. Para execução normal, copie `.env.example` para `.env`, gere secrets e use Compose.
 
-Comandos frontend vigentes: `npm run lint`, `npm test` e `npm run build`. O builder Angular 21 atual não aceita `npm test -- --run` nem necessita `--watch=false` em execução sem TTY.
+Comandos frontend vigentes: `npm run lint`, `npm test`, `npm run e2e` e `npm run build`. O E2E usa Playwright com APIs determinísticas interceptadas e inicia o Angular em `127.0.0.1:4300`; instale o Chromium uma vez com `npx playwright install chromium`.
 
 A execução direta da API usa .NET User Secrets no perfil `Development`. O `UserSecretsId` está no projeto da API; nunca copie os valores locais para `appsettings*.json`.
 
 ## Estado de implementação
 
 Fases 1, 2, 3 e 4 concluídas e aprovadas.
+
 - `Modules/Customers`, `Modules/Vehicles`, `Modules/Services`, `Modules/Parts`, `Modules/WorkOrders` e `Modules/Company` 100% implementados e integrados com o frontend Angular.
 - Rotas `/clientes`, `/veiculos`, `/ordens` e `/configuracoes` funcionais com validações visuais inline, formatação de documentos, autocomplete robusto e confirmações de transição/arquivamento.
 - Configurações da oficina totalmente gerenciáveis na aba "Dados da Oficina" em `/configuracoes`.
@@ -44,6 +45,8 @@ Fases 1, 2, 3 e 4 concluídas e aprovadas.
 - Geração de PDF oficial via backend com QuestPDF (download direto via botão "Baixar PDF" na OS ou endpoint `/api/work-orders/{id}/pdf`).
 - Histórico de migrations atualizado (`InitialIdentity`, `AddCatalogs`, `AddWorkOrders`, `AddWorkshopSettings`).
 - Aceite Compose/Nginx realizado com sucesso na porta 8080, validando fluxo completo e persistência após reinício dos contêineres.
+- Responsividade antecipada da Fase 6 validada em desktop, Pixel 7 e tablet. O editor de linhas da OS fica em `features/work-orders/components`; o estado responsivo compartilhado fica em `shared/layout`.
+- O shell mantém a navegação em uma única coleção no `AppShellComponent`, renderizada na sidebar desktop e no drawer móvel; preserve os grupos Operação/Gestão ao adicionar rotas.
 
 ## Cuidados conhecidos
 

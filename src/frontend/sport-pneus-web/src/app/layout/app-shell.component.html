@@ -1,46 +1,51 @@
 <div class="app-layout">
-  <aside class="desktop-sidebar">
-    <a routerLink="/" class="sidebar-brand">
-      <div class="brand-badge">
-        <i class="pi pi-car"></i>
-      </div>
-      <div class="brand-info">
+  <aside class="desktop-sidebar" aria-label="Navegação principal">
+    <a routerLink="/" class="sidebar-brand" aria-label="Sport Pneus — Início">
+      <span class="sidebar-wordmark" aria-hidden="true">SP</span>
+      <span class="brand-info">
         <strong class="brand-title">Sport Pneus</strong>
-        <span class="brand-subtitle">Gestão Automotiva</span>
-      </div>
+        <span class="brand-subtitle">Oficina & serviços</span>
+      </span>
     </a>
 
-    <nav class="sidebar-nav">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-item">
-        <i class="pi pi-home"></i>
-        <span>Início</span>
-      </a>
-      <a routerLink="/ordens" routerLinkActive="active" class="nav-item">
-        <i class="pi pi-file-edit"></i>
-        <span>Ordens de Serviço</span>
-      </a>
-      <a routerLink="/clientes" routerLinkActive="active" class="nav-item">
-        <i class="pi pi-users"></i>
-        <span>Clientes</span>
-      </a>
-      <a routerLink="/veiculos" routerLinkActive="active" class="nav-item">
-        <i class="pi pi-car"></i>
-        <span>Veículos</span>
-      </a>
-      <a routerLink="/configuracoes" routerLinkActive="active" class="nav-item">
-        <i class="pi pi-sliders-h"></i>
-        <span>Catálogo & Ajustes</span>
-      </a>
-    </nav>
+    <div class="sidebar-navigation">
+      @for (group of navigation; track group.label) {
+        <section class="nav-section" [attr.aria-label]="group.label">
+          <p class="nav-section-label">{{ group.label }}</p>
+          <nav class="sidebar-nav">
+            @for (item of group.items; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.exact }"
+                ariaCurrentWhenActive="page"
+                class="nav-item"
+              >
+                <span class="nav-icon"><i [class]="item.icon"></i></span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </nav>
+        </section>
+      }
+    </div>
 
     <div class="sidebar-footer">
-      <div class="user-card">
-        <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          {{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}
+        </div>
         <div class="user-details">
           <strong>{{ user()?.name }}</strong>
           <small>{{ user()?.email }}</small>
         </div>
-        <button type="button" class="logout-btn" (click)="logout()" title="Encerrar sessão" aria-label="Sair">
+        <button
+          type="button"
+          class="logout-btn"
+          (click)="logout()"
+          title="Encerrar sessão"
+          aria-label="Sair"
+        >
           <i class="pi pi-sign-out"></i>
         </button>
       </div>
@@ -48,65 +53,86 @@
   </aside>
 
   <header class="mobile-header">
-    <button type="button" class="mobile-menu-btn" (click)="mobileMenu.set(true)" aria-label="Abrir menu">
+    <button
+      type="button"
+      class="mobile-menu-btn"
+      (click)="mobileMenu.set(true)"
+      aria-label="Abrir menu"
+    >
       <i class="pi pi-bars"></i>
     </button>
-    <div class="mobile-brand">
-      <div class="brand-badge small"><i class="pi pi-car"></i></div>
+    <a routerLink="/" class="mobile-brand" aria-label="Sport Pneus — Início">
+      <span class="sidebar-wordmark small" aria-hidden="true">SP</span>
       <strong>Sport Pneus</strong>
-    </div>
+    </a>
     <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
   </header>
 
   @if (mobileMenu()) {
-    <div class="mobile-drawer" (click)="mobileMenu.set(false)">
-      <div class="drawer-panel" (click)="$event.stopPropagation()">
+    <div class="mobile-drawer" (click)="mobileMenu.set(false)" role="presentation">
+      <div
+        class="drawer-panel"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu principal"
+      >
         <div class="drawer-header">
-          <div class="sidebar-brand">
-            <div class="brand-badge"><i class="pi pi-car"></i></div>
-            <div class="brand-info">
+          <a routerLink="/" class="sidebar-brand" (click)="mobileMenu.set(false)">
+            <span class="sidebar-wordmark" aria-hidden="true">SP</span>
+            <span class="brand-info">
               <strong class="brand-title">Sport Pneus</strong>
-              <span class="brand-subtitle">Gestão Automotiva</span>
-            </div>
-          </div>
-          <button type="button" class="mobile-close-btn" (click)="mobileMenu.set(false)" aria-label="Fechar menu">
+              <span class="brand-subtitle">Oficina & serviços</span>
+            </span>
+          </a>
+          <button
+            type="button"
+            class="mobile-close-btn"
+            (click)="mobileMenu.set(false)"
+            aria-label="Fechar menu"
+          >
             <i class="pi pi-times"></i>
           </button>
         </div>
-        <nav class="sidebar-nav">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-item" (click)="mobileMenu.set(false)">
-            <i class="pi pi-home"></i>
-            <span>Início</span>
-          </a>
-          <a routerLink="/ordens" routerLinkActive="active" class="nav-item" (click)="mobileMenu.set(false)">
-            <i class="pi pi-file-edit"></i>
-            <span>Ordens de Serviço</span>
-          </a>
-          <a routerLink="/clientes" routerLinkActive="active" class="nav-item" (click)="mobileMenu.set(false)">
-            <i class="pi pi-users"></i>
-            <span>Clientes</span>
-          </a>
-          <a routerLink="/veiculos" routerLinkActive="active" class="nav-item" (click)="mobileMenu.set(false)">
-            <i class="pi pi-car"></i>
-            <span>Veículos</span>
-          </a>
-          <a routerLink="/configuracoes" routerLinkActive="active" class="nav-item" (click)="mobileMenu.set(false)">
-            <i class="pi pi-sliders-h"></i>
-            <span>Catálogo & Ajustes</span>
-          </a>
-        </nav>
+
+        <div class="sidebar-navigation">
+          @for (group of navigation; track group.label) {
+            <section class="nav-section" [attr.aria-label]="group.label">
+              <p class="nav-section-label">{{ group.label }}</p>
+              <nav class="sidebar-nav">
+                @for (item of group.items; track item.route) {
+                  <a
+                    [routerLink]="item.route"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: item.exact }"
+                    ariaCurrentWhenActive="page"
+                    class="nav-item"
+                    (click)="mobileMenu.set(false)"
+                  >
+                    <span class="nav-icon"><i [class]="item.icon"></i></span>
+                    <span>{{ item.label }}</span>
+                  </a>
+                }
+              </nav>
+            </section>
+          }
+        </div>
+
         <div class="sidebar-footer">
-          <button type="button" class="secondary-button w-full flex items-center justify-center gap-2" (click)="logout()">
-            <i class="pi pi-sign-out"></i>
-            <span>Encerrar sessão</span>
+          <div class="sidebar-user drawer-user">
+            <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+            <div class="user-details">
+              <strong>{{ user()?.name }}</strong
+              ><small>{{ user()?.email }}</small>
+            </div>
+          </div>
+          <button type="button" class="drawer-logout" (click)="logout()">
+            <i class="pi pi-sign-out"></i><span>Encerrar sessão</span>
           </button>
         </div>
       </div>
     </div>
   }
 
-  <main class="app-content">
-    <router-outlet />
-  </main>
+  <main class="app-content"><router-outlet /></main>
 </div>
-

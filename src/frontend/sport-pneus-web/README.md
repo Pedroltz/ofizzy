@@ -17,7 +17,11 @@ O servidor abre em `http://localhost:4200` e encaminha `/api` para `http://local
 ```bash
 npm run lint
 npm test
+npx playwright install chromium
+npm run e2e
 npm run build
 ```
 
-Em ambientes sem Node no host, use a imagem oficial Node 24 conforme os comandos registrados na documentação principal. O build possui atualmente um aviso não bloqueante de orçamento do bundle inicial.
+O Playwright valida login, setup e todas as rotas autenticadas em desktop, Pixel 7 e tablet usando APIs interceptadas. O servidor de teste utiliza `http://127.0.0.1:4300` e não altera o banco local.
+
+Em ambientes sem Node no host, use a imagem oficial Node 24 conforme os comandos registrados na documentação principal. O build possui aviso não bloqueante: bundle inicial de aproximadamente 707 kB para orçamento de 500 kB.

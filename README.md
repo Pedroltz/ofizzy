@@ -2,6 +2,8 @@
 
 Sistema simples e rápido para gestão de uma pequena oficina, centrado na Ordem de Serviço.
 
+O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo completo de OS, configuração da oficina, impressão HTML/PDF, dashboard operacional e interface responsiva para desktop, celular e tablet. O próximo marco funcional é financeiro e pagamentos.
+
 ## Executar
 
 1. Copie `.env.example` para `.env` e substitua as senhas.
@@ -28,4 +30,25 @@ dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;D
 
 Para desenvolvimento: `docker compose -f compose.yaml -f compose.dev.yaml up --build`.
 
-Consulte [STATUS.md](STATUS.md) para o estado atual e [ROADMAP.md](ROADMAP.md) para as próximas fases.
+## Validação
+
+Backend:
+
+```bash
+dotnet test SportPneus.slnx
+```
+
+Frontend:
+
+```bash
+cd src/frontend/sport-pneus-web
+npm run lint
+npm test
+npx playwright install chromium
+npm run e2e
+npm run build
+```
+
+O E2E inicia o Angular em `http://127.0.0.1:4300`, intercepta as APIs com dados determinísticos e executa projetos desktop, Pixel 7 e tablet.
+
+Consulte [STATUS.md](STATUS.md) para o estado atual, [ROADMAP.md](ROADMAP.md) para as próximas fases e [docs/AI-HANDOFF.md](docs/AI-HANDOFF.md) para continuidade técnica.

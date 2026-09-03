@@ -12,7 +12,8 @@ Leia nesta ordem antes de alterar o projeto: `PROJECT.md`, `STATUS.md`, `docs/AI
 - Use PrimeNG para controles e CSS/Tailwind para layout.
 - Cadastros são arquivados; documentos históricos não são apagados.
 - Nunca versionar `.env`, senhas, tokens, certificados ou dados reais.
-- Antes de concluir: backend build/test, frontend lint/test/build, migration, Compose e smoke do fluxo.
+- Antes de concluir: backend build/test, frontend lint/test/E2E/build, migration, Compose e smoke do fluxo.
+- Mudanças visuais devem preservar desktop e ser verificadas em celular/tablet sem overflow horizontal ou controles menores que 44 px.
 - Atualize `STATUS.md`, `docs/AI-HANDOFF.md`, `docs/IMPLEMENTATION-LOG.md` e o documento da fase com evidências reais.
 - Use Conventional Commits pequenos e descritivos.
 

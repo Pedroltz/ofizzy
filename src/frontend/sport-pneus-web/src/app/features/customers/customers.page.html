@@ -14,24 +14,42 @@
       <input pInputText [formControl]="search" placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..." />
     </div>
     <div class="view-mode-toggle">
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'spacious'" (click)="viewMode.set('spacious')" title="Lista Ampla">
-        <i class="pi pi-bars"></i>
-      </button>
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Tabela Compacta">
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Lista">
         <i class="pi pi-table"></i>
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Blocos">
+        <i class="pi pi-th-large"></i>
       </button>
     </div>
   </div>
 
   @if (loading()) {
-    <div class="spacious-list">
-      @for (_ of [1,2,3,4]; track $index) {
-        <div class="spacious-row">
-          <p-skeleton width="60%" height="2rem" />
-          <p-skeleton width="100%" height="1.5rem" />
+      @if (effectiveViewMode() === 'cards') {
+      <div class="catalog-grid">
+        @for (_ of [1,2,3,4,5,6]; track $index) {
+          <div class="catalog-card">
+            <div class="flex items-center justify-between">
+              <p-skeleton shape="circle" size="3rem" />
+              <p-skeleton width="30%" height="1.5rem" />
+            </div>
+            <p-skeleton width="70%" height="1.8rem" />
+            <p-skeleton width="100%" height="4.5rem" />
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <p-skeleton width="35%" height="1rem" />
+              <p-skeleton width="25%" height="2rem" />
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="data-table-card">
+        <div class="p-4 flex flex-col gap-3">
+          @for (_ of [1,2,3,4,5]; track $index) {
+            <p-skeleton width="100%" height="2.2rem" />
+          }
         </div>
-      }
-    </div>
+      </div>
+    }
   } @else if (items().length === 0) {
     <div class="empty-state surface-card">
       <div class="empty-icon"><i class="pi pi-users"></i></div>
@@ -39,72 +57,79 @@
       <p>{{ search.value ? 'Nenhum resultado corresponde aos termos pesquisados.' : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.' }}</p>
       <p-button label="Novo Cliente" icon="pi pi-plus" (onClick)="open()" />
     </div>
-  } @else if (viewMode() === 'spacious') {
-    <div class="spacious-list">
+  } @else if (effectiveViewMode() === 'cards') {
+    <div class="catalog-grid">
       @for (item of items(); track item.id) {
-        <article class="spacious-row">
-          <div class="spacious-main-line">
-            <div class="spacious-id-block">
-              <div class="spacious-avatar">{{ initials(item.name) }}</div>
-              <div class="spacious-title-group">
-                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.name }}</h2>
-                @if (item.document) {
-                  <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
-                }
-              </div>
-            </div>
+        <article class="catalog-card">
+          <!-- Cabeçalho: Avatar e Documento -->
+          <div class="catalog-card-header">
+            <div class="spacious-avatar">{{ initials(item.name) }}</div>
+            @if (item.document) {
+              <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+            } @else {
+              <span class="text-xs text-slate-400 font-medium italic">Sem documento</span>
+            }
+          </div>
 
-            <div class="spacious-attributes-block">
+          <!-- Identidade -->
+          <div class="catalog-card-identity">
+            <h2 [title]="item.name">{{ item.name }}</h2>
+            @if (item.email) {
+              <span class="catalog-card-subtitle" [title]="item.email">
+                <i class="pi pi-envelope text-slate-400"></i>
+                <span>{{ item.email }}</span>
+              </span>
+            }
+          </div>
+
+          <!-- Painel de Contatos -->
+          <div class="catalog-card-meta-box">
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"><i class="pi pi-phone"></i> Telefone</span>
               @if (item.phone) {
-                <a [href]="'tel:' + item.phone" class="spacious-pill">
-                  <i class="pi pi-phone"></i>
-                  <span>{{ item.phone }}</span>
-                </a>
-              }
-              @if (item.whatsApp) {
-                <a [href]="'https://wa.me/55' + item.whatsApp.replace('\\D', '')" target="_blank" rel="noopener noreferrer" class="spacious-pill whatsapp">
-                  <i class="pi pi-whatsapp"></i>
-                  <span>{{ item.whatsApp }}</span>
-                </a>
-              }
-              @if (item.email) {
-                <a [href]="'mailto:' + item.email" class="spacious-pill">
-                  <i class="pi pi-envelope"></i>
-                  <span>{{ item.email }}</span>
-                </a>
-              }
-              @if (!item.phone && !item.email && !item.whatsApp) {
-                <span class="text-xs text-slate-400 italic">Sem telefone informado</span>
+                <a [href]="'tel:' + item.phone" class="catalog-meta-value hover:underline text-slate-800">{{ item.phone }}</a>
+              } @else {
+                <span class="text-xs text-slate-400 italic">Não informado</span>
               }
             </div>
 
-            <div class="spacious-actions-block">
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"><i class="pi pi-whatsapp text-emerald-600"></i> WhatsApp</span>
+              @if (item.whatsApp) {
+                <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="catalog-meta-value text-emerald-700 font-bold hover:underline">
+                  {{ item.whatsApp }}
+                </a>
+              } @else {
+                <span class="text-xs text-slate-400 italic">Não informado</span>
+              }
+            </div>
+
+            @if (item.address) {
+              <div class="catalog-card-info pt-1.5 border-t border-slate-200">
+                <i class="pi pi-map-marker text-teal-600 mt-0.5 flex-shrink-0"></i>
+                <span class="truncate" [title]="item.address">{{ item.address }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Observação (se houver) -->
+          @if (item.notes) {
+            <div class="catalog-card-notes" [title]="item.notes">
+              <i class="pi pi-info-circle flex-shrink-0"></i>
+              <span class="truncate">{{ item.notes }}</span>
+            </div>
+          }
+
+          <!-- Rodapé do Card -->
+          <div class="catalog-card-footer">
+            <span class="spacious-date">
+              <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
+            </span>
+            <div class="card-actions">
               <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
               <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
             </div>
           </div>
-
-          @if (item.address || item.notes || item.createdAt) {
-            <div class="spacious-sub-line">
-              <div class="spacious-details-group">
-                @if (item.address) {
-                  <span class="spacious-address">
-                    <i class="pi pi-map-marker text-teal-600"></i>
-                    <span>{{ item.address }}</span>
-                  </span>
-                }
-                @if (item.notes) {
-                  <span class="spacious-notes">
-                    <i class="pi pi-info-circle"></i>
-                    <span>{{ item.notes }}</span>
-                  </span>
-                }
-              </div>
-              <span class="spacious-date">
-                <i class="pi pi-clock"></i> Cadastrado em {{ formatDate(item.createdAt) }}
-              </span>
-            </div>
-          }
         </article>
       }
     </div>

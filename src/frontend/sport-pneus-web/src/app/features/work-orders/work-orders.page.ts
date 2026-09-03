@@ -15,17 +15,20 @@ import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.s
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
 import { WorkOrder, WorkOrderLineRequest, WorkOrderStatus, WorkOrderSummary } from '../../core/api/work-order.models';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
+import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
+import { WorkOrderLineChange, WorkOrderLinesEditorComponent } from './components/work-order-lines-editor.component';
 
 import { DrawerModule } from 'primeng/drawer';
 
 @Component({
   selector: 'app-work-orders-page',
-  imports: [FormsModule, ReactiveFormsModule, ButtonModule, DialogModule, DrawerModule, InputNumberModule, InputTextModule, PaginatorModule, TextareaModule, PageHeaderComponent],
+  imports: [FormsModule, ReactiveFormsModule, ButtonModule, DialogModule, DrawerModule, InputNumberModule, InputTextModule, PaginatorModule, TextareaModule, PageHeaderComponent, WorkOrderLinesEditorComponent],
   templateUrl: './work-orders.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorkOrdersPage {
   private readonly api = inject(WorkOrderApiService);
+  private readonly responsive = inject(ResponsiveLayoutService);
   private readonly catalogs = inject(CatalogApiService);
   private readonly companyApi = inject(CompanyApiService);
   private readonly fb = inject(FormBuilder);
@@ -53,6 +56,11 @@ export class WorkOrdersPage {
   readonly pageSize = 12;
   readonly search = this.fb.nonNullable.control('');
   readonly viewMode = signal<'cards' | 'table'>('cards');
+  readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
+
+  updateLineFromEditor(type: 'services' | 'parts', event: WorkOrderLineChange): void {
+    this.updateLine(type, event.index, event.field, event.value);
+  }
 
   readonly form = this.fb.group({
     customerId: ['', Validators.required],
@@ -82,10 +90,11 @@ export class WorkOrdersPage {
     Cancelled: 'Cancelada'
   };
 
+  private loadVersion = 0;
   constructor() {
     const destroyRef = inject(DestroyRef);
     this.search.valueChanges.pipe(
-      debounceTime(250),
+      debounceTime(300),
       distinctUntilChanged(),
       takeUntilDestroyed(destroyRef)
     ).subscribe(() => {
@@ -113,13 +122,18 @@ export class WorkOrdersPage {
   }
 
   async load(): Promise<void> {
+    const current = ++this.loadVersion;
     this.loading.set(true);
     try {
       const result = await this.api.list(this.search.value, this.page(), this.pageSize);
-      this.items.set(result.items);
-      this.total.set(result.total);
+      if (current === this.loadVersion) {
+        this.items.set(result.items);
+        this.total.set(result.total);
+      }
     } finally {
-      this.loading.set(false);
+      if (current === this.loadVersion) {
+        this.loading.set(false);
+      }
     }
   }
 
@@ -342,5 +356,19 @@ export class WorkOrdersPage {
 
   printOrder(): void {
     window.print();
+  }
+
+  async downloadPdf(order: WorkOrderSummary | WorkOrder): Promise<void> {
+    try {
+      const blob = await this.api.downloadPdf(order.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `OS-${order.number.toString().padStart(4, '0')}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      this.messages.add({ severity: 'error', summary: 'Erro no download', detail: 'Não foi possível baixar o PDF da OS.' });
+    }
   }
 }

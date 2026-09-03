@@ -5,3 +5,10 @@ export interface WorkOrderRequest { customerId: string; vehicleId: string; milea
 export interface WorkOrderSummary { id: string; number: number; customerName: string; vehiclePlate: string; vehicleDescription: string; status: WorkOrderStatus; total: number; createdAt: string; }
 export interface WorkOrder extends WorkOrderSummary, WorkOrderRequest { customerDocument: string | null; customerPhone: string | null; servicesTotal: number; partsTotal: number; completedAt: string | null; services: (WorkOrderLineRequest & { id: string; total: number })[]; parts: (WorkOrderLineRequest & { id: string; code: string | null; total: number })[]; }
 export type WorkOrderPage = PagedResponse<WorkOrderSummary>;
+export interface DashboardSummary {
+  totalCustomers: number;
+  totalVehicles: number;
+  totalActiveOrders: number;
+  totalCompletedOrders: number;
+  activeOrders: WorkOrderSummary[];
+}

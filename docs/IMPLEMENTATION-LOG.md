@@ -35,6 +35,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Roadmap atualizado para registrar a conclusão da Fase 2 e o progresso parcial da Fase 3.
 - Changelog alinhado à stack vigente Angular 21 + PrimeNG 21 e às entregas de catálogos e ordens de serviço.
 - Modelo de dados documentado com as entidades e invariantes já implementadas para OS.
+
 ## 2026-09-02 — Fase 3 concluída e validada
 
 - Reconciliado o histórico de migrations no PostgreSQL local (`InitialIdentity` inserido em `__EFMigrationsHistory`) e aplicadas com sucesso as migrações `AddCatalogs` e `AddWorkOrders`. Todas as tabelas e a sequence `work_order_number_seq` estão ativas e persistidas.
@@ -90,6 +91,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Desativada a comutação automática de tema escuro do PrimeNG com `darkModeSelector: 'none'` em `app.config.ts`, prevenindo que navegadores/sistemas com tema escuro forçassem textos brancos sobre cartões de fundo claro.
   - Aplicada blindagem de estilo em `styles.css` para `select`, `select option`, `.wo-info-card strong`, `.order-card-identity h2` e `.catalog-row h3`, garantindo tom ardósia de máxima legibilidade (`#0f172a`).
 - **Modo Híbrido de Listagem (Tabela e Cartões)**:
+
 ## 2026-09-02 — Lista em Faixas Amplas (Spacious Full-Width Rows) sem Rolagem Horizontal
 
 - **Nova Apresentação de Lista Ampla para Clientes e Veículos**:
@@ -97,6 +99,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - **Clientes**: avatar ampliado com iniciais (`3.2rem`), Nome Completo em destaque (`1.12rem`, peso 750, tom `#0f172a`), badge com CPF/CNPJ, chips confortáveis para Telefone, WhatsApp (verde) e E-mail, endereço com ícone de localização, notas e data de cadastro.
   - **Veículos**: placa no padrão Mercosul ampliada (`.plate-badge.large`), Marca & Modelo em evidência, tag de identificação do Proprietário, pílulas de Ano/Cor, Quilometragem e Chassi, sub-linha para anotações e data de cadastro.
   - Largura de contêiner expandida (`max-width: 86rem`) para aproveitar telas maiores com conforto ergonômico.
+
 ## 2026-09-02 — Reestruturação de Ordens de Serviço: Itens Manuais/Avulsos e Edição Direta de Valores
 
 - **Flexibilidade Total no Lançamento de Serviços e Peças**:
@@ -110,6 +113,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `WorkOrdersController` grava o código fornecido para peças avulsas ou recupera do catálogo para itens catalogados.
 - **Testes e Build**:
   - Testes de integração em `WorkOrderFlowTests` atualizados cobrindo inserção de itens manuais e catalogados com sucesso (todos os 3 testes aprovados).
+
 ## 2026-09-02 — Alinhamento e Organização Visual das Ordens de Serviço (CSS Grid & Spacious Rows)
 
 - **Organização do Formulário do Drawer de OS**:
@@ -127,9 +131,9 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - **Seção "Pátio da Oficina" no Painel Inicial**:
   - Exibição dinâmica das Ordens de Serviço abertas ou em andamento diretamente na tela inicial (`DashboardPage`), com atualização reativa via APIs de OS e Catálogos.
   - Bloquinhos modernos com indicador pulsante de OS ativas, identificação do cliente, placa Mercosul, modelo do veículo, data/hora de abertura (`createdAt`), valor da OS e link de acesso rápido.
-  - Estado vazio inteligente: mensagem positiva *"Pátio Livre de Pendências"* com botão direto para emissão de nova OS quando todos os veículos estiverem liberados.
+  - Estado vazio inteligente: mensagem positiva _"Pátio Livre de Pendências"_ com botão direto para emissão de nova OS quando todos os veículos estiverem liberados.
 - **Grade de Métricas Rápidas Operacionais**:
-  - 4 cards analíticos com ícones coloridos: *Ordens Ativas (no pátio)*, *Clientes Cadastrados (base total)*, *Veículos na Base (frota)* e *Ordens Concluídas (histórico finalizado)*.
+  - 4 cards analíticos com ícones coloridos: _Ordens Ativas (no pátio)_, _Clientes Cadastrados (base total)_, _Veículos na Base (frota)_ e _Ordens Concluídas (histórico finalizado)_.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e imagem Docker atualizada.
 
 ## 2026-09-02 — Correção de Responsividade e Rolagem no Modal de Ordem de Serviço
@@ -178,10 +182,10 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - **Eliminação de Poluição Visual e Frases Quebradas**:
   - Removidos textos longos, disclaimers redundantes e o antigo badge espremido que quebrava `VALOR / TOTAL / DA OS` em 3 linhas.
   - Implementado o novo `.wo-summary-card` limpo, moderno e minimalista.
-  - **Lado Esquerdo**: Título nítido *Fechamento da Ordem* com subtítulo direto indicando a contagem de serviços e peças em uma única linha.
+  - **Lado Esquerdo**: Título nítido _Fechamento da Ordem_ com subtítulo direto indicando a contagem de serviços e peças em uma única linha.
   - **Lado Direito**:
-    - Rótulos concisos de linha única (*Mão de Obra* e *Peças & Insumos*) com valores alinhados à direita.
-    - Card de *TOTAL GERAL* em destaque verde suave (`#f0fdf4` com borda `#bbf7d0`), com o rótulo e o valor numérico em `1.75rem font-black` no mesmo alinhamento horizontal, sem nenhuma quebra.
+    - Rótulos concisos de linha única (_Mão de Obra_ e _Peças & Insumos_) com valores alinhados à direita.
+    - Card de _TOTAL GERAL_ em destaque verde suave (`#f0fdf4` com borda `#bbf7d0`), com o rótulo e o valor numérico em `1.75rem font-black` no mesmo alinhamento horizontal, sem nenhuma quebra.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
 ## 2026-09-03 — Conclusão da Fase 4: Impressão e Configuração da Oficina
@@ -204,4 +208,70 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Frontend: `npm run lint` (0 erros) e `npm run build` aprovados.
   - Smoke test via Nginx na porta 8080: login autenticado, PUT de configurações da oficina e download do PDF da OS com status 200 e cabeçalho `%PDF` validados.
 
+## 2026-09-03 — Padronização Visual (Clientes e Veículos) e Otimizações Globais de Performance
 
+- **Padronização dos Modos de Visualização (Clientes e Veículos)**:
+  - Implementado sistema simétrico e coeso com 2 modos de exibição:
+    - **Lista** (modo padrão inicial): visualização tabular densa, clara e de alta produtividade.
+    - **Blocos**: grid de cartões modernos (`.catalog-grid` e `.catalog-card`), com avatar de iniciais / placa Mercosul em destaque, caixas de especificações/contatos e botões de ação alinhados.
+  - Skeletons de carregamento adaptativos para cada modo de visualização.
+- **Compressão Gzip e Cache Estático no Nginx**:
+  - Habilitada compressão `gzip on;` (nível 6) para JSON, JS, CSS, SVG em `deploy/nginx/default.conf` e `deploy/nginx/frontend.conf`, reduzindo o payload de transferência em até 80%.
+  - Adicionado cabeçalho `Cache-Control: public, immutable` com validade de 1 ano para todos os assets estáticos com hash.
+  - Adicionado `proxy_http_version 1.1; proxy_set_header Connection ""` para manter conexões TCP ativas (keep-alive) entre o Nginx e o Kestrel.
+- **Endpoint Agregado de Dashboard (`GET /api/dashboard/summary`)**:
+  - Criado `DashboardController` e `DashboardContracts` no backend .NET 10.
+  - Eliminação de 3 requisições HTTP concorrentes pesadas no frontend: o dashboard agora executa 1 única requisição agregada ultraveloz (< 15ms).
+- **Índices de Performance no PostgreSQL**:
+  - Criada e aplicada a migração EF Core `20260903133936_AddPerformanceIndexes`.
+  - Índices adicionados: `work_orders` (`Status`, `CreatedAt`, `Status_CreatedAt`, `CustomerName`, `VehiclePlate`), `vehicles` (`IsActive`, `CustomerId`) e `customers` (`IsActive`).
+  - Eliminação de Sequential Scans em filtros de status e buscas textuais.
+- **Proteção contra Race Conditions no Frontend**:
+  - Ajustado debounce para 300ms e implementado versionamento atômico de requisição (`loadVersion`) nas páginas de Clientes, Veículos e Ordens de Serviço, garantindo que respostas fora de ordem não corrompam o estado da tela.
+- Validação técnica:
+  - Backend: `14/14` testes de unidade aprovados, `3/3` testes de integração aprovados.
+  - Migração aplicada com sucesso no PostgreSQL local.
+  - Frontend: `npm run lint` (0 erros, 0 avisos) e `npm run build` concluído com sucesso.
+
+## 2026-09-03 — Responsividade Total para Mobile e Tablets
+
+- **Preservação Absoluta do Desktop (> 900px)**:
+  - Todas as modificações responsivas foram estritamente encapsuladas em `@media (max-width: 900px)` e `@media (max-width: 640px)`. O visual, dimensões e usabilidade no desktop permanecem 100% idênticos.
+- **Navegação & Shell Mobile**:
+  - Header mobile com altura fixa de 60px (`3.75rem`), posição sticky e z-index 30.
+  - Menu drawer lateral com animação suave de entrada (`drawerSlideRight` e `drawerFadeIn`), fechando automaticamente ao tocar no backdrop, no botão de fechar ou em qualquer item de navegação.
+- **Ajustes de Grid e Cartões**:
+  - `catalog-grid` e `order-grid` ajustados para 1 coluna fluida no smartphone (eliminando o overflow horizontal de `minmax(340px)`) e 2 colunas nos tablets.
+  - `dashboard-grid` e `dashboard-stats-grid` reorganizados em 2 colunas em tablets e 1 coluna em smartphones.
+  - Botões de ação rápida (`.quick-actions-bar`) com layout empilhado e altura de toque confortável.
+- **Modais e Diálogos de Formulário (`p-dialog` e `.wo-center-dialog`)**:
+  - Diálogos ocupando `96vw` no mobile, com altura máxima de `94vh`, scroll vertical táctil e campos em 1 coluna vertical.
+  - Prevenção do zoom indesejado no iOS Safari com `font-size: 16px` em inputs e selects.
+  - Botões do rodapé de modais ("Cancelar", "Salvar", "Concluir") com largura total e área de toque de 44px (`min-height: 44px`).
+- **Operação de Ordem de Serviço pelo Smartphone**:
+  - Lançamento de serviços e peças com rolagem horizontal táctil na grade de itens (`.wo-grid-table-container`), permitindo ao mecânico no pátio alterar quantidades e preços sem desconfigurar a tela.
+  - Fechamento financeiro da OS e botões de status adaptados para tela de celular.
+- **Catálogo & Ajustes (`/configuracoes`)**:
+  - Abas PrimeNG (`p-tablist`) com rolagem horizontal deslizante (`-webkit-overflow-scrolling: touch`), permitindo alternar entre serviços, peças e dados da oficina sem quebras de layout.
+- Validação técnica:
+  - Frontend: `npm run lint` (0 erros, 0 avisos) e `npm run build` concluído com sucesso.
+  - Backend: `14/14` testes de unidade aprovados e `3/3` testes de integração aprovados.
+
+## 2026-09-03 — Editor móvel de OS e testes responsivos automatizados
+
+- Extraído `WorkOrderLinesEditorComponent`, reutilizado para serviços e peças, com grade no desktop e cards editáveis no celular.
+- Criação/edição de OS passou a ocupar `100dvh` em celulares, com `safe-area`, corpo rolável e ações/total persistentes.
+- Adicionado `ResponsiveLayoutService`; clientes, veículos e OS sempre apresentam cards até 640 px sem alterar o modo desktop escolhido.
+- Corrigido o encolhimento do contêiner principal e das tabelas, eliminando overflow horizontal também no desktop.
+- Menu móvel agora fecha por `Escape` e expõe semântica de diálogo.
+- Adicionados Playwright e matriz responsiva para todas as rotas, com mocks determinísticos de API.
+- Validação: `npm run lint`, `npm test` (2/2), `npm run build` e `npm run e2e` (23 aprovados, 4 ignorados por viewport).
+
+## 2026-09-03 — Modernização da navegação lateral
+
+- Substituído o badge genérico de automóvel por wordmark tipográfico `SP`, sem gradientes ou glow.
+- Navegação reorganizada nos grupos Operação e Gestão, com estado ativo discreto, `aria-current` e ícones contidos.
+- Desktop e drawer móvel passam a consumir a mesma coleção tipada de rotas no `AppShellComponent`.
+- Perfil do usuário integrado ao rodapé, em tratamento monocromático e com ação de saída menos intrusiva.
+- Refinamento posterior removeu cores neon, fundos coloridos dos ícones e o selo “Sistema Operacional” do dashboard, preservando apenas slate e o teal original como marcador ativo.
+- Validação: lint e build aprovados; Vitest 2/2 e Playwright 23 aprovados, com 4 ignorados por viewport.

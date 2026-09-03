@@ -3,12 +3,10 @@
     <div class="page-header-text">
       <p class="eyebrow">PAINEL DE CONTROLE</p>
       <h1>Visão Geral da Oficina</h1>
-      <p class="page-description">Controle operacional de ordens de serviço, veículos e clientes.</p>
+      <p class="page-description">
+        Controle operacional de ordens de serviço, veículos e clientes.
+      </p>
     </div>
-    <span class="status-tag completed">
-      <i class="pi pi-check-circle"></i>
-      <span>Sistema Operacional</span>
-    </span>
   </header>
 
   <div class="quick-actions-bar">
@@ -38,7 +36,10 @@
         <span class="card-tag">Operação</span>
       </div>
       <h2>Ordens de Serviço</h2>
-      <p>Gerencie o ciclo completo de ordens abertas, em execução e concluídas com snapshots de preços.</p>
+      <p>
+        Gerencie o ciclo completo de ordens abertas, em execução e concluídas com snapshots de
+        preços.
+      </p>
       <a routerLink="/ordens" class="card-action-link">
         <span>Acessar Ordens</span>
         <i class="pi pi-arrow-right"></i>
@@ -53,7 +54,9 @@
         <span class="card-tag">Cadastros</span>
       </div>
       <h2>Clientes</h2>
-      <p>Registro completo de clientes com validação de CPF/CNPJ, telefones de contato e endereços.</p>
+      <p>
+        Registro completo de clientes com validação de CPF/CNPJ, telefones de contato e endereços.
+      </p>
       <a routerLink="/clientes" class="card-action-link">
         <span>Gerenciar Clientes</span>
         <i class="pi pi-arrow-right"></i>
@@ -68,7 +71,10 @@
         <span class="card-tag">Frota</span>
       </div>
       <h2>Veículos</h2>
-      <p>Controle de modelos, marcas, placas automotivas, quilometragem e vínculos com os proprietários.</p>
+      <p>
+        Controle de modelos, marcas, placas automotivas, quilometragem e vínculos com os
+        proprietários.
+      </p>
       <a routerLink="/veiculos" class="card-action-link">
         <span>Consultar Veículos</span>
         <i class="pi pi-arrow-right"></i>
@@ -83,7 +89,9 @@
         <span class="card-tag">Catálogo</span>
       </div>
       <h2>Catálogo & Ajustes</h2>
-      <p>Tabela de serviços e peças com preços sugeridos para inserção ágil durante o atendimento.</p>
+      <p>
+        Tabela de serviços e peças com preços sugeridos para inserção ágil durante o atendimento.
+      </p>
       <a routerLink="/configuracoes" class="card-action-link">
         <span>Configurar Catálogo</span>
         <i class="pi pi-arrow-right"></i>
@@ -97,13 +105,16 @@
       <div>
         <p class="eyebrow">PÁTIO DA OFICINA</p>
         <h2>Ordens de Serviço em Aberto e em Execução</h2>
-        <p class="section-subtitle">Acompanhe os atendimentos e veículos presentes na oficina em tempo real</p>
+        <p class="section-subtitle">
+          Acompanhe os atendimentos e veículos presentes na oficina em tempo real
+        </p>
       </div>
       <div class="flex items-center gap-3">
         @if (activeOrders().length > 0) {
           <span class="active-pill">
             <span class="active-dot"></span>
-            <strong>{{ activeOrders().length }}</strong> {{ activeOrders().length === 1 ? 'ordem ativa' : 'ordens ativas' }}
+            <strong>{{ activeOrders().length }}</strong>
+            {{ activeOrders().length === 1 ? 'ordem ativa' : 'ordens ativas' }}
           </span>
         }
         <a routerLink="/ordens" class="view-all-link">
@@ -129,7 +140,10 @@
           <i class="pi pi-check-circle"></i>
         </div>
         <h3>Pátio Livre de Pendências</h3>
-        <p>Não há ordens de serviço abertas ou em andamento no momento. Todos os atendimentos foram concluídos ou liberados.</p>
+        <p>
+          Não há ordens de serviço abertas ou em andamento no momento. Todos os atendimentos foram
+          concluídos ou liberados.
+        </p>
         <a routerLink="/ordens" class="quick-action-btn highlight mt-2">
           <i class="pi pi-plus"></i>
           <span>Abrir Nova Ordem de Serviço</span>
@@ -142,9 +156,17 @@
             <!-- Topo do Bloquinho: Badge OS + Status -->
             <div class="order-card-header">
               <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-              <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'">
-                @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
-                @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+              <span
+                class="status-tag"
+                [class.open]="item.status === 'Open'"
+                [class.in-progress]="item.status === 'InProgress'"
+              >
+                @if (item.status === 'Open') {
+                  <i class="pi pi-clock"></i>
+                }
+                @if (item.status === 'InProgress') {
+                  <i class="pi pi-sync"></i>
+                }
                 <span>{{ statusLabels[item.status] }}</span>
               </span>
             </div>
@@ -162,7 +184,10 @@
             <div class="order-summary-row">
               <div class="order-date-block">
                 <small>Abertura</small>
-                <span><i class="pi pi-calendar text-teal-600 mr-1"></i>{{ formatDate(item.createdAt) }}</span>
+                <span
+                  ><i class="pi pi-calendar text-teal-600 mr-1"></i
+                  >{{ formatDate(item.createdAt) }}</span
+                >
               </div>
               <div class="order-total-val">
                 <small>Valor da OS</small>
@@ -173,7 +198,14 @@
             <!-- Rodapé de Ações -->
             <div class="order-card-actions">
               <a routerLink="/ordens" class="w-full">
-                <p-button label="Gerenciar no Módulo de Ordens" icon="pi pi-external-link" [outlined]="true" severity="secondary" size="small" styleClass="w-full" />
+                <p-button
+                  label="Gerenciar no Módulo de Ordens"
+                  icon="pi pi-external-link"
+                  [outlined]="true"
+                  severity="secondary"
+                  size="small"
+                  styleClass="w-full"
+                />
               </a>
             </div>
           </article>
@@ -272,4 +304,3 @@
     </div>
   </section>
 </section>
-

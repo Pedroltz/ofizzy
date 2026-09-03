@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { WorkOrder, WorkOrderPage, WorkOrderRequest, WorkOrderStatus } from './work-order.models';
+import { DashboardSummary, WorkOrder, WorkOrderPage, WorkOrderRequest, WorkOrderStatus } from './work-order.models';
 
 @Injectable({ providedIn: 'root' })
 export class WorkOrderApiService {
   private readonly http = inject(HttpClient);
+  dashboardSummary(): Promise<DashboardSummary> { return firstValueFrom(this.http.get<DashboardSummary>('/api/dashboard/summary')); }
   list(q = '', page = 1, pageSize = 20): Promise<WorkOrderPage> {
     let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     const query = (q ?? '').trim();
@@ -17,3 +18,4 @@ export class WorkOrderApiService {
   changeStatus(id: string, status: WorkOrderStatus): Promise<WorkOrder> { return firstValueFrom(this.http.patch<WorkOrder>(`/api/work-orders/${id}/status`, { status })); }
   downloadPdf(id: string): Promise<Blob> { return firstValueFrom(this.http.get(`/api/work-orders/${id}/pdf`, { responseType: 'blob' })); }
 }
+
