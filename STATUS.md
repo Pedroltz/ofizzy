@@ -40,23 +40,21 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R9 concluído / R10 — Polish preparado
+R10 concluído — UI/UX Redesign Integralmente Finalizado (R1 a R10)
 
 Última tarefa concluída:
-R9 — Autenticação (Telas de Login e Setup Inicial no padrão Linear/Vercel, alternador de tema flutuante no topo, mensagens claras de validação e loading states ergonômicos)
+R10 — Polish (Scrollbars discretas com CSS nativo, anéis de foco acessíveis :focus-visible, atalho global '/' para focar pesquisa com indicador <kbd>/</kbd>, skeletons e empty states uniformizados e validação responsiva total)
 
 Próxima tarefa:
-R10 — Polish (Auditoria final de consistência visual, microinterações, foco por teclado e atalhos, skeletons adaptativos em todas as transições e refinamento de contraste Dark/Light)
+Aguardando novas diretrizes do usuário (Sistema totalmente modernizado e validado).
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/features/login/login.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/login/login.page.html`
-- `src/frontend/sport-pneus-web/src/app/features/setup/setup.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/setup/setup.page.html`
+- `src/frontend/sport-pneus-web/src/app/shared/components/search-field.component.ts`
+- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.ts`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R9.
+- Nenhuma. Todas as 10 fases do redesign foram concluídas com sucesso.
 
 Problemas conhecidos:
 - Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~722 kB contra 500 kB).
@@ -66,6 +64,7 @@ Testes:
 - `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 

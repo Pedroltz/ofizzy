@@ -56,4 +56,22 @@ export class AppShellComponent {
   closeMobileMenu(): void {
     this.mobileMenu.set(false);
   }
+
+  @HostListener('document:keydown', ['$event'])
+  handleGlobalShortcut(event: KeyboardEvent): void {
+    if (event.key === '/' && !this.isEditingText(event.target)) {
+      const searchInput = document.querySelector<HTMLInputElement>('.search-field__input, .search-bar input');
+      if (searchInput) {
+        event.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+  }
+
+  private isEditingText(target: EventTarget | null): boolean {
+    if (!target || !(target instanceof HTMLElement)) return false;
+    const tag = target.tagName.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
+  }
 }

@@ -439,6 +439,20 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet (incluindo testes de `/login` e `/setup` em todos os viewports sem scroll horizontal).
 
+## 2026-09-03 — UI/UX Redesign: R10 — Polish Concluído
+
+- **Refinamento Global de Usabilidade e Acessibilidade**:
+  - **Scrollbars Discretas**: estilização de barras de rolagem nativas via CSS com espessura fina (6px), trilho transparente e cores adaptativas aos temas (`--border-default` e `--border-strong`).
+  - **Foco por Teclado e WCAG**: anéis de foco consistentes (`:focus-visible`) com `var(--focus-ring)` em todos os elementos interativos.
+  - **Atalhos Rápidos**: tecla `/` configurada globalmente no `AppShellComponent` para focar imediatamente o campo de busca de ordens, clientes e veículos, acompanhada do indicador `<kbd>/</kbd>` no `SearchFieldComponent`. Tecla `ESC` fecha drawers e menus suspensos.
+  - **Consistência de Estados de Borda**: uniformidade de `LoadingStateComponent` (skeletons) e `EmptyStateComponent` em todas as rotas da aplicação.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet cobrindo todas as telas em Dark e Light Mode sem overflow horizontal.
+
+
 
 
 

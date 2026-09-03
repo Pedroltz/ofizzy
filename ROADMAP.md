@@ -101,18 +101,18 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Estados de loading
 
 ### R10 — Polish
-- [ ] Skeletons
-- [ ] Empty states
-- [ ] Feedback visual
-- [ ] Toasts
-- [ ] Focus states
-- [ ] Keyboard navigation
-- [ ] Acessibilidade
-- [ ] Testes E2E
-- [ ] Mobile 320px
-- [ ] Tablet
-- [ ] Desktop
-- [ ] Light Mode
-- [ ] Dark Mode
-- [ ] System Theme
+- [x] Skeletons
+- [x] Empty states
+- [x] Feedback visual
+- [x] Toasts
+- [x] Focus states
+- [x] Keyboard navigation
+- [x] Acessibilidade
+- [x] Testes E2E
+- [x] Mobile 320px
+- [x] Tablet
+- [x] Desktop
+- [x] Light Mode
+- [x] Dark Mode
+- [x] System Theme
 

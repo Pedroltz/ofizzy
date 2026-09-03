@@ -24,6 +24,9 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
         (focus)="isFocused = true"
         (blur)="onBlur()"
       />
+      @if (!isFocused && !value()) {
+        <kbd class="search-field__kbd" aria-hidden="true">/</kbd>
+      }
       @if (value()) {
         <button
           type="button"
@@ -101,6 +104,24 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
     .search-field__clear:hover {
       background: var(--surface-hover);
       color: var(--text-primary);
+    }
+
+    .search-field__kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.25rem;
+      height: 1.25rem;
+      padding: 0 0.35rem;
+      margin-right: var(--space-3);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xs);
+      background: var(--surface-secondary);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: var(--font-semibold);
+      pointer-events: none;
     }
   `],
   providers: [
