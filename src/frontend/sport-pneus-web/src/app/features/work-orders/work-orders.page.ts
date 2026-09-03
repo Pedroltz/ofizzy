@@ -344,23 +344,27 @@ export class WorkOrdersPage {
     window.print();
   }
 
-  async downloadPdf(order: WorkOrder): Promise<void> {
-    this.downloadingPdf.set(true);
-    try {
-      const blob = await this.api.downloadPdf(order.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `OS-${order.number.toString().padStart(4, '0')}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      this.messages.add({ severity: 'success', summary: 'PDF baixado com sucesso!' });
-    } catch {
-      this.messages.add({ severity: 'error', summary: 'Erro ao gerar PDF da ordem de serviço.' });
-    } finally {
-      this.downloadingPdf.set(false);
-    }
+  onPdfDownloadClick(order: WorkOrder): void {
+    this.messages.add({
+      severity: 'info',
+      summary: 'Download iniciado',
+      detail: `Baixando OS-${order.number.toString().padStart(4, '0')}.pdf...`
+    });
+  }
+
+  downloadPdf(order: WorkOrder): void {
+    const link = document.createElement('a');
+    link.href = `/api/work-orders/${order.id}/pdf`;
+    link.download = `OS-${order.number.toString().padStart(4, '0')}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      link.remove();
+    }, 1000);
+    this.messages.add({
+      severity: 'info',
+      summary: 'Download iniciado',
+      detail: `Baixando OS-${order.number.toString().padStart(4, '0')}.pdf...`
+    });
   }
 }

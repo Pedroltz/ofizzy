@@ -2750,9 +2750,43 @@ label {
     }
 
     .wo-dialog-footer button,
-    .wo-dialog-footer p-button {
+    .wo-dialog-footer p-button,
+    .wo-dialog-footer a {
         flex: 1;
     }
+}
+
+.wo-pdf-download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    height: 38px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: transparent;
+    color: #475569;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.wo-pdf-download-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.wo-pdf-download-btn:active {
+    background: #f1f5f9;
+}
+
+.wo-pdf-download-btn i {
+    font-size: 0.875rem;
 }
 
 /* =========================================================
