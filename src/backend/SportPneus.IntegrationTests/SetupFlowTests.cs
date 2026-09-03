@@ -20,7 +20,12 @@ public sealed class SetupFlowTests(SportPneusFactory factory) : IClassFixture<Sp
 
         var created = await client.PostAsJsonAsync("/api/setup", request);
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
-        var duplicate = await client.PostAsJsonAsync("/api/setup", request);
+
+        using var otherClient = factory.CreateClient();
+        var otherStatus = await otherClient.GetAsync("/api/setup/status");
+        var otherCookie = otherStatus.Headers.GetValues("Set-Cookie").Single(value => value.StartsWith("XSRF-TOKEN="));
+        otherClient.DefaultRequestHeaders.Add("X-XSRF-TOKEN", Uri.UnescapeDataString(otherCookie.Split(';')[0].Split('=', 2)[1]));
+        var duplicate = await otherClient.PostAsJsonAsync("/api/setup", request);
         Assert.Equal(HttpStatusCode.Conflict, duplicate.StatusCode);
     }
 

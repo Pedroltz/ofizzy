@@ -14,7 +14,12 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = context,
-            ProblemDetails = new ProblemDetails { Status = status, Title = status == 409 ? "Conflito" : "Erro interno", Detail = status == 409 || environment.IsDevelopment() ? exception.ToString() : "Não foi possível concluir a operação." },
+            ProblemDetails = new ProblemDetails
+            {
+                Status = status,
+                Title = status == 409 ? "Conflito" : "Erro interno",
+                Detail = exception is ConflictException ce ? ce.Message : (environment.IsDevelopment() ? exception.ToString() : "Não foi possível concluir a operação.")
+            },
             Exception = exception
         });
     }

@@ -1,13 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
 import { AuthService } from '../../core/auth/auth.service';
 
-@Component({ selector: 'app-login-page', imports: [ReactiveFormsModule, ButtonModule, CardModule, InputTextModule, PasswordModule], templateUrl: './login.page.html', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-login-page', imports: [ReactiveFormsModule], templateUrl: './login.page.html', changeDetection: ChangeDetectionStrategy.OnPush })
 export class LoginPage {
   private readonly fb = inject(FormBuilder); private readonly auth = inject(AuthService); private readonly router = inject(Router);
   readonly saving = signal(false); readonly invalidCredentials = signal(false);

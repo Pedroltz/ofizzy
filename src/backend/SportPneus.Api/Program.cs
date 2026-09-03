@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -56,7 +57,7 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
-builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute())).AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -81,6 +82,9 @@ if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
 }
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.Use(async (context, next) =>
 {
     if (HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/health"))
@@ -88,13 +92,10 @@ app.Use(async (context, next) =>
         var antiforgery = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
         var tokens = antiforgery.GetAndStoreTokens(context);
         if (tokens.RequestToken is not null)
-            context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken, new CookieOptions { HttpOnly = false, Secure = context.Request.IsHttps, SameSite = SameSiteMode.Strict, Path = "/" });
+            context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken, new CookieOptions { HttpOnly = false, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Path = "/" });
     }
     await next();
 });
-app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.MapHealthChecks("/health/live", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });

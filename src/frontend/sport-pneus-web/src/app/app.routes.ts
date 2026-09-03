@@ -6,7 +6,13 @@ export const routes: Routes = [
   { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage) },
   {
     path: '', canActivate: [authGuard], loadComponent: () => import('./layout/app-shell.component').then((m) => m.AppShellComponent),
-    children: [{ path: '', pathMatch: 'full', loadComponent: () => import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage) }],
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage) },
+      { path: 'clientes', loadComponent: () => import('./features/customers/customers.page').then((m) => m.CustomersPage) },
+      { path: 'veiculos', loadComponent: () => import('./features/vehicles/vehicles.page').then((m) => m.VehiclesPage) },
+      { path: 'ordens', loadComponent: () => import('./features/work-orders/work-orders.page').then((m) => m.WorkOrdersPage) },
+      { path: 'configuracoes', loadComponent: () => import('./features/settings/settings.page').then((m) => m.SettingsPage) },
+    ],
   },
   { path: '**', redirectTo: '' },
 ];

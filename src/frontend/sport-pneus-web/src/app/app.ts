@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
-@Component({ selector: 'app-root', imports: [RouterOutlet, ToastModule], template: '<p-toast position="top-right" /><router-outlet />', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-root', imports: [RouterOutlet, ToastModule, ConfirmDialogModule], template: '<p-toast position="top-right" /><p-confirmdialog /><router-outlet />', changeDetection: ChangeDetectionStrategy.OnPush })
 export class App {}

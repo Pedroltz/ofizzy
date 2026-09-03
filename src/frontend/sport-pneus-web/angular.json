@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "2b0d7d01-e4c6-4413-9edd-797bfba6cc1d"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -59,7 +60,8 @@
               "buildTarget": "sport-pneus-web:build:production"
             },
             "development": {
-              "buildTarget": "sport-pneus-web:build:development"
+              "buildTarget": "sport-pneus-web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

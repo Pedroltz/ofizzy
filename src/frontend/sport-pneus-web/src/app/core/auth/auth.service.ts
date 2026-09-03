@@ -12,8 +12,8 @@ export class AuthService {
   readonly authenticated = computed(() => this.currentUser() !== null);
 
   setupRequired(): Promise<boolean> { return firstValueFrom(this.http.get<{ required: boolean }>('/api/setup/status')).then((response) => response.required); }
-  setup(request: SetupRequest): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/setup', request)).then((user) => this.currentUser.set(user)); }
-  login(email: string, password: string): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/auth/login', { email, password })).then((user) => this.currentUser.set(user)); }
+  setup(request: SetupRequest): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/setup', request)).then(() => this.loadAuthenticatedUser()); }
+  login(email: string, password: string): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/auth/login', { email, password })).then(() => this.loadAuthenticatedUser()); }
   restore(): Promise<boolean> {
     if (this.currentUser()) return Promise.resolve(true);
     this.restorePromise ??= firstValueFrom(this.http.get<CurrentUser>('/api/auth/me'))
@@ -22,4 +22,5 @@ export class AuthService {
     return this.restorePromise;
   }
   logout(): Promise<void> { return firstValueFrom(this.http.post<void>('/api/auth/logout', {})).catch(() => undefined).then(() => this.currentUser.set(null)); }
+  private loadAuthenticatedUser(): Promise<void> { return firstValueFrom(this.http.get<CurrentUser>('/api/auth/me')).then((user) => this.currentUser.set(user)); }
 }

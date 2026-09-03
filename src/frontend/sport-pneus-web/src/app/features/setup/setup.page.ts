@@ -1,15 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-setup-page',
-  imports: [ReactiveFormsModule, ButtonModule, CardModule, InputTextModule, PasswordModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './setup.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

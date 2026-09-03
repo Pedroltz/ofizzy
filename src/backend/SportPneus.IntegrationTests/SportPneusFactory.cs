@@ -10,6 +10,7 @@ namespace SportPneus.IntegrationTests;
 
 public sealed class SportPneusFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    private const string TestSigningKey = "integration-test-signing-key-at-least-32-bytes";
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:18-alpine").WithDatabase("sport_pneus_tests").WithUsername("tests").WithPassword("tests-password").Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -18,7 +19,7 @@ public sealed class SportPneusFactory : WebApplicationFactory<Program>, IAsyncLi
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:Postgres"] = _postgres.GetConnectionString(),
-            ["Jwt:SigningKey"] = "integration-test-signing-key-at-least-32-bytes"
+            ["Jwt:SigningKey"] = TestSigningKey
         }));
         builder.ConfigureServices(services =>
         {
@@ -30,6 +31,8 @@ public sealed class SportPneusFactory : WebApplicationFactory<Program>, IAsyncLi
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
+        Environment.SetEnvironmentVariable("ConnectionStrings__Postgres", _postgres.GetConnectionString());
+        Environment.SetEnvironmentVariable("Jwt__SigningKey", TestSigningKey);
         await using var scope = Services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
     }
@@ -37,6 +40,8 @@ public sealed class SportPneusFactory : WebApplicationFactory<Program>, IAsyncLi
     async Task IAsyncLifetime.DisposeAsync()
     {
         await _postgres.DisposeAsync();
+        Environment.SetEnvironmentVariable("ConnectionStrings__Postgres", null);
+        Environment.SetEnvironmentVariable("Jwt__SigningKey", null);
         await base.DisposeAsync();
     }
 }

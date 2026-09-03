@@ -1,28 +1,28 @@
 <main class="auth-page">
   <section class="auth-intro">
-    <span class="brand-mark"><i class="pi pi-wrench"></i></span>
+    <span class="brand-mark">🔧</span>
     <p class="eyebrow">PRIMEIRO ACESSO</p>
     <h1>Vamos preparar sua oficina.</h1>
     <p>Leva menos de dois minutos. Depois disso, somente você poderá acessar o sistema.</p>
   </section>
-  <p-card styleClass="auth-card">
+  <section class="auth-card surface-card">
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
       <div class="form-section">
         <div><span class="step-number">1</span><h2>Dados da oficina</h2></div>
-        <label>Nome da oficina<input pInputText formControlName="companyName" autocomplete="organization" /></label>
+        <label>Nome da oficina<input formControlName="companyName" autocomplete="organization" /></label>
         <div class="two-columns">
-          <label>CNPJ <small>opcional</small><input pInputText formControlName="cnpj" inputmode="numeric" placeholder="Somente números" /></label>
-          <label>Telefone <small>opcional</small><input pInputText formControlName="phone" inputmode="tel" /></label>
+          <label>CNPJ <small>opcional</small><input formControlName="cnpj" inputmode="numeric" placeholder="Somente números" /></label>
+          <label>Telefone <small>opcional</small><input formControlName="phone" inputmode="tel" /></label>
         </div>
       </div>
       <div class="form-section">
         <div><span class="step-number">2</span><h2>Seu acesso</h2></div>
-        <label>Seu nome<input pInputText formControlName="adminName" autocomplete="name" /></label>
-        <label>E-mail<input pInputText formControlName="email" type="email" autocomplete="email" /></label>
-        <label>Senha<p-password formControlName="password" [toggleMask]="true" [feedback]="true" autocomplete="new-password" styleClass="full-control" inputStyleClass="full-control" /></label>
+        <label>Seu nome<input formControlName="adminName" autocomplete="name" /></label>
+        <label>E-mail<input formControlName="email" type="email" autocomplete="email" /></label>
+        <label>Senha<input formControlName="password" type="password" autocomplete="new-password" /></label>
         @if (form.controls.password.touched && form.controls.password.invalid) { <p class="field-error">Use 10 caracteres, com maiúscula, minúscula e número.</p> }
       </div>
-      <p-button type="submit" label="Criar minha oficina" icon="pi pi-arrow-right" iconPos="right" size="large" [loading]="saving()" [disabled]="saving()" styleClass="full-control" />
+      <button type="submit" class="primary-button full-control" [disabled]="saving()">{{ saving() ? 'Criando...' : 'Criar minha oficina →' }}</button>
     </form>
-  </p-card>
+  </section>
 </main>

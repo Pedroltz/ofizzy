@@ -44,7 +44,13 @@ public sealed class SessionService(ApplicationDbContext db, IOptions<JwtOptions>
         var token = await db.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == Hash(plainToken), cancellationToken);
         if (token is not null && token.RevokedAt is null) { token.RevokedAt = DateTimeOffset.UtcNow; await db.SaveChangesAsync(cancellationToken); }
     }
-    public void Clear(HttpResponse response) { response.Cookies.Delete(AccessCookie, Cookie(DateTimeOffset.UnixEpoch)); response.Cookies.Delete(RefreshCookie, Cookie(DateTimeOffset.UnixEpoch)); }
+    public void Clear(HttpResponse response)
+    {
+        response.Cookies.Delete(AccessCookie, Cookie(DateTimeOffset.UnixEpoch));
+        response.Cookies.Delete(RefreshCookie, Cookie(DateTimeOffset.UnixEpoch));
+        response.Cookies.Delete("XSRF-TOKEN", new CookieOptions { Path = "/" });
+        response.Cookies.Delete("sport_xsrf_protection", new CookieOptions { Path = "/" });
+    }
     private async Task RevokeFamilyAsync(Guid familyId, CancellationToken cancellationToken)
     {
         var active = await db.RefreshTokens.Where(x => x.FamilyId == familyId && x.RevokedAt == null).ToListAsync(cancellationToken);
