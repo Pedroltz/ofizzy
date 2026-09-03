@@ -275,3 +275,30 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Perfil do usuário integrado ao rodapé, em tratamento monocromático e com ação de saída menos intrusiva.
 - Refinamento posterior removeu cores neon, fundos coloridos dos ícones e o selo “Sistema Operacional” do dashboard, preservando apenas slate e o teal original como marcador ativo.
 - Validação: lint e build aprovados; Vitest 2/2 e Playwright 23 aprovados, com 4 ignorados por viewport.
+
+## 2026-09-03 — UI/UX Redesign: R1 — Auditoria Visual Concluída
+
+- **Iniciativa UI/UX Redesign**: Iniciado o plano de reformulação completa da experiência visual do Workshop Manager/Sport Pneus, mantendo integrações de backend, regras de negócio e rotas existentes. Registradas as etapas R1 a R10 no `ROADMAP.md`.
+- **Mapeamento de Estilos Atuais**:
+  - `styles.css` auditado: 3809 linhas monolíticas com escopo `:root` restrito a tokens claros e múltiplos blocos responsivos agrupados no final com sobreposições via `!important`.
+  - Dezenas de cores hardcoded espalhadas (`#0f172a`, `#ffffff`, `#f1f5f9`, `#e2e8f0`, `#0f766e`, tons esmeralda, âmbar e ardósia).
+  - Configuração do PrimeNG em `app.config.ts` mantinha `darkModeSelector: 'none'`, impedindo suporte nativo a temas escuros.
+- **Mapeamento de Componentes Reutilizáveis**:
+  - Identificados componentes já existentes: `PageHeaderComponent` (em `shared/components`), `ResponsiveLayoutService` (em `shared/layout`) e `WorkOrderLinesEditorComponent` (em `features/work-orders/components`).
+  - Identificadas duplicações estruturais recorrentes entre Clientes, Veículos, Ordens de Serviço e Dashboard: toolbars de busca com alternador de visualização, empty states, skeletons de carregamento, cards de estatísticas operacionais e tags de status.
+- **Mapeamento PrimeNG**:
+  - Módulos em produção mapeados: `ButtonModule`, `DialogModule`, `DrawerModule`, `InputTextModule`, `InputNumberModule`, `TextareaModule`, `AutoCompleteModule`, `PaginatorModule`, `SkeletonModule`, `TabsModule`, `ToastModule`, `ConfirmDialogModule`.
+  - Versão fixada na linha 21 MIT mantida estritamente (ADR 0005).
+- **Inconsistências de Layout e UX Identificadas**:
+  - Dashboard operacional atual dedica grande parte da tela a cards genéricos de atalho ("Ordens de Serviço", "Clientes", "Veículos", "Catálogo") em vez de expor métricas operacionais prioritárias e fluxo de veículos no pátio.
+  - Ausência de um header horizontal operacional de contexto no shell desktop.
+  - Falta de suporte a tema escuro e transições de tema de sistema (`prefers-color-scheme`).
+- **Estratégia de Migração Incremental (R1 a R10)**:
+  - Adotada arquitetura modular de CSS (`tokens.css`, `themes.css`, etc.) e criação de `ThemeService` reativo com `light | dark | system`, detecção de `matchMedia('(prefers-color-scheme: dark)')` e persistência em `localStorage`.
+  - Criação de biblioteca de componentes compartilhados em R3 antes de atacar o shell e as telas de negócio.
+- **Validação de Baseline**:
+  - `npm test`: 2/2 testes Vitest aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: bundle compilado com sucesso.
+  - Backend `SportPneus.UnitTests`: 14/14 testes aprovados.
+

@@ -36,3 +36,35 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 - O build do frontend passa, com aviso não bloqueante de bundle inicial: ~708 kB para um orçamento de 500 kB. Revisar esse orçamento ou otimizar dependências antes do primeiro deploy público.
 - O deploy remoto depende da configuração dos secrets e do servidor descrita em `docs/DEPLOYMENT.md`.
 - O histórico de migrations no volume local foi reconciliado e atualizado (`InitialIdentity`, `AddCatalogs`, `AddWorkOrders`, `AddWorkshopSettings` aplicadas com sucesso).
+
+## UI Redesign
+
+Fase atual:
+R1 concluído / R2 — Design System preparado
+
+Última tarefa concluída:
+R1 — Auditoria visual completa (mapeamento de estilos, componentes PrimeNG e compartilhados, duplicações de layout e definição de estratégia incremental)
+
+Próxima tarefa:
+R2 — Design System (Tokens de cores Light/Dark com verde primário, tipografia, espaçamento, radius, sombras sutis e ThemeService com suporte a Light, Dark e System)
+
+Arquivos principais analisados:
+- `src/frontend/sport-pneus-web/src/styles.css`
+- `src/frontend/sport-pneus-web/src/app/app.config.ts`
+- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.*`
+- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.*`
+- `src/frontend/sport-pneus-web/src/app/shared/components/page-header.component.ts`
+
+Pendências:
+- Nenhuma para R1.
+
+Problemas conhecidos:
+- `styles.css` de 3809 linhas necessita de separação modular segura sem quebra de classes existentes.
+- PrimeNG precisa de seletor configurado para temas escuros (`[data-theme="dark"]`).
+
+Testes:
+- `npm test`: 2/2 testes aprovados.
+- `npm run lint`: 0 erros.
+- `npm run build`: bundle compilado com sucesso.
+- Backend `SportPneus.UnitTests`: 14/14 testes aprovados.
+
