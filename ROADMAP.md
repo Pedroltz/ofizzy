@@ -67,17 +67,17 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Dark Mode
 
 ### R6 — Ordens de Serviço
-- [ ] Toolbar
-- [ ] Busca
-- [ ] Filtros
-- [ ] Lista desktop
-- [ ] Cards mobile
-- [ ] Badges de status
-- [ ] Refatorar componentes excessivamente grandes
-- [ ] Editor de OS
-- [ ] Summary lateral
-- [ ] Footer mobile fixo
-- [ ] Dark Mode
+- [x] Toolbar
+- [x] Busca
+- [x] Filtros
+- [x] Lista desktop
+- [x] Cards mobile
+- [x] Badges de status
+- [x] Refatorar componentes excessivamente grandes
+- [x] Editor de OS
+- [x] Summary lateral
+- [x] Footer mobile fixo
+- [x] Dark Mode
 
 ### R7 — Clientes e Veículos
 - [ ] Clientes

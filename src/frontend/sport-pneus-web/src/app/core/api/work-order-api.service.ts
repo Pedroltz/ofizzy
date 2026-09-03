@@ -7,10 +7,11 @@ import { DashboardSummary, WorkOrder, WorkOrderPage, WorkOrderRequest, WorkOrder
 export class WorkOrderApiService {
   private readonly http = inject(HttpClient);
   dashboardSummary(): Promise<DashboardSummary> { return firstValueFrom(this.http.get<DashboardSummary>('/api/dashboard/summary')); }
-  list(q = '', page = 1, pageSize = 20): Promise<WorkOrderPage> {
+  list(q = '', page = 1, pageSize = 20, status?: WorkOrderStatus | null): Promise<WorkOrderPage> {
     let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     const query = (q ?? '').trim();
     if (query) params = params.set('q', query);
+    if (status) params = params.set('status', status);
     return firstValueFrom(this.http.get<WorkOrderPage>('/api/work-orders', { params }));
   }
   get(id: string): Promise<WorkOrder> { return firstValueFrom(this.http.get<WorkOrder>(`/api/work-orders/${id}`)); }

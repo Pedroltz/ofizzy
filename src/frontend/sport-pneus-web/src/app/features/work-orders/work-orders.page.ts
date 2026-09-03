@@ -1,9 +1,17 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { DrawerModule } from 'primeng/drawer';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
@@ -13,18 +21,50 @@ import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Part, ServiceItem, Vehicle } from '../../core/api/catalog.models';
 import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
-import { WorkOrder, WorkOrderLineRequest, WorkOrderStatus, WorkOrderSummary } from '../../core/api/work-order.models';
-import { PageHeaderComponent } from '../../shared/components/page-header.component';
+import {
+  WorkOrder,
+  WorkOrderLineRequest,
+  WorkOrderStatus,
+  WorkOrderSummary,
+} from '../../core/api/work-order.models';
+import {
+  DataTableWrapperComponent,
+  DataToolbarComponent,
+  EmptyStateComponent,
+  LoadingStateComponent,
+  PageHeaderComponent,
+  SearchFieldComponent,
+  StatusBadgeComponent,
+} from '../../shared/components';
 import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
-import { WorkOrderLineChange, WorkOrderLinesEditorComponent } from './components/work-order-lines-editor.component';
-
-import { DrawerModule } from 'primeng/drawer';
+import {
+  WorkOrderLineChange,
+  WorkOrderLinesEditorComponent,
+} from './components/work-order-lines-editor.component';
 
 @Component({
   selector: 'app-work-orders-page',
-  imports: [FormsModule, ReactiveFormsModule, ButtonModule, DialogModule, DrawerModule, InputNumberModule, InputTextModule, PaginatorModule, TextareaModule, PageHeaderComponent, WorkOrderLinesEditorComponent],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    DialogModule,
+    DrawerModule,
+    InputNumberModule,
+    InputTextModule,
+    PaginatorModule,
+    TextareaModule,
+    PageHeaderComponent,
+    DataToolbarComponent,
+    SearchFieldComponent,
+    StatusBadgeComponent,
+    EmptyStateComponent,
+    LoadingStateComponent,
+    DataTableWrapperComponent,
+    WorkOrderLinesEditorComponent,
+  ],
   templateUrl: './work-orders.page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkOrdersPage {
   private readonly api = inject(WorkOrderApiService);
@@ -55,8 +95,19 @@ export class WorkOrdersPage {
   readonly page = signal(1);
   readonly pageSize = 12;
   readonly search = this.fb.nonNullable.control('');
-  readonly viewMode = signal<'cards' | 'table'>('cards');
-  readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
+  readonly viewMode = signal<'cards' | 'table'>('table');
+  readonly effectiveViewMode = computed(() =>
+    this.responsive.isMobile() ? 'cards' : this.viewMode()
+  );
+
+  readonly selectedStatus = signal<WorkOrderStatus | 'All'>('All');
+  readonly statusFilterOptions: { label: string; value: WorkOrderStatus | 'All' }[] = [
+    { label: 'Todas', value: 'All' },
+    { label: 'Abertas', value: 'Open' },
+    { label: 'Em andamento', value: 'InProgress' },
+    { label: 'Concluídas', value: 'Completed' },
+    { label: 'Canceladas', value: 'Cancelled' },
+  ];
 
   updateLineFromEditor(type: 'services' | 'parts', event: WorkOrderLineChange): void {
     this.updateLine(type, event.index, event.field, event.value);
@@ -68,7 +119,7 @@ export class WorkOrdersPage {
     mileage: [null as number | null, Validators.min(0)],
     complaint: [''],
     diagnosis: [''],
-    notes: ['']
+    notes: [''],
   });
 
   readonly servicesSubtotal = computed(() =>
@@ -79,45 +130,50 @@ export class WorkOrdersPage {
     this.parts().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0)
   );
 
-  readonly orderTotal = computed(() =>
-    this.servicesSubtotal() + this.partsSubtotal()
-  );
+  readonly orderTotal = computed(() => this.servicesSubtotal() + this.partsSubtotal());
 
   readonly statusLabels: Record<WorkOrderStatus, string> = {
     Open: 'Aberta',
     InProgress: 'Em andamento',
     Completed: 'Finalizada',
-    Cancelled: 'Cancelada'
+    Cancelled: 'Cancelada',
   };
 
   private loadVersion = 0;
   constructor() {
     const destroyRef = inject(DestroyRef);
-    this.search.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntilDestroyed(destroyRef)
-    ).subscribe(() => {
-      this.page.set(1);
-      void this.load();
-    });
+    this.search.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(destroyRef))
+      .subscribe(() => {
+        this.page.set(1);
+        void this.load();
+      });
 
-    this.form.controls.customerId.valueChanges.pipe(
-      takeUntilDestroyed(destroyRef)
-    ).subscribe(async (customerId) => {
-      if (!this.dialog()) return;
-      if (!this.editing() || this.form.controls.vehicleId.value !== this.editing()?.vehicleId) {
-        this.form.controls.vehicleId.setValue('');
-      }
-      if (customerId) {
-        const res = await this.catalogs.vehicles('', 1, 100, customerId);
-        this.vehicles.set(res.items);
-      } else {
-        this.vehicles.set([]);
-      }
-    });
+    this.form.controls.customerId.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(async (customerId) => {
+        if (!this.dialog()) return;
+        if (!this.editing() || this.form.controls.vehicleId.value !== this.editing()?.vehicleId) {
+          this.form.controls.vehicleId.setValue('');
+        }
+        if (customerId) {
+          const res = await this.catalogs.vehicles('', 1, 100, customerId);
+          this.vehicles.set(res.items);
+        } else {
+          this.vehicles.set([]);
+        }
+      });
 
-    void this.companyApi.get().then(c => this.company.set(c)).catch(() => {});
+    void this.companyApi
+      .get()
+      .then((c) => this.company.set(c))
+      .catch(() => {});
+    void this.load();
+  }
+
+  setStatusFilter(status: WorkOrderStatus | 'All'): void {
+    this.selectedStatus.set(status);
+    this.page.set(1);
     void this.load();
   }
 
@@ -125,7 +181,14 @@ export class WorkOrdersPage {
     const current = ++this.loadVersion;
     this.loading.set(true);
     try {
-      const result = await this.api.list(this.search.value, this.page(), this.pageSize);
+      const selected = this.selectedStatus();
+      const statusParam: WorkOrderStatus | null = selected === 'All' ? null : selected;
+      const result = await this.api.list(
+        this.search.value,
+        this.page(),
+        this.pageSize,
+        statusParam
+      );
       if (current === this.loadVersion) {
         this.items.set(result.items);
         this.total.set(result.total);
@@ -141,7 +204,7 @@ export class WorkOrdersPage {
     const [customers, services, parts] = await Promise.all([
       this.catalogs.customers('', 1, 100),
       this.catalogs.services('', 100),
-      this.catalogs.parts('', 100)
+      this.catalogs.parts('', 100),
     ]);
     this.customers.set(customers.items);
     this.servicesCatalog.set(services.items);
@@ -150,7 +213,11 @@ export class WorkOrdersPage {
     if (item) {
       const order = 'servicesTotal' in item ? item : await this.api.get(item.id);
       if (order.status === 'Completed' || order.status === 'Cancelled') {
-        this.messages.add({ severity: 'warn', summary: 'Ordem imutável', detail: 'Ordens finalizadas ou canceladas não podem ser alteradas.' });
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Ordem imutável',
+          detail: 'Ordens finalizadas ou canceladas não podem ser alteradas.',
+        });
         return;
       }
       this.editing.set(order);
@@ -162,27 +229,38 @@ export class WorkOrdersPage {
         mileage: order.mileage,
         complaint: order.complaint ?? '',
         diagnosis: order.diagnosis ?? '',
-        notes: order.notes ?? ''
+        notes: order.notes ?? '',
       });
-      this.services.set(order.services.map(s => ({
-        catalogId: s.catalogId,
-        description: s.description,
-        quantity: s.quantity,
-        unitPrice: s.unitPrice
-      })));
-      this.parts.set(order.parts.map(p => ({
-        catalogId: p.catalogId,
-        description: p.description,
-        code: p.code,
-        quantity: p.quantity,
-        unitPrice: p.unitPrice
-      })));
+      this.services.set(
+        order.services.map((s) => ({
+          catalogId: s.catalogId,
+          description: s.description,
+          quantity: s.quantity,
+          unitPrice: s.unitPrice,
+        }))
+      );
+      this.parts.set(
+        order.parts.map((p) => ({
+          catalogId: p.catalogId,
+          description: p.description,
+          code: p.code,
+          quantity: p.quantity,
+          unitPrice: p.unitPrice,
+        }))
+      );
     } else {
       this.editing.set(null);
       this.vehicles.set([]);
       this.services.set([]);
       this.parts.set([]);
-      this.form.reset({ customerId: '', vehicleId: '', mileage: null, complaint: '', diagnosis: '', notes: '' });
+      this.form.reset({
+        customerId: '',
+        vehicleId: '',
+        mileage: null,
+        complaint: '',
+        diagnosis: '',
+        notes: '',
+      });
     }
     this.dialog.set(true);
   }
@@ -198,41 +276,65 @@ export class WorkOrdersPage {
   }
 
   addService(id: string): void {
-    const item = this.servicesCatalog().find(x => x.id === id);
+    const item = this.servicesCatalog().find((x) => x.id === id);
     if (item) {
-      this.services.update(lines => [...lines, { catalogId: item.id, description: item.name, quantity: 1, unitPrice: item.defaultPrice }]);
+      this.services.update((lines) => [
+        ...lines,
+        {
+          catalogId: item.id,
+          description: item.name,
+          quantity: 1,
+          unitPrice: item.defaultPrice,
+        },
+      ]);
     }
   }
 
   addManualService(): void {
-    this.services.update(lines => [
+    this.services.update((lines) => [
       ...lines,
-      { catalogId: null, description: '', quantity: 1, unitPrice: 0 }
+      { catalogId: null, description: '', quantity: 1, unitPrice: 0 },
     ]);
   }
 
   addPart(id: string): void {
-    const item = this.partsCatalog().find(x => x.id === id);
+    const item = this.partsCatalog().find((x) => x.id === id);
     if (item) {
-      this.parts.update(lines => [...lines, { catalogId: item.id, description: item.name, code: item.code, quantity: 1, unitPrice: item.salePrice }]);
+      this.parts.update((lines) => [
+        ...lines,
+        {
+          catalogId: item.id,
+          description: item.name,
+          code: item.code,
+          quantity: 1,
+          unitPrice: item.salePrice,
+        },
+      ]);
     }
   }
 
   addManualPart(): void {
-    this.parts.update(lines => [
+    this.parts.update((lines) => [
       ...lines,
-      { catalogId: null, description: '', code: '', quantity: 1, unitPrice: 0 }
+      { catalogId: null, description: '', code: '', quantity: 1, unitPrice: 0 },
     ]);
   }
 
-  updateLine(kind: 'services' | 'parts', index: number, field: string, value: unknown): void {
+  updateLine(
+    kind: 'services' | 'parts',
+    index: number,
+    field: string,
+    value: unknown
+  ): void {
     const target = kind === 'services' ? this.services : this.parts;
-    target.update(lines => lines.map((line, i) => i === index ? { ...line, [field]: value } : line));
+    target.update((lines) =>
+      lines.map((line, i) => (i === index ? { ...line, [field]: value } : line))
+    );
   }
 
   removeLine(kind: 'services' | 'parts', index: number): void {
     const target = kind === 'services' ? this.services : this.parts;
-    target.update(lines => lines.filter((_, i) => i !== index));
+    target.update((lines) => lines.filter((_, i) => i !== index));
   }
 
   async save(): Promise<void> {
@@ -240,27 +342,53 @@ export class WorkOrdersPage {
       this.form.markAllAsTouched();
       const controls = this.form.controls;
       if (!controls.customerId.value) {
-        this.messages.add({ severity: 'warn', summary: 'Cliente não selecionado', detail: 'Selecione o cliente proprietário antes de emitir a OS.' });
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Cliente não selecionado',
+          detail: 'Selecione o cliente proprietário antes de emitir a OS.',
+        });
       } else if (!controls.vehicleId.value) {
-        this.messages.add({ severity: 'warn', summary: 'Veículo não selecionado', detail: 'Selecione o veículo atendido antes de emitir a OS.' });
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Veículo não selecionado',
+          detail: 'Selecione o veículo atendido antes de emitir a OS.',
+        });
       } else if (controls.mileage.invalid) {
-        this.messages.add({ severity: 'warn', summary: 'Quilometragem inválida', detail: 'A quilometragem não pode ser negativa.' });
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Quilometragem inválida',
+          detail: 'A quilometragem não pode ser negativa.',
+        });
       } else {
-        this.messages.add({ severity: 'warn', summary: 'Campos incompletos', detail: 'Preencha os campos obrigatórios em destaque.' });
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Campos incompletos',
+          detail: 'Preencha os campos obrigatórios em destaque.',
+        });
       }
       return;
     }
 
     // Validação de linhas
-    const emptyServices = this.services().filter(s => !s.description || !s.description.trim());
+    const emptyServices = this.services().filter(
+      (s) => !s.description || !s.description.trim()
+    );
     if (emptyServices.length > 0) {
-      this.messages.add({ severity: 'warn', summary: 'Serviço sem descrição', detail: 'Preencha a descrição de todos os serviços incluídos.' });
+      this.messages.add({
+        severity: 'warn',
+        summary: 'Serviço sem descrição',
+        detail: 'Preencha a descrição de todos os serviços incluídos.',
+      });
       return;
     }
 
-    const emptyParts = this.parts().filter(p => !p.description || !p.description.trim());
+    const emptyParts = this.parts().filter((p) => !p.description || !p.description.trim());
     if (emptyParts.length > 0) {
-      this.messages.add({ severity: 'warn', summary: 'Peça sem descrição', detail: 'Preencha a descrição de todas as peças incluídas.' });
+      this.messages.add({
+        severity: 'warn',
+        summary: 'Peça sem descrição',
+        detail: 'Preencha a descrição de todas as peças incluídas.',
+      });
       return;
     }
 
@@ -268,18 +396,24 @@ export class WorkOrdersPage {
     try {
       const value = this.form.getRawValue();
       const id = this.editing()?.id;
-      await this.api.save({
-        customerId: value.customerId!,
-        vehicleId: value.vehicleId!,
-        mileage: value.mileage,
-        complaint: value.complaint || null,
-        diagnosis: value.diagnosis || null,
-        notes: value.notes || null,
-        services: this.services(),
-        parts: this.parts()
-      }, id);
+      await this.api.save(
+        {
+          customerId: value.customerId!,
+          vehicleId: value.vehicleId!,
+          mileage: value.mileage,
+          complaint: value.complaint || null,
+          diagnosis: value.diagnosis || null,
+          notes: value.notes || null,
+          services: this.services(),
+          parts: this.parts(),
+        },
+        id
+      );
       this.dialog.set(false);
-      this.messages.add({ severity: 'success', summary: id ? 'Ordem de serviço atualizada' : 'Ordem de serviço aberta' });
+      this.messages.add({
+        severity: 'success',
+        summary: id ? 'Ordem de serviço atualizada' : 'Ordem de serviço aberta',
+      });
       if (id && this.detailDialog() && this.viewing()?.id === id) {
         this.viewing.set(await this.api.get(id));
       }
@@ -302,7 +436,7 @@ export class WorkOrdersPage {
         acceptButtonProps: { severity: 'success' },
         accept: async () => {
           await this.executeStatusChange(item.id, item.number, status);
-        }
+        },
       });
     } else if (status === 'Cancelled') {
       this.confirmation.confirm({
@@ -314,17 +448,24 @@ export class WorkOrdersPage {
         acceptButtonProps: { severity: 'danger' },
         accept: async () => {
           await this.executeStatusChange(item.id, item.number, status);
-        }
+        },
       });
     } else {
       void this.executeStatusChange(item.id, item.number, status);
     }
   }
 
-  private async executeStatusChange(id: string, number: number, status: WorkOrderStatus): Promise<void> {
+  private async executeStatusChange(
+    id: string,
+    number: number,
+    status: WorkOrderStatus
+  ): Promise<void> {
     try {
       await this.api.changeStatus(id, status);
-      this.messages.add({ severity: 'success', summary: `OS #${number} atualizada para ${this.statusLabels[status]}` });
+      this.messages.add({
+        severity: 'success',
+        summary: `OS #${number} atualizada para ${this.statusLabels[status]}`,
+      });
       if (this.detailDialog() && this.viewing()?.id === id) {
         this.viewing.set(await this.api.get(id));
       }
@@ -350,7 +491,7 @@ export class WorkOrdersPage {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -368,7 +509,11 @@ export class WorkOrdersPage {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch {
-      this.messages.add({ severity: 'error', summary: 'Erro no download', detail: 'Não foi possível baixar o PDF da OS.' });
+      this.messages.add({
+        severity: 'error',
+        summary: 'Erro no download',
+        detail: 'Não foi possível baixar o PDF da OS.',
+      });
     }
   }
 }

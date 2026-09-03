@@ -373,6 +373,27 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
 
+## 2026-09-03 — UI/UX Redesign: R6 — Ordens de Serviço Concluído
+
+- **Toolbar Operacional e Filtros Semânticos (`work-orders.page.*`)**:
+  - Integrado `DataToolbarComponent` com contador reativo de ordens encontradas e alternador de visualização tabela/cards.
+  - Adicionado `SearchFieldComponent` com busca reativa e debounce integrado.
+  - Implementadas pílulas táteis de filtro por status (`Todas`, `Abertas`, `Em andamento`, `Concluídas`, `Canceladas`), com passagem direta do parâmetro `status` para a API backend (`WorkOrdersController.List`).
+- **Apresentação Híbrida Desktop/Mobile**:
+  - **Tabela Desktop**: encapsulada com `DataTableWrapperComponent`, tipografia monoespaçada no número da OS e nos totais em R$, `StatusBadgeComponent` semântico e ações rápidas acessíveis.
+  - **Cards Mobile/Tablet**: cartões limpos com layout vertical coeso, badges de placa automotiva, botões de toque >= 44px e zero rolagem horizontal indesejada.
+  - **Estados Vazios e Carregamento**: uso dos componentes padronizados `EmptyStateComponent` (com mensagem contextual para busca sem resultados) e `LoadingStateComponent` (esqueleto adaptativo).
+- **Editor Moderno de Linhas e Fechamento Financeiro**:
+  - Eliminação de centenas de linhas de código duplicado no template da página, adotando o componente modular `WorkOrderLinesEditorComponent` para Serviços e Peças.
+  - Estilização completa do editor de linhas com tokens semânticos (`--surface-primary`, `--border-subtle`, `--text-primary`, `--font-mono`) com suporte nativo e contraste validado em Dark Mode.
+  - Criação do card destacado de fechamento financeiro (`wo-form-totals-card` e `wo-summary-card`) com totais monoespaçados de serviços, peças e valor geral destacado.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso (budget de estilo de componente estritamente respeitado).
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
+
+
 
 
 

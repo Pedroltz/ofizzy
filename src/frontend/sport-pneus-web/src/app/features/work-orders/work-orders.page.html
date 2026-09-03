@@ -8,60 +8,60 @@
     (action)="open()"
   />
 
-  <div class="list-toolbar">
-    <div class="search-bar">
-      <i class="pi pi-search"></i>
-      <input pInputText [formControl]="search" placeholder="Pesquisar por número da OS, cliente ou placa do veículo..." />
+  <app-data-toolbar
+    [itemCount]="total()"
+    itemLabelSingular="ordem encontrada"
+    itemLabelPlural="ordens encontradas"
+    [(viewMode)]="viewMode"
+  >
+    <div toolbar-search>
+      <app-search-field
+        [formControl]="search"
+        placeholder="Pesquisar por número da OS, cliente ou placa..."
+      />
     </div>
-    <div class="view-mode-toggle">
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Bloquinhos">
-        <i class="pi pi-th-large"></i>
-      </button>
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Tabela Compacta">
-        <i class="pi pi-table"></i>
-      </button>
-    </div>
-  </div>
 
-  @if (loading()) {
-    <div class="order-grid">
-      @for (_ of [1,2,3,4,5,6]; track $index) {
-        <div class="order-card surface-card">
-          <p-skeleton width="40%" height="1.8rem" />
-          <p-skeleton width="75%" height="1.5rem" />
-          <p-skeleton width="100%" height="3.5rem" />
-        </div>
+    <div toolbar-filters class="status-filter-pills">
+      @for (filter of statusFilterOptions; track filter.value) {
+        <button
+          type="button"
+          class="status-pill"
+          [class.active]="selectedStatus() === filter.value"
+          (click)="setStatusFilter(filter.value)"
+        >
+          <span>{{ filter.label }}</span>
+        </button>
       }
     </div>
+  </app-data-toolbar>
+
+  @if (loading()) {
+    <app-loading-state [mode]="effectiveViewMode() === 'cards' ? 'cards' : 'table'" [count]="6" />
   } @else if (items().length === 0) {
-    <div class="empty-state surface-card col-span-full">
-      <div class="empty-icon"><i class="pi pi-file-edit"></i></div>
-      <h2>Nenhuma ordem de serviço encontrada</h2>
-      <p>{{ search.value ? 'Nenhuma OS corresponde aos filtros pesquisados.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.' }}</p>
-      <p-button label="Nova Ordem" icon="pi pi-plus" (onClick)="open()" />
-    </div>
+    <app-empty-state
+      icon="pi pi-file-edit"
+      title="Nenhuma ordem de serviço encontrada"
+      [description]="search.value || selectedStatus() !== 'All' ? 'Nenhuma OS corresponde aos filtros selecionados. Tente ajustar os termos de busca.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.'"
+      actionLabel="Nova Ordem"
+      actionIcon="pi pi-plus"
+      (action)="open()"
+    />
   } @else if (effectiveViewMode() === 'cards') {
     <div class="order-grid">
       @for (item of items(); track item.id) {
         <article class="order-card surface-card">
           <!-- Topo do Bloquinho: Badge OS + Status -->
           <div class="order-card-header" (click)="viewDetail(item)">
-            <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-            <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
-              @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
-              @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
-              @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
-              @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
-              <span>{{ statusLabels[item.status] }}</span>
-            </span>
+            <span class="order-number font-mono">OS #{{ item.number.toString().padStart(4, '0') }}</span>
+            <app-status-badge [status]="item.status" />
           </div>
 
           <!-- Identidade: Cliente & Veículo -->
           <div class="order-card-identity" (click)="viewDetail(item)">
-            <h2 title="{{ item.customerName }}">{{ item.customerName }}</h2>
+            <h2 [title]="item.customerName">{{ item.customerName }}</h2>
             <div class="order-vehicle-line">
               <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-              <span title="{{ item.vehicleDescription }}">{{ item.vehicleDescription }}</span>
+              <span [title]="item.vehicleDescription">{{ item.vehicleDescription }}</span>
             </div>
           </div>
 
@@ -69,11 +69,11 @@
           <div class="order-summary-row" (click)="viewDetail(item)">
             <div class="order-date-block">
               <small>Abertura</small>
-              <span><i class="pi pi-calendar text-teal-600 mr-1"></i>{{ formatDate(item.createdAt) }}</span>
+              <span><i class="pi pi-calendar mr-1" aria-hidden="true"></i>{{ formatDate(item.createdAt) }}</span>
             </div>
             <div class="order-total-val">
               <small>Valor Total</small>
-              <strong>{{ money(item.total) }}</strong>
+              <strong class="font-mono">{{ money(item.total) }}</strong>
             </div>
           </div>
 
@@ -95,73 +95,65 @@
       }
     </div>
   } @else {
-    <div class="data-table-card">
-      <div class="data-table-wrapper">
-        <table class="data-table">
-          <thead>
+    <app-data-table-wrapper>
+      <table class="data-table" aria-label="Lista de ordens de serviço">
+        <thead>
+          <tr>
+            <th>OS</th>
+            <th>Cliente</th>
+            <th>Veículo & Placa</th>
+            <th>Status</th>
+            <th>Abertura</th>
+            <th class="text-right">Total</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
             <tr>
-              <th>OS</th>
-              <th>Cliente</th>
-              <th>Veículo & Placa</th>
-              <th>Status</th>
-              <th>Abertura</th>
-              <th class="text-right">Total</th>
-              <th class="text-right">Ações</th>
+              <td>
+                <span class="order-number font-mono font-bold cursor-pointer hover:underline" (click)="viewDetail(item)">
+                  #{{ item.number.toString().padStart(4, '0') }}
+                </span>
+              </td>
+              <td>
+                <strong class="font-semibold">{{ item.customerName }}</strong>
+              </td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                  <span class="text-xs text-muted font-medium">{{ item.vehicleDescription }}</span>
+                </div>
+              </td>
+              <td>
+                <app-status-badge [status]="item.status" />
+              </td>
+              <td>
+                <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
+              </td>
+              <td class="text-right font-mono font-bold">
+                {{ money(item.total) }}
+              </td>
+              <td class="text-right">
+                <div class="card-actions justify-end">
+                  <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Detalhes" (onClick)="viewDetail(item)" />
+                  @if (item.status === 'Open') {
+                    <p-button icon="pi pi-play" [rounded]="true" severity="info" ariaLabel="Iniciar" (onClick)="status(item, 'InProgress')" />
+                  }
+                  @if (item.status === 'InProgress') {
+                    <p-button icon="pi pi-check" [rounded]="true" severity="success" ariaLabel="Finalizar" (onClick)="status(item, 'Completed')" />
+                  }
+                  @if (item.status === 'Open' || item.status === 'InProgress') {
+                    <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+                    <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
+                  }
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            @for (item of items(); track item.id) {
-              <tr>
-                <td>
-                  <span class="order-number font-bold text-slate-800 cursor-pointer hover:underline" (click)="viewDetail(item)">
-                    #{{ item.number.toString().padStart(4, '0') }}
-                  </span>
-                </td>
-                <td>
-                  <strong class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</strong>
-                </td>
-                <td>
-                  <div class="flex items-center gap-2">
-                    <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                    <span class="text-slate-700 text-xs font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
-                    @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
-                    @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
-                    @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
-                    @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
-                    <span>{{ statusLabels[item.status] }}</span>
-                  </span>
-                </td>
-                <td>
-                  <span class="text-xs text-slate-500">{{ formatDate(item.createdAt) }}</span>
-                </td>
-                <td class="text-right">
-                  <strong class="text-slate-900 font-extrabold" style="color: #0f172a !important;">{{ money(item.total) }}</strong>
-                </td>
-                <td class="text-right">
-                  <div class="card-actions justify-end">
-                    <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Detalhes" (onClick)="viewDetail(item)" />
-                    @if (item.status === 'Open') {
-                      <p-button icon="pi pi-play" [rounded]="true" severity="info" ariaLabel="Iniciar" (onClick)="status(item, 'InProgress')" />
-                    }
-                    @if (item.status === 'InProgress') {
-                      <p-button icon="pi pi-check" [rounded]="true" severity="success" ariaLabel="Finalizar" (onClick)="status(item, 'Completed')" />
-                    }
-                    @if (item.status === 'Open' || item.status === 'InProgress') {
-                      <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-                      <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
-                    }
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
+          }
+        </tbody>
+      </table>
+    </app-data-table-wrapper>
   }
 
   @if (total() > pageSize) {
@@ -712,210 +704,31 @@
         (remove)="removeLine('parts', $event)"
       />
 
-      @if (false) {
-      <!-- Linhas de Serviço / Mão de Obra (estrutura legada mantida temporariamente fora da renderização) -->
-      <div class="wo-block">
-        <div class="wo-block-header flex-wrap">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-wrench text-slate-500"></i>
-            <h3 class="m-0 text-sm font-bold text-slate-800">Serviços e Mão de Obra</h3>
-          </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <p-button label="Novo Serviço Avulso" icon="pi pi-plus" size="small" [outlined]="true" severity="info" type="button" (onClick)="addManualService()" />
-            <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço do catálogo" class="wo-catalog-select">
-              <option value="">+ Do Catálogo...</option>
-              @for (item of servicesCatalog(); track item.id) {
-                <option [value]="item.id">{{ item.name }} ({{ money(item.defaultPrice) }})</option>
-              }
-            </select>
-          </div>
+      <!-- Totais Financeiros Destacados da OS -->
+      <div class="wo-form-totals-card">
+        <div class="wo-form-totals-item">
+          <span class="label">Subtotal Serviços</span>
+          <span class="value font-mono">{{ money(servicesSubtotal()) }}</span>
         </div>
-
-        <div class="p-3">
-          @if (services().length > 0) {
-            <div class="wo-grid-table-container">
-              <div class="wo-grid-table">
-                <div class="wo-grid-header services">
-                  <div>Descrição da Mão de Obra / Serviço</div>
-                  <div class="text-center">Qtd</div>
-                  <div class="text-right">Valor Unit.</div>
-                  <div class="text-right">Subtotal</div>
-                  <div class="text-center">Ações</div>
-                </div>
-
-                @for (line of services(); track $index) {
-                  <div class="wo-grid-row services">
-                    <div class="wo-grid-cell">
-                      <input
-                        pInputText
-                        [ngModel]="line.description"
-                        [ngModelOptions]="{standalone:true}"
-                        placeholder="Ex: Alinhamento 3D, Solda no suporte, Troca de óleo..."
-                        (ngModelChange)="updateLine('services', $index, 'description', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell">
-                      <p-inputnumber
-                        [ngModel]="line.quantity"
-                        [ngModelOptions]="{standalone:true}"
-                        [min]="0.01"
-                        [maxFractionDigits]="2"
-                        placeholder="1"
-                        styleClass="w-full"
-                        (ngModelChange)="updateLine('services', $index, 'quantity', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell">
-                      <p-inputnumber
-                        [ngModel]="line.unitPrice"
-                        [ngModelOptions]="{standalone:true}"
-                        mode="currency"
-                        currency="BRL"
-                        locale="pt-BR"
-                        placeholder="R$ 0,00"
-                        styleClass="w-full"
-                        (ngModelChange)="updateLine('services', $index, 'unitPrice', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell wo-cell-total">
-                      <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                    </div>
-
-                    <div class="wo-grid-cell wo-cell-action">
-                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('services', $index)" ariaLabel="Remover serviço" />
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="wo-section-subtotal-bar mt-2.5">
-              <span>Subtotal Serviços ({{ services().length }} {{ services().length === 1 ? 'item' : 'itens' }}):</span>
-              <strong>{{ money(servicesSubtotal()) }}</strong>
-            </div>
-          } @else {
-            <div class="wo-table-empty border border-dashed border-slate-200 rounded-lg">
-              <i class="pi pi-wrench"></i>
-              <span>Nenhum serviço incluído. Clique em <strong>Novo Serviço Avulso</strong> ou selecione do <strong>Catálogo</strong>.</span>
-            </div>
-          }
+        <div class="wo-form-totals-divider"></div>
+        <div class="wo-form-totals-item">
+          <span class="label">Subtotal Peças</span>
+          <span class="value font-mono">{{ money(partsSubtotal()) }}</span>
+        </div>
+        <div class="wo-form-totals-divider"></div>
+        <div class="wo-form-totals-item highlight">
+          <span class="label">TOTAL DA ORDEM</span>
+          <strong class="value font-mono">{{ money(orderTotal()) }}</strong>
         </div>
       </div>
-
-      <!-- Linhas de Peças e Insumos -->
-      <div class="wo-block">
-        <div class="wo-block-header flex-wrap">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-box text-slate-500"></i>
-            <h3 class="m-0 text-sm font-bold text-slate-800">Peças e Insumos</h3>
-          </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <p-button label="Nova Peça Avulsa" icon="pi pi-plus" size="small" [outlined]="true" severity="info" type="button" (onClick)="addManualPart()" />
-            <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça do catálogo" class="wo-catalog-select">
-              <option value="">+ Do Catálogo...</option>
-              @for (item of partsCatalog(); track item.id) {
-                <option [value]="item.id">{{ item.name }} ({{ money(item.salePrice) }})</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="p-3">
-          @if (parts().length > 0) {
-            <div class="wo-grid-table-container">
-              <div class="wo-grid-table">
-                <div class="wo-grid-header parts">
-                  <div>Descrição da Peça / Insumo</div>
-                  <div>Cód / Ref</div>
-                  <div class="text-center">Qtd</div>
-                  <div class="text-right">Valor Unit.</div>
-                  <div class="text-right">Subtotal</div>
-                  <div class="text-center">Ações</div>
-                </div>
-
-                @for (line of parts(); track $index) {
-                  <div class="wo-grid-row parts">
-                    <div class="wo-grid-cell">
-                      <input
-                        pInputText
-                        [ngModel]="line.description"
-                        [ngModelOptions]="{standalone:true}"
-                        placeholder="Ex: Pneu 175/70 R14, Pastilha, Válvula..."
-                        (ngModelChange)="updateLine('parts', $index, 'description', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell">
-                      <input
-                        pInputText
-                        [ngModel]="line.code"
-                        [ngModelOptions]="{standalone:true}"
-                        placeholder="Ex: SKU-01"
-                        (ngModelChange)="updateLine('parts', $index, 'code', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell">
-                      <p-inputnumber
-                        [ngModel]="line.quantity"
-                        [ngModelOptions]="{standalone:true}"
-                        [min]="0.01"
-                        [maxFractionDigits]="2"
-                        placeholder="1"
-                        styleClass="w-full"
-                        (ngModelChange)="updateLine('parts', $index, 'quantity', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell">
-                      <p-inputnumber
-                        [ngModel]="line.unitPrice"
-                        [ngModelOptions]="{standalone:true}"
-                        mode="currency"
-                        currency="BRL"
-                        locale="pt-BR"
-                        placeholder="R$ 0,00"
-                        styleClass="w-full"
-                        (ngModelChange)="updateLine('parts', $index, 'unitPrice', $event)"
-                      />
-                    </div>
-
-                    <div class="wo-grid-cell wo-cell-total">
-                      <span>{{ money((line.quantity || 0) * (line.unitPrice || 0)) }}</span>
-                    </div>
-
-                    <div class="wo-grid-cell wo-cell-action">
-                      <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" type="button" (onClick)="removeLine('parts', $index)" ariaLabel="Remover peça" />
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="wo-section-subtotal-bar mt-2.5">
-              <span>Subtotal Peças ({{ parts().length }} {{ parts().length === 1 ? 'item' : 'itens' }}):</span>
-              <strong>{{ money(partsSubtotal()) }}</strong>
-            </div>
-          } @else {
-            <div class="wo-table-empty border border-dashed border-slate-200 rounded-lg">
-              <i class="pi pi-box"></i>
-              <span>Nenhuma peça incluída. Clique em <strong>Nova Peça Avulsa</strong> ou selecione do <strong>Catálogo</strong>.</span>
-            </div>
-          }
-        </div>
-      </div>
-      }
     </div>
   </form>
 
   <ng-template #footer>
     <div class="wo-dialog-footer">
       <div class="wo-footer-total-calc">
-        <span class="text-xs uppercase font-extrabold text-slate-500 tracking-wider">Total Calculado da OS:</span>
-        <strong class="text-emerald-700 text-2xl font-black">{{ money(orderTotal()) }}</strong>
+        <span class="text-xs uppercase font-semibold text-muted tracking-wider">Total Calculado:</span>
+        <strong class="text-primary text-xl font-bold font-mono">{{ money(orderTotal()) }}</strong>
       </div>
       <div class="flex items-center gap-2">
         <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
@@ -924,5 +737,3 @@
     </div>
   </ng-template>
 </p-dialog>
-
-

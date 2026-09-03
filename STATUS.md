@@ -40,30 +40,34 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R5 concluído / R6 — Ordens de Serviço preparado
+R6 concluído / R7 — Clientes e Veículos preparado
 
 Última tarefa concluída:
-R5 — Dashboard (Remoção de cards explicativos, 4 KPIs operacionais em tempo real, tabela de veículos no pátio com cards para mobile, barras CSS de distribuição e base cadastral com suporte completo a Dark Mode)
+R6 — Ordens de Serviço (DataToolbar com contadores, busca reativa, pílulas táteis de status integradas com a API backend, apresentação híbrida desktop/mobile, editor de linhas de serviços e peças modularizado e resumo financeiro destacado)
 
 Próxima tarefa:
-R6 — Ordens de Serviço (DataToolbar, busca, filtros de status, visualização em lista/cards, editor de linhas, drawer de edição e integração com API)
+R7 — Clientes e Veículos (DataToolbar, busca rápida, paginação, cards móveis e tabelas desktop, drawers/modais padronizados para cadastros e validação visual de CPF/CNPJ e placas)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.html`
+- `src/frontend/sport-pneus-web/src/app/core/api/work-order-api.service.ts`
+- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/work-orders/components/work-order-lines-editor.component.ts`
+- `src/frontend/sport-pneus-web/src/app/features/work-orders/components/work-order-lines-editor.component.css`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R5.
+- Nenhuma para R6.
 
 Problemas conhecidos:
-- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~719 kB contra 500 kB).
+- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~721 kB contra 500 kB).
 
 Testes:
 - `npm test`: 22/22 testes unitários aprovados.
 - `npm run lint`: 0 erros e 0 avisos.
-- `npm run build`: bundle compilado com sucesso.
+- `npm run build`: bundle compilado com sucesso e zero avisos em estilos de componentes.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 
