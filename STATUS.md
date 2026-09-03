@@ -43,14 +43,14 @@ Fase atual:
 R10 concluído — UI/UX Redesign Integralmente Finalizado (R1 a R10)
 
 Última tarefa concluída:
-R10 — Polish (Scrollbars discretas com CSS nativo, anéis de foco acessíveis :focus-visible, atalho global '/' para focar pesquisa com indicador <kbd>/</kbd>, skeletons e empty states uniformizados e validação responsiva total)
+Ajuste de alinhamento e layout das tabelas de Ordens de Serviço (Visão Geral e Módulo de Ordens): eliminação da barra de rolagem horizontal, adoção de colgroup com table-layout fixo, unificação de Cliente e Veículo em duas linhas alinhadas e botões de ação compactos.
 
 Próxima tarefa:
 Aguardando novas diretrizes do usuário (Sistema totalmente modernizado e validado).
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/shared/components/search-field.component.ts`
-- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.ts`
+- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.html`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:

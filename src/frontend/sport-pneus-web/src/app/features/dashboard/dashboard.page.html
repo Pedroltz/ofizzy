@@ -75,6 +75,14 @@
           <div class="dashboard-table-desktop">
             <app-data-table-wrapper>
               <table class="dashboard-table" aria-label="Ordens ativas na oficina">
+                <colgroup>
+                  <col style="width: 4.5rem" />
+                  <col style="width: auto" />
+                  <col style="width: 5.5rem" />
+                  <col style="width: 7.2rem" />
+                  <col style="width: 6.5rem" />
+                  <col style="width: 4.8rem" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>OS</th>
@@ -93,10 +101,10 @@
                       </td>
                       <td>
                         <div class="customer-vehicle-cell">
-                          <strong class="cell-title">{{ item.customerName }}</strong>
+                          <strong class="cell-title" [title]="item.customerName">{{ item.customerName }}</strong>
                           <div class="vehicle-subline">
                             <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                            <span class="vehicle-desc">{{ item.vehicleDescription }}</span>
+                            <span class="vehicle-desc" [title]="item.vehicleDescription">{{ item.vehicleDescription }}</span>
                           </div>
                         </div>
                       </td>

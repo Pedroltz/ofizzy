@@ -452,6 +452,20 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet cobrindo todas as telas em Dark e Light Mode sem overflow horizontal.
 
+## 2026-09-03 — Ajuste de Layout: Tabelas de Ordens de Serviço (Visão Geral e Módulo)
+
+- **Eliminação de Rolagem Horizontal e Alinhamento Vertical das Informações**:
+  - **Unificação de Cliente e Veículo**: agrupamento da identificação do cliente e veículo em duas linhas na mesma célula (`.customer-vehicle-cell`), exibindo o nome do cliente no topo e a placa Mercosul com o modelo na linha inferior.
+  - **Colgroup e Layout Fixo**: adoção de `table-layout: fixed; width: 100%;` com `<colgroup>` explícito em `dashboard.page.html` e `work-orders.page.html`, garantindo que todas as 6 colunas caibam na largura total sem criar scrollbar lateral em telas de notebook e desktop.
+  - **Ações Compactas e Sem Quebra**: botões de ação em grupo (`.table-actions-group` e `.tbl-action-btn`), substituindo botões pesados e mantendo o alinhamento à direita com o valor monetário.
+  - **Tratamento de Text-Overflow**: aplicação de `overflow: hidden; text-overflow: ellipsis;` com tooltips nativos `[title]` nos textos longos de clientes e descrições veiculares.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet, com verificação de ausência de overflow horizontal em `/` e `/ordens`.
+
+
 
 
 

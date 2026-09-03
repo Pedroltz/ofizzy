@@ -96,14 +96,21 @@
     </div>
   } @else {
     <app-data-table-wrapper>
-      <table class="data-table" aria-label="Lista de ordens de serviço">
+      <table class="data-table table-fixed" aria-label="Lista de ordens de serviço">
+        <colgroup>
+          <col style="width: 4.8rem" />
+          <col style="width: auto" />
+          <col style="width: 7.5rem" />
+          <col style="width: 5.5rem" />
+          <col style="width: 6.8rem" />
+          <col style="width: 8.5rem" />
+        </colgroup>
         <thead>
           <tr>
             <th>OS</th>
-            <th>Cliente</th>
-            <th>Veículo & Placa</th>
+            <th>Cliente / Veículo</th>
             <th>Status</th>
-            <th>Abertura</th>
+            <th>Entrada</th>
             <th class="text-right">Total</th>
             <th class="text-right">Ações</th>
           </tr>
@@ -112,40 +119,52 @@
           @for (item of items(); track item.id) {
             <tr>
               <td>
-                <span class="order-number font-mono font-bold cursor-pointer hover:underline" (click)="viewDetail(item)">
+                <span class="order-code font-mono cursor-pointer hover:underline" (click)="viewDetail(item)">
                   #{{ item.number.toString().padStart(4, '0') }}
                 </span>
               </td>
               <td>
-                <strong class="font-semibold">{{ item.customerName }}</strong>
-              </td>
-              <td>
-                <div class="flex items-center gap-2">
-                  <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                  <span class="text-xs text-muted font-medium">{{ item.vehicleDescription }}</span>
+                <div class="customer-vehicle-cell">
+                  <strong class="cell-title cursor-pointer hover:underline" (click)="viewDetail(item)" [title]="item.customerName">
+                    {{ item.customerName }}
+                  </strong>
+                  <div class="vehicle-subline">
+                    <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                    <span class="vehicle-desc" [title]="item.vehicleDescription">{{ item.vehicleDescription }}</span>
+                  </div>
                 </div>
               </td>
               <td>
                 <app-status-badge [status]="item.status" />
               </td>
               <td>
-                <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
+                <span class="date-cell">{{ formatDate(item.createdAt) }}</span>
               </td>
               <td class="text-right font-mono font-bold">
                 {{ money(item.total) }}
               </td>
               <td class="text-right">
-                <div class="card-actions justify-end">
-                  <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Detalhes" (onClick)="viewDetail(item)" />
+                <div class="table-actions-group">
+                  <button type="button" class="tbl-action-btn" title="Ver Detalhes" aria-label="Detalhes" (click)="viewDetail(item)">
+                    <i class="pi pi-eye"></i>
+                  </button>
                   @if (item.status === 'Open') {
-                    <p-button icon="pi pi-play" [rounded]="true" severity="info" ariaLabel="Iniciar" (onClick)="status(item, 'InProgress')" />
+                    <button type="button" class="tbl-action-btn action-start" title="Iniciar Ordem" aria-label="Iniciar" (click)="status(item, 'InProgress')">
+                      <i class="pi pi-play"></i>
+                    </button>
                   }
                   @if (item.status === 'InProgress') {
-                    <p-button icon="pi pi-check" [rounded]="true" severity="success" ariaLabel="Finalizar" (onClick)="status(item, 'Completed')" />
+                    <button type="button" class="tbl-action-btn action-finish" title="Finalizar Ordem" aria-label="Finalizar" (click)="status(item, 'Completed')">
+                      <i class="pi pi-check"></i>
+                    </button>
                   }
                   @if (item.status === 'Open' || item.status === 'InProgress') {
-                    <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-                    <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
+                    <button type="button" class="tbl-action-btn" title="Editar" aria-label="Editar" (click)="open(item)">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button type="button" class="tbl-action-btn action-cancel" title="Cancelar" aria-label="Cancelar" (click)="status(item, 'Cancelled')">
+                      <i class="pi pi-times"></i>
+                    </button>
                   }
                 </div>
               </td>
