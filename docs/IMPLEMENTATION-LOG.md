@@ -75,3 +75,12 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Testes unitários (10/10) e de integração (3/3) aprovados com Testcontainers.
   - Lint e build de produção do frontend aprovados.
   - Imagens Docker reconstruídas e stack Nginx validada na porta 8080.
+
+## 2026-09-02 — Reformulação dos Modais de OS para Painéis Deslizantes (Slide-over Drawers)
+
+- Substituição dos modais tradicionais centrais (`p-dialog`) por painéis laterais deslizantes (`p-drawer`) na direita da tela com backdrop suave:
+  - **Drawer de Detalhes da OS**: cabeçalho com número da OS formatado e status em badge, metadados de abertura e conclusão, cards divididos para Cliente e Veículo, bloco técnico de Queixa e Diagnóstico da oficina com destaque em verde, tabelas de serviços e peças com subtotais e resumo financeiro em destaque (`Total Geral`). Rodapé fixo com ações contextuais de transição de status e edição.
+  - **Drawer de Criação/Edição de OS**: formulário vertical fluido com cliente, veículo dinâmico, quilometragem, queixa, diagnóstico e seletores ágeis de catálogo para serviços e peças, com atualização instantânea de subtotais e total geral no rodapé.
+- Estilos dedicados adicionados em `styles.css` (`.wo-drawer`, `.wo-block`, `.wo-table`, `.wo-grand-total`, `.wo-drawer-footer`).
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e imagem frontend reconstruída.
+
