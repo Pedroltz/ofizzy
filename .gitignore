@@ -16,4 +16,6 @@ data/
 certs/
 LOCAL-CREDENTIALS.md
 compose.override.yaml
+test-results/
+playwright-report/
 

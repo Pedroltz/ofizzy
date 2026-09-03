@@ -1,0 +1,148 @@
+/* ==========================================================================
+   WORKSHOP MANAGER DESIGN SYSTEM — COLOR THEMES
+   ========================================================================== */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* App Background & Surfaces */
+  --bg-app: #f6f7f7;
+  --surface-primary: #ffffff;
+  --surface-secondary: #fafbfa;
+  --surface-hover: #f4f6f5;
+
+  /* Borders */
+  --border-subtle: #e8ebe9;
+  --border-default: #dfe3e1;
+  --border-strong: #ced4d1;
+
+  /* Typography Colors */
+  --text-primary: #171a18;
+  --text-secondary: #626b66;
+  --text-muted: #89918d;
+
+  /* Brand Primary (Sport Pneus Green) */
+  --primary: #15966a;
+  --primary-hover: #117b57;
+  --primary-soft: #eaf7f2;
+  --primary-text: #ffffff;
+
+  /* Semantic Status Colors */
+  --success: #16835f;
+  --success-hover: #126c4e;
+  --success-soft: #eaf7f2;
+  --success-text: #0d4e38;
+
+  --warning: #c68a18;
+  --warning-hover: #a57112;
+  --warning-soft: #fef8eb;
+  --warning-text: #734f09;
+
+  --danger: #d4584b;
+  --danger-hover: #b84337;
+  --danger-soft: #fdf2f1;
+  --danger-text: #82271e;
+
+  --info: #4478c4;
+  --info-hover: #3563a6;
+  --info-soft: #edf3fb;
+  --info-text: #214375;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-dropdown: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 2px var(--surface-primary), 0 0 0 4px var(--primary);
+
+  /* Backward compatibility aliases */
+  --app-bg: var(--bg-app);
+  --app-surface: var(--surface-primary);
+  --app-border: var(--border-default);
+  --app-border-subtle: var(--border-subtle);
+  --app-text: var(--text-primary);
+  --app-muted: var(--text-secondary);
+  --app-primary: var(--primary);
+  --app-primary-hover: var(--primary-hover);
+  --app-primary-soft: var(--primary-soft);
+  --app-sidebar-bg: var(--surface-primary);
+  --app-sidebar-border: var(--border-subtle);
+  --app-sidebar-text: var(--text-secondary);
+  --app-sidebar-hover: var(--surface-hover);
+  --app-radius: var(--radius-md);
+  --app-radius-sm: var(--radius-sm);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* App Background & Surfaces */
+  --bg-app: #101211;
+  --surface-primary: #171a18;
+  --surface-secondary: #1c201e;
+  --surface-hover: #222724;
+
+  /* Borders */
+  --border-subtle: #272c29;
+  --border-default: #303632;
+  --border-strong: #414844;
+
+  /* Typography Colors */
+  --text-primary: #f3f5f4;
+  --text-secondary: #b5bcb8;
+  --text-muted: #818985;
+
+  /* Brand Primary (Sport Pneus Green — adjusted for dark mode) */
+  --primary: #3ecb92;
+  --primary-hover: #53d49f;
+  --primary-soft: #15382b;
+  --primary-text: #081711;
+
+  /* Semantic Status Colors */
+  --success: #45c998;
+  --success-hover: #5cd3a5;
+  --success-soft: #143527;
+  --success-text: #a4ecd0;
+
+  --warning: #e4af48;
+  --warning-hover: #eabf66;
+  --warning-soft: #382c12;
+  --warning-text: #f6dc9d;
+
+  --danger: #ef786d;
+  --danger-hover: #f3948b;
+  --danger-soft: #3b1c19;
+  --danger-text: #f9c0ba;
+
+  --info: #75a4e7;
+  --info-hover: #91b7ed;
+  --info-soft: #182740;
+  --info-text: #c2d7f6;
+
+  /* Shadows (subtler in dark mode) */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-dropdown: 0 4px 12px -2px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 2px var(--surface-primary), 0 0 0 4px var(--primary);
+
+  /* Backward compatibility aliases */
+  --app-bg: var(--bg-app);
+  --app-surface: var(--surface-primary);
+  --app-border: var(--border-default);
+  --app-border-subtle: var(--border-subtle);
+  --app-text: var(--text-primary);
+  --app-muted: var(--text-secondary);
+  --app-primary: var(--primary);
+  --app-primary-hover: var(--primary-hover);
+  --app-primary-soft: var(--primary-soft);
+  --app-sidebar-bg: var(--surface-primary);
+  --app-sidebar-border: var(--border-subtle);
+  --app-sidebar-text: var(--text-secondary);
+  --app-sidebar-hover: var(--surface-hover);
+  --app-radius: var(--radius-md);
+  --app-radius-sm: var(--radius-sm);
+}

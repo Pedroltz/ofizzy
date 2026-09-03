@@ -22,17 +22,17 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Definir estratégia de migração incremental
 
 ### R2 — Design System
-- [ ] Criar tokens de cores
-- [ ] Criar tokens tipográficos
-- [ ] Criar escala de spacing
-- [ ] Criar radius
-- [ ] Criar sombras
-- [ ] Criar estados semânticos
-- [ ] Implementar Light Mode
-- [ ] Implementar Dark Mode
-- [ ] Implementar System Theme
-- [ ] Implementar persistência do tema
-- [ ] Criar ThemeService
+- [x] Criar tokens de cores
+- [x] Criar tokens tipográficos
+- [x] Criar escala de spacing
+- [x] Criar radius
+- [x] Criar sombras
+- [x] Criar estados semânticos
+- [x] Implementar Light Mode
+- [x] Implementar Dark Mode
+- [x] Implementar System Theme
+- [x] Implementar persistência do tema
+- [x] Criar ThemeService
 
 ### R3 — Componentes compartilhados
 - [ ] PageHeader

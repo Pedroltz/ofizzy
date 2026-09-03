@@ -1,32 +1,10 @@
 @import 'tailwindcss';
 @import 'primeicons/primeicons.css';
+@import './styles/tokens.css';
+@import './styles/themes.css';
 
 :root {
-  --app-bg: #f8fafc;
-  --app-surface: #ffffff;
-  --app-border: #e2e8f0;
-  --app-border-subtle: #f1f5f9;
-  --app-text: #0f172a;
-  --app-muted: #64748b;
-  --app-primary: #0f766e;
-  --app-primary-hover: #115e59;
-  --app-primary-soft: #f0fdfa;
-  --app-sidebar-bg: #0f172a;
-  --app-sidebar-border: #1e293b;
-  --app-sidebar-text: #94a3b8;
-  --app-sidebar-hover: #f8fafc;
-  --app-radius: 10px;
-  --app-radius-sm: 6px;
-  color-scheme: light;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 * {
@@ -59,10 +37,10 @@ textarea,
 select {
   width: 100%;
   padding: 0.75rem 0.9rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background-color: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 0.92rem;
   transition:
     border-color 0.15s ease,
@@ -70,21 +48,21 @@ select {
 }
 
 select option {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: var(--surface-primary) !important;
+  color: var(--text-primary) !important;
   padding: 0.4rem 0.6rem;
 }
 
 select option:disabled {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--app-primary);
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 /* Base Buttons */
@@ -121,38 +99,36 @@ select:focus {
 }
 
 .secondary-button {
-  color: var(--app-text);
-  background: #f1f5f9;
-  border: 1px solid var(--app-border);
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
 }
 
 .secondary-button:hover {
-  background: #e2e8f0;
+  background: var(--surface-hover);
 }
 
 .icon-button {
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-  border-radius: var(--app-radius-sm);
-  color: var(--app-muted);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
   background: transparent;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-default);
 }
 
 .icon-button:hover {
-  background: #f1f5f9;
-  color: var(--app-text);
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 /* Surface Cards */
 .surface-card {
-  background: var(--app-surface);
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius);
-  box-shadow:
-    0 1px 3px 0 rgba(15, 23, 42, 0.04),
-    0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 
 /* Status Tags */
@@ -162,7 +138,7 @@ select:focus {
   gap: 0.4rem;
   height: 1.75rem;
   padding: 0 0.65rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -173,28 +149,28 @@ select:focus {
 }
 
 .status-tag.open {
-  color: #b45309;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning);
 }
 
 .status-tag.in-progress {
-  color: #0369a1;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  color: var(--info-text);
+  background: var(--info-soft);
+  border: 1px solid var(--info);
 }
 
 .status-tag.completed,
 .status-tag.success {
-  color: #047857;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  color: var(--success-text);
+  background: var(--success-soft);
+  border: 1px solid var(--success);
 }
 
 .status-tag.cancelled {
-  color: #be123c;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
+  color: var(--danger-text);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger);
 }
 
 /* Automotive License Plate Badge */
@@ -202,14 +178,14 @@ select:focus {
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.55rem;
-  background: #f8fafc;
-  border: 1.5px solid #94a3b8;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: var(--surface-secondary);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
   font-weight: 800;
   font-size: 0.85rem;
   letter-spacing: 0.08em;
-  color: #0f172a;
+  color: var(--text-primary);
   text-transform: uppercase;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
 }

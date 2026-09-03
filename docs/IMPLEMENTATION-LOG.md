@@ -302,3 +302,23 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: bundle compilado com sucesso.
   - Backend `SportPneus.UnitTests`: 14/14 testes aprovados.
 
+## 2026-09-03 — UI/UX Redesign: R2 — Design System Concluído
+
+- **Centralização de Tokens de Design**:
+  - Criado `src/styles/tokens.css` com escalas de tipografia Inter/mono, line-heights, espaçamentos base 4px (`--space-1` a `--space-16`), border radius (`--radius-xs` a `--radius-full`) e transições.
+  - Criado `src/styles/themes.css` com suporte completo a Light Mode (`:root, [data-theme="light"]`) e Dark Mode (`[data-theme="dark"]`).
+  - Paleta com verde Sport Pneus como cor primária (`#15966a` no claro, `#3ecb92` no escuro), superfícies calibradas (`#ffffff`/`#fafbfa` no claro, `#171a18`/`#1c201e` no escuro com fundo `#101211`), estados semânticos (success, warning, danger, info com variantes soft e text) e sombras extremamente sutis.
+  - Garantida compatibilidade retroativa mapeando as variáveis legadas `--app-*` para os novos tokens do Design System.
+- **ThemeService e Gestão de Tema**:
+  - Criados `src/app/core/theme/theme.models.ts` e `src/app/core/theme/theme.service.ts` usando Angular Signals.
+  - Suporte a 3 modos: `light`, `dark` e `system`. No modo `system`, escuta eventos de runtime de `matchMedia('(prefers-color-scheme: dark)')` sem recarregar a página.
+  - Persistência em `localStorage` sob a chave `workshop-theme`.
+  - Script inline adicionado ao `<head>` em `index.html` para aplicar `data-theme` antes da renderização, eliminando flash de tema incorreto (FOUC).
+  - Integrado `ThemeService` no `App` component e configurado `darkModeSelector: '[data-theme="dark"]'` nas opções de tema do PrimeNG em `app.config.ts`.
+- **Validação Técnica e Testes**:
+  - `npm test`: 11/11 testes unitários aprovados (9 novos testes dedicados para `ThemeService` cobrindo transições `system -> light`, `system -> dark`, persistência em localStorage e escuta de mudanças de runtime no OS).
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção aprovada.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
+

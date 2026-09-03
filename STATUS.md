@@ -40,31 +40,35 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R1 concluído / R2 — Design System preparado
+R2 concluído / R3 — Componentes compartilhados preparado
 
 Última tarefa concluída:
-R1 — Auditoria visual completa (mapeamento de estilos, componentes PrimeNG e compartilhados, duplicações de layout e definição de estratégia incremental)
+R2 — Design System (Tokens de cores Light/Dark com verde primário, escalas tipográficas e de espaçamento, radius, sombras, ThemeService com Light/Dark/System, anti-FOUC e integração PrimeNG)
 
 Próxima tarefa:
-R2 — Design System (Tokens de cores Light/Dark com verde primário, tipografia, espaçamento, radius, sombras sutis e ThemeService com suporte a Light, Dark e System)
+R3 — Componentes compartilhados (PageHeader evoluído, SectionCard, StatCard, StatusBadge, DataToolbar, SearchField, EmptyState, LoadingState, DataTableWrapper e ThemeToggle)
 
-Arquivos principais analisados:
-- `src/frontend/sport-pneus-web/src/styles.css`
+Arquivos principais alterados:
+- `src/frontend/sport-pneus-web/src/styles/tokens.css` (novo)
+- `src/frontend/sport-pneus-web/src/styles/themes.css` (novo)
+- `src/frontend/sport-pneus-web/src/app/core/theme/theme.models.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/core/theme/theme.service.ts` (novo)
+- `src/frontend/sport-pneus-web/src/app/core/theme/theme.service.spec.ts` (novo)
 - `src/frontend/sport-pneus-web/src/app/app.config.ts`
-- `src/frontend/sport-pneus-web/src/app/layout/app-shell.component.*`
-- `src/frontend/sport-pneus-web/src/app/features/dashboard/dashboard.page.*`
-- `src/frontend/sport-pneus-web/src/app/shared/components/page-header.component.ts`
+- `src/frontend/sport-pneus-web/src/app/app.ts`
+- `src/frontend/sport-pneus-web/src/index.html`
+- `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R1.
+- Nenhuma para R2.
 
 Problemas conhecidos:
-- `styles.css` de 3809 linhas necessita de separação modular segura sem quebra de classes existentes.
-- PrimeNG precisa de seletor configurado para temas escuros (`[data-theme="dark"]`).
+- Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~713 kB contra 500 kB).
 
 Testes:
-- `npm test`: 2/2 testes aprovados.
-- `npm run lint`: 0 erros.
+- `npm test`: 11/11 testes aprovados (9 novos testes unitários para `ThemeService`).
+- `npm run lint`: 0 erros e 0 avisos.
 - `npm run build`: bundle compilado com sucesso.
-- Backend `SportPneus.UnitTests`: 14/14 testes aprovados.
+- `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
