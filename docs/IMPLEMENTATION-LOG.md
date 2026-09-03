@@ -132,4 +132,16 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - 4 cards analíticos com ícones coloridos: *Ordens Ativas (no pátio)*, *Clientes Cadastrados (base total)*, *Veículos na Base (frota)* e *Ordens Concluídas (histórico finalizado)*.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e imagem Docker atualizada.
 
+## 2026-09-02 — Correção de Responsividade e Rolagem no Modal de Ordem de Serviço
+
+- **Fim dos Itens Cortados / Escondidos**:
+  - Correção do bug de `min-height: auto` em `.wo-drawer-body` e `.wo-drawer-form`: aplicação de `min-height: 0 !important; flex: 1 1 auto; overflow-y: auto !important;`.
+  - Cabeçalho (`p-drawer-header`) e rodapé (`p-drawer-footer`) agora possuem `flex-shrink: 0 !important`, permanecendo perfeitamente fixos (Sticky Header & Sticky Footer) enquanto o corpo rola suavemente mesmo com dezenas de itens.
+- **Fim das Sobreposições em Telas Menores**:
+  - As tabelas de serviços e peças (`.wo-table` e `.wo-grid-table`) foram envolvidas em contêineres com rolagem horizontal segura (`.wo-table-wrapper` e `.wo-grid-table-container`) e larguras mínimas protegidas (`520px` e `580px`), impedindo o colapso de números, preços e botões.
+  - Cartões de Cliente e Veículo quebram responsivamente para 1 coluna em telas menores que 768px.
+  - O card de Total Geral (`.wo-grand-total`) e o rodapé com múltiplos botões de ação (`.wo-drawer-footer`) agora quebram linhas ordenadamente (`flex-wrap: wrap; gap: .75rem`), sem transbordar ou empurrar elementos para fora da tela.
+  - Largura do modal expandida para até `920px` / `940px` em monitores amplos, proporcionando conforto visual no lançamento de ordens volumosas.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
+
 
