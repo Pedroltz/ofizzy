@@ -20,6 +20,7 @@ export class VehiclesPage {
   private readonly api=inject(CatalogApiService); private readonly fb=inject(FormBuilder); private readonly messages=inject(MessageService); private readonly confirmation=inject(ConfirmationService);
   readonly items=signal<Vehicle[]>([]); readonly total=signal(0); readonly loading=signal(true); readonly saving=signal(false); readonly dialog=signal(false); readonly editing=signal<Vehicle|null>(null); readonly customerSuggestions=signal<Customer[]>([]);
   readonly search=this.fb.nonNullable.control(''); readonly page=signal(1); readonly pageSize=12;
+  readonly viewMode = signal<'table' | 'cards'>('table');
   readonly form=this.fb.group({ customer:this.fb.control<Customer|null>(null,Validators.required), plate:this.fb.nonNullable.control('',[Validators.required,Validators.minLength(7)]), brand:this.fb.nonNullable.control(''), model:this.fb.nonNullable.control('',Validators.required), year:this.fb.control<number|null>(null), color:this.fb.nonNullable.control(''), mileage:this.fb.control<number|null>(null), chassis:this.fb.nonNullable.control(''), notes:this.fb.nonNullable.control('') });
   constructor(){this.search.valueChanges.pipe(debounceTime(250),distinctUntilChanged(),takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>{this.page.set(1);void this.load();});void this.load();}
   async load():Promise<void>{this.loading.set(true);try{const result=await this.api.vehicles(this.search.value,this.page(),this.pageSize);this.items.set(result.items);this.total.set(result.total);}finally{this.loading.set(false);}}
@@ -91,4 +92,9 @@ export class VehiclesPage {
     });
   }
   changePage(event:PaginatorState):void{this.page.set((event.page??0)+1);void this.load();}
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(d);
+  }
 }

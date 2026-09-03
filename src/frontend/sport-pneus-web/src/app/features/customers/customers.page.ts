@@ -18,6 +18,7 @@ export class CustomersPage {
   private readonly api = inject(CatalogApiService); private readonly fb = inject(FormBuilder); private readonly messages = inject(MessageService); private readonly confirmation = inject(ConfirmationService);
   readonly items = signal<Customer[]>([]); readonly total = signal(0); readonly loading = signal(true); readonly saving = signal(false); readonly dialog = signal(false); readonly editing = signal<Customer | null>(null);
   readonly search = this.fb.nonNullable.control(''); readonly page = signal(1); readonly pageSize = 12;
+  readonly viewMode = signal<'table' | 'cards'>('table');
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(160)]],
     document: ['', [(c) => {
@@ -44,5 +45,10 @@ export class CustomersPage {
     if (d.length === 11) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
     if (d.length === 14) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12, 14)}`;
     return doc;
+  }
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(d);
   }
 }

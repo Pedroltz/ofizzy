@@ -8,65 +8,153 @@
     (action)="open()"
   />
 
-  <div class="search-bar">
-    <i class="pi pi-search"></i>
-    <input pInputText [formControl]="search" placeholder="Pesquisar por número da OS, cliente ou placa do veículo..." />
+  <div class="list-toolbar">
+    <div class="search-bar">
+      <i class="pi pi-search"></i>
+      <input pInputText [formControl]="search" placeholder="Pesquisar por número da OS, cliente ou placa do veículo..." />
+    </div>
+    <div class="view-mode-toggle">
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Visualização em Tabela">
+        <i class="pi pi-table"></i>
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Cartões">
+        <i class="pi pi-th-large"></i>
+      </button>
+    </div>
   </div>
 
-  <div class="catalog-grid order-grid">
-    @for (item of items(); track item.id) {
-      <article class="order-card surface-card">
-        <div class="order-card-header" (click)="viewDetail(item)">
-          <div class="order-card-identity">
-            <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
-            <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</h2>
-            <div class="order-vehicle-line">
-              <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-              <span class="text-slate-700 font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
-            </div>
-          </div>
-          <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
-            @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
-            @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
-            @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
-            @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
-            <span>{{ statusLabels[item.status] }}</span>
-          </span>
-        </div>
-
-        <div class="order-summary-row" (click)="viewDetail(item)">
-          <span class="order-date"><i class="pi pi-calendar"></i> {{ formatDate(item.openedAt) }}</span>
-          <div class="order-total-val">
-            <small>Valor Total</small>
-            <strong>{{ money(item.total) }}</strong>
-          </div>
-        </div>
-
-        <div class="card-actions flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-          <p-button label="Detalhes" icon="pi pi-eye" [text]="true" severity="secondary" size="small" (onClick)="viewDetail(item)" />
-          @if (item.status === 'Open') {
-            <p-button label="Iniciar" icon="pi pi-play" severity="info" size="small" (onClick)="status(item, 'InProgress')" />
-          }
-          @if (item.status === 'InProgress') {
-            <p-button label="Finalizar" icon="pi pi-check" severity="success" size="small" (onClick)="status(item, 'Completed')" />
-          }
-          @if (item.status === 'Open' || item.status === 'InProgress') {
-            <p-button label="Editar" icon="pi pi-pencil" [text]="true" severity="secondary" size="small" (onClick)="open(item)" />
-            <p-button label="Cancelar" icon="pi pi-times" severity="danger" [text]="true" size="small" (onClick)="status(item, 'Cancelled')" />
-          }
-        </div>
-      </article>
-    } @empty {
-      @if (!loading()) {
-        <div class="empty-state surface-card col-span-full">
-          <div class="empty-icon"><i class="pi pi-file-edit"></i></div>
-          <h2>Nenhuma ordem de serviço encontrada</h2>
-          <p>{{ search.value ? 'Nenhuma OS corresponde aos filtros pesquisados.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.' }}</p>
-          <p-button label="Nova Ordem" icon="pi pi-plus" (onClick)="open()" />
+  @if (loading()) {
+    <div class="order-grid">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="order-card surface-card">
+          <p-skeleton width="45%" />
+          <p-skeleton width="75%" styleClass="my-2" />
+          <p-skeleton width="35%" />
         </div>
       }
-    }
-  </div>
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state surface-card col-span-full">
+      <div class="empty-icon"><i class="pi pi-file-edit"></i></div>
+      <h2>Nenhuma ordem de serviço encontrada</h2>
+      <p>{{ search.value ? 'Nenhuma OS corresponde aos filtros pesquisados.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.' }}</p>
+      <p-button label="Nova Ordem" icon="pi pi-plus" (onClick)="open()" />
+    </div>
+  } @else if (viewMode() === 'table') {
+    <div class="data-table-card">
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>OS</th>
+              <th>Cliente</th>
+              <th>Veículo & Placa</th>
+              <th>Status</th>
+              <th>Abertura</th>
+              <th class="text-right">Total</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr>
+                <td>
+                  <span class="order-number font-bold text-slate-800 cursor-pointer hover:underline" (click)="viewDetail(item)">
+                    #{{ item.number.toString().padStart(4, '0') }}
+                  </span>
+                </td>
+                <td>
+                  <strong class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</strong>
+                </td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                    <span class="text-slate-700 text-xs font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
+                    @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
+                    @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+                    @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
+                    @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
+                    <span>{{ statusLabels[item.status] }}</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="text-xs text-slate-500">{{ formatDate(item.openedAt) }}</span>
+                </td>
+                <td class="text-right">
+                  <strong class="text-slate-900 font-extrabold" style="color: #0f172a !important;">{{ money(item.total) }}</strong>
+                </td>
+                <td class="text-right">
+                  <div class="card-actions justify-end">
+                    <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Detalhes" (onClick)="viewDetail(item)" />
+                    @if (item.status === 'Open') {
+                      <p-button icon="pi pi-play" [rounded]="true" severity="info" ariaLabel="Iniciar" (onClick)="status(item, 'InProgress')" />
+                    }
+                    @if (item.status === 'InProgress') {
+                      <p-button icon="pi pi-check" [rounded]="true" severity="success" ariaLabel="Finalizar" (onClick)="status(item, 'Completed')" />
+                    }
+                    @if (item.status === 'Open' || item.status === 'InProgress') {
+                      <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+                      <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="catalog-grid order-grid">
+      @for (item of items(); track item.id) {
+        <article class="order-card surface-card">
+          <div class="order-card-header" (click)="viewDetail(item)">
+            <div class="order-card-identity">
+              <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
+              <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.customerName }}</h2>
+              <div class="order-vehicle-line">
+                <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                <span class="text-slate-700 font-medium" style="color: #334155 !important;">{{ item.vehicleDescription }}</span>
+              </div>
+            </div>
+            <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
+              @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
+              @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+              @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
+              @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
+              <span>{{ statusLabels[item.status] }}</span>
+            </span>
+          </div>
+
+          <div class="order-summary-row" (click)="viewDetail(item)">
+            <span class="order-date"><i class="pi pi-calendar"></i> {{ formatDate(item.openedAt) }}</span>
+            <div class="order-total-val">
+              <small>Valor Total</small>
+              <strong>{{ money(item.total) }}</strong>
+            </div>
+          </div>
+
+          <div class="card-actions flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+            <p-button label="Detalhes" icon="pi pi-eye" [text]="true" severity="secondary" size="small" (onClick)="viewDetail(item)" />
+            @if (item.status === 'Open') {
+              <p-button label="Iniciar" icon="pi pi-play" severity="info" size="small" (onClick)="status(item, 'InProgress')" />
+            }
+            @if (item.status === 'InProgress') {
+              <p-button label="Finalizar" icon="pi pi-check" severity="success" size="small" (onClick)="status(item, 'Completed')" />
+            }
+            @if (item.status === 'Open' || item.status === 'InProgress') {
+              <p-button label="Editar" icon="pi pi-pencil" [text]="true" severity="secondary" size="small" (onClick)="open(item)" />
+              <p-button label="Cancelar" icon="pi pi-times" severity="danger" [text]="true" size="small" (onClick)="status(item, 'Cancelled')" />
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
 
   @if (total() > pageSize) {
     <p-paginator

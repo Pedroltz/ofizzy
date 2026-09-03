@@ -8,9 +8,19 @@
     (action)="open()"
   />
 
-  <div class="search-bar">
-    <i class="pi pi-search"></i>
-    <input pInputText [formControl]="search" placeholder="Pesquisar por placa, modelo, marca ou proprietário..." />
+  <div class="list-toolbar">
+    <div class="search-bar">
+      <i class="pi pi-search"></i>
+      <input pInputText [formControl]="search" placeholder="Pesquisar por placa, modelo, marca ou proprietário..." />
+    </div>
+    <div class="view-mode-toggle">
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Visualização em Tabela">
+        <i class="pi pi-table"></i>
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Cartões">
+        <i class="pi pi-th-large"></i>
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -32,44 +42,130 @@
       <p>{{ search.value ? 'Nenhum veículo corresponde à placa ou modelo buscado.' : 'Cadastre um cliente e vincule seu primeiro veículo para iniciar os atendimentos.' }}</p>
       <p-button label="Novo Veículo" icon="pi pi-plus" (onClick)="open()" />
     </div>
+  } @else if (viewMode() === 'table') {
+    <div class="data-table-card">
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Marca & Modelo</th>
+              <th>Proprietário (Cliente)</th>
+              <th>Ano / Cor</th>
+              <th>Quilometragem</th>
+              <th>Chassi</th>
+              <th>Cadastro</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr>
+                <td>
+                  <span class="plate-badge">{{ item.plate }}</span>
+                </td>
+                <td>
+                  <strong class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</strong>
+                </td>
+                <td>
+                  <div class="flex items-center gap-1.5">
+                    <i class="pi pi-user text-slate-400 text-xs"></i>
+                    <span class="text-slate-800 font-medium" style="color: #1e293b !important;">{{ item.customerName }}</span>
+                  </div>
+                </td>
+                <td>
+                  @if (item.year || item.color) {
+                    <span class="text-xs text-slate-600">{{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}</span>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  @if (item.mileage !== null) {
+                    <span class="font-mono text-xs text-slate-700 font-semibold">{{ item.mileage.toLocaleString('pt-BR') }} km</span>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  @if (item.chassis) {
+                    <span class="font-mono text-xs text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{{ item.chassis }}</span>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  <span class="text-xs text-slate-500">{{ formatDate(item.createdAt) }}</span>
+                </td>
+                <td class="text-right">
+                  <div class="card-actions justify-end">
+                    <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+                    <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   } @else {
     <div class="entity-grid">
       @for (item of items(); track item.id) {
-        <article class="entity-card surface-card vehicle-card">
-          <div class="vehicle-icon-badge">
-            <i class="pi pi-car"></i>
-          </div>
-          <div class="entity-main">
-            <div class="entity-header">
-              <h2>{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</h2>
+        <article class="rich-entity-card">
+          <div class="rich-card-header">
+            <div class="rich-card-title-group">
               <span class="plate-badge">{{ item.plate }}</span>
+              <div>
+                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</h2>
+                <div class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-600">
+                  <i class="pi pi-user text-slate-400 text-xs"></i>
+                  <span class="font-medium" style="color: #334155 !important;">{{ item.customerName }}</span>
+                </div>
+              </div>
             </div>
-            <div class="entity-contacts">
-              <span class="contact-item">
-                <i class="pi pi-user"></i>
-                <span>{{ item.customerName }}</span>
-              </span>
+            <div class="card-actions">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+            </div>
+          </div>
+
+          <div class="rich-card-body">
+            <div class="rich-card-meta-row">
               @if (item.year || item.color) {
-                <span class="contact-item">
+                <span class="contact-pill">
                   <i class="pi pi-calendar"></i>
                   <span>{{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}</span>
                 </span>
               }
               @if (item.mileage !== null) {
-                <span class="contact-item">
+                <span class="contact-pill">
                   <i class="pi pi-compass"></i>
                   <span>{{ item.mileage.toLocaleString('pt-BR') }} km</span>
                 </span>
               }
+              @if (item.chassis) {
+                <span class="contact-pill font-mono text-xs">
+                  <i class="pi pi-id-card"></i>
+                  <span>Chassi: {{ item.chassis }}</span>
+                </span>
+              }
             </div>
+
+            @if (item.notes) {
+              <div class="rich-card-notes">
+                <i class="pi pi-info-circle mr-1"></i> {{ item.notes }}
+              </div>
+            }
           </div>
-          <div class="card-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-            <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+
+          <div class="rich-card-footer">
+            <span class="text-xs text-slate-400">Cadastrado em {{ formatDate(item.createdAt) }}</span>
           </div>
         </article>
       }
     </div>
+  }
     @if (total() > pageSize) {
       <p-paginator
         [first]="(page()-1)*pageSize"
@@ -80,7 +176,6 @@
         (onPageChange)="changePage($event)"
       />
     }
-  }
 </section>
 
 <p-dialog [header]="editing() ? 'Editar Veículo' : 'Novo Veículo'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem, 94vw)'}">

@@ -48,6 +48,7 @@ export class WorkOrdersPage {
   readonly page = signal(1);
   readonly pageSize = 12;
   readonly search = this.fb.nonNullable.control('');
+  readonly viewMode = signal<'table' | 'cards'>('cards');
 
   readonly form = this.fb.group({
     customerId: ['', Validators.required],

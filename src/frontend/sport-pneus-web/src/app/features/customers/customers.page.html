@@ -8,9 +8,19 @@
     (action)="open()"
   />
 
-  <div class="search-bar">
-    <i class="pi pi-search"></i>
-    <input pInputText [formControl]="search" placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..." />
+  <div class="list-toolbar">
+    <div class="search-bar">
+      <i class="pi pi-search"></i>
+      <input pInputText [formControl]="search" placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..." />
+    </div>
+    <div class="view-mode-toggle">
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Visualização em Tabela">
+        <i class="pi pi-table"></i>
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Cartões">
+        <i class="pi pi-th-large"></i>
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -32,40 +42,131 @@
       <p>{{ search.value ? 'Nenhum resultado corresponde aos termos pesquisados.' : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.' }}</p>
       <p-button label="Novo Cliente" icon="pi pi-plus" (onClick)="open()" />
     </div>
+  } @else if (viewMode() === 'table') {
+    <div class="data-table-card">
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cliente / Razão Social</th>
+              <th>Documento</th>
+              <th>Telefone</th>
+              <th>WhatsApp</th>
+              <th>E-mail</th>
+              <th>Endereço</th>
+              <th>Cadastro</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2.5">
+                    <div class="entity-avatar small">{{ initials(item.name) }}</div>
+                    <strong class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.name }}</strong>
+                  </div>
+                </td>
+                <td>
+                  @if (item.document) {
+                    <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  @if (item.phone) {
+                    <a [href]="'tel:' + item.phone" class="contact-pill"><i class="pi pi-phone"></i> {{ item.phone }}</a>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  @if (item.whatsApp) {
+                    <a [href]="'https://wa.me/55' + item.whatsApp.replace('\\D', '')" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  @if (item.email) {
+                    <a [href]="'mailto:' + item.email" class="contact-pill"><i class="pi pi-envelope"></i> {{ item.email }}</a>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td>
+                  <span class="text-xs text-slate-700 max-w-xs truncate inline-block" [title]="item.address || ''">{{ item.address || '—' }}</span>
+                </td>
+                <td>
+                  <span class="text-xs text-slate-500">{{ formatDate(item.createdAt) }}</span>
+                </td>
+                <td class="text-right">
+                  <div class="card-actions justify-end">
+                    <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+                    <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   } @else {
     <div class="entity-grid">
       @for (item of items(); track item.id) {
-        <article class="entity-card surface-card">
-          <div class="entity-avatar">{{ initials(item.name) }}</div>
-          <div class="entity-main">
-            <div class="entity-header">
-              <h2>{{ item.name }}</h2>
-              @if (item.document) {
-                <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
-              }
+        <article class="rich-entity-card">
+          <div class="rich-card-header">
+            <div class="rich-card-title-group">
+              <div class="entity-avatar">{{ initials(item.name) }}</div>
+              <div>
+                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.name }}</h2>
+                @if (item.document) {
+                  <span class="doc-badge mt-1"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+                }
+              </div>
             </div>
-            <div class="entity-contacts">
-              @if (item.phone) {
-                <span class="contact-item"><i class="pi pi-phone"></i> {{ item.phone }}</span>
-              }
-              @if (item.whatsApp && item.whatsApp !== item.phone) {
-                <span class="contact-item"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</span>
-              }
-              @if (item.email) {
-                <span class="contact-item"><i class="pi pi-envelope"></i> {{ item.email }}</span>
-              }
-              @if (!item.phone && !item.email && !item.whatsApp) {
-                <span class="contact-item text-slate-400">Sem contato informado</span>
-              }
+            <div class="card-actions">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
             </div>
           </div>
-          <div class="card-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-            <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+
+          <div class="rich-card-body">
+            <div class="rich-card-meta-row">
+              @if (item.phone) {
+                <a [href]="'tel:' + item.phone" class="contact-pill"><i class="pi pi-phone"></i> {{ item.phone }}</a>
+              }
+              @if (item.whatsApp) {
+                <a [href]="'https://wa.me/55' + item.whatsApp.replace('\\D', '')" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
+              }
+              @if (item.email) {
+                <a [href]="'mailto:' + item.email" class="contact-pill"><i class="pi pi-envelope"></i> {{ item.email }}</a>
+              }
+            </div>
+
+            @if (item.address) {
+              <div class="rich-card-address">
+                <i class="pi pi-map-marker text-slate-400 mt-0.5"></i>
+                <span>{{ item.address }}</span>
+              </div>
+            }
+
+            @if (item.notes) {
+              <div class="rich-card-notes">
+                <i class="pi pi-info-circle mr-1"></i> {{ item.notes }}
+              </div>
+            }
+          </div>
+
+          <div class="rich-card-footer">
+            <span class="text-xs text-slate-400">Cadastrado em {{ formatDate(item.createdAt) }}</span>
           </div>
         </article>
       }
     </div>
+  }
     @if (total() > pageSize) {
       <p-paginator
         [first]="(page()-1)*pageSize"
@@ -76,7 +177,6 @@
         (onPageChange)="changePage($event)"
       />
     }
-  }
 </section>
 
 <p-dialog [header]="editing() ? 'Editar Cliente' : 'Novo Cliente'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem, 94vw)'}">
