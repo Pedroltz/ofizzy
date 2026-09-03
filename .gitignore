@@ -15,3 +15,5 @@ TestResults/
 data/
 certs/
 LOCAL-CREDENTIALS.md
+compose.override.yaml
+
