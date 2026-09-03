@@ -334,4 +334,8 @@ export class WorkOrdersPage {
       minute: '2-digit'
     });
   }
+
+  printOrder(): void {
+    window.print();
+  }
 }

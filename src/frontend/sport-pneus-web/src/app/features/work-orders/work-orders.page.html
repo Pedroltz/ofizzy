@@ -175,102 +175,101 @@
   }
 </section>
 
-<!-- Drawer de Visualização Detalhada da OS -->
-<p-drawer
+<!-- Modal Centralizado de Visualização Detalhada da OS (Ficha da Ordem) -->
+<p-dialog
   [visible]="detailDialog()"
   (visibleChange)="detailDialog.set($event)"
-  position="right"
   [modal]="true"
-  [blockScroll]="true"
-  [style]="{ width: 'min(920px, 100vw)' }"
-  styleClass="wo-drawer"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(1100px, 95vw)', maxHeight: '94vh' }"
+  styleClass="wo-center-dialog"
+  [draggable]="false"
+  [resizable]="false"
 >
   <ng-template #header>
     @if (viewing(); as order) {
-      <div class="wo-drawer-header">
-        <div class="wo-drawer-title-group">
-          <span class="wo-drawer-badge">ORDEM DE SERVIÇO</span>
-          <h2 class="wo-drawer-title">OS #{{ order.number.toString().padStart(4, '0') }}</h2>
+      <div class="wo-dialog-header">
+        <div class="wo-dialog-title-group">
+          <div class="flex items-center gap-2">
+            <span class="wo-drawer-badge">FICHA DA ORDEM DE SERVIÇO</span>
+            <span class="text-xs text-slate-400">· Sport Pneus Centro Automotivo</span>
+          </div>
+          <h2 class="wo-dialog-title">OS #{{ order.number.toString().padStart(4, '0') }}</h2>
         </div>
-        <span class="status-tag" [class.open]="order.status === 'Open'" [class.in-progress]="order.status === 'InProgress'" [class.completed]="order.status === 'Completed'" [class.cancelled]="order.status === 'Cancelled'">
-          @if (order.status === 'Open') { <i class="pi pi-clock"></i> }
-          @if (order.status === 'InProgress') { <i class="pi pi-sync"></i> }
-          @if (order.status === 'Completed') { <i class="pi pi-check"></i> }
-          @if (order.status === 'Cancelled') { <i class="pi pi-times"></i> }
-          <span>{{ statusLabels[order.status] }}</span>
-        </span>
+        <div class="flex items-center gap-3">
+          <div class="wo-dialog-date-pill">
+            <i class="pi pi-calendar text-teal-600"></i>
+            <span>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></span>
+            @if (order.completedAt) {
+              <span class="text-slate-300 mx-1">|</span>
+              <i class="pi pi-check-circle text-emerald-600"></i>
+              <span>Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
+            }
+          </div>
+          <span class="status-tag" [class.open]="order.status === 'Open'" [class.in-progress]="order.status === 'InProgress'" [class.completed]="order.status === 'Completed'" [class.cancelled]="order.status === 'Cancelled'">
+            @if (order.status === 'Open') { <i class="pi pi-clock"></i> }
+            @if (order.status === 'InProgress') { <i class="pi pi-sync"></i> }
+            @if (order.status === 'Completed') { <i class="pi pi-check"></i> }
+            @if (order.status === 'Cancelled') { <i class="pi pi-times"></i> }
+            <span>{{ statusLabels[order.status] }}</span>
+          </span>
+        </div>
       </div>
     }
   </ng-template>
 
   @if (viewing(); as order) {
-    <div class="wo-drawer-body">
-      <!-- Metadados de Tempo -->
-      <div class="wo-meta-bar">
-        <div class="wo-meta-item">
-          <i class="pi pi-calendar mr-1"></i>
-          <span>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></span>
-        </div>
-        @if (order.completedAt) {
-          <div class="wo-meta-item">
-            <i class="pi pi-check-circle mr-1 text-emerald-600"></i>
-            <span>Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
+    <div class="wo-dialog-content">
+      <!-- Grid de Identificação: Cliente e Veículo -->
+      <div class="wo-doc-info-grid">
+        <div class="wo-doc-card">
+          <div class="wo-doc-card-title">
+            <div class="icon-circle bg-blue-50 text-blue-600"><i class="pi pi-user"></i></div>
+            <span>DADOS DO CLIENTE</span>
           </div>
-        }
-      </div>
-
-      <!-- Resumo do Cliente e Veículo -->
-      <div class="wo-section-grid">
-        <div class="wo-info-card">
-          <div class="wo-card-header">
-            <i class="pi pi-user text-slate-500"></i>
-            <h3 style="color: #64748b !important;">Cliente</h3>
-          </div>
-          <div class="wo-card-content">
-            <strong class="text-slate-900 block font-bold text-base" style="color: #0f172a !important;">{{ order.customerName }}</strong>
-            <p class="text-sm text-slate-600 m-0 mt-1" style="color: #475569 !important;">{{ order.customerPhone || 'Telefone não informado' }}</p>
-            @if (order.customerDocument) {
-              <div class="mt-2">
+          <div class="wo-doc-card-body">
+            <strong class="wo-doc-name">{{ order.customerName }}</strong>
+            <div class="wo-doc-contact-row">
+              <span class="wo-doc-contact"><i class="pi pi-phone text-slate-400 mr-1.5"></i>{{ order.customerPhone || 'Telefone não informado' }}</span>
+              @if (order.customerDocument) {
                 <span class="doc-badge"><i class="pi pi-id-card"></i> {{ order.customerDocument }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="wo-doc-card">
+          <div class="wo-doc-card-title">
+            <div class="icon-circle bg-amber-50 text-amber-600"><i class="pi pi-car"></i></div>
+            <span>VEÍCULO ATENDIDO</span>
+          </div>
+          <div class="wo-doc-card-body">
+            <div class="flex items-center gap-3">
+              <span class="plate-badge large">{{ order.vehiclePlate }}</span>
+              <strong class="wo-doc-name">{{ order.vehicleDescription }}</strong>
+            </div>
+            @if (order.mileage !== null) {
+              <div class="mt-2 text-sm text-slate-600 flex items-center gap-1.5 font-medium">
+                <i class="pi pi-compass text-slate-400"></i>
+                <span>Quilometragem registrada: <strong class="text-slate-900">{{ order.mileage.toLocaleString('pt-BR') }} km</strong></span>
               </div>
             }
           </div>
         </div>
-
-        <div class="wo-info-card">
-          <div class="wo-card-header">
-            <i class="pi pi-car text-slate-500"></i>
-            <h3 style="color: #64748b !important;">Veículo</h3>
-          </div>
-          <div class="wo-card-content">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="plate-badge">{{ order.vehiclePlate }}</span>
-              <strong class="text-slate-900 font-bold text-base" style="color: #0f172a !important;">{{ order.vehicleDescription }}</strong>
-            </div>
-            @if (order.mileage !== null) {
-              <p class="text-sm text-slate-600 m-0 mt-2" style="color: #475569 !important;">
-                <i class="pi pi-compass mr-1 text-slate-400"></i>
-                <span>{{ order.mileage.toLocaleString('pt-BR') }} km</span>
-              </p>
-            }
-          </div>
-        </div>
       </div>
 
-      <!-- Diagnóstico e Queixa -->
+      <!-- Apontamentos Técnicos (se existirem) -->
       @if (order.complaint || order.diagnosis || order.notes) {
-        <div class="wo-block">
-          <div class="wo-block-header">
-            <div class="flex items-center gap-2">
-              <i class="pi pi-file-edit text-slate-500"></i>
-              <h3>Apontamentos Técnicos</h3>
-            </div>
+        <div class="wo-tech-card">
+          <div class="wo-doc-card-title mb-3">
+            <div class="icon-circle bg-slate-100 text-slate-600"><i class="pi pi-file-edit"></i></div>
+            <span>APONTAMENTOS TÉCNICOS DA OFICINA</span>
           </div>
-          <div class="wo-block-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @if (order.complaint) {
               <div class="wo-field-block">
                 <span class="wo-field-label">Queixa do Cliente</span>
-                <p class="wo-field-text">{{ order.complaint }}</p>
+                <p class="wo-field-text bg-slate-50 border border-slate-200 rounded-md p-3">{{ order.complaint }}</p>
               </div>
             }
             @if (order.diagnosis) {
@@ -279,22 +278,22 @@
                 <p class="wo-field-text diagnosis">{{ order.diagnosis }}</p>
               </div>
             }
-            @if (order.notes) {
-              <div class="wo-field-block">
-                <span class="wo-field-label">Observações Internas</span>
-                <p class="wo-field-text notes">{{ order.notes }}</p>
-              </div>
-            }
           </div>
+          @if (order.notes) {
+            <div class="wo-field-block mt-3">
+              <span class="wo-field-label">Observações Internas</span>
+              <p class="wo-field-text notes bg-slate-50 border border-slate-200 rounded-md p-2.5">{{ order.notes }}</p>
+            </div>
+          }
         </div>
       }
 
-      <!-- Serviços Executados -->
+      <!-- Tabela Ampla de Mão de Obra e Serviços -->
       <div class="wo-block">
         <div class="wo-block-header">
           <div class="flex items-center gap-2">
-            <i class="pi pi-wrench text-slate-500"></i>
-            <h3>Mão de Obra e Serviços</h3>
+            <i class="pi pi-wrench text-blue-600"></i>
+            <h3 class="font-bold text-base text-slate-800">Mão de Obra e Serviços</h3>
           </div>
           <span class="wo-item-count">{{ order.services.length }} {{ order.services.length === 1 ? 'item' : 'itens' }}</span>
         </div>
@@ -305,26 +304,26 @@
             <table class="wo-table">
               <thead>
                 <tr>
-                  <th>Descrição</th>
-                  <th class="text-center w-16">Qtd</th>
-                  <th class="text-right w-28">Unitário</th>
-                  <th class="text-right w-28">Subtotal</th>
+                  <th class="text-left py-3">Descrição da Mão de Obra / Serviço</th>
+                  <th class="text-center w-24">Qtd</th>
+                  <th class="text-right w-36">Valor Unitário</th>
+                  <th class="text-right w-36">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 @for (svc of order.services; track svc.id) {
                   <tr>
-                    <td><strong>{{ svc.description }}</strong></td>
+                    <td class="py-3"><strong class="text-slate-900 text-sm">{{ svc.description }}</strong></td>
                     <td class="text-center">{{ svc.quantity }}</td>
                     <td class="text-right">{{ money(svc.unitPrice) }}</td>
-                    <td class="text-right font-semibold text-slate-900">{{ money(svc.total) }}</td>
+                    <td class="text-right font-bold text-slate-900">{{ money(svc.total) }}</td>
                   </tr>
                 }
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="3" class="text-right text-slate-500">Subtotal Serviços:</td>
-                  <td class="text-right font-bold text-slate-800">{{ money(order.servicesTotal) }}</td>
+                  <td colspan="3" class="text-right text-slate-600 font-semibold py-3">Subtotal de Serviços:</td>
+                  <td class="text-right font-bold text-slate-900 text-base py-3">{{ money(order.servicesTotal) }}</td>
                 </tr>
               </tfoot>
             </table>
@@ -332,12 +331,12 @@
         }
       </div>
 
-      <!-- Peças Utilizadas -->
+      <!-- Tabela Ampla de Peças e Insumos -->
       <div class="wo-block">
         <div class="wo-block-header">
           <div class="flex items-center gap-2">
-            <i class="pi pi-box text-slate-500"></i>
-            <h3>Peças e Materiais</h3>
+            <i class="pi pi-box text-emerald-600"></i>
+            <h3 class="font-bold text-base text-slate-800">Peças, Materiais e Insumos</h3>
           </div>
           <span class="wo-item-count">{{ order.parts.length }} {{ order.parts.length === 1 ? 'item' : 'itens' }}</span>
         </div>
@@ -348,10 +347,11 @@
             <table class="wo-table">
               <thead>
                 <tr>
-                  <th>Código / Descrição</th>
-                  <th class="text-center w-16">Qtd</th>
-                  <th class="text-right w-28">Unitário</th>
-                  <th class="text-right w-28">Subtotal</th>
+                  <th class="text-left w-36">Código / Ref</th>
+                  <th class="text-left py-3">Descrição da Peça / Insumo</th>
+                  <th class="text-center w-24">Qtd</th>
+                  <th class="text-right w-36">Valor Unitário</th>
+                  <th class="text-right w-36">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
@@ -359,20 +359,22 @@
                   <tr>
                     <td>
                       @if (pt.code) {
-                        <span class="font-mono text-xs font-bold text-slate-500 mr-2 bg-slate-100 px-1.5 py-0.5 rounded">[{{ pt.code }}]</span>
+                        <span class="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded">{{ pt.code }}</span>
+                      } @else {
+                        <span class="text-slate-400">-</span>
                       }
-                      <strong>{{ pt.description }}</strong>
                     </td>
+                    <td class="py-3"><strong class="text-slate-900 text-sm">{{ pt.description }}</strong></td>
                     <td class="text-center">{{ pt.quantity }}</td>
                     <td class="text-right">{{ money(pt.unitPrice) }}</td>
-                    <td class="text-right font-semibold text-slate-900">{{ money(pt.total) }}</td>
+                    <td class="text-right font-bold text-slate-900">{{ money(pt.total) }}</td>
                   </tr>
                 }
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="3" class="text-right text-slate-500">Subtotal Peças:</td>
-                  <td class="text-right font-bold text-slate-800">{{ money(order.partsTotal) }}</td>
+                  <td colspan="4" class="text-right text-slate-600 font-semibold py-3">Subtotal de Peças:</td>
+                  <td class="text-right font-bold text-slate-900 text-base py-3">{{ money(order.partsTotal) }}</td>
                 </tr>
               </tfoot>
             </table>
@@ -380,26 +382,37 @@
         }
       </div>
 
-      <!-- Total Geral -->
-      <div class="wo-grand-total">
-        <div class="wo-grand-total-info">
-          <span class="wo-grand-total-label">Total Geral da Ordem</span>
-          <span class="wo-grand-total-sub">Serviços executados + peças utilizadas</span>
+      <!-- Resumo Financeiro / Fechamento da OS -->
+      <div class="wo-doc-total-box">
+        <div class="wo-doc-total-row">
+          <span>Subtotal de Mão de Obra:</span>
+          <strong>{{ money(order.servicesTotal) }}</strong>
         </div>
-        <div class="wo-grand-total-value">{{ money(order.total) }}</div>
+        <div class="wo-doc-total-row">
+          <span>Subtotal de Peças e Insumos:</span>
+          <strong>{{ money(order.partsTotal) }}</strong>
+        </div>
+        <div class="wo-doc-total-grand">
+          <div class="flex flex-col">
+            <span class="text-xs uppercase font-extrabold text-emerald-800 tracking-wider">Total Geral da Ordem</span>
+            <span class="text-xs text-emerald-600">Serviços + Peças</span>
+          </div>
+          <strong>{{ money(order.total) }}</strong>
+        </div>
       </div>
     </div>
   }
 
   <ng-template #footer>
     @if (viewing(); as order) {
-      <div class="wo-drawer-footer">
-        <div class="wo-footer-left">
+      <div class="wo-dialog-footer">
+        <div class="flex items-center gap-2">
+          <p-button label="Imprimir Ficha" icon="pi pi-print" [outlined]="true" severity="secondary" (onClick)="printOrder()" />
           @if (order.status === 'Open' || order.status === 'InProgress') {
             <p-button label="Editar Ordem" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
           }
         </div>
-        <div class="wo-footer-right">
+        <div class="flex items-center gap-2 flex-wrap">
           @if (order.status === 'Open') {
             <p-button label="Iniciar Atendimento" icon="pi pi-play" severity="info" (onClick)="status(order, 'InProgress')" />
           }
@@ -414,29 +427,30 @@
       </div>
     }
   </ng-template>
-</p-drawer>
+</p-dialog>
 
-<!-- Drawer de Criação / Edição de OS -->
-<p-drawer
+<!-- Modal Centralizado de Criação / Edição de OS -->
+<p-dialog
   [visible]="dialog()"
   (visibleChange)="dialog.set($event)"
-  position="right"
   [modal]="true"
-  [blockScroll]="true"
-  [style]="{ width: 'min(940px, 100vw)' }"
-  styleClass="wo-drawer"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(1120px, 95vw)', maxHeight: '94vh' }"
+  styleClass="wo-center-dialog"
+  [draggable]="false"
+  [resizable]="false"
 >
   <ng-template #header>
-    <div class="wo-drawer-header">
-      <div class="wo-drawer-title-group">
+    <div class="wo-dialog-header">
+      <div class="wo-dialog-title-group">
         <span class="wo-drawer-badge">{{ editing() ? 'ALTERAÇÃO DE ORDEM' : 'NOVA ENTRADA' }}</span>
-        <h2 class="wo-drawer-title">{{ editing() ? ('Editar OS #' + editing()?.number?.toString()?.padStart(4, '0')) : 'Abertura de Ordem de Serviço' }}</h2>
+        <h2 class="wo-dialog-title">{{ editing() ? ('Editar OS #' + editing()?.number?.toString()?.padStart(4, '0')) : 'Abertura de Ordem de Serviço' }}</h2>
       </div>
     </div>
   </ng-template>
 
-  <form [formGroup]="form" id="workOrderForm" class="wo-drawer-form" (ngSubmit)="save()">
-    <div class="wo-drawer-body">
+  <form [formGroup]="form" id="workOrderForm" class="wo-dialog-form" (ngSubmit)="save()">
+    <div class="wo-dialog-content">
       <div class="two-columns">
         <label>Cliente (Proprietário)
           <select formControlName="customerId" style="color: #0f172a !important; background-color: #ffffff !important;">
@@ -685,17 +699,17 @@
   </form>
 
   <ng-template #footer>
-    <div class="wo-drawer-footer">
+    <div class="wo-dialog-footer">
       <div class="wo-footer-total-calc">
         <span>Total Calculado:</span>
-        <strong>{{ money(orderTotal()) }}</strong>
+        <strong class="text-slate-900">{{ money(orderTotal()) }}</strong>
       </div>
-      <div class="wo-footer-right">
+      <div class="flex items-center gap-2">
         <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
         <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="button" (onClick)="save()" [loading]="saving()" />
       </div>
     </div>
   </ng-template>
-</p-drawer>
+</p-dialog>
 
 

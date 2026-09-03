@@ -1645,7 +1645,189 @@ select:focus {
 }
 
 /* =========================================================
-   WORK ORDER SLIDE-OVER DRAWER (MODAIS REFORMULADOS)
+   CENTERED WORK ORDER DOCUMENT MODAL (NOVO PADRÃO ERGONÔMICO)
+   ========================================================= */
+.wo-center-dialog {
+    max-height: 94vh;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+    border: 1px solid var(--app-border) !important;
+}
+
+.wo-center-dialog .p-dialog-header {
+    padding: 1.25rem 2rem !important;
+    background: #f8fafc !important;
+    border-bottom: 1px solid var(--app-border) !important;
+}
+
+.wo-center-dialog .p-dialog-content {
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow-y: auto !important;
+    max-height: calc(94vh - 145px) !important;
+}
+
+.wo-center-dialog .p-dialog-footer {
+    padding: 1rem 2rem !important;
+    background: #f8fafc !important;
+    border-top: 1px solid var(--app-border) !important;
+}
+
+.wo-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.wo-dialog-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.wo-dialog-title {
+    font-size: 1.55rem;
+    font-weight: 850;
+    margin: 0;
+    color: #0f172a;
+    letter-spacing: -.02em;
+}
+
+.wo-dialog-date-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .84rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: .35rem .75rem;
+    border-radius: 8px;
+    color: #475569;
+}
+
+.wo-dialog-content {
+    padding: 2rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: #ffffff;
+}
+
+.wo-dialog-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.wo-dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Document Grid: Customer & Vehicle */
+.wo-doc-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.wo-doc-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+
+.wo-doc-card-title {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.wo-doc-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.wo-doc-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a !important;
+}
+
+.wo-doc-contact-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+    font-size: .88rem;
+    color: #475569;
+}
+
+.wo-tech-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+/* Document Summary Box */
+.wo-doc-total-box {
+    margin-left: auto;
+    width: min(400px, 100%);
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.05);
+}
+
+.wo-doc-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .92rem;
+    color: #334155;
+}
+
+.wo-doc-total-grand {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: .75rem;
+    border-top: 1.5px dashed #86efac;
+}
+
+.wo-doc-total-grand strong {
+    font-size: 1.85rem;
+    font-weight: 850;
+    color: #15803d;
+}
+
+/* =========================================================
+   WORK ORDER SLIDE-OVER DRAWER (LEGACY COMPATIBILITY)
    ========================================================= */
 .wo-drawer {
     background: var(--app-surface) !important;
@@ -2476,5 +2658,53 @@ label {
     .quick-actions-bar {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .wo-doc-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wo-dialog-content {
+        padding: 1.25rem 1rem !important;
+        gap: 1rem !important;
+    }
+
+    .wo-dialog-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wo-dialog-footer > div {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .wo-dialog-footer button,
+    .wo-dialog-footer p-button {
+        flex: 1;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    .wo-center-dialog,
+    .wo-center-dialog * {
+        visibility: visible !important;
+    }
+    .wo-center-dialog {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .wo-dialog-footer,
+    .p-dialog-header-actions {
+        display: none !important;
     }
 }
