@@ -7,6 +7,8 @@ Atualizado em: 2026-09-02
 Fases 1, 2 e 3 concluídas e validadas.
 - Módulos de Clientes e Veículos totalmente integrados e corrigidos.
 - Módulo de Ordens de Serviço completo: abertura, listagem, visualização detalhada, edição (em aberto/em andamento), transições de estado com confirmação e persistência total no PostgreSQL.
+- Interface web (UI) completamente remodelada para padrão profissional/corporativo automotivo, sem emojis, com ícones vetoriais PrimeIcons, badges de placa automotiva, dashboard com fluxo operacional e painéis polidos.
+- Backend enriquecido com carregamento resiliente de UserSecrets e fallback para variáveis do `.env` (`JWT_SIGNING_KEY` e PostgreSQL), permitindo execução direta via `dotnet run` sem falhas.
 - Stack Docker Compose (PostgreSQL, Backend, Frontend e Nginx) validada com smoke tests e persistência após reinício na porta 8080.
 
 ## Próximo marco
