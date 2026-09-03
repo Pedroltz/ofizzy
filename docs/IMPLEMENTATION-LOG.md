@@ -144,4 +144,18 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Largura do modal expandida para até `920px` / `940px` em monitores amplos, proporcionando conforto visual no lançamento de ordens volumosas.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
+## 2026-09-02 — Modal Centralizado em Ficha de Documento e Suporte a Impressão da OS
+
+- **Substituição da Gaveta Lateral por Modal Centralizado Ergonômico**:
+  - Migração de `<p-drawer>` lateral para modal centralizado `<p-dialog>` (`.wo-center-dialog`) de largura expandida (`min(1100px, 95vw)`).
+  - Experiência visual centralizada, eliminando a sensação de "gaveta espremida no canto direito da tela".
+- **Ficha Visual da Ordem de Serviço (Padrão Centro Automotivo)**:
+  - Cabeçalho de documento com numeração destacada (`OS #0001`), subtítulo institucional da Sport Pneus, tag de status com ícones e data/hora de abertura e conclusão.
+  - Painel de identificação em duas colunas amplas (`.wo-doc-info-grid`): card do Cliente (com telefone/WhatsApp e CPF/CNPJ) e card do Veículo (com placa Mercosul em tamanho ampliado e KM registrada).
+  - Tabelas de Mão de Obra e Peças com largura total, cabeçalho cinza suave, colunas espaçosas e tipografia nítida de alto contraste.
+  - Quadro de fechamento financeiro estilo fatura/recibo (`.wo-doc-total-box`), com subtotais detalhados e valor total da OS em verde esmeralda.
+- **Recursos Adicionais e Impressão**:
+  - Adicionado botão **"Imprimir Ficha"** (`printOrder()` chamando `window.print()`) com folha de estilos `@media print` que isola a ficha da ordem de serviço para gerar PDF ou impressão física limpa.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
+
 
