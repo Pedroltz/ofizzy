@@ -1790,40 +1790,156 @@ select:focus {
     padding: 1.25rem 1.5rem;
 }
 
-/* Document Summary Box */
-.wo-doc-total-box {
-    margin-left: auto;
-    width: min(400px, 100%);
-    background: #f0fdf4;
-    border: 1.5px solid #86efac;
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: .65rem;
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.05);
+/* Executive Work Order Invoice Summary Card */
+.wo-invoice-summary-card {
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
 }
 
-.wo-doc-total-row {
+.wo-summary-notes {
+    padding: 1.5rem 1.75rem;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+}
+
+.wo-summary-notes-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .82rem;
+    font-weight: 800;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.wo-summary-metrics {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.wo-metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.wo-metric-label {
+    font-size: .74rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.wo-metric-value {
+    font-size: 1.1rem;
+    font-weight: 850;
+    color: #0f172a;
+}
+
+.wo-metric-divider {
+    width: 1px;
+    height: 2.25rem;
+    background: #cbd5e1;
+}
+
+.wo-summary-disclaimer {
+    margin: 0;
+    font-size: .8rem;
+    color: #64748b;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+}
+
+.wo-financial-column {
+    padding: 1.5rem 1.75rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-left: 1px solid #bbf7d0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .85rem;
+}
+
+.wo-financial-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: .92rem;
-    color: #334155;
+    font-size: .95rem;
 }
 
-.wo-doc-total-grand {
+.wo-financial-row .label {
+    color: #475569;
+    font-weight: 600;
+}
+
+.wo-financial-row .value {
+    color: #0f172a;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.05rem;
+}
+
+.wo-financial-divider {
+    height: 1px;
+    background: #86efac;
+    margin: .25rem 0;
+}
+
+.wo-financial-grand-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    padding-top: .75rem;
-    border-top: 1.5px dashed #86efac;
+    align-items: center;
+    padding-top: .4rem;
+    gap: 1rem;
 }
 
-.wo-doc-total-grand strong {
-    font-size: 1.85rem;
+.grand-label-group {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.grand-badge {
+    font-size: .74rem;
     font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    padding: .2rem .55rem;
+    border-radius: 6px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.grand-sub {
+    font-size: .75rem;
     color: #15803d;
+    font-weight: 600;
+}
+
+.grand-value {
+    font-size: 2.15rem;
+    font-weight: 900;
+    color: #166534;
+    letter-spacing: -.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
 }
 
 /* =========================================================
@@ -2642,6 +2758,20 @@ label {
 
     .wo-grand-total-value {
         font-size: 1.5rem;
+    }
+
+    .wo-invoice-summary-card {
+        grid-template-columns: 1fr;
+    }
+
+    .wo-summary-notes {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .wo-financial-column {
+        border-left: none;
+        border-top: 1px solid #bbf7d0;
     }
 }
 

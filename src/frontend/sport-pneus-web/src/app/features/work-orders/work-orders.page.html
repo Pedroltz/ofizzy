@@ -383,21 +383,50 @@
       </div>
 
       <!-- Resumo Financeiro / Fechamento da OS -->
-      <div class="wo-doc-total-box">
-        <div class="wo-doc-total-row">
-          <span>Subtotal de Mão de Obra:</span>
-          <strong>{{ money(order.servicesTotal) }}</strong>
-        </div>
-        <div class="wo-doc-total-row">
-          <span>Subtotal de Peças e Insumos:</span>
-          <strong>{{ money(order.partsTotal) }}</strong>
-        </div>
-        <div class="wo-doc-total-grand">
-          <div class="flex flex-col">
-            <span class="text-xs uppercase font-extrabold text-emerald-800 tracking-wider">Total Geral da Ordem</span>
-            <span class="text-xs text-emerald-600">Serviços + Peças</span>
+      <div class="wo-invoice-summary-card">
+        <!-- Lado Esquerdo: Resumo Operacional dos Itens -->
+        <div class="wo-summary-notes">
+          <div class="wo-summary-notes-header">
+            <i class="pi pi-receipt text-emerald-600"></i>
+            <span>Resumo de Fechamento da OS</span>
           </div>
-          <strong>{{ money(order.total) }}</strong>
+          <div class="wo-summary-metrics">
+            <div class="wo-metric-item">
+              <span class="wo-metric-label">Mão de Obra / Serviços</span>
+              <strong class="wo-metric-value">{{ order.services.length }} {{ order.services.length === 1 ? 'item executado' : 'itens executados' }}</strong>
+            </div>
+            <div class="wo-metric-divider"></div>
+            <div class="wo-metric-item">
+              <span class="wo-metric-label">Peças & Insumos</span>
+              <strong class="wo-metric-value">{{ order.parts.length }} {{ order.parts.length === 1 ? 'peça aplicada' : 'peças aplicadas' }}</strong>
+            </div>
+          </div>
+          <p class="wo-summary-disclaimer">
+            <i class="pi pi-shield text-emerald-700 mr-1.5"></i>
+            <span>Valores e apontamentos técnicos consolidados pela oficina Sport Pneus.</span>
+          </p>
+        </div>
+
+        <!-- Lado Direito: Cálculos e Total Geral Perfeitamente Alinhados -->
+        <div class="wo-financial-column">
+          <div class="wo-financial-row">
+            <span class="label">Mão de Obra & Serviços:</span>
+            <span class="value">{{ money(order.servicesTotal) }}</span>
+          </div>
+          <div class="wo-financial-row">
+            <span class="label">Peças, Materiais & Insumos:</span>
+            <span class="value">{{ money(order.partsTotal) }}</span>
+          </div>
+          <div class="wo-financial-divider"></div>
+          <div class="wo-financial-grand-row">
+            <div class="grand-label-group">
+              <span class="grand-badge">VALOR TOTAL DA OS</span>
+              <span class="grand-sub">Total final a faturar</span>
+            </div>
+            <div class="grand-value">
+              {{ money(order.total) }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -701,8 +730,8 @@
   <ng-template #footer>
     <div class="wo-dialog-footer">
       <div class="wo-footer-total-calc">
-        <span>Total Calculado:</span>
-        <strong class="text-slate-900">{{ money(orderTotal()) }}</strong>
+        <span class="text-xs uppercase font-extrabold text-slate-500 tracking-wider">Total Calculado da OS:</span>
+        <strong class="text-emerald-700 text-2xl font-black">{{ money(orderTotal()) }}</strong>
       </div>
       <div class="flex items-center gap-2">
         <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
