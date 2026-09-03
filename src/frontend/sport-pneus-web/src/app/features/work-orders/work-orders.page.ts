@@ -343,28 +343,4 @@ export class WorkOrdersPage {
   printOrder(): void {
     window.print();
   }
-
-  onPdfDownloadClick(order: WorkOrder): void {
-    this.messages.add({
-      severity: 'info',
-      summary: 'Download iniciado',
-      detail: `Baixando OS-${order.number.toString().padStart(4, '0')}.pdf...`
-    });
-  }
-
-  downloadPdf(order: WorkOrder): void {
-    const link = document.createElement('a');
-    link.href = `/api/work-orders/${order.id}/pdf`;
-    link.download = `OS-${order.number.toString().padStart(4, '0')}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      link.remove();
-    }, 1000);
-    this.messages.add({
-      severity: 'info',
-      summary: 'Download iniciado',
-      detail: `Baixando OS-${order.number.toString().padStart(4, '0')}.pdf...`
-    });
-  }
 }

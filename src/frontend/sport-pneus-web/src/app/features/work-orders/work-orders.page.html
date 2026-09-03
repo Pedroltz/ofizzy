@@ -417,15 +417,6 @@
       <div class="wo-dialog-footer">
         <div class="flex items-center gap-2">
           <p-button label="Imprimir Ficha" icon="pi pi-print" [outlined]="true" severity="secondary" (onClick)="printOrder()" />
-          <a
-            [href]="'/api/work-orders/' + order.id + '/pdf'"
-            [download]="'OS-' + order.number.toString().padStart(4, '0') + '.pdf'"
-            class="wo-pdf-download-btn"
-            (click)="onPdfDownloadClick(order)"
-          >
-            <i class="pi pi-file-pdf"></i>
-            <span>Baixar PDF</span>
-          </a>
           @if (order.status === 'Open' || order.status === 'InProgress') {
             <p-button label="Editar Ordem" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
           }
