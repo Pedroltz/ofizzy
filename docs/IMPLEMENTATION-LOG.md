@@ -84,3 +84,15 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Estilos dedicados adicionados em `styles.css` (`.wo-drawer`, `.wo-block`, `.wo-table`, `.wo-grand-total`, `.wo-drawer-footer`).
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e imagem frontend reconstruída.
 
+## 2026-09-02 — Visualização Híbrida de Dados (Tabelas e Cartões Ricos) e Contraste de Textos
+
+- **Correção de Alto Contraste de Cores**:
+  - Desativada a comutação automática de tema escuro do PrimeNG com `darkModeSelector: 'none'` em `app.config.ts`, prevenindo que navegadores/sistemas com tema escuro forçassem textos brancos sobre cartões de fundo claro.
+  - Aplicada blindagem de estilo em `styles.css` para `select`, `select option`, `.wo-info-card strong`, `.order-card-identity h2` e `.catalog-row h3`, garantindo tom ardósia de máxima legibilidade (`#0f172a`).
+- **Modo Híbrido de Listagem (Tabela e Cartões)**:
+  - Implementado alternador de visualização (`viewMode`) em **Clientes**, **Veículos** e **Ordens de Serviço**.
+  - **Tabela Completa (DataGrid)**: exibição em linhas e colunas estruturadas contendo todas as informações cadastrais (Nome, CPF/CNPJ, Telefone com discagem, WhatsApp direto, E-mail, Endereço, Data de Cadastro, Placa Mercosul, Chassi, Ano, Cor, KM, Status, Valor Total e Ações).
+  - **Cartões Ricos**: blocos detalhados que não ocultam dados, apresentando chips de contato interativos, placas em destaque e seções dedicadas para endereços e anotações.
+- Validação: lint e build aprovados sem erros, imagens Docker atualizadas.
+
+
