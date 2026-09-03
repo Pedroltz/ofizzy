@@ -47,14 +47,14 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] ThemeToggle
 
 ### R4 — App Shell
-- [ ] Sidebar desktop
-- [ ] Header desktop
-- [ ] Navegação
-- [ ] Usuário
-- [ ] Theme Toggle
-- [ ] Drawer mobile
-- [ ] Header mobile
-- [ ] Responsividade
+- [x] Sidebar desktop
+- [x] Header desktop
+- [x] Navegação
+- [x] Usuário
+- [x] Theme Toggle
+- [x] Drawer mobile
+- [x] Header mobile
+- [x] Responsividade
 
 ### R5 — Dashboard
 - [ ] Header operacional

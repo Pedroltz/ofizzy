@@ -341,5 +341,19 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: bundle compilado com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
 
+## 2026-09-03 — UI/UX Redesign: R4 — App Shell Concluído
+
+- **Reformulação do Shell da Aplicação (`src/app/layout/`)**:
+  - **Sidebar Desktop Minimalista**: dimensionada para 248px (`--sidebar-width`), superfícies limpas com fundo `var(--surface-primary)` e borda sutil `var(--border-subtle)`, wordmark `SP` com suporte aos novos tokens de verde (`var(--primary)` e `var(--primary-soft)`). Navegação sóbria inspirada em dashboards SaaS operacionais, com itens ativos destacados por fundo suave e cor no ícone, sem blocos chamativos.
+  - **Header Desktop Operacional**: adicionado cabeçalho superior horizontal com altura de 56px (`--header-height`), exibindo a data de hoje formatada em português brasileiro (`todayFormatted`), link ágil de criação "+ Nova OS" para a rota `/ordens` e o seletor acessível de tema (`ThemeToggleComponent`).
+  - **Header Mobile & Drawer**: cabeçalho móvel sticky de 60px com acesso direto ao botão hambúrguer, brand da oficina e botão de alternância de tema (`app-theme-toggle`) junto ao avatar. Drawer móvel deslizante com navegação completa, perfil do usuário e botão de tema no rodapé.
+  - **Botão de Alternância de Tema**: posicionado de forma permanente e visível tanto na barra superior do desktop quanto no rodapé da sidebar e no header móvel, permitindo alternar livremente entre os modos **Claro**, **Escuro** e **Sistema**.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
+
+
 
 

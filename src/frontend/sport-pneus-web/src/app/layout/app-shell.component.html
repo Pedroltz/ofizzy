@@ -1,10 +1,11 @@
 <div class="app-layout">
+  <!-- Desktop Sidebar -->
   <aside class="desktop-sidebar" aria-label="Navegação principal">
     <a routerLink="/" class="sidebar-brand" aria-label="Sport Pneus — Início">
       <span class="sidebar-wordmark" aria-hidden="true">SP</span>
       <span class="brand-info">
         <strong class="brand-title">Sport Pneus</strong>
-        <span class="brand-subtitle">Oficina & serviços</span>
+        <span class="brand-subtitle">Gestão de Oficina</span>
       </span>
     </a>
 
@@ -31,6 +32,9 @@
     </div>
 
     <div class="sidebar-footer">
+      <div class="sidebar-theme-row">
+        <app-theme-toggle />
+      </div>
       <div class="sidebar-user">
         <div class="user-avatar">
           {{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}
@@ -52,87 +56,114 @@
     </div>
   </aside>
 
-  <header class="mobile-header">
-    <button
-      type="button"
-      class="mobile-menu-btn"
-      (click)="mobileMenu.set(true)"
-      aria-label="Abrir menu"
-    >
-      <i class="pi pi-bars"></i>
-    </button>
-    <a routerLink="/" class="mobile-brand" aria-label="Sport Pneus — Início">
-      <span class="sidebar-wordmark small" aria-hidden="true">SP</span>
-      <strong>Sport Pneus</strong>
-    </a>
-    <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
-  </header>
+  <!-- Main Area -->
+  <div class="app-main-area">
+    <!-- Desktop Header -->
+    <header class="desktop-header">
+      <div class="desktop-header__left">
+        <span class="desktop-header__date">
+          <i class="pi pi-calendar"></i>
+          <span>{{ todayFormatted() }}</span>
+        </span>
+      </div>
+      <div class="desktop-header__right">
+        <a routerLink="/ordens" class="header-action-link">
+          <i class="pi pi-plus"></i>
+          <span>Nova OS</span>
+        </a>
+        <app-theme-toggle />
+      </div>
+    </header>
 
-  @if (mobileMenu()) {
-    <div class="mobile-drawer" (click)="mobileMenu.set(false)" role="presentation">
-      <div
-        class="drawer-panel"
-        (click)="$event.stopPropagation()"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu principal"
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        (click)="mobileMenu.set(true)"
+        aria-label="Abrir menu"
       >
-        <div class="drawer-header">
-          <a routerLink="/" class="sidebar-brand" (click)="mobileMenu.set(false)">
-            <span class="sidebar-wordmark" aria-hidden="true">SP</span>
-            <span class="brand-info">
-              <strong class="brand-title">Sport Pneus</strong>
-              <span class="brand-subtitle">Oficina & serviços</span>
-            </span>
-          </a>
-          <button
-            type="button"
-            class="mobile-close-btn"
-            (click)="mobileMenu.set(false)"
-            aria-label="Fechar menu"
-          >
-            <i class="pi pi-times"></i>
-          </button>
-        </div>
+        <i class="pi pi-bars"></i>
+      </button>
+      <a routerLink="/" class="mobile-brand" aria-label="Sport Pneus — Início">
+        <span class="sidebar-wordmark small" aria-hidden="true">SP</span>
+        <strong>Sport Pneus</strong>
+      </a>
+      <div class="mobile-header__right">
+        <app-theme-toggle />
+        <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+      </div>
+    </header>
 
-        <div class="sidebar-navigation">
-          @for (group of navigation; track group.label) {
-            <section class="nav-section" [attr.aria-label]="group.label">
-              <p class="nav-section-label">{{ group.label }}</p>
-              <nav class="sidebar-nav">
-                @for (item of group.items; track item.route) {
-                  <a
-                    [routerLink]="item.route"
-                    routerLinkActive="active"
-                    [routerLinkActiveOptions]="{ exact: item.exact }"
-                    ariaCurrentWhenActive="page"
-                    class="nav-item"
-                    (click)="mobileMenu.set(false)"
-                  >
-                    <span class="nav-icon"><i [class]="item.icon"></i></span>
-                    <span>{{ item.label }}</span>
-                  </a>
-                }
-              </nav>
-            </section>
-          }
-        </div>
-
-        <div class="sidebar-footer">
-          <div class="sidebar-user drawer-user">
-            <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
-            <div class="user-details">
-              <strong>{{ user()?.name }}</strong
-              ><small>{{ user()?.email }}</small>
-            </div>
+    @if (mobileMenu()) {
+      <div class="mobile-drawer" (click)="mobileMenu.set(false)" role="presentation">
+        <div
+          class="drawer-panel"
+          (click)="$event.stopPropagation()"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu principal"
+        >
+          <div class="drawer-header">
+            <a routerLink="/" class="sidebar-brand" (click)="mobileMenu.set(false)">
+              <span class="sidebar-wordmark" aria-hidden="true">SP</span>
+              <span class="brand-info">
+                <strong class="brand-title">Sport Pneus</strong>
+                <span class="brand-subtitle">Gestão de Oficina</span>
+              </span>
+            </a>
+            <button
+              type="button"
+              class="mobile-close-btn"
+              (click)="mobileMenu.set(false)"
+              aria-label="Fechar menu"
+            >
+              <i class="pi pi-times"></i>
+            </button>
           </div>
-          <button type="button" class="drawer-logout" (click)="logout()">
-            <i class="pi pi-sign-out"></i><span>Encerrar sessão</span>
-          </button>
+
+          <div class="sidebar-navigation">
+            @for (group of navigation; track group.label) {
+              <section class="nav-section" [attr.aria-label]="group.label">
+                <p class="nav-section-label">{{ group.label }}</p>
+                <nav class="sidebar-nav">
+                  @for (item of group.items; track item.route) {
+                    <a
+                      [routerLink]="item.route"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: item.exact }"
+                      ariaCurrentWhenActive="page"
+                      class="nav-item"
+                      (click)="mobileMenu.set(false)"
+                    >
+                      <span class="nav-icon"><i [class]="item.icon"></i></span>
+                      <span>{{ item.label }}</span>
+                    </a>
+                  }
+                </nav>
+              </section>
+            }
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-theme-row">
+              <app-theme-toggle />
+            </div>
+            <div class="sidebar-user drawer-user">
+              <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+              <div class="user-details">
+                <strong>{{ user()?.name }}</strong
+                ><small>{{ user()?.email }}</small>
+              </div>
+            </div>
+            <button type="button" class="drawer-logout" (click)="logout()">
+              <i class="pi pi-sign-out"></i><span>Encerrar sessão</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  }
+    }
 
-  <main class="app-content"><router-outlet /></main>
+    <main class="app-content"><router-outlet /></main>
+  </div>
 </div>
