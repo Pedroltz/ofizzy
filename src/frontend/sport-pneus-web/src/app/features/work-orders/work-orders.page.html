@@ -382,50 +382,30 @@
         }
       </div>
 
-      <!-- Resumo Financeiro / Fechamento da OS -->
-      <div class="wo-invoice-summary-card">
-        <!-- Lado Esquerdo: Resumo Operacional dos Itens -->
-        <div class="wo-summary-notes">
-          <div class="wo-summary-notes-header">
-            <i class="pi pi-receipt text-emerald-600"></i>
-            <span>Resumo de Fechamento da OS</span>
+      <!-- Resumo Financeiro da OS (Simples, Moderno e Sem Quebras) -->
+      <div class="wo-summary-card">
+        <div class="wo-summary-left">
+          <div class="wo-summary-title-row">
+            <i class="pi pi-check-circle text-emerald-600 text-lg"></i>
+            <span class="wo-summary-title">Fechamento da Ordem</span>
           </div>
-          <div class="wo-summary-metrics">
-            <div class="wo-metric-item">
-              <span class="wo-metric-label">Mão de Obra / Serviços</span>
-              <strong class="wo-metric-value">{{ order.services.length }} {{ order.services.length === 1 ? 'item executado' : 'itens executados' }}</strong>
-            </div>
-            <div class="wo-metric-divider"></div>
-            <div class="wo-metric-item">
-              <span class="wo-metric-label">Peças & Insumos</span>
-              <strong class="wo-metric-value">{{ order.parts.length }} {{ order.parts.length === 1 ? 'peça aplicada' : 'peças aplicadas' }}</strong>
-            </div>
-          </div>
-          <p class="wo-summary-disclaimer">
-            <i class="pi pi-shield text-emerald-700 mr-1.5"></i>
-            <span>Valores e apontamentos técnicos consolidados pela oficina Sport Pneus.</span>
-          </p>
+          <span class="wo-summary-subtitle">
+            {{ order.services.length }} {{ order.services.length === 1 ? 'serviço' : 'serviços' }} e {{ order.parts.length }} {{ order.parts.length === 1 ? 'peça' : 'peças' }} lançadas
+          </span>
         </div>
 
-        <!-- Lado Direito: Cálculos e Total Geral Perfeitamente Alinhados -->
-        <div class="wo-financial-column">
-          <div class="wo-financial-row">
-            <span class="label">Mão de Obra & Serviços:</span>
+        <div class="wo-summary-right">
+          <div class="wo-summary-row">
+            <span class="label">Mão de Obra</span>
             <span class="value">{{ money(order.servicesTotal) }}</span>
           </div>
-          <div class="wo-financial-row">
-            <span class="label">Peças, Materiais & Insumos:</span>
+          <div class="wo-summary-row">
+            <span class="label">Peças & Insumos</span>
             <span class="value">{{ money(order.partsTotal) }}</span>
           </div>
-          <div class="wo-financial-divider"></div>
-          <div class="wo-financial-grand-row">
-            <div class="grand-label-group">
-              <span class="grand-badge">VALOR TOTAL DA OS</span>
-              <span class="grand-sub">Total final a faturar</span>
-            </div>
-            <div class="grand-value">
-              {{ money(order.total) }}
-            </div>
+          <div class="wo-summary-total-row">
+            <span class="total-label">TOTAL GERAL</span>
+            <strong class="total-value">{{ money(order.total) }}</strong>
           </div>
         </div>
       </div>
