@@ -74,21 +74,21 @@
           <!-- Visualização em Tabela para Desktop -->
           <div class="dashboard-table-desktop">
             <app-data-table-wrapper>
-              <table class="dashboard-table" aria-label="Ordens ativas na oficina">
+              <table class="dashboard-table table-fixed" aria-label="Ordens ativas na oficina">
                 <colgroup>
-                  <col style="width: 4.5rem" />
+                  <col style="width: 4.2rem" />
+                  <col style="width: 8.8rem" />
                   <col style="width: auto" />
-                  <col style="width: 5.5rem" />
+                  <col style="width: 6.2rem" />
                   <col style="width: 7.2rem" />
-                  <col style="width: 6.5rem" />
-                  <col style="width: 4.8rem" />
+                  <col style="width: 5.2rem" />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>OS</th>
+                    <th>Status</th>
                     <th>Cliente / Veículo</th>
                     <th>Entrada</th>
-                    <th>Status</th>
                     <th class="text-right">Valor</th>
                     <th class="text-right">Ação</th>
                   </tr>
@@ -98,6 +98,9 @@
                     <tr>
                       <td>
                         <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
+                      </td>
+                      <td>
+                        <app-status-badge [status]="item.status" />
                       </td>
                       <td>
                         <div class="customer-vehicle-cell">
@@ -110,9 +113,6 @@
                       </td>
                       <td>
                         <span class="date-cell">{{ formatDate(item.createdAt) }}</span>
-                      </td>
-                      <td>
-                        <app-status-badge [status]="item.status" />
                       </td>
                       <td class="text-right font-mono font-medium">
                         {{ money(item.total) }}
