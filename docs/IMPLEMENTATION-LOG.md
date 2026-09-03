@@ -158,4 +158,19 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Adicionado botão **"Imprimir Ficha"** (`printOrder()` chamando `window.print()`) com folha de estilos `@media print` que isola a ficha da ordem de serviço para gerar PDF ou impressão física limpa.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
+## 2026-09-02 — Novo Painel Executivo de Fechamento Financeiro da Ordem de Serviço
+
+- **Estrutura Balanceada em 2 Colunas (`.wo-invoice-summary-card`)**:
+  - Eliminação da antiga caixa flutuante isolada à direita: implementação de um card de fechamento financeiro de largura total com visual premium.
+  - **Coluna Operacional (Esquerda)**:
+    - Cabeçalho com ícone de extrato/recibo.
+    - Contadores operacionais em destaque: quantidade exata de serviços/mão de obra executados e quantidade de peças aplicadas, separados por divisor vertical limpo.
+    - Nota de garantia técnica e consolidação da Sport Pneus.
+  - **Coluna Financeira (Direita)**:
+    - Gradiente suave esmeralda (`#f0fdf4` a `#ecfdf5`) com borda sutil.
+    - Linhas de Mão de Obra e Peças com rótulos e valores em fonte numérica tabular (`font-variant-numeric: tabular-nums`).
+    - Linha divisória limpa e sólida.
+    - **Total Geral da Ordem**: badge estilizado `VALOR TOTAL DA OS`, subtítulo explicativo e valor em destaque com tipografia `2.15rem font-black` alinhada perfeitamente ao centro vertical.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
+
 
