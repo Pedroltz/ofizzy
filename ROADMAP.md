@@ -80,11 +80,11 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Dark Mode
 
 ### R7 — Clientes e Veículos
-- [ ] Clientes
-- [ ] Veículos
-- [ ] CRUD visual padronizado
-- [ ] Responsividade
-- [ ] Dark Mode
+- [x] Clientes
+- [x] Veículos
+- [x] CRUD visual padronizado
+- [x] Responsividade
+- [x] Dark Mode
 
 ### R8 — Configurações e Catálogo
 - [ ] Configurações

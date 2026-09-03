@@ -40,24 +40,23 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 ## UI Redesign
 
 Fase atual:
-R6 concluído / R7 — Clientes e Veículos preparado
+R7 concluído / R8 — Configurações e Catálogo preparado
 
 Última tarefa concluída:
-R6 — Ordens de Serviço (DataToolbar com contadores, busca reativa, pílulas táteis de status integradas com a API backend, apresentação híbrida desktop/mobile, editor de linhas de serviços e peças modularizado e resumo financeiro destacado)
+R7 — Clientes e Veículos (DataToolbar com contagem reativa, busca ágil integrada, visualização em tabela desktop com avatares e badges de placa, cards mobile com contatos rápidos, modais padronizados com validação e suporte completo a Dark Mode)
 
 Próxima tarefa:
-R7 — Clientes e Veículos (DataToolbar, busca rápida, paginação, cards móveis e tabelas desktop, drawers/modais padronizados para cadastros e validação visual de CPF/CNPJ e placas)
+R8 — Configurações e Catálogo (Configurações da oficina, catálogo de serviços e peças, dados da empresa e termos de garantia)
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/app/core/api/work-order-api.service.ts`
-- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.ts`
-- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.html`
-- `src/frontend/sport-pneus-web/src/app/features/work-orders/components/work-order-lines-editor.component.ts`
-- `src/frontend/sport-pneus-web/src/app/features/work-orders/components/work-order-lines-editor.component.css`
+- `src/frontend/sport-pneus-web/src/app/features/customers/customers.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/customers/customers.page.html`
+- `src/frontend/sport-pneus-web/src/app/features/vehicles/vehicles.page.ts`
+- `src/frontend/sport-pneus-web/src/app/features/vehicles/vehicles.page.html`
 - `src/frontend/sport-pneus-web/src/styles.css`
 
 Pendências:
-- Nenhuma para R6.
+- Nenhuma para R7.
 
 Problemas conhecidos:
 - Aviso não bloqueante de budget de bundle inicial no build de produção mantido (~721 kB contra 500 kB).
@@ -65,8 +64,9 @@ Problemas conhecidos:
 Testes:
 - `npm test`: 22/22 testes unitários aprovados.
 - `npm run lint`: 0 erros e 0 avisos.
-- `npm run build`: bundle compilado com sucesso e zero avisos em estilos de componentes.
+- `npm run build`: bundle compilado com sucesso.
 - `npm run e2e`: 23 cenários aprovados pelo Playwright em desktop, Pixel 7 e tablet.
+
 
 
 

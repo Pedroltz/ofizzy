@@ -393,6 +393,23 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso (budget de estilo de componente estritamente respeitado).
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
 
+## 2026-09-03 — UI/UX Redesign: R7 — Clientes e Veículos Concluído
+
+- **Padronização Visual e Operacional (`customers.page.*` e `vehicles.page.*`)**:
+  - **Toolbars Unificadas**: `DataToolbarComponent` implementado com contagem reativa e dinâmica de registros ("`X clientes encontrados`" e "`X veículos encontrados`") e alternador de tabela/cards.
+  - **Busca Rápida com Debounce**: `SearchFieldComponent` integrado com pesquisa ágil por nome, documento, telefone, placa, modelo e fabricante.
+  - **Tabelas Desktop Acessíveis**: `DataTableWrapperComponent` adotado nas duas telas com tipografia sóbria, bordas sutis, avatares gerados automaticamente a partir das iniciais do cliente e badges metálicas de placa.
+  - **Cartões Móveis Otimizados**: preservação e modernização de `article.catalog-card` com botões de toque >= 44px, links rápidos de discagem telefônica e abertura direta de conversa no WhatsApp.
+  - **Estados de Borda**: substituição de layouts manuais por `EmptyStateComponent` com chamadas contextuais de ação e `LoadingStateComponent` com skeleton adaptativo para tabela e cartões.
+- **Formulários e Modais de Edição**:
+  - Modais de criação e edição com layout responsivo em duas colunas, mensagens de validação visual de CPF/CNPJ e placa, alvos de toque adequados e contraste validado em Light e Dark Mode.
+- **Validação Técnica e Testes**:
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm run build`: compilação de produção concluída com sucesso.
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet.
+
+
 
 
 

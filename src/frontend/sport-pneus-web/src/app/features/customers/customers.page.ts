@@ -11,10 +11,36 @@ import { TextareaModule } from 'primeng/textarea';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer } from '../../core/api/catalog.models';
-import { PageHeaderComponent } from '../../shared/components/page-header.component';
+import {
+  DataTableWrapperComponent,
+  DataToolbarComponent,
+  EmptyStateComponent,
+  LoadingStateComponent,
+  PageHeaderComponent,
+  SearchFieldComponent,
+} from '../../shared/components';
 import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
 
-@Component({ selector: 'app-customers-page', imports: [ReactiveFormsModule, ButtonModule, DialogModule, InputTextModule, PaginatorModule, SkeletonModule, TextareaModule, PageHeaderComponent], templateUrl: './customers.page.html', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({
+  selector: 'app-customers-page',
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    PaginatorModule,
+    SkeletonModule,
+    TextareaModule,
+    PageHeaderComponent,
+    DataToolbarComponent,
+    SearchFieldComponent,
+    DataTableWrapperComponent,
+    EmptyStateComponent,
+    LoadingStateComponent,
+  ],
+  templateUrl: './customers.page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class CustomersPage {
   private readonly api = inject(CatalogApiService); private readonly fb = inject(FormBuilder); private readonly messages = inject(MessageService); private readonly confirmation = inject(ConfirmationService);
   private readonly responsive = inject(ResponsiveLayoutService);
