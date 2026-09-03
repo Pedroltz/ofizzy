@@ -18,7 +18,7 @@ export class CustomersPage {
   private readonly api = inject(CatalogApiService); private readonly fb = inject(FormBuilder); private readonly messages = inject(MessageService); private readonly confirmation = inject(ConfirmationService);
   readonly items = signal<Customer[]>([]); readonly total = signal(0); readonly loading = signal(true); readonly saving = signal(false); readonly dialog = signal(false); readonly editing = signal<Customer | null>(null);
   readonly search = this.fb.nonNullable.control(''); readonly page = signal(1); readonly pageSize = 12;
-  readonly viewMode = signal<'table' | 'cards'>('table');
+  readonly viewMode = signal<'spacious' | 'table'>('spacious');
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(160)]],
     document: ['', [(c) => {

@@ -427,7 +427,7 @@ select:focus {
 }
 
 .page-container {
-    max-width: 76rem;
+    max-width: 86rem;
     margin: 0 auto;
     padding: clamp(1.25rem, 3vw, 2.5rem);
 }
@@ -1017,6 +1017,206 @@ select:focus {
     padding-top: .75rem;
     border-top: 1px solid #f1f5f9;
     margin-top: auto;
+}
+
+/* =========================================================
+   SPACIOUS FULL-WIDTH LIST ROWS (FAIXAS AMPLAS SEM SCROLL)
+   ========================================================= */
+.spacious-list {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    width: 100%;
+}
+
+.spacious-row {
+    background: #ffffff;
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+    padding: 1.15rem 1.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.spacious-row:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.spacious-main-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.spacious-id-block {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    min-width: 260px;
+    flex: 0 1 auto;
+}
+
+.spacious-avatar {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 10px;
+    background: #f0fdfa;
+    border: 1.5px solid #ccfbf1;
+    color: var(--app-primary);
+    font-size: 1.15rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.spacious-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.spacious-title-group h2 {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 750;
+    color: #0f172a !important;
+    line-height: 1.25;
+}
+
+.spacious-attributes-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .65rem;
+    flex: 1 1 320px;
+}
+
+.spacious-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: .86rem;
+    font-weight: 600;
+    color: #0f172a !important;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.spacious-pill i {
+    color: #64748b;
+    font-size: .85rem;
+}
+
+.spacious-pill:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.spacious-pill.whatsapp {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #15803d !important;
+}
+
+.spacious-pill.whatsapp i {
+    color: #16a34a;
+}
+
+.spacious-pill.whatsapp:hover {
+    background: #dcfce7;
+}
+
+.spacious-owner-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .92rem;
+    color: #334155;
+    background: #f8fafc;
+    padding: .35rem .75rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.spacious-owner-tag strong {
+    color: #0f172a !important;
+    font-weight: 750;
+}
+
+.spacious-actions-block {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.spacious-sub-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding-top: .75rem;
+    border-top: 1px solid #f1f5f9;
+    font-size: .84rem;
+}
+
+.spacious-details-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .85rem;
+    flex: 1;
+}
+
+.spacious-address {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: #334155 !important;
+    background: #f8fafc;
+    padding: .35rem .75rem;
+    border-radius: 6px;
+    border: 1px solid #f1f5f9;
+}
+
+.spacious-notes {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: #854d0e !important;
+    background: #fefce8;
+    padding: .35rem .75rem;
+    border-radius: 6px;
+    border: 1px solid #fef08a;
+    font-style: italic;
+}
+
+.spacious-date {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: #94a3b8;
+    font-size: .8rem;
+    margin-left: auto;
+}
+
+.plate-badge.large {
+    font-size: .95rem;
+    padding: .35rem .85rem;
+    border-width: 2px;
 }
 
 /* Order Cards (Ordens de Serviço) */

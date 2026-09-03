@@ -14,24 +14,21 @@
       <input pInputText [formControl]="search" placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..." />
     </div>
     <div class="view-mode-toggle">
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Visualização em Tabela">
-        <i class="pi pi-table"></i>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'spacious'" (click)="viewMode.set('spacious')" title="Lista Ampla">
+        <i class="pi pi-bars"></i>
       </button>
-      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" title="Visualização em Cartões">
-        <i class="pi pi-th-large"></i>
+      <button type="button" class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Tabela Compacta">
+        <i class="pi pi-table"></i>
       </button>
     </div>
   </div>
 
   @if (loading()) {
-    <div class="entity-grid">
-      @for (_ of [1,2,3,4,5,6]; track $index) {
-        <div class="entity-card surface-card">
-          <p-skeleton shape="circle" size="3rem" />
-          <div class="grow">
-            <p-skeleton width="65%" />
-            <p-skeleton width="40%" styleClass="mt-2" />
-          </div>
+    <div class="spacious-list">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="spacious-row">
+          <p-skeleton width="60%" height="2rem" />
+          <p-skeleton width="100%" height="1.5rem" />
         </div>
       }
     </div>
@@ -42,7 +39,76 @@
       <p>{{ search.value ? 'Nenhum resultado corresponde aos termos pesquisados.' : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.' }}</p>
       <p-button label="Novo Cliente" icon="pi pi-plus" (onClick)="open()" />
     </div>
-  } @else if (viewMode() === 'table') {
+  } @else if (viewMode() === 'spacious') {
+    <div class="spacious-list">
+      @for (item of items(); track item.id) {
+        <article class="spacious-row">
+          <div class="spacious-main-line">
+            <div class="spacious-id-block">
+              <div class="spacious-avatar">{{ initials(item.name) }}</div>
+              <div class="spacious-title-group">
+                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.name }}</h2>
+                @if (item.document) {
+                  <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="spacious-attributes-block">
+              @if (item.phone) {
+                <a [href]="'tel:' + item.phone" class="spacious-pill">
+                  <i class="pi pi-phone"></i>
+                  <span>{{ item.phone }}</span>
+                </a>
+              }
+              @if (item.whatsApp) {
+                <a [href]="'https://wa.me/55' + item.whatsApp.replace('\\D', '')" target="_blank" rel="noopener noreferrer" class="spacious-pill whatsapp">
+                  <i class="pi pi-whatsapp"></i>
+                  <span>{{ item.whatsApp }}</span>
+                </a>
+              }
+              @if (item.email) {
+                <a [href]="'mailto:' + item.email" class="spacious-pill">
+                  <i class="pi pi-envelope"></i>
+                  <span>{{ item.email }}</span>
+                </a>
+              }
+              @if (!item.phone && !item.email && !item.whatsApp) {
+                <span class="text-xs text-slate-400 italic">Sem telefone informado</span>
+              }
+            </div>
+
+            <div class="spacious-actions-block">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+            </div>
+          </div>
+
+          @if (item.address || item.notes || item.createdAt) {
+            <div class="spacious-sub-line">
+              <div class="spacious-details-group">
+                @if (item.address) {
+                  <span class="spacious-address">
+                    <i class="pi pi-map-marker text-teal-600"></i>
+                    <span>{{ item.address }}</span>
+                  </span>
+                }
+                @if (item.notes) {
+                  <span class="spacious-notes">
+                    <i class="pi pi-info-circle"></i>
+                    <span>{{ item.notes }}</span>
+                  </span>
+                }
+              </div>
+              <span class="spacious-date">
+                <i class="pi pi-clock"></i> Cadastrado em {{ formatDate(item.createdAt) }}
+              </span>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  } @else {
     <div class="data-table-card">
       <div class="data-table-wrapper">
         <table class="data-table">
@@ -112,59 +178,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-  } @else {
-    <div class="entity-grid">
-      @for (item of items(); track item.id) {
-        <article class="rich-entity-card">
-          <div class="rich-card-header">
-            <div class="rich-card-title-group">
-              <div class="entity-avatar">{{ initials(item.name) }}</div>
-              <div>
-                <h2 class="text-slate-900 font-bold" style="color: #0f172a !important;">{{ item.name }}</h2>
-                @if (item.document) {
-                  <span class="doc-badge mt-1"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
-                }
-              </div>
-            </div>
-            <div class="card-actions">
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
-            </div>
-          </div>
-
-          <div class="rich-card-body">
-            <div class="rich-card-meta-row">
-              @if (item.phone) {
-                <a [href]="'tel:' + item.phone" class="contact-pill"><i class="pi pi-phone"></i> {{ item.phone }}</a>
-              }
-              @if (item.whatsApp) {
-                <a [href]="'https://wa.me/55' + item.whatsApp.replace('\\D', '')" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
-              }
-              @if (item.email) {
-                <a [href]="'mailto:' + item.email" class="contact-pill"><i class="pi pi-envelope"></i> {{ item.email }}</a>
-              }
-            </div>
-
-            @if (item.address) {
-              <div class="rich-card-address">
-                <i class="pi pi-map-marker text-slate-400 mt-0.5"></i>
-                <span>{{ item.address }}</span>
-              </div>
-            }
-
-            @if (item.notes) {
-              <div class="rich-card-notes">
-                <i class="pi pi-info-circle mr-1"></i> {{ item.notes }}
-              </div>
-            }
-          </div>
-
-          <div class="rich-card-footer">
-            <span class="text-xs text-slate-400">Cadastrado em {{ formatDate(item.createdAt) }}</span>
-          </div>
-        </article>
-      }
     </div>
   }
     @if (total() > pageSize) {
