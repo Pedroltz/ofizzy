@@ -79,11 +79,23 @@
   }
 </section>
 
-<!-- Dialog de Visualização Detalhada da OS -->
-<p-dialog [header]="'Ordem de Serviço #' + (viewing()?.number?.toString()?.padStart(4, '0') || '')" [visible]="detailDialog()" (visibleChange)="detailDialog.set($event)" [modal]="true" [style]="{width:'min(860px, 96vw)'}">
-  @if (viewing(); as order) {
-    <div class="detail-modal-body">
-      <div class="detail-header-status">
+<!-- Drawer de Visualização Detalhada da OS -->
+<p-drawer
+  [visible]="detailDialog()"
+  (visibleChange)="detailDialog.set($event)"
+  position="right"
+  [modal]="true"
+  [blockScroll]="true"
+  [style]="{ width: 'min(780px, 100vw)' }"
+  styleClass="wo-drawer"
+>
+  <ng-template #header>
+    @if (viewing(); as order) {
+      <div class="wo-drawer-header">
+        <div class="wo-drawer-title-group">
+          <span class="wo-drawer-badge">ORDEM DE SERVIÇO</span>
+          <h2 class="wo-drawer-title">OS #{{ order.number.toString().padStart(4, '0') }}</h2>
+        </div>
         <span class="status-tag" [class.open]="order.status === 'Open'" [class.in-progress]="order.status === 'InProgress'" [class.completed]="order.status === 'Completed'" [class.cancelled]="order.status === 'Cancelled'">
           @if (order.status === 'Open') { <i class="pi pi-clock"></i> }
           @if (order.status === 'InProgress') { <i class="pi pi-sync"></i> }
@@ -91,254 +103,371 @@
           @if (order.status === 'Cancelled') { <i class="pi pi-times"></i> }
           <span>{{ statusLabels[order.status] }}</span>
         </span>
-        <div class="detail-dates">
+      </div>
+    }
+  </ng-template>
+
+  @if (viewing(); as order) {
+    <div class="wo-drawer-body">
+      <!-- Metadados de Tempo -->
+      <div class="wo-meta-bar">
+        <div class="wo-meta-item">
+          <i class="pi pi-calendar mr-1"></i>
           <span>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></span>
-          @if (order.completedAt) {
-            <span class="ml-3">Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
-          }
+        </div>
+        @if (order.completedAt) {
+          <div class="wo-meta-item">
+            <i class="pi pi-check-circle mr-1 text-emerald-600"></i>
+            <span>Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
+          </div>
+        }
+      </div>
+
+      <!-- Resumo do Cliente e Veículo -->
+      <div class="wo-section-grid">
+        <div class="wo-info-card">
+          <div class="wo-card-header">
+            <i class="pi pi-user text-slate-500"></i>
+            <h3>Cliente</h3>
+          </div>
+          <div class="wo-card-content">
+            <strong>{{ order.customerName }}</strong>
+            <p class="text-sm text-slate-600 m-0 mt-1">{{ order.customerPhone || 'Telefone não informado' }}</p>
+            @if (order.customerDocument) {
+              <div class="mt-2">
+                <span class="doc-badge"><i class="pi pi-id-card"></i> {{ order.customerDocument }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="wo-info-card">
+          <div class="wo-card-header">
+            <i class="pi pi-car text-slate-500"></i>
+            <h3>Veículo</h3>
+          </div>
+          <div class="wo-card-content">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="plate-badge">{{ order.vehiclePlate }}</span>
+              <strong>{{ order.vehicleDescription }}</strong>
+            </div>
+            @if (order.mileage !== null) {
+              <p class="text-sm text-slate-600 m-0 mt-2">
+                <i class="pi pi-compass mr-1 text-slate-400"></i>
+                <span>{{ order.mileage.toLocaleString('pt-BR') }} km</span>
+              </p>
+            }
+          </div>
         </div>
       </div>
 
-      <div class="detail-grid-2">
-        <div class="detail-card">
-          <h4><i class="pi pi-user mr-1 text-slate-400"></i> Cliente</h4>
-          <p class="font-bold text-base m-0">{{ order.customerName }}</p>
-          <p class="text-sm text-slate-600 m-0 mt-1">{{ order.customerPhone || 'Telefone não informado' }}</p>
-          @if (order.customerDocument) {
-            <small class="text-slate-500 block mt-1">Documento: {{ order.customerDocument }}</small>
-          }
-        </div>
-
-        <div class="detail-card">
-          <h4><i class="pi pi-car mr-1 text-slate-400"></i> Veículo</h4>
-          <p class="font-bold text-base m-0">
-            <span class="plate-badge mini mr-2">{{ order.vehiclePlate }}</span>
-            <span>{{ order.vehicleDescription }}</span>
-          </p>
-          @if (order.mileage !== null) {
-            <p class="text-sm text-slate-600 m-0 mt-1">KM registrada: {{ order.mileage.toLocaleString('pt-BR') }} km</p>
-          }
-        </div>
-      </div>
-
+      <!-- Diagnóstico e Queixa -->
       @if (order.complaint || order.diagnosis || order.notes) {
-        <div class="detail-card">
-          <h4><i class="pi pi-info-circle mr-1 text-slate-400"></i> Diagnóstico e Apontamentos</h4>
-          @if (order.complaint) {
-            <div class="mb-3">
-              <span class="text-xs font-semibold uppercase text-slate-400 block">Queixa Relatada pelo Cliente:</span>
-              <p class="m-0 text-sm text-slate-800">{{ order.complaint }}</p>
+        <div class="wo-block">
+          <div class="wo-block-header">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-file-edit text-slate-500"></i>
+              <h3>Apontamentos Técnicos</h3>
             </div>
-          }
-          @if (order.diagnosis) {
-            <div class="mb-3">
-              <span class="text-xs font-semibold uppercase text-slate-400 block">Diagnóstico Técnico:</span>
-              <p class="m-0 text-sm font-medium text-emerald-900 bg-emerald-50 p-2 rounded border border-emerald-200/60">{{ order.diagnosis }}</p>
-            </div>
-          }
-          @if (order.notes) {
-            <div>
-              <span class="text-xs font-semibold uppercase text-slate-400 block">Observações Internas:</span>
-              <p class="m-0 text-sm text-slate-600">{{ order.notes }}</p>
-            </div>
-          }
+          </div>
+          <div class="wo-block-content">
+            @if (order.complaint) {
+              <div class="wo-field-block">
+                <span class="wo-field-label">Queixa do Cliente</span>
+                <p class="wo-field-text">{{ order.complaint }}</p>
+              </div>
+            }
+            @if (order.diagnosis) {
+              <div class="wo-field-block">
+                <span class="wo-field-label">Diagnóstico Técnico da Oficina</span>
+                <p class="wo-field-text diagnosis">{{ order.diagnosis }}</p>
+              </div>
+            }
+            @if (order.notes) {
+              <div class="wo-field-block">
+                <span class="wo-field-label">Observações Internas</span>
+                <p class="wo-field-text notes">{{ order.notes }}</p>
+              </div>
+            }
+          </div>
         </div>
       }
 
-      <div class="detail-card">
-        <h4><i class="pi pi-wrench mr-1 text-slate-400"></i> Serviços Executados</h4>
-        @if (order.services.length === 0) {
-          <p class="text-sm text-slate-400 m-0">Nenhum serviço lançado nesta ordem.</p>
-        } @else {
-          <table class="detail-table">
-            <thead>
-              <tr><th>Descrição do Serviço</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
-            </thead>
-            <tbody>
-              @for (svc of order.services; track svc.id) {
-                <tr><td>{{ svc.description }}</td><td class="text-right">{{ svc.quantity }}</td><td class="text-right">{{ money(svc.unitPrice) }}</td><td class="text-right font-medium text-slate-900">{{ money(svc.total) }}</td></tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr><td colspan="3" class="text-right text-slate-500 font-normal">Subtotal Serviços:</td><td class="text-right font-semibold">{{ money(order.servicesTotal) }}</td></tr>
-            </tfoot>
-          </table>
-        }
-      </div>
-
-      <div class="detail-card">
-        <h4><i class="pi pi-box mr-1 text-slate-400"></i> Peças e Materiais Utilizados</h4>
-        @if (order.parts.length === 0) {
-          <p class="text-sm text-slate-400 m-0">Nenhuma peça lançada nesta ordem.</p>
-        } @else {
-          <table class="detail-table">
-            <thead>
-              <tr><th>Código / Descrição da Peça</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
-            </thead>
-            <tbody>
-              @for (pt of order.parts; track pt.id) {
-                <tr>
-                  <td>@if (pt.code) { <span class="font-mono text-xs font-bold text-slate-500 mr-1 bg-slate-100 px-1 py-0.5 rounded">[{{ pt.code }}]</span> }{{ pt.description }}</td>
-                  <td class="text-right">{{ pt.quantity }}</td>
-                  <td class="text-right">{{ money(pt.unitPrice) }}</td>
-                  <td class="text-right font-medium text-slate-900">{{ money(pt.total) }}</td>
-                </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr><td colspan="3" class="text-right text-slate-500 font-normal">Subtotal Peças:</td><td class="text-right font-semibold">{{ money(order.partsTotal) }}</td></tr>
-            </tfoot>
-          </table>
-        }
-      </div>
-
-      <div class="detail-total-box">
-        <div class="detail-total-info">
-          <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total Geral da Ordem de Serviço</span>
-          <strong class="text-2xl text-emerald-800 font-extrabold">{{ money(order.total) }}</strong>
+      <!-- Serviços Executados -->
+      <div class="wo-block">
+        <div class="wo-block-header">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-wrench text-slate-500"></i>
+            <h3>Mão de Obra e Serviços</h3>
+          </div>
+          <span class="wo-item-count">{{ order.services.length }} {{ order.services.length === 1 ? 'item' : 'itens' }}</span>
         </div>
+        @if (order.services.length === 0) {
+          <div class="wo-empty-line">Nenhum serviço lançado nesta ordem.</div>
+        } @else {
+          <div class="wo-table-wrapper">
+            <table class="wo-table">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th class="text-center w-16">Qtd</th>
+                  <th class="text-right w-28">Unitário</th>
+                  <th class="text-right w-28">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (svc of order.services; track svc.id) {
+                  <tr>
+                    <td><strong>{{ svc.description }}</strong></td>
+                    <td class="text-center">{{ svc.quantity }}</td>
+                    <td class="text-right">{{ money(svc.unitPrice) }}</td>
+                    <td class="text-right font-semibold text-slate-900">{{ money(svc.total) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right text-slate-500">Subtotal Serviços:</td>
+                  <td class="text-right font-bold text-slate-800">{{ money(order.servicesTotal) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
       </div>
-    </div>
 
-    <div class="dialog-actions flex justify-between items-center pt-4 border-t border-slate-200 mt-2">
-      <div>
-        @if (order.status === 'Open' || order.status === 'InProgress') {
-          <p-button label="Editar OS" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
+      <!-- Peças Utilizadas -->
+      <div class="wo-block">
+        <div class="wo-block-header">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box text-slate-500"></i>
+            <h3>Peças e Materiais</h3>
+          </div>
+          <span class="wo-item-count">{{ order.parts.length }} {{ order.parts.length === 1 ? 'item' : 'itens' }}</span>
+        </div>
+        @if (order.parts.length === 0) {
+          <div class="wo-empty-line">Nenhuma peça lançada nesta ordem.</div>
+        } @else {
+          <div class="wo-table-wrapper">
+            <table class="wo-table">
+              <thead>
+                <tr>
+                  <th>Código / Descrição</th>
+                  <th class="text-center w-16">Qtd</th>
+                  <th class="text-right w-28">Unitário</th>
+                  <th class="text-right w-28">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (pt of order.parts; track pt.id) {
+                  <tr>
+                    <td>
+                      @if (pt.code) {
+                        <span class="font-mono text-xs font-bold text-slate-500 mr-2 bg-slate-100 px-1.5 py-0.5 rounded">[{{ pt.code }}]</span>
+                      }
+                      <strong>{{ pt.description }}</strong>
+                    </td>
+                    <td class="text-center">{{ pt.quantity }}</td>
+                    <td class="text-right">{{ money(pt.unitPrice) }}</td>
+                    <td class="text-right font-semibold text-slate-900">{{ money(pt.total) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right text-slate-500">Subtotal Peças:</td>
+                  <td class="text-right font-bold text-slate-800">{{ money(order.partsTotal) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         }
       </div>
-      <div class="flex gap-2">
-        @if (order.status === 'Open') {
-          <p-button label="Iniciar Atendimento" icon="pi pi-play" severity="info" (onClick)="status(order, 'InProgress')" />
-        }
-        @if (order.status === 'InProgress') {
-          <p-button label="Finalizar OS" icon="pi pi-check" severity="success" (onClick)="status(order, 'Completed')" />
-        }
-        @if (order.status === 'Open' || order.status === 'InProgress') {
-          <p-button label="Cancelar OS" icon="pi pi-times" severity="danger" [text]="true" (onClick)="status(order, 'Cancelled')" />
-        }
-        <p-button label="Fechar" severity="secondary" [text]="true" (onClick)="detailDialog.set(false)" />
+
+      <!-- Total Geral -->
+      <div class="wo-grand-total">
+        <div class="wo-grand-total-info">
+          <span class="wo-grand-total-label">Total Geral da Ordem</span>
+          <span class="wo-grand-total-sub">Serviços executados + peças utilizadas</span>
+        </div>
+        <div class="wo-grand-total-value">{{ money(order.total) }}</div>
       </div>
     </div>
   }
-</p-dialog>
 
-<!-- Dialog de Criação / Edição de OS -->
-<p-dialog [header]="editing() ? ('Editar OS #' + (editing()?.number?.toString()?.padStart(4, '0') || '')) : 'Nova Ordem de Serviço'" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true" [style]="{width:'min(920px, 96vw)'}">
-  <form [formGroup]="form" class="form-stack" (ngSubmit)="save()">
-    <div class="two-columns">
-      <label>Cliente
-        <select formControlName="customerId">
-          <option value="">Selecione o cliente</option>
-          @for (item of customers(); track item.id) {
-            <option [value]="item.id">{{ item.name }}</option>
+  <ng-template #footer>
+    @if (viewing(); as order) {
+      <div class="wo-drawer-footer">
+        <div class="wo-footer-left">
+          @if (order.status === 'Open' || order.status === 'InProgress') {
+            <p-button label="Editar Ordem" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
           }
-        </select>
-        @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
-          <small class="field-error-text">Selecione o cliente</small>
-        }
-      </label>
-
-      <label>Veículo
-        <select formControlName="vehicleId">
-          <option value="">Selecione o veículo</option>
-          @for (item of vehicles(); track item.id) {
-            <option [value]="item.id">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
+        </div>
+        <div class="wo-footer-right">
+          @if (order.status === 'Open') {
+            <p-button label="Iniciar Atendimento" icon="pi pi-play" severity="info" (onClick)="status(order, 'InProgress')" />
           }
-        </select>
-        @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
-          <small class="field-error-text">Selecione o veículo</small>
-        }
-      </label>
-    </div>
-
-    @if (form.controls.customerId.value && vehicles().length === 0) {
-      <div class="p-3 text-sm text-amber-800 bg-amber-50 rounded-lg border border-amber-200">
-        <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a OS.
+          @if (order.status === 'InProgress') {
+            <p-button label="Finalizar OS" icon="pi pi-check" severity="success" (onClick)="status(order, 'Completed')" />
+          }
+          @if (order.status === 'Open' || order.status === 'InProgress') {
+            <p-button label="Cancelar OS" icon="pi pi-times" severity="danger" [text]="true" (onClick)="status(order, 'Cancelled')" />
+          }
+          <p-button label="Fechar" severity="secondary" [text]="true" (onClick)="detailDialog.set(false)" />
+        </div>
       </div>
     }
+  </ng-template>
+</p-drawer>
 
-    <div class="two-columns">
-      <label>Quilometragem (KM)
-        <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" suffix=" km" styleClass="full-control" />
-      </label>
-      <label>Queixa Relatada pelo Cliente
-        <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Ruído na frenagem e volante puxando para direita"></textarea>
-      </label>
-    </div>
-
-    <label>Diagnóstico Técnico da Oficina
-      <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilhas dianteiras no limite de desgaste; alinhamento necessário"></textarea>
-    </label>
-
-    <label>Observações Internas <small class="text-slate-400">opcional</small>
-      <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Aprovado orçamento complementar via contato telefônico"></textarea>
-    </label>
-
-    <div class="line-section">
-      <div class="line-heading">
-        <div class="flex items-center gap-2">
-          <i class="pi pi-wrench text-slate-500"></i>
-          <h3>Serviços a Realizar</h3>
-        </div>
-        <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço">
-          <option value="">+ Selecionar do catálogo</option>
-          @for (item of servicesCatalog(); track item.id) {
-            <option [value]="item.id">{{ item.name }} · {{ money(item.defaultPrice) }}</option>
-          }
-        </select>
+<!-- Drawer de Criação / Edição de OS -->
+<p-drawer
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  position="right"
+  [modal]="true"
+  [blockScroll]="true"
+  [style]="{ width: 'min(820px, 100vw)' }"
+  styleClass="wo-drawer"
+>
+  <ng-template #header>
+    <div class="wo-drawer-header">
+      <div class="wo-drawer-title-group">
+        <span class="wo-drawer-badge">{{ editing() ? 'ALTERAÇÃO DE ORDEM' : 'NOVA ENTRADA' }}</span>
+        <h2 class="wo-drawer-title">{{ editing() ? ('Editar OS #' + editing()?.number?.toString()?.padStart(4, '0')) : 'Abertura de Ordem de Serviço' }}</h2>
       </div>
-      @for (line of services(); track $index) {
-        <div class="order-line">
-          <div class="order-line-desc">
-            <strong>{{ line.description }}</strong>
-          </div>
-          <div class="order-line-inputs">
-            <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('services',$index,'quantity',$event)" />
-            <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('services',$index,'unitPrice',$event)" />
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('services',$index)" ariaLabel="Remover linha de serviço" />
-          </div>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="form" id="workOrderForm" class="wo-drawer-form" (ngSubmit)="save()">
+    <div class="wo-drawer-body">
+      <div class="two-columns">
+        <label>Cliente (Proprietário)
+          <select formControlName="customerId">
+            <option value="">Selecione o cliente cadastrado</option>
+            @for (item of customers(); track item.id) {
+              <option [value]="item.id">{{ item.name }}</option>
+            }
+          </select>
+          @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
+            <small class="field-error-text">Selecione o cliente</small>
+          }
+        </label>
+
+        <label>Veículo Atendido
+          <select formControlName="vehicleId">
+            <option value="">Selecione o veículo</option>
+            @for (item of vehicles(); track item.id) {
+              <option [value]="item.id">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
+            }
+          </select>
+          @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
+            <small class="field-error-text">Selecione o veículo</small>
+          }
+        </label>
+      </div>
+
+      @if (form.controls.customerId.value && vehicles().length === 0) {
+        <div class="p-3 text-sm text-amber-800 bg-amber-50 rounded-lg border border-amber-200">
+          <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a OS.
         </div>
       }
-    </div>
 
-    <div class="line-section">
-      <div class="line-heading">
-        <div class="flex items-center gap-2">
-          <i class="pi pi-box text-slate-500"></i>
-          <h3>Peças e Insumos</h3>
+      <div class="two-columns">
+        <label>Quilometragem Atual (KM)
+          <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" suffix=" km" styleClass="full-control" />
+        </label>
+        <label>Queixa Relatada pelo Cliente
+          <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Ruído na frenagem e volante puxando para direita"></textarea>
+        </label>
+      </div>
+
+      <label>Diagnóstico Técnico da Oficina
+        <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilhas dianteiras no limite de desgaste; alinhamento necessário"></textarea>
+      </label>
+
+      <label>Observações Internas <small class="text-slate-400">opcional</small>
+        <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Aprovado orçamento complementar via contato telefônico"></textarea>
+      </label>
+
+      <!-- Linhas de Serviço -->
+      <div class="wo-block">
+        <div class="wo-block-header">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-wrench text-slate-500"></i>
+            <h3>Serviços a Realizar</h3>
+          </div>
+          <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço">
+            <option value="">+ Selecionar do catálogo</option>
+            @for (item of servicesCatalog(); track item.id) {
+              <option [value]="item.id">{{ item.name }} · {{ money(item.defaultPrice) }}</option>
+            }
+          </select>
         </div>
-        <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça">
-          <option value="">+ Selecionar do catálogo</option>
-          @for (item of partsCatalog(); track item.id) {
-            <option [value]="item.id">{{ item.name }} · {{ money(item.salePrice) }}</option>
+        <div class="p-3 flex flex-col gap-2">
+          @for (line of services(); track $index) {
+            <div class="order-line">
+              <div class="order-line-desc">
+                <strong>{{ line.description }}</strong>
+              </div>
+              <div class="order-line-inputs">
+                <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('services',$index,'quantity',$event)" />
+                <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('services',$index,'unitPrice',$event)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('services',$index)" ariaLabel="Remover linha de serviço" />
+              </div>
+            </div>
+          } @empty {
+            <div class="text-center py-4 text-sm text-slate-400">Nenhum serviço selecionado. Utilize o seletor acima para adicionar.</div>
           }
-        </select>
-      </div>
-      @for (line of parts(); track $index) {
-        <div class="order-line">
-          <div class="order-line-desc">
-            <strong>{{ line.description }}</strong>
-          </div>
-          <div class="order-line-inputs">
-            <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('parts',$index,'quantity',$event)" />
-            <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('parts',$index,'unitPrice',$event)" />
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('parts',$index)" ariaLabel="Remover linha de peça" />
-          </div>
         </div>
-      }
-    </div>
-
-    <div class="order-footer">
-      <div class="order-footer-total">
-        <span>Total Calculado:</span>
-        <strong>{{ money(orderTotal()) }}</strong>
       </div>
-      <div class="flex gap-2">
-        <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
-        <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="submit" [loading]="saving()" />
+
+      <!-- Linhas de Peça -->
+      <div class="wo-block">
+        <div class="wo-block-header">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box text-slate-500"></i>
+            <h3>Peças e Insumos</h3>
+          </div>
+          <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça">
+            <option value="">+ Selecionar do catálogo</option>
+            @for (item of partsCatalog(); track item.id) {
+              <option [value]="item.id">{{ item.name }} · {{ money(item.salePrice) }}</option>
+            }
+          </select>
+        </div>
+        <div class="p-3 flex flex-col gap-2">
+          @for (line of parts(); track $index) {
+            <div class="order-line">
+              <div class="order-line-desc">
+                <strong>{{ line.description }}</strong>
+              </div>
+              <div class="order-line-inputs">
+                <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('parts',$index,'quantity',$event)" />
+                <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('parts',$index,'unitPrice',$event)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('parts',$index)" ariaLabel="Remover linha de peça" />
+              </div>
+            </div>
+          } @empty {
+            <div class="text-center py-4 text-sm text-slate-400">Nenhuma peça selecionada. Utilize o seletor acima para adicionar.</div>
+          }
+        </div>
       </div>
     </div>
   </form>
-</p-dialog>
+
+  <ng-template #footer>
+    <div class="wo-drawer-footer">
+      <div class="wo-footer-total-calc">
+        <span>Total Calculado:</span>
+        <strong>{{ money(orderTotal()) }}</strong>
+      </div>
+      <div class="wo-footer-right">
+        <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
+        <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="submit" form="workOrderForm" [loading]="saving()" />
+      </div>
+    </div>
+  </ng-template>
+</p-drawer>
 
 

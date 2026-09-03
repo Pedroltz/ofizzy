@@ -15,9 +15,11 @@ import { WorkOrderApiService } from '../../core/api/work-order-api.service';
 import { WorkOrder, WorkOrderLineRequest, WorkOrderStatus, WorkOrderSummary } from '../../core/api/work-order.models';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 
+import { DrawerModule } from 'primeng/drawer';
+
 @Component({
   selector: 'app-work-orders-page',
-  imports: [FormsModule, ReactiveFormsModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, PaginatorModule, TextareaModule, PageHeaderComponent],
+  imports: [FormsModule, ReactiveFormsModule, ButtonModule, DialogModule, DrawerModule, InputNumberModule, InputTextModule, PaginatorModule, TextareaModule, PageHeaderComponent],
   templateUrl: './work-orders.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
