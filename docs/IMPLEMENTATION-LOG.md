@@ -184,4 +184,24 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
     - Card de *TOTAL GERAL* em destaque verde suave (`#f0fdf4` com borda `#bbf7d0`), com o rótulo e o valor numérico em `1.75rem font-black` no mesmo alinhamento horizontal, sem nenhuma quebra.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
+## 2026-09-03 — Conclusão da Fase 4: Impressão e Configuração da Oficina
+
+- **Módulo de Dados da Oficina (`Company`)**:
+  - Tabela PostgreSQL `companies` enriquecida com `LegalName`, `City`, `State`, `PostalCode`, `Email`, `WarrantyTerms`, `ReceiptNotes` e expansão de `Cnpj` para 18 caracteres.
+  - Migration EF Core `20260903030538_AddWorkshopSettings` criada e aplicada.
+  - Endpoints REST `GET /api/company` e `PUT /api/company` com validação FluentValidation.
+  - Nova aba "Dados da Oficina" em `/configuracoes` no frontend Angular com formulário reativo completo.
+- **Impressão A4 Minimalista em Preto e Branco (`.wo-print-sheet`)**:
+  - Modelo econômico e limpo baseado estritamente em texto e linhas divisórias contínuas, sem fundos que desperdicem tinta de impressora.
+  - Seções estruturadas: Cabeçalho com dados da oficina e número da OS, Dados do Cliente e Veículo, Apontamentos Técnicos, Tabelas de Serviços e Peças, Fechamento Financeiro e Termo de Garantia com 2 campos de assinatura para termo de entrega do veículo.
+  - Acionamento direto via botão "Imprimir Ficha" (`window.print()`).
+- **Geração de PDF Oficial no Backend com QuestPDF**:
+  - Endpoint `GET /api/work-orders/{id}/pdf` gerando PDF A4 no padrão texto e separações com suporte a múltiplas páginas e numeração `Página X de Y`.
+  - Botão "Baixar PDF" integrado na tela de detalhes da OS.
+- Validação técnica:
+  - Testes de unidade do backend: `14/14` aprovados (incluindo validação do gerador de PDF e validadores da oficina).
+  - Testes de integração do backend: `3/3` aprovados.
+  - Frontend: `npm run lint` (0 erros) e `npm run build` aprovados.
+  - Smoke test via Nginx na porta 8080: login autenticado, PUT de configurações da oficina e download do PDF da OS com status 200 e cabeçalho `%PDF` validados.
+
 

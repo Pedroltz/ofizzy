@@ -54,6 +54,32 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
         item.Status = request.Status; item.CompletedAt = request.Status == WorkOrderStatus.Completed ? DateTimeOffset.UtcNow : null; item.UpdatedAt = DateTimeOffset.UtcNow; await db.SaveChangesAsync(ct); return Ok(await LoadResponse(id, ct));
     }
 
+    [HttpGet("{id:guid}/pdf")]
+    public async Task<IActionResult> DownloadPdf(Guid id, CancellationToken ct)
+    {
+        var order = await db.WorkOrders
+            .AsNoTracking()
+            .Include(x => x.Services)
+            .Include(x => x.Parts)
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
+
+        if (order is null) return NotFound();
+
+        var company = await db.Companies.AsNoTracking().FirstOrDefaultAsync(ct) ?? new Infrastructure.Persistence.Company
+        {
+            Name = "Sport Pneus - Centro Automotivo",
+            Phone = "(11) 99999-9999",
+            Address = "Rua das Oficinas, 100",
+            City = "São Paulo",
+            State = "SP"
+        };
+
+        var doc = new WorkOrderPdfDocument(order, company);
+        var bytes = QuestPDF.Fluent.GenerateExtensions.GeneratePdf(doc);
+
+        return File(bytes, "application/pdf", $"OS-{order.Number:D4}.pdf");
+    }
+
     private async Task<bool> Validate(WorkOrderRequest request, CancellationToken ct) { var result = await validator.ValidateAsync(request, ct); if (result.IsValid) return true; foreach (var error in result.Errors) ModelState.AddModelError(error.PropertyName, error.ErrorMessage); return false; }
     private async Task<(SportPneus.Api.Modules.Customers.Customer Customer, SportPneus.Api.Modules.Vehicles.Vehicle Vehicle)> GetReferences(WorkOrderRequest request, CancellationToken ct) { var customer = await db.Customers.SingleOrDefaultAsync(x => x.Id == request.CustomerId && x.IsActive, ct) ?? throw new ConflictException("O cliente informado não está disponível."); var vehicle = await db.Vehicles.SingleOrDefaultAsync(x => x.Id == request.VehicleId && x.CustomerId == customer.Id && x.IsActive, ct) ?? throw new ConflictException("O veículo informado não pertence ao cliente ou está arquivado."); return (customer, vehicle); }
     private static void EnsureEditable(WorkOrder item) { if (item.Status is WorkOrderStatus.Completed or WorkOrderStatus.Cancelled) throw new ConflictException("Uma OS finalizada ou cancelada não pode ser alterada."); }

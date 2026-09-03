@@ -36,11 +36,13 @@ A execução direta da API usa .NET User Secrets no perfil `Development`. O `Use
 
 ## Estado de implementação
 
-Fases 1, 2 e 3 concluídas e aprovadas.
-- `Modules/Customers`, `Modules/Vehicles`, `Modules/Services`, `Modules/Parts` e `Modules/WorkOrders` 100% implementados e integrados com o frontend Angular.
-- Rotas `/clientes`, `/veiculos` e `/ordens` funcionais com validações visuais inline, formatação de documentos, autocomplete robusto e confirmações de transição/arquivamento.
-- Visualização detalhada e edição completa de ordens de serviço entregues e validadas.
-- Histórico de migrations reconciliado no volume local (`InitialIdentity`, `AddCatalogs`, `AddWorkOrders`).
+Fases 1, 2, 3 e 4 concluídas e aprovadas.
+- `Modules/Customers`, `Modules/Vehicles`, `Modules/Services`, `Modules/Parts`, `Modules/WorkOrders` e `Modules/Company` 100% implementados e integrados com o frontend Angular.
+- Rotas `/clientes`, `/veiculos`, `/ordens` e `/configuracoes` funcionais com validações visuais inline, formatação de documentos, autocomplete robusto e confirmações de transição/arquivamento.
+- Configurações da oficina totalmente gerenciáveis na aba "Dados da Oficina" em `/configuracoes`.
+- Impressão A4 minimalista profissional (`.wo-print-sheet`) baseada em texto e linhas divisórias, sem fundos que gastem tinta, acionada com um clique em "Imprimir Ficha".
+- Geração de PDF oficial via backend com QuestPDF (download direto via botão "Baixar PDF" na OS ou endpoint `/api/work-orders/{id}/pdf`).
+- Histórico de migrations atualizado (`InitialIdentity`, `AddCatalogs`, `AddWorkOrders`, `AddWorkshopSettings`).
 - Aceite Compose/Nginx realizado com sucesso na porta 8080, validando fluxo completo e persistência após reinício dos contêineres.
 
 ## Cuidados conhecidos

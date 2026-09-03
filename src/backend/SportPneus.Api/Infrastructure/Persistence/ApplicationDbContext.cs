@@ -28,9 +28,15 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         {
             entity.ToTable("companies"); entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
-            entity.Property(x => x.Cnpj).HasMaxLength(14); entity.Property(x => x.Phone).HasMaxLength(20);
-            entity.Property(x => x.WhatsApp).HasMaxLength(20); entity.Property(x => x.Address).HasMaxLength(500);
+            entity.Property(x => x.LegalName).HasMaxLength(160);
+            entity.Property(x => x.Cnpj).HasMaxLength(18); entity.Property(x => x.Phone).HasMaxLength(20);
+            entity.Property(x => x.WhatsApp).HasMaxLength(20); entity.Property(x => x.Email).HasMaxLength(254);
+            entity.Property(x => x.Address).HasMaxLength(500);
+            entity.Property(x => x.City).HasMaxLength(100); entity.Property(x => x.State).HasMaxLength(2);
+            entity.Property(x => x.PostalCode).HasMaxLength(10);
             entity.Property(x => x.LogoPath).HasMaxLength(300);
+            entity.Property(x => x.WarrantyTerms).HasMaxLength(1000);
+            entity.Property(x => x.ReceiptNotes).HasMaxLength(1000);
         });
         modelBuilder.Entity<User>(entity =>
         {

@@ -15,4 +15,5 @@ export class WorkOrderApiService {
   get(id: string): Promise<WorkOrder> { return firstValueFrom(this.http.get<WorkOrder>(`/api/work-orders/${id}`)); }
   save(request: WorkOrderRequest, id?: string): Promise<WorkOrder> { return firstValueFrom(id ? this.http.put<WorkOrder>(`/api/work-orders/${id}`, request) : this.http.post<WorkOrder>('/api/work-orders', request)); }
   changeStatus(id: string, status: WorkOrderStatus): Promise<WorkOrder> { return firstValueFrom(this.http.patch<WorkOrder>(`/api/work-orders/${id}/status`, { status })); }
+  downloadPdf(id: string): Promise<Blob> { return firstValueFrom(this.http.get(`/api/work-orders/${id}/pdf`, { responseType: 'blob' })); }
 }

@@ -10,6 +10,8 @@ using SportPneus.Api.Authentication;
 using SportPneus.Api.Infrastructure.Errors;
 using SportPneus.Api.Infrastructure.Persistence;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())

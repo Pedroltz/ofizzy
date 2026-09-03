@@ -11,6 +11,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Part, ServiceItem, Vehicle } from '../../core/api/catalog.models';
+import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
 import { WorkOrder, WorkOrderLineRequest, WorkOrderStatus, WorkOrderSummary } from '../../core/api/work-order.models';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
@@ -26,6 +27,7 @@ import { DrawerModule } from 'primeng/drawer';
 export class WorkOrdersPage {
   private readonly api = inject(WorkOrderApiService);
   private readonly catalogs = inject(CatalogApiService);
+  private readonly companyApi = inject(CompanyApiService);
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
@@ -37,9 +39,11 @@ export class WorkOrdersPage {
   readonly partsCatalog = signal<Part[]>([]);
   readonly services = signal<WorkOrderLineRequest[]>([]);
   readonly parts = signal<WorkOrderLineRequest[]>([]);
+  readonly company = signal<CompanyResponse | null>(null);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly downloadingPdf = signal(false);
   readonly dialog = signal(false);
   readonly detailDialog = signal(false);
   readonly viewing = signal<WorkOrder | null>(null);
@@ -104,6 +108,7 @@ export class WorkOrdersPage {
       }
     });
 
+    void this.companyApi.get().then(c => this.company.set(c)).catch(() => {});
     void this.load();
   }
 
@@ -337,5 +342,25 @@ export class WorkOrdersPage {
 
   printOrder(): void {
     window.print();
+  }
+
+  async downloadPdf(order: WorkOrder): Promise<void> {
+    this.downloadingPdf.set(true);
+    try {
+      const blob = await this.api.downloadPdf(order.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `OS-${order.number.toString().padStart(4, '0')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      this.messages.add({ severity: 'success', summary: 'PDF baixado com sucesso!' });
+    } catch {
+      this.messages.add({ severity: 'error', summary: 'Erro ao gerar PDF da ordem de serviço.' });
+    } finally {
+      this.downloadingPdf.set(false);
+    }
   }
 }

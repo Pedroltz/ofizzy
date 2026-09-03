@@ -2755,26 +2755,243 @@ label {
     }
 }
 
-/* Print Styles */
+/* =========================================================
+   CLEAN TEXT & SEPARATORS PRINT SHEET (A4)
+   ========================================================= */
+.wo-print-sheet {
+    display: none !important;
+}
+
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
     body * {
         visibility: hidden !important;
     }
-    .wo-center-dialog,
-    .wo-center-dialog * {
+
+    .wo-print-sheet,
+    .wo-print-sheet * {
         visibility: visible !important;
     }
-    .wo-center-dialog {
+
+    .wo-print-sheet {
+        display: block !important;
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
-        max-height: none !important;
-        box-shadow: none !important;
-        border: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 9pt !important;
+        line-height: 1.3 !important;
     }
-    .wo-dialog-footer,
-    .p-dialog-header-actions {
-        display: none !important;
+
+    .wo-print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .wo-print-company {
+        flex: 1;
+    }
+
+    .wo-print-company-name {
+        margin: 0 0 2px 0;
+        font-size: 14pt;
+        font-weight: bold;
+        color: #000000;
+        text-transform: uppercase;
+    }
+
+    .wo-print-company-legal {
+        margin: 0 0 2px 0;
+        font-size: 8pt;
+        color: #444444;
+    }
+
+    .wo-print-company-meta,
+    .wo-print-company-addr {
+        margin: 1px 0;
+        font-size: 8.5pt;
+        color: #222222;
+    }
+
+    .wo-print-os-info {
+        text-align: right;
+        min-width: 200px;
+    }
+
+    .wo-print-os-number {
+        margin: 0 0 4px 0;
+        font-size: 13pt;
+        font-weight: bold;
+        color: #000000;
+    }
+
+    .wo-print-os-info p {
+        margin: 2px 0;
+        font-size: 8.5pt;
+    }
+
+    .wo-print-divider {
+        height: 1px;
+        background: #777777;
+        margin: 8px 0;
+        border: none;
+    }
+
+    .wo-print-divider.thick {
+        height: 2px;
+        background: #000000;
+        margin: 10px 0;
+        border: none;
+    }
+
+    .wo-print-section {
+        margin: 6px 0;
+    }
+
+    .wo-print-label {
+        display: block;
+        font-size: 7.5pt;
+        font-weight: bold;
+        color: #444444;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 3px;
+    }
+
+    .wo-print-value-large {
+        font-size: 10.5pt;
+        font-weight: bold;
+        margin: 0 0 2px 0;
+    }
+
+    .wo-print-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .wo-print-grid-2 p {
+        margin: 2px 0;
+        font-size: 8.5pt;
+    }
+
+    .wo-print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+    }
+
+    .wo-print-table th {
+        border-bottom: 1.5px solid #000000;
+        padding: 4px 6px;
+        font-size: 8.5pt;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .wo-print-table td {
+        border-bottom: 0.5px solid #cccccc;
+        padding: 4px 6px;
+        font-size: 8.5pt;
+    }
+
+    .wo-print-subtotal {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+        font-size: 8.5pt;
+    }
+
+    .wo-print-totals-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-top: 6px;
+    }
+
+    .wo-print-notes {
+        flex: 1;
+        font-size: 8pt;
+    }
+
+    .wo-print-notes p {
+        margin: 2px 0;
+    }
+
+    .wo-print-totals-box {
+        width: 250px;
+    }
+
+    .wo-print-total-line {
+        display: flex;
+        justify-content: space-between;
+        font-size: 8.5pt;
+        margin: 2px 0;
+    }
+
+    .wo-print-grand-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 11pt;
+        font-weight: bold;
+        margin-top: 4px;
+        padding-top: 4px;
+        border-top: 1px solid #000000;
+        border-bottom: 2px solid #000000;
+        padding-bottom: 2px;
+    }
+
+    .wo-print-footer-section {
+        margin-top: 25px;
+    }
+
+    .wo-print-terms {
+        font-size: 7pt;
+        color: #444444;
+        text-align: justify;
+        line-height: 1.25;
+        margin: 0 0 30px 0;
+    }
+
+    .wo-print-signatures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .wo-print-sign-line {
+        border-top: 1px solid #000000;
+        margin-bottom: 4px;
+    }
+
+    .wo-print-sign-name {
+        margin: 0;
+        font-size: 8.5pt;
+        font-weight: bold;
+    }
+
+    .wo-print-sign-role {
+        margin: 1px 0;
+        font-size: 7.5pt;
+        color: #555555;
     }
 }

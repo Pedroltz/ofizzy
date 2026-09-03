@@ -417,6 +417,7 @@
       <div class="wo-dialog-footer">
         <div class="flex items-center gap-2">
           <p-button label="Imprimir Ficha" icon="pi pi-print" [outlined]="true" severity="secondary" (onClick)="printOrder()" />
+          <p-button label="Baixar PDF" icon="pi pi-file-pdf" [outlined]="true" severity="secondary" (onClick)="downloadPdf(order)" [loading]="downloadingPdf()" />
           @if (order.status === 'Open' || order.status === 'InProgress') {
             <p-button label="Editar Ordem" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
           }
@@ -437,6 +438,189 @@
     }
   </ng-template>
 </p-dialog>
+
+@if (viewing(); as order) {
+  <div id="printableWorkOrder" class="wo-print-sheet">
+    <!-- Cabeçalho Oficina & OS -->
+    <div class="wo-print-header">
+      <div class="wo-print-company">
+        <h1 class="wo-print-company-name">{{ company()?.name || 'Sport Pneus - Centro Automotivo' }}</h1>
+        @if (company()?.legalName) {
+          <p class="wo-print-company-legal">{{ company()?.legalName }}</p>
+        }
+        <p class="wo-print-company-meta">
+          @if (company()?.cnpj) { <span>CNPJ: {{ company()?.cnpj }}</span> }
+          @if (company()?.phone) { <span> · Fone: {{ company()?.phone }}</span> }
+          @if (company()?.whatsApp) { <span> · WhatsApp: {{ company()?.whatsApp }}</span> }
+        </p>
+        @if (company()?.address) {
+          <p class="wo-print-company-addr">
+            {{ company()?.address }}{{ company()?.city ? ', ' + company()?.city + '-' + company()?.state : '' }} {{ company()?.postalCode }}
+          </p>
+        }
+      </div>
+
+      <div class="wo-print-os-info">
+        <h2 class="wo-print-os-number">ORDEM DE SERVIÇO #{{ order.number.toString().padStart(4, '0') }}</h2>
+        <p>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></p>
+        @if (order.completedAt) {
+          <p>Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></p>
+        }
+        <p>Status: <strong>{{ statusLabels[order.status].toUpperCase() }}</strong></p>
+      </div>
+    </div>
+
+    <div class="wo-print-divider thick"></div>
+
+    <!-- Cliente & Veículo -->
+    <div class="wo-print-section wo-print-grid-2">
+      <div>
+        <span class="wo-print-label">DADOS DO CLIENTE</span>
+        <p class="wo-print-value-large">{{ order.customerName }}</p>
+        <p>CPF/CNPJ: {{ order.customerDocument || 'Não informado' }}</p>
+        <p>Telefone: {{ order.customerPhone || 'Não informado' }}</p>
+      </div>
+      <div>
+        <span class="wo-print-label">VEÍCULO ATENDIDO</span>
+        <p class="wo-print-value-large">PLACA: {{ order.vehiclePlate }}</p>
+        <p>{{ order.vehicleDescription }}</p>
+        <p>KM: {{ order.mileage ? order.mileage.toLocaleString('pt-BR') + ' km' : 'Não informada' }}</p>
+      </div>
+    </div>
+
+    @if (order.complaint || order.diagnosis) {
+      <div class="wo-print-divider"></div>
+      <div class="wo-print-section wo-print-grid-2">
+        @if (order.complaint) {
+          <div>
+            <span class="wo-print-label">QUEIXA / SOLICITAÇÃO</span>
+            <p>{{ order.complaint }}</p>
+          </div>
+        }
+        @if (order.diagnosis) {
+          <div>
+            <span class="wo-print-label">DIAGNÓSTICO TÉCNICO</span>
+            <p>{{ order.diagnosis }}</p>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="wo-print-divider"></div>
+
+    <!-- Mão de Obra e Serviços -->
+    <div class="wo-print-section">
+      <span class="wo-print-label">SERVIÇOS / MÃO DE OBRA</span>
+      <table class="wo-print-table">
+        <thead>
+          <tr>
+            <th style="width: 55%; text-align: left;">Descrição</th>
+            <th style="width: 15%; text-align: center;">Qtd</th>
+            <th style="width: 15%; text-align: right;">Unitário</th>
+            <th style="width: 15%; text-align: right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of order.services; track s.id) {
+            <tr>
+              <td>{{ s.description }}</td>
+              <td style="text-align: center;">{{ s.quantity }}</td>
+              <td style="text-align: right;">{{ money(s.unitPrice) }}</td>
+              <td style="text-align: right; font-weight: bold;">{{ money(s.total) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="wo-print-subtotal">
+        <span>Subtotal Serviços:</span>
+        <strong>{{ money(order.servicesTotal) }}</strong>
+      </div>
+    </div>
+
+    @if (order.parts.length > 0) {
+      <div class="wo-print-divider"></div>
+      <!-- Peças e Insumos -->
+      <div class="wo-print-section">
+        <span class="wo-print-label">PEÇAS & INSUMOS</span>
+        <table class="wo-print-table">
+          <thead>
+            <tr>
+              <th style="width: 20%; text-align: left;">Código</th>
+              <th style="width: 40%; text-align: left;">Descrição</th>
+              <th style="width: 10%; text-align: center;">Qtd</th>
+              <th style="width: 15%; text-align: right;">Unitário</th>
+              <th style="width: 15%; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of order.parts; track p.id) {
+              <tr>
+                <td>{{ p.code || '-' }}</td>
+                <td>{{ p.description }}</td>
+                <td style="text-align: center;">{{ p.quantity }}</td>
+                <td style="text-align: right;">{{ money(p.unitPrice) }}</td>
+                <td style="text-align: right; font-weight: bold;">{{ money(p.total) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="wo-print-subtotal">
+          <span>Subtotal Peças:</span>
+          <strong>{{ money(order.partsTotal) }}</strong>
+        </div>
+      </div>
+    }
+
+    <div class="wo-print-divider thick"></div>
+
+    <!-- Fechamento Financeiro -->
+    <div class="wo-print-totals-row">
+      <div class="wo-print-notes">
+        @if (order.notes) {
+          <span class="wo-print-label">OBSERVAÇÕES</span>
+          <p>{{ order.notes }}</p>
+        }
+      </div>
+      <div class="wo-print-totals-box">
+        <div class="wo-print-total-line">
+          <span>Mão de Obra:</span>
+          <span>{{ money(order.servicesTotal) }}</span>
+        </div>
+        <div class="wo-print-total-line">
+          <span>Peças & Insumos:</span>
+          <span>{{ money(order.partsTotal) }}</span>
+        </div>
+        <div class="wo-print-divider"></div>
+        <div class="wo-print-grand-total">
+          <span>TOTAL GERAL:</span>
+          <strong>{{ money(order.total) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Termos e Assinatura -->
+    <div class="wo-print-footer-section">
+      <p class="wo-print-terms">
+        {{ company()?.warrantyTerms || 'Garantia legal de 90 dias conforme artigo 26 do Código de Defesa do Consumidor.' }}
+      </p>
+
+      <div class="wo-print-signatures">
+        <div class="wo-print-sign-col">
+          <div class="wo-print-sign-line"></div>
+          <p class="wo-print-sign-name">{{ company()?.name || 'Sport Pneus' }}</p>
+          <p class="wo-print-sign-role">Responsável Técnico</p>
+        </div>
+
+        <div class="wo-print-sign-col">
+          <div class="wo-print-sign-line"></div>
+          <p class="wo-print-sign-name">{{ order.customerName }}</p>
+          <p class="wo-print-sign-role">Assinatura do Cliente / Responsável</p>
+          <p class="wo-print-sign-role">Data de Retirada: ____/____/________</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Modal Centralizado de Criação / Edição de OS -->
 <p-dialog
