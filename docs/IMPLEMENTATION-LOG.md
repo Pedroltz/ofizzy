@@ -110,6 +110,16 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `WorkOrdersController` grava o código fornecido para peças avulsas ou recupera do catálogo para itens catalogados.
 - **Testes e Build**:
   - Testes de integração em `WorkOrderFlowTests` atualizados cobrindo inserção de itens manuais e catalogados com sucesso (todos os 3 testes aprovados).
-  - Frontend validado com `npm run lint` (0 erros) e `npm run build` aprovado. Imagens Docker Compose atualizadas e saudáveis.
+## 2026-09-02 — Alinhamento e Organização Visual das Ordens de Serviço (CSS Grid & Spacious Rows)
+
+- **Organização do Formulário do Drawer de OS**:
+  - Reorganizados os campos gerais: KM e Observações Internas emparelhados em linha de altura simples, Queixa Relatada e Diagnóstico Técnico perfeitamente balanceados em duas colunas simétricas com `rows="2"`.
+- **Grade Tabular Estruturada com CSS Grid para Itens da OS**:
+  - Substituição de cartões soltos com labels repetidos por `.wo-grid-table` com cabeçalho de colunas unificado no topo da tabela (`Descrição`, `Cód/Ref`, `Qtd`, `Valor Unit.`, `Subtotal`, `Ações`).
+  - Cada item compõe uma linha perfeitamente alinhada em colunas fixas com altura padronizada (`align-items: center`), garantindo leitura clara e sem desvios entre linhas.
+  - Subtotais de cada linha e subtotais parciais de seção alinhados à direita com destaque visual.
+- **Lista em Faixas Amplas na Página de Ordens de Serviço**:
+  - A página principal de Ordens de Serviço adotou o mesmo padrão de faixas horizontais de largura total (`.spacious-list`), com badge da OS, cliente, placa, status e valor total sem quebras incômodas.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
 
