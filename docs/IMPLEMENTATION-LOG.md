@@ -122,4 +122,14 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - A página principal de Ordens de Serviço adotou o mesmo padrão de faixas horizontais de largura total (`.spacious-list`), com badge da OS, cliente, placa, status e valor total sem quebras incômodas.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
+## 2026-09-02 — Painel Operacional no Dashboard: Ordens Ativas e Métricas em Tempo Real
+
+- **Seção "Pátio da Oficina" no Painel Inicial**:
+  - Exibição dinâmica das Ordens de Serviço abertas ou em andamento diretamente na tela inicial (`DashboardPage`), com atualização reativa via APIs de OS e Catálogos.
+  - Bloquinhos modernos com indicador pulsante de OS ativas, identificação do cliente, placa Mercosul, modelo do veículo, data/hora de abertura (`createdAt`), valor da OS e link de acesso rápido.
+  - Estado vazio inteligente: mensagem positiva *"Pátio Livre de Pendências"* com botão direto para emissão de nova OS quando todos os veículos estiverem liberados.
+- **Grade de Métricas Rápidas Operacionais**:
+  - 4 cards analíticos com ícones coloridos: *Ordens Ativas (no pátio)*, *Clientes Cadastrados (base total)*, *Veículos na Base (frota)* e *Ordens Concluídas (histórico finalizado)*.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e imagem Docker atualizada.
+
 
