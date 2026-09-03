@@ -1,8 +1,137 @@
 <section class="page-container">
-  <header class="page-header"><div><p class="eyebrow">VISÃO GERAL</p><h1>Bem-vindo à Sport Pneus</h1><p>Seus clientes, veículos e catálogos já podem ser organizados.</p></div><span class="status-tag success">Cadastros disponíveis</span></header>
-  <div class="foundation-grid">
-    <article class="surface-card"><div class="foundation-item"><span class="feature-icon">👥</span><div><h2>Clientes e veículos</h2><p>Cadastros rápidos, pesquisáveis e ligados ao proprietário.</p></div></div></article>
-    <article class="surface-card"><div class="foundation-item"><span class="feature-icon">🔧</span><div><h2>Serviços e peças</h2><p>Catálogos prontos para agilizar as próximas Ordens de Serviço.</p></div></div></article>
+  <header class="page-header">
+    <div class="page-header-text">
+      <p class="eyebrow">PAINEL DE CONTROLE</p>
+      <h1>Visão Geral da Oficina</h1>
+      <p class="page-description">Controle operacional de ordens de serviço, veículos e clientes.</p>
+    </div>
+    <span class="status-tag completed">
+      <i class="pi pi-check-circle"></i>
+      <span>Sistema Operacional</span>
+    </span>
+  </header>
+
+  <div class="quick-actions-bar">
+    <span class="quick-actions-label">Ações rápidas:</span>
+    <div class="quick-actions-buttons">
+      <a routerLink="/ordens" class="quick-action-btn highlight">
+        <i class="pi pi-plus"></i>
+        <span>Nova Ordem de Serviço</span>
+      </a>
+      <a routerLink="/clientes" class="quick-action-btn">
+        <i class="pi pi-user-plus"></i>
+        <span>Cadastrar Cliente</span>
+      </a>
+      <a routerLink="/veiculos" class="quick-action-btn">
+        <i class="pi pi-car"></i>
+        <span>Cadastrar Veículo</span>
+      </a>
+    </div>
   </div>
-  <div class="next-step"><span>→</span><div><strong>Próxima etapa</strong><p>Criação rápida e acompanhamento completo das Ordens de Serviço.</p></div></div>
+
+  <div class="dashboard-grid">
+    <article class="dashboard-card surface-card">
+      <div class="card-icon-header">
+        <div class="card-icon-badge">
+          <i class="pi pi-file-edit"></i>
+        </div>
+        <span class="card-tag">Operação</span>
+      </div>
+      <h2>Ordens de Serviço</h2>
+      <p>Gerencie o ciclo completo de ordens abertas, em execução e concluídas com snapshots de preços.</p>
+      <a routerLink="/ordens" class="card-action-link">
+        <span>Acessar Ordens</span>
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </article>
+
+    <article class="dashboard-card surface-card">
+      <div class="card-icon-header">
+        <div class="card-icon-badge">
+          <i class="pi pi-users"></i>
+        </div>
+        <span class="card-tag">Cadastros</span>
+      </div>
+      <h2>Clientes</h2>
+      <p>Registro completo de clientes com validação de CPF/CNPJ, telefones de contato e endereços.</p>
+      <a routerLink="/clientes" class="card-action-link">
+        <span>Gerenciar Clientes</span>
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </article>
+
+    <article class="dashboard-card surface-card">
+      <div class="card-icon-header">
+        <div class="card-icon-badge">
+          <i class="pi pi-car"></i>
+        </div>
+        <span class="card-tag">Frota</span>
+      </div>
+      <h2>Veículos</h2>
+      <p>Controle de modelos, marcas, placas automotivas, quilometragem e vínculos com os proprietários.</p>
+      <a routerLink="/veiculos" class="card-action-link">
+        <span>Consultar Veículos</span>
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </article>
+
+    <article class="dashboard-card surface-card">
+      <div class="card-icon-header">
+        <div class="card-icon-badge">
+          <i class="pi pi-sliders-h"></i>
+        </div>
+        <span class="card-tag">Catálogo</span>
+      </div>
+      <h2>Catálogo & Ajustes</h2>
+      <p>Tabela de serviços e peças com preços sugeridos para inserção ágil durante o atendimento.</p>
+      <a routerLink="/configuracoes" class="card-action-link">
+        <span>Configurar Catálogo</span>
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </article>
+  </div>
+
+  <section class="workflow-section surface-card">
+    <header class="workflow-header">
+      <div>
+        <p class="eyebrow">FLUXO OPERACIONAL</p>
+        <h3>Ciclo de Atendimento da Oficina</h3>
+      </div>
+      <span class="workflow-badge">Padrão Sport Pneus</span>
+    </header>
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="step-icon"><i class="pi pi-sign-in"></i></div>
+        <div class="step-info">
+          <strong>1. Entrada</strong>
+          <span>Identificação do cliente, veículo e registro de queixas</span>
+        </div>
+      </div>
+      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
+      <div class="workflow-step">
+        <div class="step-icon"><i class="pi pi-search"></i></div>
+        <div class="step-info">
+          <strong>2. Diagnóstico</strong>
+          <span>Avaliação técnica, seleção de serviços e peças</span>
+        </div>
+      </div>
+      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
+      <div class="workflow-step">
+        <div class="step-icon"><i class="pi pi-wrench"></i></div>
+        <div class="step-info">
+          <strong>3. Execução</strong>
+          <span>Status Em Andamento e realização dos serviços</span>
+        </div>
+      </div>
+      <div class="workflow-step-divider"><i class="pi pi-chevron-right"></i></div>
+      <div class="workflow-step">
+        <div class="step-icon"><i class="pi pi-check-circle"></i></div>
+        <div class="step-info">
+          <strong>4. Conclusão</strong>
+          <span>Finalização da OS e liberação do veículo</span>
+        </div>
+      </div>
+    </div>
+  </section>
 </section>
+

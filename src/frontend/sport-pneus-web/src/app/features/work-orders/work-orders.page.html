@@ -1,24 +1,51 @@
 <section class="page-container">
-  <app-page-header eyebrow="OPERAÇÃO" title="Ordens de serviço" description="Acompanhe o serviço da entrada até a finalização." actionLabel="Nova OS" (action)="open()" />
-  <div class="search-bar"><input pInputText [formControl]="search" placeholder="Buscar por número, cliente ou placa" /></div>
+  <app-page-header
+    eyebrow="OPERAÇÃO"
+    title="Ordens de Serviço"
+    description="Acompanhamento operacional desde a recepção do veículo até a entrega."
+    actionLabel="Nova Ordem"
+    actionIcon="pi pi-plus"
+    (action)="open()"
+  />
+
+  <div class="search-bar">
+    <i class="pi pi-search"></i>
+    <input pInputText [formControl]="search" placeholder="Pesquisar por número da OS, cliente ou placa do veículo..." />
+  </div>
+
   <div class="catalog-grid order-grid">
     @for (item of items(); track item.id) {
-      <article class="catalog-card surface-card">
-        <div class="catalog-card-header cursor-pointer" (click)="viewDetail(item)">
-          <div>
-            <small>OS #{{ item.number }}</small>
+      <article class="order-card surface-card">
+        <div class="order-card-header" (click)="viewDetail(item)">
+          <div class="order-card-identity">
+            <span class="order-number">OS #{{ item.number.toString().padStart(4, '0') }}</span>
             <h2>{{ item.customerName }}</h2>
-            <p>{{ item.vehiclePlate }} · {{ item.vehicleDescription }}</p>
+            <div class="order-vehicle-line">
+              <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+              <span>{{ item.vehicleDescription }}</span>
+            </div>
           </div>
           <span class="status-tag" [class.open]="item.status === 'Open'" [class.in-progress]="item.status === 'InProgress'" [class.completed]="item.status === 'Completed'" [class.cancelled]="item.status === 'Cancelled'">
-            {{ statusLabels[item.status] }}
+            @if (item.status === 'Open') { <i class="pi pi-clock"></i> }
+            @if (item.status === 'InProgress') { <i class="pi pi-sync"></i> }
+            @if (item.status === 'Completed') { <i class="pi pi-check"></i> }
+            @if (item.status === 'Cancelled') { <i class="pi pi-times"></i> }
+            <span>{{ statusLabels[item.status] }}</span>
           </span>
         </div>
-        <div class="order-total cursor-pointer" (click)="viewDetail(item)">{{ money(item.total) }}</div>
-        <div class="card-actions flex flex-wrap gap-2">
+
+        <div class="order-summary-row" (click)="viewDetail(item)">
+          <span class="order-date"><i class="pi pi-calendar"></i> {{ formatDate(item.openedAt) }}</span>
+          <div class="order-total-val">
+            <small>Valor Total</small>
+            <strong>{{ money(item.total) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-actions flex flex-wrap gap-2 pt-3 border-t border-slate-100">
           <p-button label="Detalhes" icon="pi pi-eye" [text]="true" severity="secondary" size="small" (onClick)="viewDetail(item)" />
           @if (item.status === 'Open') {
-            <p-button label="Iniciar" icon="pi pi-play" severity="secondary" size="small" (onClick)="status(item, 'InProgress')" />
+            <p-button label="Iniciar" icon="pi pi-play" severity="info" size="small" (onClick)="status(item, 'InProgress')" />
           }
           @if (item.status === 'InProgress') {
             <p-button label="Finalizar" icon="pi pi-check" severity="success" size="small" (onClick)="status(item, 'Completed')" />
@@ -32,130 +59,148 @@
     } @empty {
       @if (!loading()) {
         <div class="empty-state surface-card col-span-full">
-          <span class="pi pi-wrench"></span>
-          <h2>Nenhuma OS encontrada</h2>
-          <p>Abra a primeira ordem para começar o atendimento.</p>
-          <p-button label="Nova OS" icon="pi pi-plus" (onClick)="open()" />
+          <div class="empty-icon"><i class="pi pi-file-edit"></i></div>
+          <h2>Nenhuma ordem de serviço encontrada</h2>
+          <p>{{ search.value ? 'Nenhuma OS corresponde aos filtros pesquisados.' : 'Abra a primeira ordem de serviço para iniciar o controle da oficina.' }}</p>
+          <p-button label="Nova Ordem" icon="pi pi-plus" (onClick)="open()" />
         </div>
       }
     }
   </div>
-  @if (total() > pageSize) { <p-paginator [rows]="pageSize" [totalRecords]="total()" (onPageChange)="changePage($event)" /> }
+
+  @if (total() > pageSize) {
+    <p-paginator
+      [rows]="pageSize"
+      [totalRecords]="total()"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}–{last} de {totalRecords} ordens"
+      (onPageChange)="changePage($event)"
+    />
+  }
 </section>
 
 <!-- Dialog de Visualização Detalhada da OS -->
-<p-dialog [header]="'Ordem de Serviço #' + viewing()?.number" [visible]="detailDialog()" (visibleChange)="detailDialog.set($event)" [modal]="true" [style]="{width:'min(840px, 96vw)'}">
+<p-dialog [header]="'Ordem de Serviço #' + (viewing()?.number?.toString()?.padStart(4, '0') || '')" [visible]="detailDialog()" (visibleChange)="detailDialog.set($event)" [modal]="true" [style]="{width:'min(860px, 96vw)'}">
   @if (viewing(); as order) {
     <div class="detail-modal-body">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+      <div class="detail-header-status">
         <span class="status-tag" [class.open]="order.status === 'Open'" [class.in-progress]="order.status === 'InProgress'" [class.completed]="order.status === 'Completed'" [class.cancelled]="order.status === 'Cancelled'">
-          {{ statusLabels[order.status] }}
+          @if (order.status === 'Open') { <i class="pi pi-clock"></i> }
+          @if (order.status === 'InProgress') { <i class="pi pi-sync"></i> }
+          @if (order.status === 'Completed') { <i class="pi pi-check"></i> }
+          @if (order.status === 'Cancelled') { <i class="pi pi-times"></i> }
+          <span>{{ statusLabels[order.status] }}</span>
         </span>
-        <div class="text-sm text-gray-500">
-          <span>Criada em: <strong>{{ formatDate(order.createdAt) }}</strong></span>
+        <div class="detail-dates">
+          <span>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></span>
           @if (order.completedAt) {
-            <span class="ml-3">Finalizada em: <strong>{{ formatDate(order.completedAt) }}</strong></span>
+            <span class="ml-3">Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
           }
         </div>
       </div>
 
       <div class="detail-grid-2">
         <div class="detail-card">
-          <h4>Cliente</h4>
+          <h4><i class="pi pi-user mr-1 text-slate-400"></i> Cliente</h4>
           <p class="font-bold text-base m-0">{{ order.customerName }}</p>
-          <p class="text-sm text-gray-600 m-0 mt-1">{{ order.customerPhone || 'Telefone não informado' }}</p>
+          <p class="text-sm text-slate-600 m-0 mt-1">{{ order.customerPhone || 'Telefone não informado' }}</p>
           @if (order.customerDocument) {
-            <small class="text-gray-500 block mt-1">Doc: {{ order.customerDocument }}</small>
+            <small class="text-slate-500 block mt-1">Documento: {{ order.customerDocument }}</small>
           }
         </div>
 
         <div class="detail-card">
-          <h4>Veículo</h4>
-          <p class="font-bold text-base m-0"><strong class="plate font-mono uppercase">{{ order.vehiclePlate }}</strong> · {{ order.vehicleDescription }}</p>
+          <h4><i class="pi pi-car mr-1 text-slate-400"></i> Veículo</h4>
+          <p class="font-bold text-base m-0">
+            <span class="plate-badge mini mr-2">{{ order.vehiclePlate }}</span>
+            <span>{{ order.vehicleDescription }}</span>
+          </p>
           @if (order.mileage !== null) {
-            <p class="text-sm text-gray-600 m-0 mt-1">KM atual: {{ order.mileage.toLocaleString('pt-BR') }} km</p>
+            <p class="text-sm text-slate-600 m-0 mt-1">KM registrada: {{ order.mileage.toLocaleString('pt-BR') }} km</p>
           }
         </div>
       </div>
 
       @if (order.complaint || order.diagnosis || order.notes) {
         <div class="detail-card">
-          <h4>Diagnóstico e Observações</h4>
+          <h4><i class="pi pi-info-circle mr-1 text-slate-400"></i> Diagnóstico e Apontamentos</h4>
           @if (order.complaint) {
-            <div class="mb-2">
-              <span class="text-xs font-semibold uppercase text-gray-500 block">Queixa do cliente:</span>
-              <p class="m-0 text-sm">{{ order.complaint }}</p>
+            <div class="mb-3">
+              <span class="text-xs font-semibold uppercase text-slate-400 block">Queixa Relatada pelo Cliente:</span>
+              <p class="m-0 text-sm text-slate-800">{{ order.complaint }}</p>
             </div>
           }
           @if (order.diagnosis) {
-            <div class="mb-2">
-              <span class="text-xs font-semibold uppercase text-gray-500 block">Diagnóstico da oficina:</span>
-              <p class="m-0 text-sm font-medium text-emerald-800">{{ order.diagnosis }}</p>
+            <div class="mb-3">
+              <span class="text-xs font-semibold uppercase text-slate-400 block">Diagnóstico Técnico:</span>
+              <p class="m-0 text-sm font-medium text-emerald-900 bg-emerald-50 p-2 rounded border border-emerald-200/60">{{ order.diagnosis }}</p>
             </div>
           }
           @if (order.notes) {
             <div>
-              <span class="text-xs font-semibold uppercase text-gray-500 block">Observações internas:</span>
-              <p class="m-0 text-sm text-gray-600">{{ order.notes }}</p>
+              <span class="text-xs font-semibold uppercase text-slate-400 block">Observações Internas:</span>
+              <p class="m-0 text-sm text-slate-600">{{ order.notes }}</p>
             </div>
           }
         </div>
       }
 
       <div class="detail-card">
-        <h4>Serviços Realizados</h4>
+        <h4><i class="pi pi-wrench mr-1 text-slate-400"></i> Serviços Executados</h4>
         @if (order.services.length === 0) {
-          <p class="text-sm text-gray-500 m-0">Nenhum serviço adicionado.</p>
+          <p class="text-sm text-slate-400 m-0">Nenhum serviço lançado nesta ordem.</p>
         } @else {
           <table class="detail-table">
             <thead>
-              <tr><th>Descrição</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
+              <tr><th>Descrição do Serviço</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
             </thead>
             <tbody>
               @for (svc of order.services; track svc.id) {
-                <tr><td>{{ svc.description }}</td><td class="text-right">{{ svc.quantity }}</td><td class="text-right">{{ money(svc.unitPrice) }}</td><td class="text-right font-medium">{{ money(svc.total) }}</td></tr>
+                <tr><td>{{ svc.description }}</td><td class="text-right">{{ svc.quantity }}</td><td class="text-right">{{ money(svc.unitPrice) }}</td><td class="text-right font-medium text-slate-900">{{ money(svc.total) }}</td></tr>
               }
             </tbody>
             <tfoot>
-              <tr><td colspan="3" class="text-right text-gray-600">Subtotal Serviços:</td><td class="text-right">{{ money(order.servicesTotal) }}</td></tr>
+              <tr><td colspan="3" class="text-right text-slate-500 font-normal">Subtotal Serviços:</td><td class="text-right font-semibold">{{ money(order.servicesTotal) }}</td></tr>
             </tfoot>
           </table>
         }
       </div>
 
       <div class="detail-card">
-        <h4>Peças e Materiais</h4>
+        <h4><i class="pi pi-box mr-1 text-slate-400"></i> Peças e Materiais Utilizados</h4>
         @if (order.parts.length === 0) {
-          <p class="text-sm text-gray-500 m-0">Nenhuma peça adicionada.</p>
+          <p class="text-sm text-slate-400 m-0">Nenhuma peça lançada nesta ordem.</p>
         } @else {
           <table class="detail-table">
             <thead>
-              <tr><th>Código / Descrição</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
+              <tr><th>Código / Descrição da Peça</th><th class="text-right">Qtd</th><th class="text-right">Unitário</th><th class="text-right">Total</th></tr>
             </thead>
             <tbody>
               @for (pt of order.parts; track pt.id) {
                 <tr>
-                  <td>@if (pt.code) { <span class="font-mono text-xs font-bold text-gray-500 mr-1">[{{ pt.code }}]</span> }{{ pt.description }}</td>
+                  <td>@if (pt.code) { <span class="font-mono text-xs font-bold text-slate-500 mr-1 bg-slate-100 px-1 py-0.5 rounded">[{{ pt.code }}]</span> }{{ pt.description }}</td>
                   <td class="text-right">{{ pt.quantity }}</td>
                   <td class="text-right">{{ money(pt.unitPrice) }}</td>
-                  <td class="text-right font-medium">{{ money(pt.total) }}</td>
+                  <td class="text-right font-medium text-slate-900">{{ money(pt.total) }}</td>
                 </tr>
               }
             </tbody>
             <tfoot>
-              <tr><td colspan="3" class="text-right text-gray-600">Subtotal Peças:</td><td class="text-right">{{ money(order.partsTotal) }}</td></tr>
+              <tr><td colspan="3" class="text-right text-slate-500 font-normal">Subtotal Peças:</td><td class="text-right font-semibold">{{ money(order.partsTotal) }}</td></tr>
             </tfoot>
           </table>
         }
       </div>
 
-      <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex justify-between items-center">
-        <span class="font-bold text-emerald-900 text-lg">Total Geral da Ordem</span>
-        <strong class="text-2xl text-emerald-800 font-extrabold">{{ money(order.total) }}</strong>
+      <div class="detail-total-box">
+        <div class="detail-total-info">
+          <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total Geral da Ordem de Serviço</span>
+          <strong class="text-2xl text-emerald-800 font-extrabold">{{ money(order.total) }}</strong>
+        </div>
       </div>
     </div>
 
-    <div class="dialog-actions flex justify-between items-center pt-4 border-t border-gray-200 mt-2">
+    <div class="dialog-actions flex justify-between items-center pt-4 border-t border-slate-200 mt-2">
       <div>
         @if (order.status === 'Open' || order.status === 'InProgress') {
           <p-button label="Editar OS" icon="pi pi-pencil" severity="secondary" (onClick)="detailDialog.set(false); open(order)" />
@@ -163,7 +208,7 @@
       </div>
       <div class="flex gap-2">
         @if (order.status === 'Open') {
-          <p-button label="Iniciar Atendimento" icon="pi pi-play" severity="secondary" (onClick)="status(order, 'InProgress')" />
+          <p-button label="Iniciar Atendimento" icon="pi pi-play" severity="info" (onClick)="status(order, 'InProgress')" />
         }
         @if (order.status === 'InProgress') {
           <p-button label="Finalizar OS" icon="pi pi-check" severity="success" (onClick)="status(order, 'Completed')" />
@@ -178,7 +223,7 @@
 </p-dialog>
 
 <!-- Dialog de Criação / Edição de OS -->
-<p-dialog [header]="editing() ? ('Editar OS #' + editing()?.number) : 'Nova ordem de serviço'" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true" [style]="{width:'min(920px, 96vw)'}">
+<p-dialog [header]="editing() ? ('Editar OS #' + (editing()?.number?.toString()?.padStart(4, '0') || '')) : 'Nova Ordem de Serviço'" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true" [style]="{width:'min(920px, 96vw)'}">
   <form [formGroup]="form" class="form-stack" (ngSubmit)="save()">
     <div class="two-columns">
       <label>Cliente
@@ -189,7 +234,7 @@
           }
         </select>
         @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
-          <small class="text-red-500">Selecione o cliente</small>
+          <small class="field-error-text">Selecione o cliente</small>
         }
       </label>
 
@@ -201,7 +246,7 @@
           }
         </select>
         @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
-          <small class="text-red-500">Selecione o veículo</small>
+          <small class="field-error-text">Selecione o veículo</small>
         }
       </label>
     </div>
@@ -214,26 +259,29 @@
 
     <div class="two-columns">
       <label>Quilometragem (KM)
-        <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" />
+        <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" suffix=" km" styleClass="full-control" />
       </label>
-      <label>Queixa do cliente
-        <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Barulho na roda dianteira esquerda"></textarea>
+      <label>Queixa Relatada pelo Cliente
+        <textarea pTextarea formControlName="complaint" rows="2" placeholder="Ex: Ruído na frenagem e volante puxando para direita"></textarea>
       </label>
     </div>
 
-    <label>Diagnóstico
-      <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilha de freio gasta e disco riscado"></textarea>
+    <label>Diagnóstico Técnico da Oficina
+      <textarea pTextarea formControlName="diagnosis" rows="2" placeholder="Ex: Pastilhas dianteiras no limite de desgaste; alinhamento necessário"></textarea>
     </label>
 
-    <label>Observações internas <small>opcional</small>
-      <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Autorizado serviço adicional por telefone"></textarea>
+    <label>Observações Internas <small class="text-slate-400">opcional</small>
+      <textarea pTextarea formControlName="notes" rows="2" placeholder="Ex: Aprovado orçamento complementar via contato telefônico"></textarea>
     </label>
 
     <div class="line-section">
       <div class="line-heading">
-        <h3>Serviços</h3>
+        <div class="flex items-center gap-2">
+          <i class="pi pi-wrench text-slate-500"></i>
+          <h3>Serviços a Realizar</h3>
+        </div>
         <select #servicePicker (change)="addService(servicePicker.value); servicePicker.value=''" aria-label="Adicionar serviço">
-          <option value="">+ Adicionar do catálogo</option>
+          <option value="">+ Selecionar do catálogo</option>
           @for (item of servicesCatalog(); track item.id) {
             <option [value]="item.id">{{ item.name }} · {{ money(item.defaultPrice) }}</option>
           }
@@ -241,19 +289,26 @@
       </div>
       @for (line of services(); track $index) {
         <div class="order-line">
-          <strong>{{ line.description }}</strong>
-          <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" (ngModelChange)="updateLine('services',$index,'quantity',$event)" />
-          <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" (ngModelChange)="updateLine('services',$index,'unitPrice',$event)" />
-          <button type="button" class="icon-button" (click)="removeLine('services',$index)" aria-label="Remover">×</button>
+          <div class="order-line-desc">
+            <strong>{{ line.description }}</strong>
+          </div>
+          <div class="order-line-inputs">
+            <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('services',$index,'quantity',$event)" />
+            <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('services',$index,'unitPrice',$event)" />
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('services',$index)" ariaLabel="Remover linha de serviço" />
+          </div>
         </div>
       }
     </div>
 
     <div class="line-section">
       <div class="line-heading">
-        <h3>Peças</h3>
+        <div class="flex items-center gap-2">
+          <i class="pi pi-box text-slate-500"></i>
+          <h3>Peças e Insumos</h3>
+        </div>
         <select #partPicker (change)="addPart(partPicker.value); partPicker.value=''" aria-label="Adicionar peça">
-          <option value="">+ Adicionar do catálogo</option>
+          <option value="">+ Selecionar do catálogo</option>
           @for (item of partsCatalog(); track item.id) {
             <option [value]="item.id">{{ item.name }} · {{ money(item.salePrice) }}</option>
           }
@@ -261,21 +316,29 @@
       </div>
       @for (line of parts(); track $index) {
         <div class="order-line">
-          <strong>{{ line.description }}</strong>
-          <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" (ngModelChange)="updateLine('parts',$index,'quantity',$event)" />
-          <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" (ngModelChange)="updateLine('parts',$index,'unitPrice',$event)" />
-          <button type="button" class="icon-button" (click)="removeLine('parts',$index)" aria-label="Remover">×</button>
+          <div class="order-line-desc">
+            <strong>{{ line.description }}</strong>
+          </div>
+          <div class="order-line-inputs">
+            <p-inputnumber [ngModel]="line.quantity" [ngModelOptions]="{standalone:true}" [min]="0.001" [maxFractionDigits]="3" placeholder="Qtd" (ngModelChange)="updateLine('parts',$index,'quantity',$event)" />
+            <p-inputnumber [ngModel]="line.unitPrice" [ngModelOptions]="{standalone:true}" mode="currency" currency="BRL" locale="pt-BR" placeholder="Preço" (ngModelChange)="updateLine('parts',$index,'unitPrice',$event)" />
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeLine('parts',$index)" ariaLabel="Remover linha de peça" />
+          </div>
         </div>
       }
     </div>
 
     <div class="order-footer">
-      <strong>Total: {{ money(orderTotal()) }}</strong>
+      <div class="order-footer-total">
+        <span>Total Calculado:</span>
+        <strong>{{ money(orderTotal()) }}</strong>
+      </div>
       <div class="flex gap-2">
-        <p-button label="Voltar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
-        <p-button [label]="editing() ? 'Salvar alterações' : 'Abrir OS'" icon="pi pi-check" type="submit" [loading]="saving()" />
+        <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
+        <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="submit" [loading]="saving()" />
       </div>
     </div>
   </form>
 </p-dialog>
+
 

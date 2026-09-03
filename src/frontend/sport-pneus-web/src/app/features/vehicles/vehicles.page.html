@@ -1,17 +1,145 @@
 <section class="page-container">
-  <app-page-header title="Veículos" description="Busque por placa, modelo, marca ou proprietário." actionLabel="Novo veículo" (action)="open()" />
-  <div class="search-bar"><i class="pi pi-search"></i><input pInputText [formControl]="search" placeholder="Buscar veículo..." /></div>
-  @if(loading()){<div class="entity-grid">@for(_ of [1,2,3,4,5,6];track $index){<div class="entity-card"><p-skeleton shape="circle" size="3rem"/><div class="grow"><p-skeleton width="65%"/><p-skeleton width="40%" styleClass="mt-2"/></div></div>}</div>}
-  @else if(items().length===0){<div class="empty-state"><span><i class="pi pi-car"></i></span><h2>Nenhum veículo encontrado</h2><p>{{search.value?'Tente outra placa ou modelo.':'Cadastre um cliente e seu primeiro veículo.'}}</p><p-button label="Novo veículo" icon="pi pi-plus" (onClick)="open()"/></div>}
-  @else{<div class="entity-grid">@for(item of items();track item.id){<article class="entity-card"><span class="feature-icon"><i class="pi pi-car"></i></span><div class="grow"><h2>{{item.brand}} {{item.model}}</h2><p><strong class="plate">{{item.plate}}</strong> · {{item.customerName}}</p>@if(item.mileage!==null){<small>{{item.mileage.toLocaleString('pt-BR')}} km</small>}</div><div class="card-actions"><p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)"/><p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)"/></div></article>}</div>@if(total()>pageSize){<p-paginator [first]="(page()-1)*pageSize" [rows]="pageSize" [totalRecords]="total()" (onPageChange)="changePage($event)"/>}}
+  <app-page-header
+    eyebrow="FROTA"
+    title="Veículos"
+    description="Cadastro da frota de clientes com placas, modelo, ano e quilometragem."
+    actionLabel="Novo Veículo"
+    actionIcon="pi pi-plus"
+    (action)="open()"
+  />
+
+  <div class="search-bar">
+    <i class="pi pi-search"></i>
+    <input pInputText [formControl]="search" placeholder="Pesquisar por placa, modelo, marca ou proprietário..." />
+  </div>
+
+  @if (loading()) {
+    <div class="entity-grid">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="entity-card surface-card">
+          <p-skeleton shape="circle" size="3rem" />
+          <div class="grow">
+            <p-skeleton width="65%" />
+            <p-skeleton width="40%" styleClass="mt-2" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state surface-card">
+      <div class="empty-icon"><i class="pi pi-car"></i></div>
+      <h2>Nenhum veículo encontrado</h2>
+      <p>{{ search.value ? 'Nenhum veículo corresponde à placa ou modelo buscado.' : 'Cadastre um cliente e vincule seu primeiro veículo para iniciar os atendimentos.' }}</p>
+      <p-button label="Novo Veículo" icon="pi pi-plus" (onClick)="open()" />
+    </div>
+  } @else {
+    <div class="entity-grid">
+      @for (item of items(); track item.id) {
+        <article class="entity-card surface-card vehicle-card">
+          <div class="vehicle-icon-badge">
+            <i class="pi pi-car"></i>
+          </div>
+          <div class="entity-main">
+            <div class="entity-header">
+              <h2>{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</h2>
+              <span class="plate-badge">{{ item.plate }}</span>
+            </div>
+            <div class="entity-contacts">
+              <span class="contact-item">
+                <i class="pi pi-user"></i>
+                <span>{{ item.customerName }}</span>
+              </span>
+              @if (item.year || item.color) {
+                <span class="contact-item">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}</span>
+                </span>
+              }
+              @if (item.mileage !== null) {
+                <span class="contact-item">
+                  <i class="pi pi-compass"></i>
+                  <span>{{ item.mileage.toLocaleString('pt-BR') }} km</span>
+                </span>
+              }
+            </div>
+          </div>
+          <div class="card-actions">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+            <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+          </div>
+        </article>
+      }
+    </div>
+    @if (total() > pageSize) {
+      <p-paginator
+        [first]="(page()-1)*pageSize"
+        [rows]="pageSize"
+        [totalRecords]="total()"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first}–{last} de {totalRecords} veículos"
+        (onPageChange)="changePage($event)"
+      />
+    }
+  }
 </section>
-<p-dialog [header]="editing()?'Editar veículo':'Novo veículo'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem,94vw)'}">
+
+<p-dialog [header]="editing() ? 'Editar Veículo' : 'Novo Veículo'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem, 94vw)'}">
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
-    <label>Cliente<p-autocomplete formControlName="customer" [suggestions]="customerSuggestions()" (completeMethod)="searchCustomers($event)" optionLabel="name" [dropdown]="true" placeholder="Digite o nome ou telefone" styleClass="full-control"><ng-template #item let-customer><div><strong>{{customer.name}}</strong><small class="block">{{customer.phone||customer.document||'Sem contato'}}</small></div></ng-template></p-autocomplete>@if (form.controls.customer.errors?.['required'] && form.controls.customer.touched) { <small class="text-red-500">Selecione um cliente cadastrado</small> }</label>
-    <div class="two-columns"><label>Placa<input pInputText formControlName="plate" placeholder="ABC1D23" style="text-transform: uppercase" /></label><label>Modelo<input pInputText formControlName="model" placeholder="Corsa" /></label></div>
-    <div class="two-columns"><label>Marca <small>opcional</small><input pInputText formControlName="brand" /></label><label>Ano <small>opcional</small><p-inputnumber formControlName="year" [useGrouping]="false" [min]="1900" [max]="2030" styleClass="full-control" /></label></div>
-    <div class="two-columns"><label>Cor <small>opcional</small><input pInputText formControlName="color" /></label><label>Quilometragem <small>opcional</small><p-inputnumber formControlName="mileage" [min]="0" suffix=" km" styleClass="full-control" /></label></div>
-    <label>Chassi <small>opcional</small><input pInputText formControlName="chassis" /></label><label>Observações <small>opcional</small><textarea pTextarea formControlName="notes" rows="3"></textarea></label>
-    <div class="dialog-actions"><p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="dialog.set(false)"/><p-button type="submit" [label]="editing()?'Salvar alterações':'Criar veículo'" icon="pi pi-check" [loading]="saving()"/></div>
+    <label>Proprietário (Cliente)
+      <p-autocomplete
+        formControlName="customer"
+        [suggestions]="customerSuggestions()"
+        (completeMethod)="searchCustomers($event)"
+        optionLabel="name"
+        [dropdown]="true"
+        placeholder="Digite o nome, telefone ou CPF do cliente"
+        styleClass="full-control"
+      >
+        <ng-template #item let-customer>
+          <div class="autocomplete-customer-item">
+            <strong>{{ customer.name }}</strong>
+            <small class="text-slate-500">{{ customer.phone || customer.document || 'Sem contato' }}</small>
+          </div>
+        </ng-template>
+      </p-autocomplete>
+      @if (form.controls.customer.errors?.['required'] && form.controls.customer.touched) {
+        <small class="field-error-text">Selecione um cliente cadastrado</small>
+      }
+    </label>
+    <div class="two-columns">
+      <label>Placa do Veículo
+        <input pInputText formControlName="plate" placeholder="ABC1D23 ou ABC-1234" style="text-transform: uppercase" />
+      </label>
+      <label>Modelo
+        <input pInputText formControlName="model" placeholder="Ex: Corolla, Corsa, Onix" />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label>Marca / Fabricante <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="brand" placeholder="Ex: Toyota, Chevrolet, Volkswagen" />
+      </label>
+      <label>Ano de Fabricação <small class="text-slate-400">opcional</small>
+        <p-inputnumber formControlName="year" [useGrouping]="false" [min]="1900" [max]="2035" placeholder="Ex: 2022" styleClass="full-control" />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label>Cor Predominante <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="color" placeholder="Ex: Prata, Preto, Branco" />
+      </label>
+      <label>Quilometragem Atual <small class="text-slate-400">opcional</small>
+        <p-inputnumber formControlName="mileage" [min]="0" suffix=" km" placeholder="Ex: 45000 km" styleClass="full-control" />
+      </label>
+    </div>
+    <label>Número do Chassi <small class="text-slate-400">opcional</small>
+      <input pInputText formControlName="chassis" placeholder="Número gravado no documento ou chassi" style="text-transform: uppercase" />
+    </label>
+    <label>Observações do Veículo <small class="text-slate-400">opcional</small>
+      <textarea pTextarea formControlName="notes" rows="3" placeholder="Informações de avarias prévias, modelo do motor, blindagem, etc."></textarea>
+    </label>
+    <div class="dialog-actions">
+      <p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="dialog.set(false)" />
+      <p-button type="submit" [label]="editing() ? 'Salvar Alterações' : 'Cadastrar Veículo'" icon="pi pi-check" [loading]="saving()" />
+    </div>
   </form>
 </p-dialog>
+

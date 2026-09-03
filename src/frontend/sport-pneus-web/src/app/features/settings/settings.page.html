@@ -1,12 +1,135 @@
 <section class="page-container">
-  <header class="page-header"><div><p class="eyebrow">CONFIGURAÇÕES</p><h1>Catálogos da oficina</h1><p>Serviços e peças ficam disponíveis para preenchimento rápido das Ordens de Serviço.</p></div></header>
+  <app-page-header
+    eyebrow="TABELAS DE PREÇO"
+    title="Catálogo da Oficina"
+    description="Padronize a precificação de mão de obra e peças para agilizar a criação de novas ordens."
+    actionLabel=""
+  />
+
   <p-tabs value="services">
-    <p-tablist><p-tab value="services"><i class="pi pi-wrench"></i> Serviços</p-tab><p-tab value="parts"><i class="pi pi-box"></i> Peças</p-tab></p-tablist>
+    <p-tablist>
+      <p-tab value="services"><i class="pi pi-wrench mr-2"></i> Mão de Obra e Serviços</p-tab>
+      <p-tab value="parts"><i class="pi pi-box mr-2"></i> Peças e Insumos</p-tab>
+    </p-tablist>
     <p-tabpanels>
-      <p-tabpanel value="services"><div class="catalog-toolbar"><div><h2>Serviços</h2><p>Valores são sugestões e poderão ser alterados em cada OS.</p></div><p-button label="Novo serviço" icon="pi pi-plus" (onClick)="openService()"/></div><div class="catalog-list">@for(item of services();track item.id){<article><div class="grow"><h3>{{item.name}}</h3><p>{{item.description||'Sem descrição'}}</p></div><strong>{{money(item.defaultPrice)}}</strong><div class="card-actions"><p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" (onClick)="openService(item)"/><p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" (onClick)="archiveService(item)"/></div></article>}@empty{<div class="empty-state compact"><span><i class="pi pi-wrench"></i></span><h2>Nenhum serviço cadastrado</h2></div>}</div></p-tabpanel>
-      <p-tabpanel value="parts"><div class="catalog-toolbar"><div><h2>Peças</h2><p>O cadastro não movimenta estoque nesta versão.</p></div><p-button label="Nova peça" icon="pi pi-plus" (onClick)="openPart()"/></div><div class="catalog-list">@for(item of parts();track item.id){<article><div class="grow"><h3>{{item.name}}</h3><p>Código {{item.code}} · Custo {{money(item.costPrice)}}</p></div><strong>{{money(item.salePrice)}}</strong><div class="card-actions"><p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" (onClick)="openPart(item)"/><p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" (onClick)="archivePart(item)"/></div></article>}@empty{<div class="empty-state compact"><span><i class="pi pi-box"></i></span><h2>Nenhuma peça cadastrada</h2></div>}</div></p-tabpanel>
+      <p-tabpanel value="services">
+        <div class="catalog-toolbar">
+          <div>
+            <h2>Serviços Cadastrados</h2>
+            <p>Valores são sugestões padrão que podem ser personalizados em cada ordem de serviço.</p>
+          </div>
+          <p-button label="Novo Serviço" icon="pi pi-plus" (onClick)="openService()" />
+        </div>
+        <div class="catalog-list">
+          @for (item of services(); track item.id) {
+            <article class="surface-card catalog-row">
+              <div class="grow">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description || 'Sem descrição cadastrada' }}</p>
+              </div>
+              <div class="catalog-price-box">
+                <small>Preço Padrão</small>
+                <strong>{{ money(item.defaultPrice) }}</strong>
+              </div>
+              <div class="card-actions">
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar serviço" (onClick)="openService(item)" />
+                <p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar serviço" (onClick)="archiveService(item)" />
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state surface-card compact">
+              <div class="empty-icon"><i class="pi pi-wrench"></i></div>
+              <h2>Nenhum serviço cadastrado</h2>
+              <p>Cadastre os serviços comuns da oficina (alinhamento, balanceamento, troca de pneus).</p>
+              <p-button label="Cadastrar Serviço" icon="pi pi-plus" (onClick)="openService()" />
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+
+      <p-tabpanel value="parts">
+        <div class="catalog-toolbar">
+          <div>
+            <h2>Peças e Insumos Cadastrados</h2>
+            <p>Cadastre códigos de referência e preços de custo/venda para agilizar o lançamento na OS.</p>
+          </div>
+          <p-button label="Nova Peça" icon="pi pi-plus" (onClick)="openPart()" />
+        </div>
+        <div class="catalog-list">
+          @for (item of parts(); track item.id) {
+            <article class="surface-card catalog-row">
+              <div class="grow">
+                <h3>{{ item.name }}</h3>
+                <p>
+                  @if (item.code) {
+                    <span class="font-mono text-xs font-bold text-slate-500 mr-2 bg-slate-100 px-1.5 py-0.5 rounded">Cód: {{ item.code }}</span>
+                  }
+                  <span class="text-slate-500">Custo: {{ money(item.costPrice) }}</span>
+                </p>
+              </div>
+              <div class="catalog-price-box">
+                <small>Preço de Venda</small>
+                <strong>{{ money(item.salePrice) }}</strong>
+              </div>
+              <div class="card-actions">
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar peça" (onClick)="openPart(item)" />
+                <p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar peça" (onClick)="archivePart(item)" />
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state surface-card compact">
+              <div class="empty-icon"><i class="pi pi-box"></i></div>
+              <h2>Nenhuma peça cadastrada</h2>
+              <p>Cadastre as peças frequentes (válvulas, pneus, pastilhas, filtros, óleos).</p>
+              <p-button label="Cadastrar Peça" icon="pi pi-plus" (onClick)="openPart()" />
+            </div>
+          }
+        </div>
+      </p-tabpanel>
     </p-tabpanels>
   </p-tabs>
 </section>
-<p-dialog [header]="editingService()?'Editar serviço':'Novo serviço'" [modal]="true" [visible]="serviceDialog()" (visibleChange)="serviceDialog.set($event)" [style]="{width:'min(34rem,94vw)'}"><form [formGroup]="serviceForm" class="dialog-form" (ngSubmit)="saveService()"><label>Nome<input pInputText formControlName="name"/></label><label>Descrição <small>opcional</small><textarea pTextarea formControlName="description" rows="3"></textarea></label><label>Preço padrão<p-inputnumber formControlName="defaultPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" styleClass="full-control"/></label><div class="dialog-actions"><p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="serviceDialog.set(false)"/><p-button type="submit" label="Salvar serviço" icon="pi pi-check" [loading]="saving()"/></div></form></p-dialog>
-<p-dialog [header]="editingPart()?'Editar peça':'Nova peça'" [modal]="true" [visible]="partDialog()" (visibleChange)="partDialog.set($event)" [style]="{width:'min(34rem,94vw)'}"><form [formGroup]="partForm" class="dialog-form" (ngSubmit)="savePart()"><div class="two-columns"><label>Nome<input pInputText formControlName="name"/></label><label>Código<input pInputText formControlName="code"/></label></div><div class="two-columns"><label>Preço de custo<p-inputnumber formControlName="costPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" styleClass="full-control"/></label><label>Preço de venda<p-inputnumber formControlName="salePrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" styleClass="full-control"/></label></div><div class="dialog-actions"><p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="partDialog.set(false)"/><p-button type="submit" label="Salvar peça" icon="pi pi-check" [loading]="saving()"/></div></form></p-dialog>
+
+<p-dialog [header]="editingService() ? 'Editar Serviço' : 'Novo Serviço'" [modal]="true" [visible]="serviceDialog()" (visibleChange)="serviceDialog.set($event)" [style]="{width:'min(36rem, 94vw)'}">
+  <form [formGroup]="serviceForm" class="dialog-form" (ngSubmit)="saveService()">
+    <label>Nome do Serviço
+      <input pInputText formControlName="name" placeholder="Ex: Alinhamento 3D Dianteiro / Traseiro" />
+    </label>
+    <label>Descrição do Serviço <small class="text-slate-400">opcional</small>
+      <textarea pTextarea formControlName="description" rows="3" placeholder="Detalhes do que inclui o serviço, garantias, etc."></textarea>
+    </label>
+    <label>Preço Padrão Sugerido
+      <p-inputnumber formControlName="defaultPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+    </label>
+    <div class="dialog-actions">
+      <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="serviceDialog.set(false)" />
+      <p-button type="submit" [label]="editingService() ? 'Salvar Alterações' : 'Cadastrar Serviço'" icon="pi pi-check" [loading]="saving()" />
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [header]="editingPart() ? 'Editar Peça' : 'Nova Peça'" [modal]="true" [visible]="partDialog()" (visibleChange)="partDialog.set($event)" [style]="{width:'min(36rem, 94vw)'}">
+  <form [formGroup]="partForm" class="dialog-form" (ngSubmit)="savePart()">
+    <div class="two-columns">
+      <label>Nome / Descrição da Peça
+        <input pInputText formControlName="name" placeholder="Ex: Pneu 185/65 R15" />
+      </label>
+      <label>Código de Referência / SKU
+        <input pInputText formControlName="code" placeholder="Ex: PN-185-65" style="text-transform: uppercase" />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label>Preço de Custo
+        <p-inputnumber formControlName="costPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+      </label>
+      <label>Preço de Venda Sugerido
+        <p-inputnumber formControlName="salePrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+      </label>
+    </div>
+    <div class="dialog-actions">
+      <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="partDialog.set(false)" />
+      <p-button type="submit" [label]="editingPart() ? 'Salvar Alterações' : 'Cadastrar Peça'" icon="pi pi-check" [loading]="saving()" />
+    </div>
+  </form>
+</p-dialog>
+

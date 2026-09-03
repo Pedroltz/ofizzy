@@ -1,17 +1,36 @@
 <main class="auth-page login-layout">
   <section class="auth-intro">
-    <span class="brand-mark">🔧</span>
+    <div class="brand-mark">
+      <i class="pi pi-car text-3xl"></i>
+    </div>
     <p class="eyebrow">SPORT PNEUS</p>
-    <h1>Sua oficina, sem complicação.</h1>
-    <p>Ordens de serviço organizadas e rápidas, do jeito que o trabalho precisa.</p>
+    <h1>Gestão inteligente para sua oficina.</h1>
+    <p>Acompanhe ordens de serviço, veículos e clientes com rapidez e total controle operacional.</p>
   </section>
   <section class="auth-card login-card surface-card">
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
-      <header><h2>Entrar</h2><p>Use os dados criados no primeiro acesso.</p></header>
-      <label>E-mail<input formControlName="email" type="email" autocomplete="email" /></label>
-      <label>Senha<input formControlName="password" type="password" autocomplete="current-password" /></label>
-      @if (invalidCredentials()) { <p class="field-error">E-mail ou senha inválidos.</p> }
-      <button type="submit" class="primary-button full-control" [disabled]="saving()">{{ saving() ? 'Entrando...' : 'Entrar →' }}</button>
+      <header>
+        <h2>Acessar o sistema</h2>
+        <p>Informe suas credenciais para entrar.</p>
+      </header>
+      <label>E-mail
+        <input pInputText formControlName="email" type="email" autocomplete="email" placeholder="seu.email@empresa.com" />
+      </label>
+      <label>Senha
+        <input pInputText formControlName="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </label>
+      @if (invalidCredentials()) {
+        <p class="field-error"><i class="pi pi-exclamation-triangle mr-1"></i> E-mail ou senha inválidos.</p>
+      }
+      <button type="submit" class="primary-button full-control flex items-center justify-center gap-2" [disabled]="saving()">
+        @if (saving()) {
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Entrando...</span>
+        } @else {
+          <span>Entrar no sistema</span>
+          <i class="pi pi-arrow-right"></i>
+        }
+      </button>
     </form>
   </section>
 </main>

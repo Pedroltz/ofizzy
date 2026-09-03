@@ -1,25 +1,118 @@
 <section class="page-container">
-  <app-page-header title="Clientes" description="Encontre rapidamente por nome, telefone ou CPF/CNPJ." actionLabel="Novo cliente" (action)="open()" />
-  <div class="search-bar"><i class="pi pi-search"></i><input pInputText [formControl]="search" placeholder="Buscar cliente..." /></div>
+  <app-page-header
+    eyebrow="CADASTROS"
+    title="Clientes"
+    description="Base de proprietários e frotistas com contatos e documentos."
+    actionLabel="Novo Cliente"
+    actionIcon="pi pi-plus"
+    (action)="open()"
+  />
+
+  <div class="search-bar">
+    <i class="pi pi-search"></i>
+    <input pInputText [formControl]="search" placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..." />
+  </div>
+
   @if (loading()) {
-    <div class="entity-grid">@for (_ of [1,2,3,4,5,6]; track $index) { <div class="entity-card"><p-skeleton shape="circle" size="3rem" /><div class="grow"><p-skeleton width="65%" /><p-skeleton width="40%" styleClass="mt-2" /></div></div> }</div>
+    <div class="entity-grid">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="entity-card surface-card">
+          <p-skeleton shape="circle" size="3rem" />
+          <div class="grow">
+            <p-skeleton width="65%" />
+            <p-skeleton width="40%" styleClass="mt-2" />
+          </div>
+        </div>
+      }
+    </div>
   } @else if (items().length === 0) {
-    <div class="empty-state"><span><i class="pi pi-users"></i></span><h2>Nenhum cliente encontrado</h2><p>{{ search.value ? 'Tente outro termo de busca.' : 'Cadastre o primeiro cliente para começar.' }}</p><p-button label="Novo cliente" icon="pi pi-plus" (onClick)="open()" /></div>
+    <div class="empty-state surface-card">
+      <div class="empty-icon"><i class="pi pi-users"></i></div>
+      <h2>Nenhum cliente encontrado</h2>
+      <p>{{ search.value ? 'Nenhum resultado corresponde aos termos pesquisados.' : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.' }}</p>
+      <p-button label="Novo Cliente" icon="pi pi-plus" (onClick)="open()" />
+    </div>
   } @else {
-    <div class="entity-grid">@for (item of items(); track item.id) {
-      <article class="entity-card"><span class="entity-avatar">{{ initials(item.name) }}</span><div class="grow"><h2>{{ item.name }}</h2><p>{{ item.phone || item.email || 'Sem contato informado' }}</p>@if (item.document) { <small>{{ formatDocument(item.document) }}</small> }</div><div class="card-actions"><p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" /><p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" /></div></article>
-    }</div>
-    @if (total() > pageSize) { <p-paginator [first]="(page()-1)*pageSize" [rows]="pageSize" [totalRecords]="total()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} de {totalRecords}" (onPageChange)="changePage($event)" /> }
+    <div class="entity-grid">
+      @for (item of items(); track item.id) {
+        <article class="entity-card surface-card">
+          <div class="entity-avatar">{{ initials(item.name) }}</div>
+          <div class="entity-main">
+            <div class="entity-header">
+              <h2>{{ item.name }}</h2>
+              @if (item.document) {
+                <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+              }
+            </div>
+            <div class="entity-contacts">
+              @if (item.phone) {
+                <span class="contact-item"><i class="pi pi-phone"></i> {{ item.phone }}</span>
+              }
+              @if (item.whatsApp && item.whatsApp !== item.phone) {
+                <span class="contact-item"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</span>
+              }
+              @if (item.email) {
+                <span class="contact-item"><i class="pi pi-envelope"></i> {{ item.email }}</span>
+              }
+              @if (!item.phone && !item.email && !item.whatsApp) {
+                <span class="contact-item text-slate-400">Sem contato informado</span>
+              }
+            </div>
+          </div>
+          <div class="card-actions">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
+            <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+          </div>
+        </article>
+      }
+    </div>
+    @if (total() > pageSize) {
+      <p-paginator
+        [first]="(page()-1)*pageSize"
+        [rows]="pageSize"
+        [totalRecords]="total()"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first}–{last} de {totalRecords} clientes"
+        (onPageChange)="changePage($event)"
+      />
+    }
   }
 </section>
 
-<p-dialog [header]="editing() ? 'Editar cliente' : 'Novo cliente'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem, 94vw)'}">
+<p-dialog [header]="editing() ? 'Editar Cliente' : 'Novo Cliente'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{width:'min(42rem, 94vw)'}">
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
-    <label>Nome<input pInputText formControlName="name" autocomplete="name" /></label>
-    <div class="two-columns"><label>CPF/CNPJ <small>opcional</small><input pInputText formControlName="document" inputmode="numeric" placeholder="11 dígitos (CPF) ou 14 (CNPJ)" />@if (form.controls.document.errors?.['invalidDocument'] && form.controls.document.touched) { <small class="text-red-500">Informe 11 dígitos (CPF) ou 14 dígitos (CNPJ)</small> }</label><label>Telefone <small>opcional</small><input pInputText formControlName="phone" inputmode="tel" /></label></div>
-    <div class="two-columns"><label>WhatsApp <small>opcional</small><input pInputText formControlName="whatsApp" inputmode="tel" /></label><label>E-mail <small>opcional</small><input pInputText formControlName="email" type="email" /></label></div>
-    <label>Endereço <small>opcional</small><input pInputText formControlName="address" /></label>
-    <label>Observações <small>opcional</small><textarea pTextarea formControlName="notes" rows="3"></textarea></label>
-    <div class="dialog-actions"><p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="dialog.set(false)" /><p-button type="submit" [label]="editing() ? 'Salvar alterações' : 'Criar cliente'" icon="pi pi-check" [loading]="saving()" /></div>
+    <label>Nome Completo / Razão Social
+      <input pInputText formControlName="name" autocomplete="name" placeholder="Ex: Roberto Carlos Pereira" />
+    </label>
+    <div class="two-columns">
+      <label>CPF / CNPJ <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="document" inputmode="numeric" placeholder="11 dígitos (CPF) ou 14 (CNPJ)" />
+        @if (form.controls.document.errors?.['invalidDocument'] && form.controls.document.touched) {
+          <small class="field-error-text">Informe 11 dígitos para CPF ou 14 dígitos para CNPJ</small>
+        }
+      </label>
+      <label>Telefone Comercial / Fixo <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="phone" inputmode="tel" placeholder="(00) 0000-0000" />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label>WhatsApp / Celular <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="whatsApp" inputmode="tel" placeholder="(00) 90000-0000" />
+      </label>
+      <label>E-mail de Contato <small class="text-slate-400">opcional</small>
+        <input pInputText formControlName="email" type="email" placeholder="cliente@email.com" />
+      </label>
+    </div>
+    <label>Endereço Completo <small class="text-slate-400">opcional</small>
+      <input pInputText formControlName="address" placeholder="Rua, número, bairro, cidade - UF" />
+    </label>
+    <label>Observações Adicionais <small class="text-slate-400">opcional</small>
+      <textarea pTextarea formControlName="notes" rows="3" placeholder="Informações de preferência, faturamento ou restrições..."></textarea>
+    </label>
+    <div class="dialog-actions">
+      <p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="dialog.set(false)" />
+      <p-button type="submit" [label]="editing() ? 'Salvar Alterações' : 'Cadastrar Cliente'" icon="pi pi-check" [loading]="saving()" />
+    </div>
   </form>
 </p-dialog>
+

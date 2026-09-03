@@ -9,8 +9,9 @@ import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Part, ServiceItem } from '../../core/api/catalog.models';
+import { PageHeaderComponent } from '../../shared/components/page-header.component';
 
-@Component({selector:'app-settings-page',imports:[ReactiveFormsModule,ButtonModule,DialogModule,InputNumberModule,InputTextModule,TabsModule,TextareaModule],templateUrl:'./settings.page.html',changeDetection:ChangeDetectionStrategy.OnPush})
+@Component({selector:'app-settings-page',imports:[ReactiveFormsModule,ButtonModule,DialogModule,InputNumberModule,InputTextModule,TabsModule,TextareaModule,PageHeaderComponent],templateUrl:'./settings.page.html',changeDetection:ChangeDetectionStrategy.OnPush})
 export class SettingsPage{
   private readonly api=inject(CatalogApiService);private readonly fb=inject(FormBuilder);private readonly messages=inject(MessageService);private readonly confirmation=inject(ConfirmationService);
   readonly services=signal<ServiceItem[]>([]);readonly parts=signal<Part[]>([]);readonly loading=signal(true);readonly saving=signal(false);readonly serviceDialog=signal(false);readonly partDialog=signal(false);readonly editingService=signal<ServiceItem|null>(null);readonly editingPart=signal<Part|null>(null);
