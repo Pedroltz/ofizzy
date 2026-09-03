@@ -667,7 +667,7 @@
       </div>
       <div class="wo-footer-right">
         <p-button label="Cancelar" severity="secondary" [text]="true" type="button" (onClick)="dialog.set(false)" />
-        <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="submit" form="workOrderForm" [loading]="saving()" />
+        <p-button [label]="editing() ? 'Salvar Alterações' : 'Emitir Ordem de Serviço'" icon="pi pi-check" type="button" (onClick)="save()" [loading]="saving()" />
       </div>
     </div>
   </ng-template>

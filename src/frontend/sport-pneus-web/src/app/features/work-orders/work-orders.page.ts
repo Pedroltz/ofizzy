@@ -219,6 +219,16 @@ export class WorkOrdersPage {
   async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      const controls = this.form.controls;
+      if (!controls.customerId.value) {
+        this.messages.add({ severity: 'warn', summary: 'Cliente não selecionado', detail: 'Selecione o cliente proprietário antes de emitir a OS.' });
+      } else if (!controls.vehicleId.value) {
+        this.messages.add({ severity: 'warn', summary: 'Veículo não selecionado', detail: 'Selecione o veículo atendido antes de emitir a OS.' });
+      } else if (controls.mileage.invalid) {
+        this.messages.add({ severity: 'warn', summary: 'Quilometragem inválida', detail: 'A quilometragem não pode ser negativa.' });
+      } else {
+        this.messages.add({ severity: 'warn', summary: 'Campos incompletos', detail: 'Preencha os campos obrigatórios em destaque.' });
+      }
       return;
     }
 
@@ -255,6 +265,8 @@ export class WorkOrdersPage {
         this.viewing.set(await this.api.get(id));
       }
       await this.load();
+    } catch (err) {
+      console.error('Falha ao gravar OS:', err);
     } finally {
       this.saving.set(false);
     }
