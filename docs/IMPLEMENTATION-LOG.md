@@ -90,9 +90,14 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Desativada a comutação automática de tema escuro do PrimeNG com `darkModeSelector: 'none'` em `app.config.ts`, prevenindo que navegadores/sistemas com tema escuro forçassem textos brancos sobre cartões de fundo claro.
   - Aplicada blindagem de estilo em `styles.css` para `select`, `select option`, `.wo-info-card strong`, `.order-card-identity h2` e `.catalog-row h3`, garantindo tom ardósia de máxima legibilidade (`#0f172a`).
 - **Modo Híbrido de Listagem (Tabela e Cartões)**:
-  - Implementado alternador de visualização (`viewMode`) em **Clientes**, **Veículos** e **Ordens de Serviço**.
-  - **Tabela Completa (DataGrid)**: exibição em linhas e colunas estruturadas contendo todas as informações cadastrais (Nome, CPF/CNPJ, Telefone com discagem, WhatsApp direto, E-mail, Endereço, Data de Cadastro, Placa Mercosul, Chassi, Ano, Cor, KM, Status, Valor Total e Ações).
-  - **Cartões Ricos**: blocos detalhados que não ocultam dados, apresentando chips de contato interativos, placas em destaque e seções dedicadas para endereços e anotações.
-- Validação: lint e build aprovados sem erros, imagens Docker atualizadas.
+## 2026-09-02 — Lista em Faixas Amplas (Spacious Full-Width Rows) sem Rolagem Horizontal
+
+- **Nova Apresentação de Lista Ampla para Clientes e Veículos**:
+  - Implementada a visualização em faixas horizontais de largura total (`.spacious-list` e `.spacious-row`), eliminando o atrito da rolagem horizontal das tabelas densas e o aperto dos cartões tradicionais.
+  - **Clientes**: avatar ampliado com iniciais (`3.2rem`), Nome Completo em destaque (`1.12rem`, peso 750, tom `#0f172a`), badge com CPF/CNPJ, chips confortáveis para Telefone, WhatsApp (verde) e E-mail, endereço com ícone de localização, notas e data de cadastro.
+  - **Veículos**: placa no padrão Mercosul ampliada (`.plate-badge.large`), Marca & Modelo em evidência, tag de identificação do Proprietário, pílulas de Ano/Cor, Quilometragem e Chassi, sub-linha para anotações e data de cadastro.
+  - Largura de contêiner expandida (`max-width: 86rem`) para aproveitar telas maiores com conforto ergonômico.
+  - Alternador mantido para permitir alternar entre a Lista Ampla padrão e a Tabela Compacta quando desejado.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado no Docker Compose.
 
 
