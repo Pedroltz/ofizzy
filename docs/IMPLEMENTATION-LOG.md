@@ -173,4 +173,15 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
     - **Total Geral da Ordem**: badge estilizado `VALOR TOTAL DA OS`, subtítulo explicativo e valor em destaque com tipografia `2.15rem font-black` alinhada perfeitamente ao centro vertical.
 - Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
 
+## 2026-09-02 — Simplificação e Eliminação de Frases Quebradas no Fechamento da OS
+
+- **Eliminação de Poluição Visual e Frases Quebradas**:
+  - Removidos textos longos, disclaimers redundantes e o antigo badge espremido que quebrava `VALOR / TOTAL / DA OS` em 3 linhas.
+  - Implementado o novo `.wo-summary-card` limpo, moderno e minimalista.
+  - **Lado Esquerdo**: Título nítido *Fechamento da Ordem* com subtítulo direto indicando a contagem de serviços e peças em uma única linha.
+  - **Lado Direito**:
+    - Rótulos concisos de linha única (*Mão de Obra* e *Peças & Insumos*) com valores alinhados à direita.
+    - Card de *TOTAL GERAL* em destaque verde suave (`#f0fdf4` com borda `#bbf7d0`), com o rótulo e o valor numérico em `1.75rem font-black` no mesmo alinhamento horizontal, sem nenhuma quebra.
+- Validação técnica: `npm run lint` (0 erros), `npm run build` aprovado e contêiner frontend atualizado.
+
 
