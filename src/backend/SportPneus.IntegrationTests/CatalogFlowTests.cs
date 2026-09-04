@@ -52,7 +52,7 @@ public sealed class CatalogFlowTests(SportPneusFactory factory) : IClassFixture<
         client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", Uri.UnescapeDataString(xsrfCookie.Split(';')[0].Split('=', 2)[1]));
         client.DefaultRequestHeaders.Add("Cookie", $"{protectionCookie.Split(';')[0]}; {xsrfCookie.Split(';')[0]}");
 
-        var response = await client.PostAsJsonAsync("/api/setup", new { companyName = "Sport Pneus", cnpj = (string?)null, phone = (string?)null, adminName = "Administrador", email = "admin@sportpneus.local", password = "Oficina2026" });
+        var response = await client.PostAsJsonAsync("/api/setup", new { companyName = "Ofizzy", cnpj = (string?)null, phone = (string?)null, adminName = "Administrador", email = "admin@ofizzy.local", password = "Oficina2026" });
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var sessionCookies = response.Headers.GetValues("Set-Cookie").Select(value => value.Split(';')[0]).ToList();
         sessionCookies.Add(protectionCookie.Split(';')[0]);

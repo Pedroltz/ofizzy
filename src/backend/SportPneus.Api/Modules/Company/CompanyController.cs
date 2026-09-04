@@ -18,11 +18,11 @@ public sealed class CompanyController(ApplicationDbContext db) : ControllerBase
         {
             company = new Infrastructure.Persistence.Company
             {
-                Name = "Sport Pneus - Centro Automotivo",
-                LegalName = "Sport Pneus Comércio e Serviços Automotivos LTDA",
+                Name = "Ofizzy",
+                LegalName = "Ofizzy Gestão de Oficinas LTDA",
                 Phone = "(11) 99999-9999",
                 WhatsApp = "(11) 99999-9999",
-                Email = "contato@sportpneus.local",
+                Email = "contato@ofizzy.local",
                 Address = "Rua das Oficinas, 100",
                 City = "São Paulo",
                 State = "SP",

@@ -3,14 +3,7 @@
     eyebrow="Painel Operacional"
     title="Visão Geral da Oficina"
     description="Controle em tempo real de veículos no pátio, ordens em andamento e produtividade"
-  >
-    <div page-actions class="dashboard-header-actions">
-      <a routerLink="/ordens" class="primary-button">
-        <i class="pi pi-plus" aria-hidden="true"></i>
-        <span>Nova Ordem de Serviço</span>
-      </a>
-    </div>
-  </app-page-header>
+  />
 
   <!-- Linha 1: KPIs Operacionais -->
   <section class="dashboard-kpi-grid" aria-label="Métricas principais">
@@ -74,14 +67,14 @@
           <!-- Visualização em Tabela para Desktop -->
           <div class="dashboard-table-desktop">
             <app-data-table-wrapper>
-              <table class="dashboard-table table-fixed" aria-label="Ordens ativas na oficina">
+              <table class="dashboard-table table-fixed dashboard-work-orders-table" aria-label="Ordens ativas na oficina">
                 <colgroup>
-                  <col style="width: 4.2rem" />
+                  <col style="width: 6rem" />
                   <col style="width: auto" />
-                  <col style="width: 8.8rem" />
-                  <col style="width: 5.8rem" />
-                  <col style="width: 7.2rem" />
-                  <col style="width: 5.2rem" />
+                  <col style="width: 9.5rem" />
+                  <col style="width: 7.5rem" />
+                  <col style="width: 9rem" />
+                  <col style="width: 8.5rem" />
                 </colgroup>
                 <thead>
                   <tr>

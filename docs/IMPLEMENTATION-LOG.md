@@ -154,7 +154,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - Migração de `<p-drawer>` lateral para modal centralizado `<p-dialog>` (`.wo-center-dialog`) de largura expandida (`min(1100px, 95vw)`).
   - Experiência visual centralizada, eliminando a sensação de "gaveta espremida no canto direito da tela".
 - **Ficha Visual da Ordem de Serviço (Padrão Centro Automotivo)**:
-  - Cabeçalho de documento com numeração destacada (`OS #0001`), subtítulo institucional da Sport Pneus, tag de status com ícones e data/hora de abertura e conclusão.
+- Cabeçalho de documento com numeração destacada (`OS #0001`), subtítulo institucional do Ofizzy, tag de status com ícones e data/hora de abertura e conclusão.
   - Painel de identificação em duas colunas amplas (`.wo-doc-info-grid`): card do Cliente (com telefone/WhatsApp e CPF/CNPJ) e card do Veículo (com placa Mercosul em tamanho ampliado e KM registrada).
   - Tabelas de Mão de Obra e Peças com largura total, cabeçalho cinza suave, colunas espaçosas e tipografia nítida de alto contraste.
   - Quadro de fechamento financeiro estilo fatura/recibo (`.wo-doc-total-box`), com subtotais detalhados e valor total da OS em verde esmeralda.
@@ -169,7 +169,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - **Coluna Operacional (Esquerda)**:
     - Cabeçalho com ícone de extrato/recibo.
     - Contadores operacionais em destaque: quantidade exata de serviços/mão de obra executados e quantidade de peças aplicadas, separados por divisor vertical limpo.
-    - Nota de garantia técnica e consolidação da Sport Pneus.
+- Nota de garantia técnica e consolidação do Ofizzy.
   - **Coluna Financeira (Direita)**:
     - Gradiente suave esmeralda (`#f0fdf4` a `#ecfdf5`) com borda sutil.
     - Linhas de Mão de Obra e Peças com rótulos e valores em fonte numérica tabular (`font-variant-numeric: tabular-nums`).
@@ -278,7 +278,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 
 ## 2026-09-03 — UI/UX Redesign: R1 — Auditoria Visual Concluída
 
-- **Iniciativa UI/UX Redesign**: Iniciado o plano de reformulação completa da experiência visual do Workshop Manager/Sport Pneus, mantendo integrações de backend, regras de negócio e rotas existentes. Registradas as etapas R1 a R10 no `ROADMAP.md`.
+- **Iniciativa UI/UX Redesign**: Iniciado o plano de reformulação completa da experiência visual do Ofizzy, mantendo integrações de backend, regras de negócio e rotas existentes. Registradas as etapas R1 a R10 no `ROADMAP.md`.
 - **Mapeamento de Estilos Atuais**:
   - `styles.css` auditado: 3809 linhas monolíticas com escopo `:root` restrito a tokens claros e múltiplos blocos responsivos agrupados no final com sobreposições via `!important`.
   - Dezenas de cores hardcoded espalhadas (`#0f172a`, `#ffffff`, `#f1f5f9`, `#e2e8f0`, `#0f766e`, tons esmeralda, âmbar e ardósia).
@@ -307,7 +307,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - **Centralização de Tokens de Design**:
   - Criado `src/styles/tokens.css` com escalas de tipografia Inter/mono, line-heights, espaçamentos base 4px (`--space-1` a `--space-16`), border radius (`--radius-xs` a `--radius-full`) e transições.
   - Criado `src/styles/themes.css` com suporte completo a Light Mode (`:root, [data-theme="light"]`) e Dark Mode (`[data-theme="dark"]`).
-  - Paleta com verde Sport Pneus como cor primária (`#15966a` no claro, `#3ecb92` no escuro), superfícies calibradas (`#ffffff`/`#fafbfa` no claro, `#171a18`/`#1c201e` no escuro com fundo `#101211`), estados semânticos (success, warning, danger, info com variantes soft e text) e sombras extremamente sutis.
+- Paleta com verde Ofizzy como cor primária (`#15966a` no claro, `#3ecb92` no escuro), superfícies calibradas (`#ffffff`/`#fafbfa` no claro, `#171a18`/`#1c201e` no escuro com fundo `#101211`), estados semânticos (success, warning, danger, info com variantes soft e text) e sombras extremamente sutis.
   - Garantida compatibilidade retroativa mapeando as variáveis legadas `--app-*` para os novos tokens do Design System.
 - **ThemeService e Gestão de Tema**:
   - Criados `src/app/core/theme/theme.models.ts` e `src/app/core/theme/theme.service.ts` usando Angular Signals.
@@ -465,13 +465,77 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm run build`: compilação de produção concluída com sucesso.
   - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet, com verificação de ausência de overflow horizontal em `/` e `/ordens`.
 
+## 2026-09-04 — Ajuste de alinhamento da lista de Ordens de Serviço
 
+- Adicionada a classe específica `.work-orders-list-table` à tabela do modo lista de `/ordens`.
+- Aumentado o espaçamento interno das extremidades, revisadas as larguras das colunas e reservado espaço suficiente para o conjunto de ações sem aproximá-lo da borda.
+- O modo bloco e o comportamento responsivo não foram alterados.
+- Validação: `npm run build` executado após a alteração.
+- Aplicado o mesmo padrão de espaçamento e alinhamento à tabela de Ordens ativas da visão geral da Oficina, sem alterar os cards mobile.
+- Melhorada a interação da lista de OS: clique/Enter/Espaço na linha abre a ficha, e ações contextuais foram agrupadas, removendo o botão redundante de visualização.
+- Aplicado o mesmo padrão às listas de Clientes e Veículos: linha abre edição, ações agrupadas e colunas secundárias responsivas evitam scroll horizontal.
+- Refatorados os cards de Clientes e Veículos para uma estrutura interativa comum; ações passaram a usar botões HTML com PrimeIcons explicitamente visíveis em light/dark mode.
+- Corrigido o glifo de arquivamento em Clientes e Veículos: `pi-archive` inexistente foi substituído por `pi-folder-open` nas ações e diálogos de confirmação.
+- Corrigida a paginação da impressão: ficha posicionada no topo, cabeçalhos de tabelas repetíveis e seção de termos/assinaturas protegida contra divisão entre páginas.
+- Eliminada a página em branco em OS curtas: elementos invisíveis da SPA agora saem do layout de impressão, mantendo apenas a ficha impressa.
+- Correção complementar: status reposicionado antes de Cliente/Veículo e coluna ampliada para impedir o corte de “Em andamento”.
+- Protegida a célula do status contra clipping, mantendo o badge visível e antes de Cliente/Veículo.
+- Status elevado para a primeira coluna da lista, antes do número da OS e de Cliente/Veículo.
+- Ordem final ajustada conforme requisito: `OS → Cliente / Veículo → Status → Entrada → Total → Ações`.
+- Removido o atalho duplicado de Nova Ordem de Serviço do Dashboard; a ação permanece disponível no cabeçalho global.
+- Seletor de tema centralizado no rodapé da barra lateral e do drawer móvel, removendo sua duplicação nos cabeçalhos.
+- Documentação reorganizada: documentos gerais, inclusive o guia do frontend, centralizados em `docs/`; `README.md` mantido como índice na raiz do repositório e arquivos de orientação para IA também preservados na raiz.
 
+## 2026-09-04 — Revisão e Correção Visual Global do Frontend (Dark/Light Mode e Design Tokens)
 
+- **Eliminação Completa de Cores Hardcoded e Adaptação Total ao Dark/Light Mode**:
+  - Remoção de todas as classes arbitrárias do Tailwind (`text-slate-*`, `bg-slate-*`, `border-slate-*`, etc.) e estilos inline de `<select>` e `<option>` em modais e fichas.
+  - Migração integral de todos os componentes para tokens semânticos CSS (`var(--surface-primary)`, `var(--surface-secondary)`, `var(--surface-hover)`, `var(--text-primary)`, `var(--text-secondary)`, `var(--text-muted)`, `var(--border-subtle)`, `var(--border-default)`, `var(--border-strong)`, `var(--primary)`, `var(--success)`, `var(--warning)`, `var(--danger)`, `var(--info)`).
+  - Folha de estilos `styles.css` limpa de quaisquer cores hexadecimais fora de `@media print`, garantindo transição perfeita entre modo claro e escuro sem flashes ou textos invisíveis.
+- **Harmonização de Componentes PrimeNG e Formulários**:
+  - Overrides temáticos bridge em `styles.css` para `p-dialog`, `p-autocomplete-overlay`, `p-paginator`, `p-inputtext`, `p-tooltip` respeitando tokens de superfície e texto de cada tema.
+  - Seletores `<select>` e `<option>` no modal de criação/edição de OS ajustados para herdar fundo e texto sem estilos forçados.
+- **Padronização Visual de Grids e Cartões (Clientes, Veículos e Ordens)**:
+  - `.catalog-grid` e `.order-grid` uniformizados com `repeat(auto-fill, minmax(min(100%, 320px/330px), 1fr))`, impedindo cartões esticados ou estreitos demais.
+  - Hierarquia padronizada em todos os cartões: cabeçalho com identificação clara, painel de meta-informações com labels uniformes, linha de observações com truncamento seguro e rodapé sticky com data e botões de ação acessíveis.
+  - Botões de ação em cartões com `pTooltip` e `ariaLabel` descritivos para leitores de tela e usabilidade ergonômica.
+- **Padronização das Ações de Tabela**:
+  - Tabela de Clientes e Veículos atualizadas para o padrão de botões compactos `.table-actions-group` e `.tbl-action-btn.edit` / `.tbl-action-btn.delete` (quadrados de 32px com ícones centralizados, bordas suaves e hover contextual).
+  - Tabela de Ordens de Serviço preservada com alinhamento simétrico e colgroup responsivo sem rolagem horizontal.
+- **Ficha da Ordem de Serviço (`wo-center-dialog`) e Resumo Financeiro**:
+  - Ficha de documento (`.wo-doc-card`, `.wo-tech-card`, `.wo-doc-section`, `.wo-summary-card`) adaptada com fundos semânticos e tipografia legível em Dark Mode.
+  - Resumo financeiro com cards arejados, valores tabulados e destaque claro do Total Geral.
+- **Validação Técnica e Testes**:
+  - `npm run lint`: 0 erros e 0 avisos.
+  - `npm test`: 22/22 testes unitários aprovados.
+  - `npm run build`: compilação concluída com sucesso (aviso de budget conhecido mantido).
+  - `npm run e2e`: 23 cenários aprovados pelo Playwright em Desktop, Pixel 7 e Tablet, cobrindo rotas em múltiplos viewports sem quebras visuais ou overflow.
 
+## 2026-09-04 — Navegação rápida e rebranding para Ofizzy
 
+- Habilitado o preload dos componentes lazy para retirar o download de chunks do caminho crítico das trocas de tela.
+- Implementado cache de sessão GET com TTL de 30 segundos, chaves por filtros/paginação, deduplicação de chamadas, snapshots stale-while-revalidate, invalidação seletiva e proteção contra respostas obsoletas.
+- Dashboard e listagens mantêm dados visíveis ao retornar; catálogos, veículos por cliente e dados da oficina são reutilizados no editor de OS.
+- Adicionado teste E2E que navega para fora e volta a Clientes, confirma exibição em até 100 ms e uma única chamada a `/api/customers`.
+- Alterada a marca pública para Ofizzy em todas as superfícies visíveis, defaults de novas instalações, impressão/PDF e documentação; identificadores internos legados foram mantidos para não quebrar infraestrutura existente.
+- Validação: `npm run lint` aprovado; `npm test -- --watch=false` com 26/26; `npm run build` aprovado; `npm run e2e` com 24 aprovados/6 skips; backend com 14/14 unitários, 3/3 integrações e build Release sem avisos.
+- Compose: frontend foi construído com sucesso no Docker; a reconstrução completa não terminou porque o SDK .NET de 189 MB ainda não existia localmente e o download foi interrompido. O PostgreSQL permaneceu saudável e com o volume persistente.
 
+## 2026-09-04 — Dashboard adaptável à largura disponível
 
+- A tabela “Veículos na Oficina” passou a responder à largura real da coluna principal por container query.
+- Entre 901 e 1400 px, o grid deixa de comprimir a lista em 8/4: a lista ocupa a largura total, os painéis laterais descem em duas colunas e as colunas auxiliares da tabela ficam compactas.
+- Abaixo de 46rem disponíveis, a tabela ainda é substituída pelos cards existentes.
+- Adicionado cenário E2E em viewport de 1180 px, verificando lista em largura total, Cliente/Veículo acima de 200 px e ausência de overflow horizontal.
+- Validação: lint aprovado, 26/26 unitários, build aprovado e 27 E2E aprovados com 9 skips específicos de viewport.
 
+## 2026-09-04 — Responsividade da listagem de Ordens de Serviço
 
+- Compactadas as larguras de OS, status, entrada, total e ações entre 901 e 1400 px, liberando espaço real para Cliente/Veículo.
+- Tablets e celulares passam obrigatoriamente para cards em `/ordens`; a preferência tabela/cards permanece disponível no desktop.
+- Validação: lint, 26/26 testes unitários e build aprovados; E2E direcionado aprovado em notebook de 1180 px e tablet, sem overflow.
 
+## 2026-09-04 — Limpeza conservadora antes da publicação
+
+- Removidos signal e formatador sem consumidores, consolidado seletor CSS duplicado e retirado `console.error` redundante coberto pelo interceptor HTTP.
+- Mantidas as validações de formulários, DTOs, autenticação e regras de OS por serem necessárias para UX e integridade do backend.

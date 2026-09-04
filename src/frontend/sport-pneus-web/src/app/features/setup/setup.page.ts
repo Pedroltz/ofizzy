@@ -14,7 +14,7 @@ export class SetupPage {
   private readonly fb = inject(FormBuilder); private readonly auth = inject(AuthService); private readonly router = inject(Router);
   readonly saving = signal(false);
   readonly form = this.fb.nonNullable.group({
-    companyName: ['Sport Pneus', [Validators.required, Validators.maxLength(160)]], cnpj: [''], phone: [''],
+    companyName: ['', [Validators.required, Validators.maxLength(160)]], cnpj: [''], phone: [''],
     adminName: ['', [Validators.required, Validators.maxLength(120)]], email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)]],
   });

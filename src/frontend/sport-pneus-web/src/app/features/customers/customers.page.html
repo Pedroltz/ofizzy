@@ -36,7 +36,14 @@
   } @else if (effectiveViewMode() === 'cards') {
     <div class="catalog-grid">
       @for (item of items(); track item.id) {
-        <article class="catalog-card">
+        <article
+          class="catalog-card entity-card entity-card--customer"
+          tabindex="0"
+          [attr.aria-label]="'Editar cliente ' + item.name"
+          (click)="open(item)"
+          (keydown.enter)="open(item)"
+          (keydown.space)="$event.preventDefault(); open(item)"
+        >
           <!-- Cabeçalho: Avatar e Documento -->
           <div class="catalog-card-header">
             <div class="spacious-avatar">{{ initials(item.name) }}</div>
@@ -63,16 +70,16 @@
             <div class="catalog-meta-row">
               <span class="catalog-meta-label"><i class="pi pi-phone"></i> Telefone</span>
               @if (item.phone) {
-                <a [href]="'tel:' + item.phone" class="catalog-meta-value hover:underline">{{ item.phone }}</a>
+                <a [href]="'tel:' + item.phone" class="catalog-meta-value hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">{{ item.phone }}</a>
               } @else {
                 <span class="text-xs text-muted italic">Não informado</span>
               }
             </div>
 
             <div class="catalog-meta-row">
-              <span class="catalog-meta-label"><i class="pi pi-whatsapp text-emerald-600"></i> WhatsApp</span>
+              <span class="catalog-meta-label"><i class="pi pi-whatsapp text-success"></i> WhatsApp</span>
               @if (item.whatsApp) {
-                <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="catalog-meta-value text-emerald-600 font-bold hover:underline">
+                <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="catalog-meta-value text-success font-bold hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                   {{ item.whatsApp }}
                 </a>
               } @else {
@@ -82,7 +89,7 @@
 
             @if (item.address) {
               <div class="catalog-card-info pt-1.5 border-t border-subtle">
-                <i class="pi pi-map-marker text-teal-600 mt-0.5 flex-shrink-0"></i>
+                <i class="pi pi-map-marker text-muted mt-0.5 flex-shrink-0"></i>
                 <span class="truncate" [title]="item.address">{{ item.address }}</span>
               </div>
             }
@@ -101,9 +108,13 @@
             <span class="spacious-date">
               <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
             </span>
-            <div class="card-actions">
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+            <div class="card-actions entity-card-actions" aria-label="Ações do cliente">
+              <button type="button" class="entity-card-action" title="Editar cliente" aria-label="Editar cliente" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+                <i class="pi pi-pencil" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="entity-card-action danger" title="Arquivar cliente" aria-label="Arquivar cliente" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+                <i class="pi pi-folder-open" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
         </article>
@@ -111,7 +122,17 @@
     </div>
   } @else {
     <app-data-table-wrapper>
-      <table class="data-table" aria-label="Lista de clientes">
+      <table class="data-table table-fixed customers-list-table" aria-label="Lista de clientes">
+        <colgroup>
+          <col style="width: 20%" />
+          <col style="width: 13%" />
+          <col style="width: 13%" />
+          <col style="width: 13%" />
+          <col style="width: 17%" />
+          <col style="width: auto" />
+          <col style="width: 9%" />
+          <col style="width: 6.25rem" />
+        </colgroup>
         <thead>
           <tr>
             <th>Cliente / Razão Social</th>
@@ -126,7 +147,14 @@
         </thead>
         <tbody>
           @for (item of items(); track item.id) {
-            <tr>
+            <tr
+              class="entity-list-row"
+              tabindex="0"
+              [attr.aria-label]="'Editar cliente ' + item.name"
+              (click)="open(item)"
+              (keydown.enter)="open(item)"
+              (keydown.space)="$event.preventDefault(); open(item)"
+            >
               <td>
                 <div class="flex items-center gap-2.5">
                   <div class="entity-avatar small">{{ initials(item.name) }}</div>
@@ -142,21 +170,21 @@
               </td>
               <td>
                 @if (item.phone) {
-                  <a [href]="'tel:' + item.phone" class="contact-pill"><i class="pi pi-phone"></i> {{ item.phone }}</a>
+                  <a [href]="'tel:' + item.phone" class="contact-pill" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-phone"></i> {{ item.phone }}</a>
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
               </td>
               <td>
                 @if (item.whatsApp) {
-                  <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
+                  <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
               </td>
               <td>
                 @if (item.email) {
-                  <a [href]="'mailto:' + item.email" class="contact-pill"><i class="pi pi-envelope"></i> {{ item.email }}</a>
+                  <a [href]="'mailto:' + item.email" class="contact-pill" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-envelope"></i> {{ item.email }}</a>
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
@@ -168,9 +196,13 @@
                 <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
               </td>
               <td class="text-right">
-                <div class="card-actions justify-end">
-                  <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-                  <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+                <div class="table-actions-group entity-table-actions" aria-label="Ações do cliente">
+                  <button type="button" class="tbl-action-btn edit" title="Editar cliente" aria-label="Editar cliente" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button type="button" class="tbl-action-btn delete" title="Arquivar cliente" aria-label="Arquivar cliente" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+                    <i class="pi pi-folder-open"></i>
+                  </button>
                 </div>
               </td>
             </tr>

@@ -9,7 +9,7 @@ public sealed class SetupRequestValidatorTests
     [Fact]
     public void AcceptsValidInitialSetup()
     {
-        var result = _validator.Validate(new SetupRequest("Sport Pneus", null, null, "Administrador", "admin@sportpneus.local", "Oficina2026"));
+        var result = _validator.Validate(new SetupRequest("Ofizzy", null, null, "Administrador", "admin@ofizzy.local", "Oficina2026"));
         Assert.True(result.IsValid);
     }
 
@@ -20,7 +20,7 @@ public sealed class SetupRequestValidatorTests
     [InlineData("SemNumeroAqui")]
     public void RejectsWeakPassword(string password)
     {
-        var result = _validator.Validate(new SetupRequest("Sport Pneus", null, null, "Administrador", "admin@sportpneus.local", password));
+        var result = _validator.Validate(new SetupRequest("Ofizzy", null, null, "Administrador", "admin@ofizzy.local", password));
         Assert.False(result.IsValid);
     }
 }

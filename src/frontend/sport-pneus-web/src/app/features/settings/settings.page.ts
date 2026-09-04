@@ -80,11 +80,23 @@ export class SettingsPage {
   });
 
   constructor() {
+    const services = this.api.peekServices();
+    const parts = this.api.peekParts();
+    const company = this.companyApi.peek();
+    if (services) this.services.set(services.items);
+    if (parts) this.parts.set(parts.items);
+    if (company) {
+      this.company.set(company);
+      this.patchCompany(company);
+    }
+    this.loading.set(!services && !parts && !company);
     void this.load();
   }
 
   async load(): Promise<void> {
-    this.loading.set(true);
+    this.loading.set(
+      !this.api.peekServices() && !this.api.peekParts() && !this.companyApi.peek()
+    );
     try {
       const [services, parts, comp] = await Promise.all([
         this.api.services(),
@@ -95,24 +107,21 @@ export class SettingsPage {
       this.parts.set(parts.items);
       if (comp) {
         this.company.set(comp);
-        this.companyForm.patchValue({
-          name: comp.name || '',
-          legalName: comp.legalName || '',
-          cnpj: comp.cnpj || '',
-          phone: comp.phone || '',
-          whatsApp: comp.whatsApp || '',
-          email: comp.email || '',
-          address: comp.address || '',
-          city: comp.city || '',
-          state: comp.state || '',
-          postalCode: comp.postalCode || '',
-          warrantyTerms: comp.warrantyTerms || '',
-          receiptNotes: comp.receiptNotes || ''
-        });
+        this.patchCompany(comp);
       }
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private patchCompany(comp: CompanyResponse): void {
+    this.companyForm.patchValue({
+      name: comp.name || '', legalName: comp.legalName || '', cnpj: comp.cnpj || '',
+      phone: comp.phone || '', whatsApp: comp.whatsApp || '', email: comp.email || '',
+      address: comp.address || '', city: comp.city || '', state: comp.state || '',
+      postalCode: comp.postalCode || '', warrantyTerms: comp.warrantyTerms || '',
+      receiptNotes: comp.receiptNotes || ''
+    });
   }
 
   async saveCompany(): Promise<void> {

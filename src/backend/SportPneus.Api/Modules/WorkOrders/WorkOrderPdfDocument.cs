@@ -281,7 +281,7 @@ public sealed class WorkOrderPdfDocument(WorkOrder order, SportPneus.Api.Infrast
             col.Item().LineHorizontal(0.5f).LineColor("#cbd5e1");
             col.Item().PaddingTop(4).Row(row =>
             {
-                row.RelativeItem().Text("Sport Pneus · Sistema de Gestão de Oficinas").FontSize(7.5f).FontColor("#94a3b8");
+                row.RelativeItem().Text("Ofizzy · Sistema de Gestão de Oficinas").FontSize(7.5f).FontColor("#94a3b8");
                 row.RelativeItem().AlignRight().Text(text =>
                 {
                     text.Span("Página ").FontSize(7.5f).FontColor("#94a3b8");

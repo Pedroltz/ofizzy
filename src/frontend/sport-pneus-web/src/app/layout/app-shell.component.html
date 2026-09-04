@@ -1,10 +1,10 @@
 <div class="app-layout">
   <!-- Desktop Sidebar -->
   <aside class="desktop-sidebar" aria-label="Navegação principal">
-    <a routerLink="/" class="sidebar-brand" aria-label="Sport Pneus — Início">
-      <span class="sidebar-wordmark" aria-hidden="true">SP</span>
+    <a routerLink="/" class="sidebar-brand" aria-label="Ofizzy — Início">
+      <span class="sidebar-wordmark" aria-hidden="true">OF</span>
       <span class="brand-info">
-        <strong class="brand-title">Sport Pneus</strong>
+        <strong class="brand-title">Ofizzy</strong>
         <span class="brand-subtitle">Gestão de Oficina</span>
       </span>
     </a>
@@ -71,7 +71,6 @@
           <i class="pi pi-plus"></i>
           <span>Nova OS</span>
         </a>
-        <app-theme-toggle />
       </div>
     </header>
 
@@ -85,12 +84,11 @@
       >
         <i class="pi pi-bars"></i>
       </button>
-      <a routerLink="/" class="mobile-brand" aria-label="Sport Pneus — Início">
-        <span class="sidebar-wordmark small" aria-hidden="true">SP</span>
-        <strong>Sport Pneus</strong>
+      <a routerLink="/" class="mobile-brand" aria-label="Ofizzy — Início">
+        <span class="sidebar-wordmark small" aria-hidden="true">OF</span>
+        <strong>Ofizzy</strong>
       </a>
       <div class="mobile-header__right">
-        <app-theme-toggle />
         <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
       </div>
     </header>
@@ -106,9 +104,9 @@
         >
           <div class="drawer-header">
             <a routerLink="/" class="sidebar-brand" (click)="mobileMenu.set(false)">
-              <span class="sidebar-wordmark" aria-hidden="true">SP</span>
+              <span class="sidebar-wordmark" aria-hidden="true">OF</span>
               <span class="brand-info">
-                <strong class="brand-title">Sport Pneus</strong>
+                <strong class="brand-title">Ofizzy</strong>
                 <span class="brand-subtitle">Gestão de Oficina</span>
               </span>
             </a>

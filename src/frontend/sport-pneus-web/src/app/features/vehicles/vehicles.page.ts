@@ -33,15 +33,22 @@ export class VehiclesPage {
   readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
   readonly form=this.fb.group({ customer:this.fb.control<Customer|null>(null,Validators.required), plate:this.fb.nonNullable.control('',[Validators.required,Validators.minLength(7)]), brand:this.fb.nonNullable.control(''), model:this.fb.nonNullable.control('',Validators.required), year:this.fb.control<number|null>(null), color:this.fb.nonNullable.control(''), mileage:this.fb.control<number|null>(null), chassis:this.fb.nonNullable.control(''), notes:this.fb.nonNullable.control('') });
   private loadVersion = 0;
+  private hasLoaded = false;
   constructor(){this.search.valueChanges.pipe(debounceTime(300),distinctUntilChanged(),takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>{this.page.set(1);void this.load();});void this.load();}
   async load():Promise<void>{
     const current = ++this.loadVersion;
-    this.loading.set(true);
+    const cached = this.api.peekVehicles(this.search.value, this.page(), this.pageSize);
+    if (cached) {
+      this.items.set(cached.items);
+      this.total.set(cached.total);
+    }
+    this.loading.set(!cached && !this.hasLoaded);
     try{
       const result=await this.api.vehicles(this.search.value,this.page(),this.pageSize);
       if (current === this.loadVersion) {
         this.items.set(result.items);
         this.total.set(result.total);
+        this.hasLoaded = true;
       }
     } finally {
       if (current === this.loadVersion) {
@@ -105,7 +112,7 @@ export class VehiclesPage {
     this.confirmation.confirm({
       header: 'Arquivar veículo',
       message: `Arquivar ${item.model} — ${item.plate}? O histórico será preservado.`,
-      icon: 'pi pi-archive',
+      icon: 'pi pi-folder-open',
       acceptLabel: 'Arquivar',
       rejectLabel: 'Voltar',
       acceptButtonProps: { severity: 'danger' },

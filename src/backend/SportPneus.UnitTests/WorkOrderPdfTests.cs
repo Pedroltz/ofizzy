@@ -17,8 +17,8 @@ public class WorkOrderPdfTests
     {
         var company = new Company
         {
-            Name = "Sport Pneus - Centro Automotivo",
-            LegalName = "Sport Pneus LTDA",
+            Name = "Ofizzy",
+            LegalName = "Ofizzy LTDA",
             Cnpj = "12.345.678/0001-90",
             Phone = "(11) 99999-9999",
             Address = "Av. Principal, 1000",

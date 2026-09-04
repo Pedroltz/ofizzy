@@ -87,8 +87,10 @@
               <p-button label="Finalizar" icon="pi pi-check" severity="success" size="small" (onClick)="status(item, 'Completed')" />
             }
             @if (item.status === 'Open' || item.status === 'InProgress') {
-              <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" size="small" ariaLabel="Editar" (onClick)="open(item)" />
-              <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" size="small" ariaLabel="Cancelar" (onClick)="status(item, 'Cancelled')" />
+              <div class="order-card-actions-secondary">
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" size="small" ariaLabel="Editar OS" pTooltip="Editar OS" tooltipPosition="top" (onClick)="open(item)" />
+                <p-button icon="pi pi-times" [text]="true" [rounded]="true" severity="danger" size="small" ariaLabel="Cancelar OS" pTooltip="Cancelar OS" tooltipPosition="top" (onClick)="status(item, 'Cancelled')" />
+              </div>
             }
           </div>
         </article>
@@ -96,14 +98,14 @@
     </div>
   } @else {
     <app-data-table-wrapper>
-      <table class="data-table table-fixed" aria-label="Lista de ordens de serviço">
+      <table class="data-table table-fixed work-orders-list-table" aria-label="Lista de ordens de serviço">
         <colgroup>
-          <col style="width: 4.5rem" />
-          <col style="width: auto" />
-          <col style="width: 9.2rem" />
           <col style="width: 6rem" />
-          <col style="width: 8.2rem" />
+          <col style="width: auto" />
           <col style="width: 9.5rem" />
+          <col style="width: 7.5rem" />
+          <col style="width: 9rem" />
+          <col style="width: 13.75rem" />
         </colgroup>
         <thead>
           <tr>
@@ -117,15 +119,22 @@
         </thead>
         <tbody>
           @for (item of items(); track item.id) {
-            <tr>
+            <tr
+              class="work-orders-list-row"
+              tabindex="0"
+              [attr.aria-label]="'Abrir detalhes da OS #' + item.number.toString().padStart(4, '0')"
+              (click)="viewDetail(item)"
+              (keydown.enter)="viewDetail(item)"
+              (keydown.space)="$event.preventDefault(); viewDetail(item)"
+            >
               <td>
-                <span class="order-code font-mono cursor-pointer hover:underline" (click)="viewDetail(item)">
+                <span class="order-code font-mono">
                   #{{ item.number.toString().padStart(4, '0') }}
                 </span>
               </td>
               <td>
                 <div class="customer-vehicle-cell">
-                  <strong class="cell-title cursor-pointer hover:underline" (click)="viewDetail(item)" [title]="item.customerName">
+                  <strong class="cell-title" [title]="item.customerName">
                     {{ item.customerName }}
                   </strong>
                   <div class="vehicle-subline">
@@ -134,7 +143,7 @@
                   </div>
                 </div>
               </td>
-              <td>
+              <td class="work-order-status-cell">
                 <app-status-badge [status]="item.status" />
               </td>
               <td>
@@ -147,25 +156,22 @@
                 {{ money(item.total) }}
               </td>
               <td class="text-right">
-                <div class="table-actions-group">
-                  <button type="button" class="tbl-action-btn" title="Ver Detalhes" aria-label="Detalhes" (click)="viewDetail(item)">
-                    <i class="pi pi-eye"></i>
-                  </button>
+                <div class="table-actions-group" aria-label="Ações da ordem">
                   @if (item.status === 'Open') {
-                    <button type="button" class="tbl-action-btn action-start" title="Iniciar Ordem" aria-label="Iniciar" (click)="status(item, 'InProgress')">
+                    <button type="button" class="tbl-action-btn action-start" title="Iniciar Ordem" aria-label="Iniciar" (click)="$event.stopPropagation(); status(item, 'InProgress')" (keydown)="$event.stopPropagation()">
                       <i class="pi pi-play"></i>
                     </button>
                   }
                   @if (item.status === 'InProgress') {
-                    <button type="button" class="tbl-action-btn action-finish" title="Finalizar Ordem" aria-label="Finalizar" (click)="status(item, 'Completed')">
+                    <button type="button" class="tbl-action-btn action-finish" title="Finalizar Ordem" aria-label="Finalizar" (click)="$event.stopPropagation(); status(item, 'Completed')" (keydown)="$event.stopPropagation()">
                       <i class="pi pi-check"></i>
                     </button>
                   }
                   @if (item.status === 'Open' || item.status === 'InProgress') {
-                    <button type="button" class="tbl-action-btn" title="Editar" aria-label="Editar" (click)="open(item)">
+                    <button type="button" class="tbl-action-btn" title="Editar" aria-label="Editar" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
                       <i class="pi pi-pencil"></i>
                     </button>
-                    <button type="button" class="tbl-action-btn action-cancel" title="Cancelar" aria-label="Cancelar" (click)="status(item, 'Cancelled')">
+                    <button type="button" class="tbl-action-btn action-cancel" title="Cancelar" aria-label="Cancelar" (click)="$event.stopPropagation(); status(item, 'Cancelled')" (keydown)="$event.stopPropagation()">
                       <i class="pi pi-times"></i>
                     </button>
                   }
@@ -206,7 +212,7 @@
         <div class="wo-dialog-title-group">
           <div class="flex items-center gap-2">
             <span class="wo-drawer-badge">FICHA DA ORDEM DE SERVIÇO</span>
-            <span class="text-xs text-slate-400 hidden sm:inline">· Sport Pneus Centro Automotivo</span>
+            <span class="text-xs text-muted hidden sm:inline">· Ofizzy</span>
           </div>
           <div class="flex items-center gap-3 mt-1">
             <h2 class="wo-dialog-title">OS #{{ order.number.toString().padStart(4, '0') }}</h2>
@@ -220,11 +226,11 @@
           </div>
         </div>
         <div class="wo-dialog-date-pill">
-          <i class="pi pi-calendar text-teal-600"></i>
+          <i class="pi pi-calendar text-info"></i>
           <span>Abertura: <strong>{{ formatDate(order.createdAt) }}</strong></span>
           @if (order.completedAt) {
-            <span class="text-slate-300 mx-1">|</span>
-            <i class="pi pi-check-circle text-emerald-600"></i>
+            <span class="text-muted opacity-50 mx-1">|</span>
+            <i class="pi pi-check-circle text-success"></i>
             <span>Conclusão: <strong>{{ formatDate(order.completedAt) }}</strong></span>
           }
         </div>
@@ -238,13 +244,13 @@
       <div class="wo-doc-info-grid">
         <div class="wo-doc-card">
           <div class="wo-doc-card-title">
-            <div class="icon-circle bg-blue-50 text-blue-600"><i class="pi pi-user"></i></div>
+            <div class="icon-circle info"><i class="pi pi-user"></i></div>
             <span>DADOS DO CLIENTE</span>
           </div>
           <div class="wo-doc-card-body">
             <strong class="wo-doc-name">{{ order.customerName }}</strong>
             <div class="wo-doc-contact-row">
-              <span class="wo-doc-contact"><i class="pi pi-phone text-slate-400 mr-1.5"></i>{{ order.customerPhone || 'Telefone não informado' }}</span>
+              <span class="wo-doc-contact"><i class="pi pi-phone text-muted mr-1.5"></i>{{ order.customerPhone || 'Telefone não informado' }}</span>
               @if (order.customerDocument) {
                 <span class="doc-badge"><i class="pi pi-id-card"></i> {{ order.customerDocument }}</span>
               }
@@ -254,7 +260,7 @@
 
         <div class="wo-doc-card">
           <div class="wo-doc-card-title">
-            <div class="icon-circle bg-amber-50 text-amber-600"><i class="pi pi-car"></i></div>
+            <div class="icon-circle warning"><i class="pi pi-car"></i></div>
             <span>VEÍCULO ATENDIDO</span>
           </div>
           <div class="wo-doc-card-body">
@@ -263,9 +269,9 @@
               <strong class="wo-doc-name">{{ order.vehicleDescription }}</strong>
             </div>
             @if (order.mileage !== null) {
-              <div class="mt-2 text-sm text-slate-600 flex items-center gap-1.5 font-medium">
-                <i class="pi pi-compass text-slate-400"></i>
-                <span>Quilometragem registrada: <strong class="text-slate-900">{{ order.mileage.toLocaleString('pt-BR') }} km</strong></span>
+              <div class="mt-2 text-sm text-secondary flex items-center gap-1.5 font-medium">
+                <i class="pi pi-compass text-muted"></i>
+                <span>Quilometragem registrada: <strong class="text-primary">{{ order.mileage.toLocaleString('pt-BR') }} km</strong></span>
               </div>
             }
           </div>
@@ -276,14 +282,14 @@
       @if (order.complaint || order.diagnosis || order.notes) {
         <div class="wo-tech-card">
           <div class="wo-doc-card-title mb-3">
-            <div class="icon-circle bg-slate-100 text-slate-600"><i class="pi pi-file-edit"></i></div>
+            <div class="icon-circle"><i class="pi pi-file-edit"></i></div>
             <span>APONTAMENTOS TÉCNICOS DA OFICINA</span>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @if (order.complaint) {
               <div class="wo-field-block">
                 <span class="wo-field-label">Queixa do Cliente</span>
-                <p class="wo-field-text bg-slate-50 border border-slate-200 rounded-md p-3">{{ order.complaint }}</p>
+                <p class="wo-field-text">{{ order.complaint }}</p>
               </div>
             }
             @if (order.diagnosis) {
@@ -296,7 +302,7 @@
           @if (order.notes) {
             <div class="wo-field-block mt-3">
               <span class="wo-field-label">Observações Internas</span>
-              <p class="wo-field-text notes bg-slate-50 border border-slate-200 rounded-md p-2.5">{{ order.notes }}</p>
+              <p class="wo-field-text notes">{{ order.notes }}</p>
             </div>
           }
         </div>
@@ -306,13 +312,13 @@
       <div class="wo-doc-section">
         <div class="wo-doc-section-header">
           <div class="flex items-center gap-2">
-            <i class="pi pi-wrench text-blue-600 text-base"></i>
-            <h3 class="font-bold text-sm sm:text-base text-slate-800 m-0">Mão de Obra e Serviços</h3>
+            <i class="pi pi-wrench text-info text-base"></i>
+            <h3 class="font-bold text-sm sm:text-base text-primary m-0">Mão de Obra e Serviços</h3>
           </div>
           <span class="wo-doc-badge-pill">{{ order.services.length }} {{ order.services.length === 1 ? 'item' : 'itens' }}</span>
         </div>
         @if (order.services.length === 0) {
-          <div class="wo-empty-line p-4 text-center text-slate-400 text-sm">Nenhum serviço lançado nesta ordem.</div>
+          <div class="wo-empty-line p-4 text-center text-muted text-sm">Nenhum serviço lançado nesta ordem.</div>
         } @else {
           <div class="wo-table-wrapper">
             <table class="wo-table w-full">
@@ -326,21 +332,21 @@
               </thead>
               <tbody>
                 @for (svc of order.services; track svc.id) {
-                  <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+                  <tr>
                     <td class="py-3 px-4">
-                      <strong class="text-slate-900 text-sm block font-semibold">{{ svc.description }}</strong>
-                      <small class="text-slate-500 md:hidden mt-0.5 block font-normal">{{ svc.quantity }}x {{ money(svc.unitPrice) }}</small>
+                      <strong class="text-primary text-sm block font-semibold">{{ svc.description }}</strong>
+                      <small class="text-muted md:hidden mt-0.5 block font-normal">{{ svc.quantity }}x {{ money(svc.unitPrice) }}</small>
                     </td>
-                    <td class="text-center hidden md:table-cell text-slate-700 font-medium">{{ svc.quantity }}</td>
-                    <td class="text-right hidden md:table-cell text-slate-700 font-medium">{{ money(svc.unitPrice) }}</td>
-                    <td class="text-right font-bold text-slate-900 py-3 px-4">{{ money(svc.total) }}</td>
+                    <td class="text-center hidden md:table-cell text-secondary font-medium">{{ svc.quantity }}</td>
+                    <td class="text-right hidden md:table-cell text-secondary font-medium">{{ money(svc.unitPrice) }}</td>
+                    <td class="text-right font-bold text-primary py-3 px-4">{{ money(svc.total) }}</td>
                   </tr>
                 }
               </tbody>
             </table>
             <div class="wo-doc-subtotal-bar">
-              <span class="text-slate-500 font-medium text-sm">Subtotal de Serviços:</span>
-              <strong class="text-slate-900 font-bold text-base">{{ money(order.servicesTotal) }}</strong>
+              <span class="text-muted font-medium text-sm">Subtotal de Serviços:</span>
+              <strong class="text-primary font-bold text-base">{{ money(order.servicesTotal) }}</strong>
             </div>
           </div>
         }
@@ -350,13 +356,13 @@
       <div class="wo-doc-section">
         <div class="wo-doc-section-header">
           <div class="flex items-center gap-2">
-            <i class="pi pi-box text-emerald-600 text-base"></i>
-            <h3 class="font-bold text-sm sm:text-base text-slate-800 m-0">Peças, Materiais e Insumos</h3>
+            <i class="pi pi-box text-success text-base"></i>
+            <h3 class="font-bold text-sm sm:text-base text-primary m-0">Peças, Materiais e Insumos</h3>
           </div>
           <span class="wo-doc-badge-pill">{{ order.parts.length }} {{ order.parts.length === 1 ? 'item' : 'itens' }}</span>
         </div>
         @if (order.parts.length === 0) {
-          <div class="wo-empty-line p-4 text-center text-slate-400 text-sm">Nenhuma peça lançada nesta ordem.</div>
+          <div class="wo-empty-line p-4 text-center text-muted text-sm">Nenhuma peça lançada nesta ordem.</div>
         } @else {
           <div class="wo-table-wrapper">
             <table class="wo-table w-full">
@@ -370,26 +376,26 @@
               </thead>
               <tbody>
                 @for (pt of order.parts; track pt.id) {
-                  <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+                  <tr>
                     <td class="py-3 px-4">
                       <div class="flex items-center gap-2 flex-wrap">
-                        <strong class="text-slate-900 text-sm font-semibold">{{ pt.description }}</strong>
+                        <strong class="text-primary text-sm font-semibold">{{ pt.description }}</strong>
                         @if (pt.code) {
-                          <span class="font-mono text-xs font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{{ pt.code }}</span>
+                          <span class="font-mono text-xs font-semibold text-secondary bg-surface-secondary px-1.5 py-0.5 rounded border border-subtle">{{ pt.code }}</span>
                         }
                       </div>
-                      <small class="text-slate-500 md:hidden mt-0.5 block font-normal">{{ pt.quantity }}x {{ money(pt.unitPrice) }}</small>
+                      <small class="text-muted md:hidden mt-0.5 block font-normal">{{ pt.quantity }}x {{ money(pt.unitPrice) }}</small>
                     </td>
-                    <td class="text-center hidden md:table-cell text-slate-700 font-medium">{{ pt.quantity }}</td>
-                    <td class="text-right hidden md:table-cell text-slate-700 font-medium">{{ money(pt.unitPrice) }}</td>
-                    <td class="text-right font-bold text-slate-900 py-3 px-4">{{ money(pt.total) }}</td>
+                    <td class="text-center hidden md:table-cell text-secondary font-medium">{{ pt.quantity }}</td>
+                    <td class="text-right hidden md:table-cell text-secondary font-medium">{{ money(pt.unitPrice) }}</td>
+                    <td class="text-right font-bold text-primary py-3 px-4">{{ money(pt.total) }}</td>
                   </tr>
                 }
               </tbody>
             </table>
             <div class="wo-doc-subtotal-bar">
-              <span class="text-slate-500 font-medium text-sm">Subtotal de Peças:</span>
-              <strong class="text-slate-900 font-bold text-base">{{ money(order.partsTotal) }}</strong>
+              <span class="text-muted font-medium text-sm">Subtotal de Peças:</span>
+              <strong class="text-primary font-bold text-base">{{ money(order.partsTotal) }}</strong>
             </div>
           </div>
         }
@@ -399,7 +405,7 @@
       <div class="wo-summary-card">
         <div class="wo-summary-left">
           <div class="wo-summary-title-row">
-            <i class="pi pi-check-circle text-emerald-600 text-lg"></i>
+            <i class="pi pi-check-circle text-success text-lg"></i>
             <span class="wo-summary-title">Fechamento da Ordem</span>
           </div>
           <span class="wo-summary-subtitle">
@@ -454,7 +460,7 @@
     <!-- Cabeçalho Oficina & OS -->
     <div class="wo-print-header">
       <div class="wo-print-company">
-        <h1 class="wo-print-company-name">{{ company()?.name || 'Sport Pneus - Centro Automotivo' }}</h1>
+      <h1 class="wo-print-company-name">{{ company()?.name || 'Ofizzy' }}</h1>
         @if (company()?.legalName) {
           <p class="wo-print-company-legal">{{ company()?.legalName }}</p>
         }
@@ -617,7 +623,7 @@
       <div class="wo-print-signatures">
         <div class="wo-print-sign-col">
           <div class="wo-print-sign-line"></div>
-          <p class="wo-print-sign-name">{{ company()?.name || 'Sport Pneus' }}</p>
+          <p class="wo-print-sign-name">{{ company()?.name || 'Ofizzy' }}</p>
           <p class="wo-print-sign-role">Responsável Técnico</p>
         </div>
 
@@ -656,10 +662,10 @@
     <div class="wo-dialog-content">
       <div class="two-columns">
         <label>Cliente (Proprietário)
-          <select formControlName="customerId" style="color: #0f172a !important; background-color: #ffffff !important;">
-            <option value="" style="color: #64748b !important; background-color: #ffffff !important;">Selecione o cliente cadastrado</option>
+          <select formControlName="customerId">
+            <option value="">Selecione o cliente cadastrado</option>
             @for (item of customers(); track item.id) {
-              <option [value]="item.id" style="color: #0f172a !important; background-color: #ffffff !important;">{{ item.name }}</option>
+              <option [value]="item.id">{{ item.name }}</option>
             }
           </select>
           @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
@@ -668,10 +674,10 @@
         </label>
 
         <label>Veículo Atendido
-          <select formControlName="vehicleId" style="color: #0f172a !important; background-color: #ffffff !important;">
-            <option value="" style="color: #64748b !important; background-color: #ffffff !important;">Selecione o veículo</option>
+          <select formControlName="vehicleId">
+            <option value="">Selecione o veículo</option>
             @for (item of vehicles(); track item.id) {
-              <option [value]="item.id" style="color: #0f172a !important; background-color: #ffffff !important;">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
+              <option [value]="item.id">{{ item.plate }} · {{ item.brand }} {{ item.model }}</option>
             }
           </select>
           @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
@@ -681,7 +687,7 @@
       </div>
 
       @if (form.controls.customerId.value && vehicles().length === 0) {
-        <div class="p-3 text-sm text-amber-800 bg-amber-50 rounded-lg border border-amber-200">
+        <div class="alert-warning">
           <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a OS.
         </div>
       }
@@ -690,7 +696,7 @@
         <label>Quilometragem do Veículo (KM)
           <p-inputnumber formControlName="mileage" [min]="0" [useGrouping]="false" placeholder="Ex: 85000" suffix=" km" styleClass="full-control" />
         </label>
-        <label>Observações Internas <small class="text-slate-400">opcional</small>
+        <label>Observações Internas <small class="text-muted">opcional</small>
           <input pInputText formControlName="notes" placeholder="Ex: Aprovado orçamento complementar por telefone" />
         </label>
       </div>

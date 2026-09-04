@@ -85,9 +85,10 @@ const order = {
   ],
 };
 
-async function mockApi(page: Page): Promise<void> {
+async function mockApi(page: Page, requestCounts?: Map<string, number>): Promise<void> {
   await page.route('**/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
+    requestCounts?.set(path, (requestCounts.get(path) ?? 0) + 1);
     let body: unknown = {};
     if (path === '/api/setup/status') body = { required: false };
     else if (path === '/api/auth/me' || path === '/api/auth/refresh')
@@ -111,7 +112,7 @@ async function mockApi(page: Page): Promise<void> {
       body = { items: [order], total: 1, page: 1, pageSize: 12 };
     else if (path === '/api/company')
       body = {
-        name: 'Sport Pneus',
+        name: 'Ofizzy',
         legalName: null,
         cnpj: null,
         phone: null,
@@ -126,6 +127,56 @@ async function mockApi(page: Page): Promise<void> {
     });
   });
 }
+
+test('retorno para uma listagem reutiliza os dados da sessão', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  const requests = new Map<string, number>();
+  await mockApi(page, requests);
+
+  await page.goto('/clientes');
+  await expect(page.getByText(customer.name).first()).toBeVisible();
+  await page.locator('.desktop-sidebar a[href="/"]').first().click();
+  await expect(page.locator('.desktop-sidebar a[href="/clientes"]')).toBeVisible();
+  await page.locator('.desktop-sidebar a[href="/clientes"]').click();
+  await expect(page.getByText(customer.name).first()).toBeVisible({ timeout: 100 });
+
+  expect(requests.get('/api/customers')).toBe(1);
+});
+
+test('dashboard dá largura total à lista antes de comprimir cliente e veículo', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  await page.setViewportSize({ width: 1180, height: 800 });
+  await mockApi(page);
+
+  await page.goto('/');
+
+  await expect(page.locator('.dashboard-table-desktop')).toBeVisible();
+  const mainBox = await page.locator('.dashboard-main-col').boundingBox();
+  const sideBox = await page.locator('.dashboard-side-col').boundingBox();
+  const customerColumn = await page.locator('.dashboard-work-orders-table tbody td').nth(1).boundingBox();
+  expect(sideBox!.y).toBeGreaterThan(mainBox!.y + mainBox!.height - 1);
+  expect(customerColumn!.width).toBeGreaterThan(200);
+  await expectNoHorizontalOverflow(page);
+});
+
+test('lista de OS preserva cliente e veículo em notebook e usa cards no tablet', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile');
+  await mockApi(page);
+  await page.goto('/ordens');
+
+  if (testInfo.project.name === 'tablet') {
+    await expect(page.locator('.order-grid .order-card').first()).toBeVisible();
+  } else {
+    await page.setViewportSize({ width: 1180, height: 800 });
+    const customerColumn = await page.locator('.work-orders-list-table tbody td').nth(1).boundingBox();
+    expect(customerColumn!.width).toBeGreaterThan(200);
+  }
+  await expectNoHorizontalOverflow(page);
+});
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
   const sizes = await page.evaluate(() => ({

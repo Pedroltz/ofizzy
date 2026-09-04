@@ -1,5 +1,5 @@
 -- Seed Script: Realistic Workshop Demonstration Data
--- Sport Pneus - Centro Automotivo
+-- Ofizzy - Gestão de Oficinas
 
 BEGIN;
 

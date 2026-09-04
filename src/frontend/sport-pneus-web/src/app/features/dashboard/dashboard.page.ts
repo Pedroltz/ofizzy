@@ -89,18 +89,27 @@ export class DashboardPage implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
+    const cached = this.workOrdersApi.peekDashboardSummary();
+    if (cached) {
+      this.applySummary(cached);
+      this.loading.set(false);
+    }
     try {
       const summary = await this.workOrdersApi.dashboardSummary();
-      this.activeOrders.set(summary.activeOrders);
-      this.totalActiveOrders.set(summary.totalActiveOrders);
-      this.totalCompletedOrders.set(summary.totalCompletedOrders);
-      this.totalCustomers.set(summary.totalCustomers);
-      this.totalVehicles.set(summary.totalVehicles);
+      this.applySummary(summary);
     } catch (e) {
       console.error('Erro ao carregar dados do dashboard:', e);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private applySummary(summary: Awaited<ReturnType<WorkOrderApiService['dashboardSummary']>>): void {
+    this.activeOrders.set(summary.activeOrders);
+    this.totalActiveOrders.set(summary.totalActiveOrders);
+    this.totalCompletedOrders.set(summary.totalCompletedOrders);
+    this.totalCustomers.set(summary.totalCustomers);
+    this.totalVehicles.set(summary.totalVehicles);
   }
 
   navigateToNewOrder(): void {
@@ -134,14 +143,6 @@ export class DashboardPage implements OnInit {
 
   formatTimeOnly(iso?: string | null): string {
     if (!iso) return '';
-    return new Date(iso).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
-
-  formatTime(iso?: string | null): string {
-    if (!iso) return '-';
     return new Date(iso).toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',

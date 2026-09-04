@@ -67,7 +67,7 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
 
         var company = await db.Companies.AsNoTracking().FirstOrDefaultAsync(ct) ?? new Infrastructure.Persistence.Company
         {
-            Name = "Sport Pneus - Centro Automotivo",
+            Name = "Ofizzy",
             Phone = "(11) 99999-9999",
             Address = "Rua das Oficinas, 100",
             City = "São Paulo",

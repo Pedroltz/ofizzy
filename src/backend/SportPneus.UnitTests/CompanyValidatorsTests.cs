@@ -11,8 +11,8 @@ public class CompanyValidatorsTests
     public void Valid_Company_Request_Passes()
     {
         var request = new UpdateCompanyRequest(
-            "Sport Pneus",
-            "Sport Pneus LTDA",
+            "Ofizzy",
+            "Ofizzy LTDA",
             "12.345.678/0001-90",
             "(11) 99999-9999",
             "(11) 99999-9999",
@@ -44,7 +44,7 @@ public class CompanyValidatorsTests
     public void Invalid_Email_Fails()
     {
         var request = new UpdateCompanyRequest(
-            "Sport Pneus",
+            "Ofizzy",
             null, null, null, null,
             "invalid-email",
             null, null, null, null, null, null);

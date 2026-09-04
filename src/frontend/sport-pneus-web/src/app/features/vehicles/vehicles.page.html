@@ -36,7 +36,14 @@
   } @else if (effectiveViewMode() === 'cards') {
     <div class="catalog-grid">
       @for (item of items(); track item.id) {
-        <article class="catalog-card">
+        <article
+          class="catalog-card entity-card entity-card--vehicle"
+          tabindex="0"
+          [attr.aria-label]="'Editar veículo ' + item.plate"
+          (click)="open(item)"
+          (keydown.enter)="open(item)"
+          (keydown.space)="$event.preventDefault(); open(item)"
+        >
           <!-- Cabeçalho: Placa e Ano/Cor ou Badge de Carro -->
           <div class="catalog-card-header">
             <span class="plate-badge large">{{ item.plate }}</span>
@@ -63,7 +70,7 @@
           <!-- Painel de Especificações do Veículo -->
           <div class="catalog-card-meta-box">
             <div class="catalog-meta-row">
-              <span class="catalog-meta-label"><i class="pi pi-compass text-teal-600"></i> Quilometragem</span>
+              <span class="catalog-meta-label"><i class="pi pi-compass text-muted"></i> Quilometragem</span>
               @if (item.mileage !== null) {
                 <span class="catalog-meta-value font-mono font-bold">{{ item.mileage.toLocaleString('pt-BR') }} km</span>
               } @else {
@@ -96,9 +103,13 @@
             <span class="spacious-date">
               <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
             </span>
-            <div class="card-actions">
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-              <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+            <div class="card-actions entity-card-actions" aria-label="Ações do veículo">
+              <button type="button" class="entity-card-action" title="Editar veículo" aria-label="Editar veículo" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+                <i class="pi pi-pencil" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="entity-card-action danger" title="Arquivar veículo" aria-label="Arquivar veículo" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+                <i class="pi pi-folder-open" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
         </article>
@@ -106,7 +117,17 @@
     </div>
   } @else {
     <app-data-table-wrapper>
-      <table class="data-table" aria-label="Lista de veículos">
+      <table class="data-table table-fixed vehicles-list-table" aria-label="Lista de veículos">
+        <colgroup>
+          <col style="width: 7rem" />
+          <col style="width: 18%" />
+          <col style="width: 18%" />
+          <col style="width: 11%" />
+          <col style="width: 11%" />
+          <col style="width: auto" />
+          <col style="width: 9%" />
+          <col style="width: 6.25rem" />
+        </colgroup>
         <thead>
           <tr>
             <th>Placa</th>
@@ -121,7 +142,14 @@
         </thead>
         <tbody>
           @for (item of items(); track item.id) {
-            <tr>
+            <tr
+              class="entity-list-row"
+              tabindex="0"
+              [attr.aria-label]="'Editar veículo ' + item.plate"
+              (click)="open(item)"
+              (keydown.enter)="open(item)"
+              (keydown.space)="$event.preventDefault(); open(item)"
+            >
               <td>
                 <span class="plate-badge">{{ item.plate }}</span>
               </td>
@@ -159,9 +187,13 @@
                 <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
               </td>
               <td class="text-right">
-                <div class="card-actions justify-end">
-                  <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" ariaLabel="Editar" (onClick)="open(item)" />
-                  <p-button icon="pi pi-archive" [rounded]="true" [text]="true" severity="danger" ariaLabel="Arquivar" (onClick)="archive(item)" />
+                <div class="table-actions-group entity-table-actions" aria-label="Ações do veículo">
+                  <button type="button" class="tbl-action-btn edit" title="Editar veículo" aria-label="Editar veículo" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button type="button" class="tbl-action-btn delete" title="Arquivar veículo" aria-label="Arquivar veículo" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+                    <i class="pi pi-folder-open"></i>
+                  </button>
                 </div>
               </td>
             </tr>

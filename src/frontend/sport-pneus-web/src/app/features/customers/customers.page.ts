@@ -62,15 +62,22 @@ export class CustomersPage {
   });
 
   private loadVersion = 0;
+  private hasLoaded = false;
   constructor() { this.search.valueChanges.pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(inject(DestroyRef))).subscribe(() => { this.page.set(1); void this.load(); }); void this.load(); }
   async load(): Promise<void> {
     const current = ++this.loadVersion;
-    this.loading.set(true);
+    const cached = this.api.peekCustomers(this.search.value, this.page(), this.pageSize);
+    if (cached) {
+      this.items.set(cached.items);
+      this.total.set(cached.total);
+    }
+    this.loading.set(!cached && !this.hasLoaded);
     try {
       const result = await this.api.customers(this.search.value, this.page(), this.pageSize);
       if (current === this.loadVersion) {
         this.items.set(result.items);
         this.total.set(result.total);
+        this.hasLoaded = true;
       }
     } finally {
       if (current === this.loadVersion) {
@@ -80,7 +87,7 @@ export class CustomersPage {
   }
   open(item?: Customer): void { this.editing.set(item ?? null); this.form.reset(item ? { name:item.name, document:item.document ?? '', phone:item.phone ?? '', whatsApp:item.whatsApp ?? '', email:item.email ?? '', address:item.address ?? '', notes:item.notes ?? '' } : { name:'', document:'', phone:'', whatsApp:'', email:'', address:'', notes:'' }); this.dialog.set(true); }
   async save(): Promise<void> { if (this.form.invalid) { this.form.markAllAsTouched(); return; } this.saving.set(true); try { const value = this.form.getRawValue(); await this.api.saveCustomer({ name:value.name, document:value.document || null, phone:value.phone || null, whatsApp:value.whatsApp || null, email:value.email || null, address:value.address || null, notes:value.notes || null }, this.editing()?.id); this.messages.add({ severity:'success', summary:this.editing() ? 'Cliente atualizado' : 'Cliente criado' }); this.dialog.set(false); await this.load(); } finally { this.saving.set(false); } }
-  archive(item: Customer): void { this.confirmation.confirm({ header:'Arquivar cliente', message:`Arquivar ${item.name} e seus veículos? O histórico será preservado.`, icon:'pi pi-archive', acceptLabel:'Arquivar', rejectLabel:'Voltar', acceptButtonProps:{ severity:'danger' }, accept:async()=>{ await this.api.archiveCustomer(item.id); this.messages.add({ severity:'success', summary:'Cliente arquivado' }); await this.load(); } }); }
+  archive(item: Customer): void { this.confirmation.confirm({ header:'Arquivar cliente', message:`Arquivar ${item.name} e seus veículos? O histórico será preservado.`, icon:'pi pi-folder-open', acceptLabel:'Arquivar', rejectLabel:'Voltar', acceptButtonProps:{ severity:'danger' }, accept:async()=>{ await this.api.archiveCustomer(item.id); this.messages.add({ severity:'success', summary:'Cliente arquivado' }); await this.load(); } }); }
   changePage(event: PaginatorState): void { this.page.set((event.page ?? 0) + 1); void this.load(); }
   initials(name: string): string { const parts = (name || '').trim().split(/\s+/).filter(Boolean); return parts.slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'C'; }
   formatDocument(doc?: string | null): string {

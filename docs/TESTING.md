@@ -9,6 +9,6 @@
 ## Baseline atual
 
 - Backend: 14 testes unitários e 3 testes de integração aprovados.
-- Frontend: 2 testes Vitest aprovados.
+- Frontend: 22 testes Vitest aprovados em 4 arquivos de teste.
 - E2E responsivo: 23 cenários aprovados e 4 ignorados por não se aplicarem ao viewport, em projetos desktop, Pixel 7 e tablet.
-- Build frontend aprovado com aviso não bloqueante: bundle inicial de aproximadamente 707 kB para orçamento de 500 kB.
+- Build frontend aprovado com aviso não bloqueante: bundle inicial de aproximadamente 736 kB para orçamento de 500 kB.

@@ -2,10 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CurrentUser, SetupRequest } from './auth.models';
+import { SessionDataCacheService } from '../cache/session-data-cache.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly cache = inject(SessionDataCacheService);
   private readonly currentUser = signal<CurrentUser | null>(null);
   private restorePromise?: Promise<boolean>;
   readonly user = this.currentUser.asReadonly();
@@ -21,6 +23,6 @@ export class AuthService {
       .then((user) => { this.currentUser.set(user); return true; }).catch(() => false).finally(() => { this.restorePromise = undefined; });
     return this.restorePromise;
   }
-  logout(): Promise<void> { return firstValueFrom(this.http.post<void>('/api/auth/logout', {})).catch(() => undefined).then(() => this.currentUser.set(null)); }
+  logout(): Promise<void> { return firstValueFrom(this.http.post<void>('/api/auth/logout', {})).catch(() => undefined).then(() => { this.cache.clear(); this.currentUser.set(null); }); }
   private loadAuthenticatedUser(): Promise<void> { return firstValueFrom(this.http.get<CurrentUser>('/api/auth/me')).then((user) => this.currentUser.set(user)); }
 }

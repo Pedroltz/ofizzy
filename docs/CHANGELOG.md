@@ -26,3 +26,7 @@ Todas as alterações relevantes serão registradas aqui seguindo Keep a Changel
 - Fluxo CSRF pós-login/setup ajustado para renovar o token vinculado ao usuário autenticado.
 - Listagens de clientes, veículos e OS passam a usar cards obrigatoriamente no celular, preservando tabela/cards no desktop.
 - Busca de clientes, veículos e OS protegida contra respostas assíncronas fora de ordem.
+- Listas de OS, clientes e veículos receberam linhas clicáveis, ações compactas e ajustes responsivos sem rolagem horizontal.
+- Impressão da OS passou a preservar termos e assinaturas em documentos longos e não gerar páginas vazias em documentos curtos.
+- Atalho de Nova OS foi centralizado no cabeçalho global e o seletor de tema na barra lateral/drawer móvel.
+- Documentação geral foi centralizada em `docs/`; apenas o índice `README.md` e os arquivos de orientação para IA permanecem na raiz.

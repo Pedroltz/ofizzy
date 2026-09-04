@@ -7,7 +7,7 @@
 - [ ] Fase 5 — Pagamentos e financeiro básico.
 - [ ] Fase 6 — Histórico, busca, UX final, E2E, logs e backup/restauração. Responsividade final e matriz E2E foram antecipadas; os demais itens permanecem pendentes.
 
-Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído após build/teste e registro no histórico.
+Os critérios detalhados vivem em `phases/`. Um item só é concluído após build/teste e registro no histórico.
 
 ---
 
@@ -115,4 +115,3 @@ Os critérios detalhados vivem em `docs/phases/`. Um item só é concluído apó
 - [x] Light Mode
 - [x] Dark Mode
 - [x] System Theme
-

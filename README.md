@@ -1,10 +1,23 @@
-# Sport Pneus
+# Ofizzy
 
 Sistema simples e rápido para gestão de uma pequena oficina, centrado na Ordem de Serviço.
 
 O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo completo de OS, configuração da oficina, impressão HTML/PDF, dashboard operacional e interface responsiva para desktop, celular e tablet. O próximo marco funcional é financeiro e pagamentos.
 
+## Documentação
+
+- [Visão e limites do produto](docs/PROJECT.md)
+- [Status atual](docs/STATUS.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Arquitetura](docs/ARCHITECTURE.md) e [modelo de dados](docs/DATA-MODEL.md)
+- [Frontend](docs/FRONTEND.md), [contratos da API](docs/API.md), [testes](docs/TESTING.md) e [deploy](docs/DEPLOYMENT.md)
+- [Guia de contribuição](docs/CONTRIBUTING.md), [segurança](docs/SECURITY.md) e [changelog](docs/CHANGELOG.md)
+- [Decisões arquiteturais](docs/adr/) e [fases de implementação](docs/phases/)
+- Orientações para agentes de IA: [`AGENTS.md`](AGENTS.md) e [`AI-HANDOFF.md`](AI-HANDOFF.md)
+
 ## Executar
+
+Execute os comandos abaixo a partir da raiz do repositório.
 
 1. Copie `.env.example` para `.env` e substitua as senhas.
 2. Construa e execute a migration: `docker compose --profile tools run --rm --build migrate`.
@@ -51,4 +64,4 @@ npm run build
 
 O E2E inicia o Angular em `http://127.0.0.1:4300`, intercepta as APIs com dados determinísticos e executa projetos desktop, Pixel 7 e tablet.
 
-Consulte [STATUS.md](STATUS.md) para o estado atual, [ROADMAP.md](ROADMAP.md) para as próximas fases e [docs/AI-HANDOFF.md](docs/AI-HANDOFF.md) para continuidade técnica.
+Consulte [docs/STATUS.md](docs/STATUS.md) para o estado atual, [docs/ROADMAP.md](docs/ROADMAP.md) para as próximas fases e [AI-HANDOFF.md](AI-HANDOFF.md) para continuidade técnica.

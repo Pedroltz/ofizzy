@@ -1,6 +1,6 @@
 # Instruções para agentes de IA
 
-Leia nesta ordem antes de alterar o projeto: `PROJECT.md`, `STATUS.md`, `docs/AI-HANDOFF.md`, `docs/ARCHITECTURE.md` e o documento da fase ativa em `docs/phases/`.
+Leia nesta ordem antes de alterar o projeto: `docs/PROJECT.md`, `docs/STATUS.md`, `AI-HANDOFF.md`, `docs/ARCHITECTURE.md` e o documento da fase ativa em `docs/phases/`.
 
 ## Regras obrigatórias
 
@@ -14,7 +14,7 @@ Leia nesta ordem antes de alterar o projeto: `PROJECT.md`, `STATUS.md`, `docs/AI
 - Nunca versionar `.env`, senhas, tokens, certificados ou dados reais.
 - Antes de concluir: backend build/test, frontend lint/test/E2E/build, migration, Compose e smoke do fluxo.
 - Mudanças visuais devem preservar desktop e ser verificadas em celular/tablet sem overflow horizontal ou controles menores que 44 px.
-- Atualize `STATUS.md`, `docs/AI-HANDOFF.md`, `docs/IMPLEMENTATION-LOG.md` e o documento da fase com evidências reais.
+- Atualize `docs/STATUS.md`, `AI-HANDOFF.md`, `docs/IMPLEMENTATION-LOG.md` e o documento da fase com evidências reais.
 - Use Conventional Commits pequenos e descritivos.
 
 ## Definição de pronto

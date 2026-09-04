@@ -6,4 +6,4 @@
 - O Playwright requer `npx playwright install chromium` na primeira execução.
 - Alterações responsivas devem ser validadas em desktop, celular e tablet, sem overflow horizontal.
 - Não versionar `.env`, tokens, senhas, certificados ou dados reais de clientes.
-- Atualize `STATUS.md` e o documento da fase; acrescente ao log apenas após validar.
+- Atualize `STATUS.md`, `IMPLEMENTATION-LOG.md` e o documento da fase com as evidências reais da validação.

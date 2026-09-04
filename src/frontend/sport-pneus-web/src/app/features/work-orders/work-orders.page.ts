@@ -86,7 +86,6 @@ export class WorkOrdersPage {
 
   readonly loading = signal(true);
   readonly saving = signal(false);
-  readonly downloadingPdf = signal(false);
   readonly dialog = signal(false);
   readonly detailDialog = signal(false);
   readonly viewing = signal<WorkOrder | null>(null);
@@ -97,7 +96,7 @@ export class WorkOrdersPage {
   readonly search = this.fb.nonNullable.control('');
   readonly viewMode = signal<'cards' | 'table'>('table');
   readonly effectiveViewMode = computed(() =>
-    this.responsive.isMobile() ? 'cards' : this.viewMode()
+    this.responsive.isTabletOrSmaller() ? 'cards' : this.viewMode()
   );
 
   readonly selectedStatus = signal<WorkOrderStatus | 'All'>('All');
@@ -140,6 +139,7 @@ export class WorkOrdersPage {
   };
 
   private loadVersion = 0;
+  private hasLoaded = false;
   constructor() {
     const destroyRef = inject(DestroyRef);
     this.search.valueChanges
@@ -164,6 +164,8 @@ export class WorkOrdersPage {
         }
       });
 
+    const cachedCompany = this.companyApi.peek();
+    if (cachedCompany) this.company.set(cachedCompany);
     void this.companyApi
       .get()
       .then((c) => this.company.set(c))
@@ -179,10 +181,15 @@ export class WorkOrdersPage {
 
   async load(): Promise<void> {
     const current = ++this.loadVersion;
-    this.loading.set(true);
+    const selected = this.selectedStatus();
+    const statusParam: WorkOrderStatus | null = selected === 'All' ? null : selected;
+    const cached = this.api.peekList(this.search.value, this.page(), this.pageSize, statusParam);
+    if (cached) {
+      this.items.set(cached.items);
+      this.total.set(cached.total);
+    }
+    this.loading.set(!cached && !this.hasLoaded);
     try {
-      const selected = this.selectedStatus();
-      const statusParam: WorkOrderStatus | null = selected === 'All' ? null : selected;
       const result = await this.api.list(
         this.search.value,
         this.page(),
@@ -192,6 +199,7 @@ export class WorkOrdersPage {
       if (current === this.loadVersion) {
         this.items.set(result.items);
         this.total.set(result.total);
+        this.hasLoaded = true;
       }
     } finally {
       if (current === this.loadVersion) {
@@ -418,8 +426,8 @@ export class WorkOrdersPage {
         this.viewing.set(await this.api.get(id));
       }
       await this.load();
-    } catch (err) {
-      console.error('Falha ao gravar OS:', err);
+    } catch {
+      // O interceptor HTTP já apresenta o erro da API ao usuário.
     } finally {
       this.saving.set(false);
     }
