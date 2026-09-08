@@ -106,3 +106,4 @@ Testes:
 - Validação local: backend build sem avisos, 14/14 unitários e 4/4 integrações; frontend lint, 26/26 unitários, build e 27 E2E aprovados com 9 skips condicionais.
 - Compose criou banco/schema `ofizzy`, aplicou 6 migrations, deixou os quatro serviços saudáveis pelo Nginx e preservou autenticação após reinício do backend.
 - Permanece apenas o aviso conhecido do bundle inicial do frontend: 740,72 kB para orçamento de 500 kB.
+- Workflow remoto `Pull request` aprovado no commit `4670c67`: backend, frontend e validação Compose concluídos com sucesso.

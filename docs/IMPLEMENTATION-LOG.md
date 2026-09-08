@@ -551,4 +551,5 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Compose: configurações base/dev/local/prod validadas, imagens backend/frontend construídas, 6 migrations aplicadas e quatro serviços saudáveis.
 - Smoke pelo Nginx aprovado; setup, autenticação, health check, schema e persistência da sessão após reinício do backend foram confirmados.
 - Repositório privado renomeado para `Pedroltz/ofizzy`, preservando `develop` como branch padrão; `origin` local atualizado e commit publicado.
+- CI remoto aprovado no commit `4670c67` (run `34226277097`): jobs backend, frontend e Compose concluídos com sucesso.
 - O build mantém somente o aviso conhecido do bundle inicial: 740,72 kB para orçamento de 500 kB.
