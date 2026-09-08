@@ -550,4 +550,5 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Frontend: lint aprovado, 26/26 testes unitários, build aprovado e 27 E2E aprovados com 9 skips condicionais em desktop, celular e tablet.
 - Compose: configurações base/dev/local/prod validadas, imagens backend/frontend construídas, 6 migrations aplicadas e quatro serviços saudáveis.
 - Smoke pelo Nginx aprovado; setup, autenticação, health check, schema e persistência da sessão após reinício do backend foram confirmados.
+- Repositório privado renomeado para `Pedroltz/ofizzy`, preservando `develop` como branch padrão; `origin` local atualizado e commit publicado.
 - O build mantém somente o aviso conhecido do bundle inicial: 740,72 kB para orçamento de 500 kB.

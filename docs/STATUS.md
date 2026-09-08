@@ -102,7 +102,7 @@ Testes:
 - Compose, imagens, banco, usuário, schema, cookies e exemplos usam identificadores Ofizzy.
 - Migration idempotente e script de backup/restauração adicionados para preservar dados em um volume separado e permitir rollback.
 - Contratos HTTP e regras de negócio permaneceram inalterados. A troca dos cookies encerra as sessões existentes de forma intencional.
-- A migração do ambiente publicado e a renomeação externa do repositório devem ocorrer somente depois da validação local descrita nesta entrega.
+- O repositório remoto foi renomeado para `Pedroltz/ofizzy` após a validação local; a migração do ambiente publicado continua exigindo a janela documentada de backup e restauração.
 - Validação local: backend build sem avisos, 14/14 unitários e 4/4 integrações; frontend lint, 26/26 unitários, build e 27 E2E aprovados com 9 skips condicionais.
 - Compose criou banco/schema `ofizzy`, aplicou 6 migrations, deixou os quatro serviços saudáveis pelo Nginx e preservou autenticação após reinício do backend.
 - Permanece apenas o aviso conhecido do bundle inicial do frontend: 740,72 kB para orçamento de 500 kB.
