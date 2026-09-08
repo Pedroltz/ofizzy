@@ -1,6 +1,6 @@
 # Testes
 
-- Backend: `dotnet build SportPneus.slnx --configuration Release` e `dotnet test SportPneus.slnx --configuration Release`.
+- Backend: `dotnet build Ofizzy.slnx --configuration Release` e `dotnet test Ofizzy.slnx --configuration Release`.
 - Frontend: `npm run lint`, `npm test`, `npm run e2e` e `npm run build`. Em execução sem TTY, o runner Vitest encerra após uma passagem; não use `--run`, opção não reconhecida pelo builder Angular atual.
 - Instale o navegador E2E uma vez com `npx playwright install chromium`. O Playwright inicia o servidor em `127.0.0.1:4300` e usa mocks de API determinísticos, sem alterar o banco da oficina.
 - Integração usa PostgreSQL real via Testcontainers e requer Docker.

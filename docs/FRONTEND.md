@@ -7,7 +7,7 @@ Aplicação Angular 21 standalone com PrimeNG 21, PrimeIcons e Tailwind CSS 4. A
 Com as dependências instaladas, execute a partir da raiz do repositório:
 
 ```bash
-cd src/frontend/sport-pneus-web
+cd src/frontend/ofizzy-web
 npm start
 ```
 

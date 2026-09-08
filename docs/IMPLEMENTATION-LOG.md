@@ -300,7 +300,7 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
   - `npm test`: 2/2 testes Vitest aprovados.
   - `npm run lint`: 0 erros e 0 avisos.
   - `npm run build`: bundle compilado com sucesso.
-  - Backend `SportPneus.UnitTests`: 14/14 testes aprovados.
+  - Backend `Ofizzy.UnitTests`: 14/14 testes aprovados.
 
 ## 2026-09-03 — UI/UX Redesign: R2 — Design System Concluído
 
@@ -539,3 +539,15 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 
 - Removidos signal e formatador sem consumidores, consolidado seletor CSS duplicado e retirado `console.error` redundante coberto pelo interceptor HTTP.
 - Mantidas as validações de formulários, DTOs, autenticação e regras de OS por serem necessárias para UX e integridade do backend.
+
+## 2026-09-08 — Identidade técnica integral Ofizzy
+
+- Renomeados solução, projetos, namespaces, diretórios backend/frontend, workspace Angular, pacotes, imagens e projeto Compose para Ofizzy.
+- Banco, usuário, schema, JWT, cookies, scripts, CI/CD e documentação foram alinhados à mesma identidade, sem alterar APIs ou regras de negócio.
+- Adicionada migration idempotente para bancos existentes e teste de integração que comprova a preservação de dados durante a troca de schema.
+- Adicionado `scripts/migrate-to-ofizzy.sh`, que cria backup lógico validado, restaura em volume separado e preserva a origem para rollback por sete dias.
+- Backend: build Release sem avisos, 14/14 testes unitários e 4/4 testes de integração aprovados.
+- Frontend: lint aprovado, 26/26 testes unitários, build aprovado e 27 E2E aprovados com 9 skips condicionais em desktop, celular e tablet.
+- Compose: configurações base/dev/local/prod validadas, imagens backend/frontend construídas, 6 migrations aplicadas e quatro serviços saudáveis.
+- Smoke pelo Nginx aprovado; setup, autenticação, health check, schema e persistência da sessão após reinício do backend foram confirmados.
+- O build mantém somente o aviso conhecido do bundle inicial: 740,72 kB para orçamento de 500 kB.

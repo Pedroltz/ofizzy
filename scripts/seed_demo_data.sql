@@ -4,16 +4,16 @@
 BEGIN;
 
 -- Limpeza prévia de registros de demonstração anteriores
-DELETE FROM sport_pneus.work_order_services WHERE "Id"::text LIKE 'c0000006%';
-DELETE FROM sport_pneus.work_order_parts WHERE "Id"::text LIKE 'c0000007%';
-DELETE FROM sport_pneus.work_orders WHERE "Id"::text LIKE 'c0000005%';
-DELETE FROM sport_pneus.vehicles WHERE "Id"::text LIKE 'c0000004%';
-DELETE FROM sport_pneus.customers WHERE "Id"::text LIKE 'c0000003%';
-DELETE FROM sport_pneus.parts WHERE "Id"::text LIKE 'c0000002%';
-DELETE FROM sport_pneus.services WHERE "Id"::text LIKE 'c0000001%';
+DELETE FROM ofizzy.work_order_services WHERE "Id"::text LIKE 'c0000006%';
+DELETE FROM ofizzy.work_order_parts WHERE "Id"::text LIKE 'c0000007%';
+DELETE FROM ofizzy.work_orders WHERE "Id"::text LIKE 'c0000005%';
+DELETE FROM ofizzy.vehicles WHERE "Id"::text LIKE 'c0000004%';
+DELETE FROM ofizzy.customers WHERE "Id"::text LIKE 'c0000003%';
+DELETE FROM ofizzy.parts WHERE "Id"::text LIKE 'c0000002%';
+DELETE FROM ofizzy.services WHERE "Id"::text LIKE 'c0000001%';
 
 -- 1. SERVIÇOS DO CATÁLOGO
-INSERT INTO sport_pneus.services ("Id", "Name", "Description", "DefaultPrice", "IsActive", "CreatedAt", "UpdatedAt")
+INSERT INTO ofizzy.services ("Id", "Name", "Description", "DefaultPrice", "IsActive", "CreatedAt", "UpdatedAt")
 VALUES
   ('c0000001-0000-0000-0000-000000000001', 'Alinhamento 3D Dianteiro e Traseiro', 'Leitura a laser e ajuste de convergência/divergência dianteira e traseira', 130.00, true, NOW(), NOW()),
   ('c0000001-0000-0000-0000-000000000002', 'Balanceamento de Rodas (4 Rodas)', 'Equilíbrio dinâmico computadorizado de massa das 4 rodas', 80.00, true, NOW(), NOW()),
@@ -28,7 +28,7 @@ VALUES
 ON CONFLICT ("Id") DO NOTHING;
 
 -- 2. PEÇAS E INSUMOS DO CATÁLOGO
-INSERT INTO sport_pneus.parts ("Id", "Name", "Code", "CostPrice", "SalePrice", "IsActive", "CreatedAt", "UpdatedAt")
+INSERT INTO ofizzy.parts ("Id", "Name", "Code", "CostPrice", "SalePrice", "IsActive", "CreatedAt", "UpdatedAt")
 VALUES
   ('c0000002-0000-0000-0000-000000000001', 'Pneu Pirelli Cinturato P7 205/55 R16', 'PIR-205-55-16', 360.00, 540.00, true, NOW(), NOW()),
   ('c0000002-0000-0000-0000-000000000002', 'Pneu Michelin Primacy 4 225/45 R17', 'MCH-225-45-17', 490.00, 750.00, true, NOW(), NOW()),
@@ -45,7 +45,7 @@ VALUES
 ON CONFLICT ("Id") DO NOTHING;
 
 -- 3. CLIENTES
-INSERT INTO sport_pneus.customers ("Id", "Name", "Document", "Phone", "WhatsApp", "Email", "Address", "Notes", "IsActive", "CreatedAt", "UpdatedAt")
+INSERT INTO ofizzy.customers ("Id", "Name", "Document", "Phone", "WhatsApp", "Email", "Address", "Notes", "IsActive", "CreatedAt", "UpdatedAt")
 VALUES
   ('c0000003-0000-0000-0000-000000000001', 'Renata Vasconcelos de Alencar', '28491823812', '1134218899', '11988223344', 'renata.alencar@uol.com.br', 'Av. Paulista, 1842, Apto 112 - Bela Vista, São Paulo - SP', 'Cliente preferencial. Solicita aviso prévio por WhatsApp antes de aprovar peças.', true, NOW() - INTERVAL '45 days', NOW() - INTERVAL '45 days'),
   ('c0000003-0000-0000-0000-000000000002', 'Marcos Vinicius Mendonça', '19382746501', '1122894455', '11971239988', 'marcos.mendonca@logistica.com.br', 'Rua Vergueiro, 3050 - Vila Mariana, São Paulo - SP', 'Frotista individual. Paga via PIX CNPJ.', true, NOW() - INTERVAL '30 days', NOW() - INTERVAL '30 days'),
@@ -58,7 +58,7 @@ VALUES
 ON CONFLICT ("Id") DO NOTHING;
 
 -- 4. VEÍCULOS
-INSERT INTO sport_pneus.vehicles ("Id", "CustomerId", "Plate", "Brand", "Model", "Year", "Color", "Mileage", "Chassis", "Notes", "IsActive", "CreatedAt", "UpdatedAt")
+INSERT INTO ofizzy.vehicles ("Id", "CustomerId", "Plate", "Brand", "Model", "Year", "Color", "Mileage", "Chassis", "Notes", "IsActive", "CreatedAt", "UpdatedAt")
 VALUES
   ('c0000004-0000-0000-0000-000000000001', 'c0000003-0000-0000-0000-000000000001', 'BRA2E19', 'Toyota', 'Corolla XEi 2.0 Dynamic Force', 2022, 'Prata Metálico', 38400, '9BRBD48E3N0129845', 'Revisões em dia. Rodas de liga aro 16.', true, NOW() - INTERVAL '45 days', NOW() - INTERVAL '45 days'),
   ('c0000004-0000-0000-0000-000000000002', 'c0000003-0000-0000-0000-000000000002', 'RTY9H88', 'Honda', 'Civic Touring 1.5 Turbo', 2021, 'Preto Cristal', 46200, '93HFC1670MZ102948', 'Usa pneus 225/45 R17.', true, NOW() - INTERVAL '30 days', NOW() - INTERVAL '30 days'),
@@ -74,7 +74,7 @@ ON CONFLICT ("Id") DO NOTHING;
 -- 5. ORDENS DE SERVIÇO (DISTRIBUIÇÃO: InProgress = Pátio, Open = Abertas, Completed = Concluídas, Cancelled = Canceladas)
 
 -- OS 101: InProgress (Pátio da Oficina) - Toyota Corolla (Renata)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -90,20 +90,20 @@ INSERT INTO sport_pneus.work_orders (
   'InProgress', NOW() - INTERVAL '4 hours', NOW() - INTERVAL '1 hour', NULL
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000001', 'c0000005-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000001', 'Alinhamento 3D Dianteiro e Traseiro', 1, 130.00),
   ('c0000006-0000-0000-0000-000000000002', 'c0000005-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000004', 'Troca de Pastilhas e Discos de Freio', 1, 160.00)
 ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
 VALUES
   ('c0000007-0000-0000-0000-000000000001', 'c0000005-0000-0000-0000-000000000001', 'c0000002-0000-0000-0000-000000000005', 'Pastilha de Freio Dianteira Fras-le Cerâmica', 'FRS-PD1420', 1, 185.00),
   ('c0000007-0000-0000-0000-000000000002', 'c0000005-0000-0000-0000-000000000001', 'c0000002-0000-0000-0000-000000000011', 'Fluido de Freio Bosch DOT 4 (500ml)', 'BOS-DOT4-500', 1, 45.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 102: InProgress (Pátio da Oficina) - Honda Civic (Marcos Vinicius)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -119,21 +119,21 @@ INSERT INTO sport_pneus.work_orders (
   'InProgress', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '30 minutes', NULL
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000003', 'c0000005-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000002', 'Balanceamento de Rodas (4 Rodas)', 1, 80.00),
   ('c0000006-0000-0000-0000-000000000004', 'c0000005-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000003', 'Montagem e Troca de Pneus (4 Rodas)', 1, 60.00),
   ('c0000006-0000-0000-0000-000000000005', 'c0000005-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000001', 'Alinhamento 3D Dianteiro e Traseiro', 1, 130.00)
 ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
 VALUES
   ('c0000007-0000-0000-0000-000000000003', 'c0000005-0000-0000-0000-000000000002', 'c0000002-0000-0000-0000-000000000002', 'Pneu Michelin Primacy 4 225/45 R17', 'MCH-225-45-17', 2, 750.00),
   ('c0000007-0000-0000-0000-000000000004', 'c0000005-0000-0000-0000-000000000002', 'c0000002-0000-0000-0000-000000000010', 'Válvula Bico de Roda TR414 Premium', 'VAL-TR414', 2, 15.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 103: InProgress (Pátio da Oficina) - Iveco Daily (TranspSilva)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -149,19 +149,19 @@ INSERT INTO sport_pneus.work_orders (
   'InProgress', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '15 minutes', NULL
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000006', 'c0000005-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000005', 'Troca de Óleo e Filtros (Mão de Obra)', 1, 70.00)
 ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
 VALUES
   ('c0000007-0000-0000-0000-000000000005', 'c0000005-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000007', 'Óleo Motorcraft 5W30 100% Sintético (1 Litro)', 'MOT-5W30-1L', 7, 58.00),
   ('c0000007-0000-0000-0000-000000000006', 'c0000005-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000008', 'Filtro de Óleo Mann-Filter W712', 'MAN-W712', 1, 48.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 104: Open (Aguardando Aprovação / Orçamento) - Jeep Compass (Juliana Costa)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -177,19 +177,19 @@ INSERT INTO sport_pneus.work_orders (
   'Open', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', NULL
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000007', 'c0000005-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000007', 'Higienização de Ar-Condicionado e Ozônio', 1, 120.00),
   ('c0000006-0000-0000-0000-000000000008', 'c0000005-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000008', 'Revisão de Suspensão e Amortecedores', 1, 150.00)
 ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
 VALUES
   ('c0000007-0000-0000-0000-000000000007', 'c0000005-0000-0000-0000-000000000004', 'c0000002-0000-0000-0000-000000000009', 'Filtro de Cabine / Ar-Condicionado Tecfil', 'TEC-CAB4410', 1, 55.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 105: Open (Em Diagnóstico) - Volkswagen Golf GTI (Eduardo Henrique)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -205,14 +205,14 @@ INSERT INTO sport_pneus.work_orders (
   'Open', NOW() - INTERVAL '5 hours', NOW() - INTERVAL '5 hours', NULL
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000009', 'c0000005-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000009', 'Vulcanização e Reparo de Pneu a Frio', 1, 45.00),
   ('c0000006-0000-0000-0000-000000000010', 'c0000005-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000002', 'Balanceamento de Rodas (4 Rodas)', 1, 80.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 106: Completed (Entregue) - Chevrolet Onix (Camila Nogueira)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -228,14 +228,14 @@ INSERT INTO sport_pneus.work_orders (
   'Completed', NOW() - INTERVAL '3 days', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000011', 'c0000005-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000002', 'Balanceamento de Rodas (4 Rodas)', 1, 80.00),
   ('c0000006-0000-0000-0000-000000000012', 'c0000005-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000001', 'Alinhamento 3D Dianteiro e Traseiro', 1, 130.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 107: Completed (Entregue) - Ford Ranger (Auto Peças Central)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"
@@ -251,19 +251,19 @@ INSERT INTO sport_pneus.work_orders (
   'Completed', NOW() - INTERVAL '5 days', NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'
 ) ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_services ("Id", "WorkOrderId", "ServiceId", "Description", "Quantity", "UnitPrice")
 VALUES
   ('c0000006-0000-0000-0000-000000000013', 'c0000005-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000008', 'Revisão de Suspensão e Amortecedores', 1, 150.00),
   ('c0000006-0000-0000-0000-000000000014', 'c0000005-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000001', 'Alinhamento 3D Dianteiro e Traseiro', 1, 130.00)
 ON CONFLICT ("Id") DO NOTHING;
 
-INSERT INTO sport_pneus.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
+INSERT INTO ofizzy.work_order_parts ("Id", "WorkOrderId", "PartId", "Description", "Code", "Quantity", "UnitPrice")
 VALUES
   ('c0000007-0000-0000-0000-000000000008', 'c0000005-0000-0000-0000-000000000007', 'c0000002-0000-0000-0000-000000000012', 'Amortecedor Dianteiro Monroe OESpectrum (Unidade)', 'MNR-742145', 2, 470.00)
 ON CONFLICT ("Id") DO NOTHING;
 
 -- OS 108: Cancelled - Hyundai Creta (Rodrigo Fonseca)
-INSERT INTO sport_pneus.work_orders (
+INSERT INTO ofizzy.work_orders (
   "Id", "CustomerId", "VehicleId", "CustomerName", "CustomerDocument", "CustomerPhone",
   "VehiclePlate", "VehicleDescription", "Mileage", "Complaint", "Diagnosis", "Notes",
   "Status", "CreatedAt", "UpdatedAt", "CompletedAt"

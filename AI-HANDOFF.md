@@ -1,6 +1,6 @@
 # Handoff para IA
 
-Atualizado em: 2026-09-04
+Atualizado em: 2026-09-08
 
 ## Leia primeiro
 
@@ -20,10 +20,10 @@ Atualizado em: 2026-09-04
 
 ## Mapa do código
 
-- `src/backend/SportPneus.Api/Modules`: módulos de negócio.
-- `src/backend/SportPneus.Api/Infrastructure`: EF, migrations e erros.
-- `src/frontend/sport-pneus-web/src/app/features`: páginas lazy-loaded.
-- `src/frontend/sport-pneus-web/src/app/core`: sessão, HTTP e clientes de API.
+- `src/backend/Ofizzy.Api/Modules`: módulos de negócio.
+- `src/backend/Ofizzy.Api/Infrastructure`: EF, migrations e erros.
+- `src/frontend/ofizzy-web/src/app/features`: páginas lazy-loaded.
+- `src/frontend/ofizzy-web/src/app/core`: sessão, HTTP e clientes de API.
 - `docs/phases`: escopo e aceite por fase.
 
 ## Comandos sem toolchain no host
@@ -76,7 +76,7 @@ Fases 1, 2, 3 e 4 concluídas e aprovadas.
 
 ## Atualização de performance e marca — 2026-09-04
 
-- O nome público do produto é **Ofizzy**. Namespaces `SportPneus.*`, pasta `sport-pneus-web`, nomes de imagens e IDs de secrets continuam legados por compatibilidade e não devem ser renomeados sem uma migração coordenada de CI/CD e volumes.
+- O nome público do produto é **Ofizzy**.
 - `SessionDataCacheService` mantém snapshots GET em memória por 30 segundos, deduplica chamadas simultâneas e impede que respostas antigas repovoem o cache após invalidação.
 - Mutações invalidam listas dependentes e Dashboard; logout limpa todo o cache. Páginas usam snapshots sem reexibir loading bloqueante ao retornar.
 - `PreloadAllModules` antecipa os chunks lazy após a navegação inicial.
@@ -84,3 +84,11 @@ Fases 1, 2, 3 e 4 concluídas e aprovadas.
 - A lista de OS do Dashboard usa a largura total entre 901 e 1400 px, com os cards laterais abaixo dela e colunas compactas; a container query mantém tabela acima de 46rem e cards abaixo desse limite. Não volte à divisão 8/4 nesse intervalo, pois ela corta Cliente/Veículo.
 - Em `/ordens`, `effectiveViewMode` força cards até 900 px; de 901 a 1400 px, `.work-orders-list-table` reduz as colunas auxiliares e preserva Cliente/Veículo. O seletor manual continua valendo em desktops maiores.
 - A limpeza final foi deliberadamente conservadora: não remova os validators do frontend/backend nem as checagens de linhas de OS, pois eles fornecem feedback imediato e mantêm a API autoritativa.
+
+## Identidade técnica Ofizzy — 2026-09-08
+
+- Solução, projetos, namespaces, frontend, imagens, Compose, banco, usuário e schema usam exclusivamente `Ofizzy`/`ofizzy`.
+- A migration `RenameTechnicalIdentifiersToOfizzy` preserva bancos existentes e não altera IDs registrados em `__EFMigrationsHistory`.
+- O script `scripts/migrate-to-ofizzy.sh` faz backup lógico, restaura em um volume separado e mantém a origem intacta para rollback.
+- Cookies de sessão e proteção antiforgery receberam novos nomes; após a atualização, todos os usuários precisam autenticar novamente.
+- A Fase 5 permanece como próxima entrega funcional.

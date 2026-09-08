@@ -1,6 +1,6 @@
 # Status do projeto
 
-Atualizado em: 2026-09-04
+Atualizado em: 2026-09-08
 
 ## Estado
 
@@ -67,10 +67,10 @@ Próxima tarefa:
 Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento, parcelas, caixa e fechamento financeiro).
 
 Arquivos principais alterados:
-- `src/frontend/sport-pneus-web/src/styles.css`
-- `src/frontend/sport-pneus-web/src/app/features/work-orders/work-orders.page.html`
-- `src/frontend/sport-pneus-web/src/app/features/customers/customers.page.html`
-- `src/frontend/sport-pneus-web/src/app/features/vehicles/vehicles.page.html`
+- `src/frontend/ofizzy-web/src/styles.css`
+- `src/frontend/ofizzy-web/src/app/features/work-orders/work-orders.page.html`
+- `src/frontend/ofizzy-web/src/app/features/customers/customers.page.html`
+- `src/frontend/ofizzy-web/src/app/features/vehicles/vehicles.page.html`
 
 Pendências:
 - Nenhuma. Dark mode, grids e tabelas 100% consistentes e validados.
@@ -89,9 +89,20 @@ Testes:
 - Rotas lazy agora são pré-carregadas em segundo plano, reduzindo a espera no primeiro acesso às telas.
 - Dashboard, Clientes, Veículos, Ordens, Configurações e catálogos da OS reutilizam cache de sessão por 30 segundos, com deduplicação, invalidação após mutações e limpeza no logout.
 - Ao retornar para uma listagem, os dados já obtidos aparecem imediatamente; snapshots expirados permanecem visíveis durante a revalidação.
-- A marca visível do sistema foi alterada de Sport Pneus para Ofizzy no shell, login, título, impressão, PDF, defaults e documentação. Identificadores técnicos legados foram preservados para compatibilidade.
+- A marca visível Ofizzy foi aplicada ao shell, login, título, impressão, PDF, defaults e documentação.
 - Evidências: frontend lint aprovado; 26/26 testes unitários; build aprovado; 27 E2E aprovados e 9 ignorados condicionalmente por viewport; backend 14/14 testes unitários e 3/3 de integração.
 - O build mantém o aviso conhecido de budget inicial em 739,06 kB. Não houve alteração de modelo ou nova migration.
 - Dashboard responsivo por largura real do conteúdo: entre 901 e 1400 px, a lista usa a largura total e a lateral é movida para baixo; abaixo de 46rem na coluna principal, a tabela troca para cards. As colunas fixas ficam compactas em notebooks, preservando espaço para Cliente/Veículo.
 - A listagem completa de OS agora compacta colunas auxiliares entre 901 e 1400 px, reserva mais de 200 px para Cliente/Veículo em notebook de 1180 px e força cards em tablets/celulares. Teste E2E direcionado aprovado em desktop e tablet.
 - Limpeza conservadora removeu estado e método não utilizados, consolidou regra CSS duplicada e eliminou logging local redundante; validações de domínio, segurança e entrada foram preservadas.
+
+## Identidade técnica Ofizzy — 2026-09-08
+
+- Solução, projetos e namespaces backend usam `Ofizzy.*`; o frontend usa `ofizzy-web`.
+- Compose, imagens, banco, usuário, schema, cookies e exemplos usam identificadores Ofizzy.
+- Migration idempotente e script de backup/restauração adicionados para preservar dados em um volume separado e permitir rollback.
+- Contratos HTTP e regras de negócio permaneceram inalterados. A troca dos cookies encerra as sessões existentes de forma intencional.
+- A migração do ambiente publicado e a renomeação externa do repositório devem ocorrer somente depois da validação local descrita nesta entrega.
+- Validação local: backend build sem avisos, 14/14 unitários e 4/4 integrações; frontend lint, 26/26 unitários, build e 27 E2E aprovados com 9 skips condicionais.
+- Compose criou banco/schema `ofizzy`, aplicou 6 migrations, deixou os quatro serviços saudáveis pelo Nginx e preservou autenticação após reinício do backend.
+- Permanece apenas o aviso conhecido do bundle inicial do frontend: 740,72 kB para orçamento de 500 kB.

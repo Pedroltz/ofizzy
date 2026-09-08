@@ -37,8 +37,8 @@ Defina `ConnectionStrings__Postgres` apontando para `localhost:5432` antes de in
 Para executar a API diretamente com `dotnet run`, configure uma vez os valores locais via .NET User Secrets. O projeto já possui `UserSecretsId`; os segredos são carregados automaticamente no perfil `Development` e nunca devem ser versionados:
 
 ```bash
-dotnet user-secrets set "Jwt:SigningKey" "<chave-aleatória-com-ao-menos-32-bytes>" --project src/backend/SportPneus.Api
-dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;Database=sport_pneus;Username=sport_pneus;Password=<senha-local>" --project src/backend/SportPneus.Api
+dotnet user-secrets set "Jwt:SigningKey" "<chave-aleatória-com-ao-menos-32-bytes>" --project src/backend/Ofizzy.Api
+dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;Database=ofizzy;Username=ofizzy;Password=<senha-local>" --project src/backend/Ofizzy.Api
 ```
 
 Para desenvolvimento: `docker compose -f compose.yaml -f compose.dev.yaml up --build`.
@@ -48,13 +48,13 @@ Para desenvolvimento: `docker compose -f compose.yaml -f compose.dev.yaml up --b
 Backend:
 
 ```bash
-dotnet test SportPneus.slnx
+dotnet test Ofizzy.slnx
 ```
 
 Frontend:
 
 ```bash
-cd src/frontend/sport-pneus-web
+cd src/frontend/ofizzy-web
 npm run lint
 npm test
 npx playwright install chromium

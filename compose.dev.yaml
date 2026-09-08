@@ -5,11 +5,11 @@ services:
     volumes:
       - .:/workspace
       - nuget_cache:/root/.nuget/packages
-    command: ["dotnet", "watch", "--project", "src/backend/SportPneus.Api", "run", "--no-launch-profile"]
+    command: ["dotnet", "watch", "--project", "src/backend/Ofizzy.Api", "run", "--no-launch-profile"]
   frontend:
     build: { target: development }
     volumes:
-      - ./src/frontend/sport-pneus-web:/app
+      - ./src/frontend/ofizzy-web:/app
       - frontend_node_modules:/app/node_modules
     command: ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "1000"]
     healthcheck:
