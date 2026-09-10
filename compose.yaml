@@ -25,6 +25,7 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-ofizzy};Username=${POSTGRES_USER:-ofizzy};Password=${POSTGRES_PASSWORD}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Defina JWT_SIGNING_KEY no arquivo .env}
+      Platform__BootstrapEnabled: ${PLATFORM_BOOTSTRAP_ENABLED:-false}
     depends_on:
       postgres: { condition: service_healthy }
     healthcheck:

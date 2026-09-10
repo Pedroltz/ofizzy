@@ -2,21 +2,35 @@
 
 ## Visão
 
-Uma aplicação de produtividade para mecânicos e proprietários de pequenas oficinas. O fluxo principal é Cliente → Veículo → Ordem de Serviço → Diagnóstico → Serviços/Peças → Finalização → Pagamento → Impressão.
+Plataforma SaaS multi-tenant para gestão de empresas prestadoras de serviços,
+com módulos e verticais especializadas. Automotive é a primeira vertical:
+Cliente → Veículo → Ordem de Serviço → Diagnóstico → Serviços/Peças → Finalização
+→ Impressão. Pagamentos e financeiro operacional continuam como próxima entrega.
+
+Tenant é a organização cliente do Ofizzy. Customer é o cliente atendido por essa
+organização. Uma pessoa pode participar de várias organizações por TenantUser.
 
 ## Princípios
 
-- Abrir uma OS em poucos segundos e concluir ações comuns em um a três cliques.
-- Preferir cards, busca e formulários curtos a tabelas densas e menus extensos.
-- Garantir que os fluxos operacionais completos funcionem a partir de 320 px, sem exigir rolagem horizontal.
-- Entregar fluxos completos, sem telas simuladas.
-- Preservar snapshots e documentos históricos.
-- Escolher a solução mais simples que mantenha uma evolução segura.
+- Monólito modular, uma API, um PostgreSQL compartilhado e um frontend principal.
+- Isolamento por TenantId e autorização no backend, inclusive acesso por IDs.
+- Dados históricos e snapshots preservados; cadastros são arquivados.
+- Regras e cálculos críticos no backend; DTOs e validação em todos os contratos.
+- PrimeNG 21, tokens visuais e operação responsiva desde 320 px.
+- Fluxos reais com persistência; nenhum tenant novo exige deploy ou container.
 
-## MVP
+## Escopo atual
 
-Setup e autenticação; clientes; veículos; catálogos de serviços e peças; OS; impressão HTML/PDF; pagamentos; financeiro básico; histórico; busca global; responsividade; logs e backups.
+Identidade, tenants, vínculos e papéis, configurações por tenant, módulos,
+provisionamento administrativo, onboarding, clientes, Automotive/veículos,
+catálogos, OS, impressão HTML/PDF e dashboard. Administração global é separada
+da administração da organização. Novos usuários recebem credencial inicial pelo
+operador em canal privado; não há envio automático de convite nesta fase.
 
-## Fora do MVP
+## Evolução futura
 
-WhatsApp, aprovação online, estoque, fornecedores, agenda, fotos, checklist, documentos fiscais, múltiplas oficinas, permissões e SaaS.
+Outras verticais, convites por e-mail, SaaS Subscriptions, autosserviço e cobrança
+SaaS podem reutilizar o provisionamento. Não implementados agora: pagamentos SaaS,
+estoque, fornecedores, agenda, documentos fiscais, WhatsApp, bancos dedicados,
+domínios customizados ou outros frontends. Não haverá microserviços sem necessidade
+concreta. Financeiro operacional é distinto da assinatura SaaS.

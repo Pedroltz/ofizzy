@@ -1,5 +1,8 @@
 # Roadmap
 
+Prioridade vigente: fundação SaaS multi-tenant ([Fase SaaS](phases/PHASE-07-SAAS.md)), antecipada antes do financeiro. Automotive preservada. Novos tenants são provisionados sem deploy.
+
+
 - [x] Fase 1 — Fundação: projetos, banco, migration, setup, autenticação, shell, containers e CI.
 - [x] Fase 2 — Clientes, veículos, serviços e peças.
 - [x] Fase 3 — Ordem de Serviço, snapshots, valores e estados (abertura, listagem, detalhes, edição, transições e persistência validadas).
@@ -115,3 +118,16 @@ Os critérios detalhados vivem em `phases/`. Um item só é concluído após bui
 - [x] Light Mode
 - [x] Dark Mode
 - [x] System Theme
+
+## Plataforma SaaS
+
+- Fundação tenancy, vínculos, papéis e módulos.
+- Migração legada e isolamento automático com integridade relacional.
+- Autenticação com seleção/troca de tenant e refresh preservado.
+- Provisionamento transacional e administração global separada.
+- Onboarding e frontend Automotive adaptado.
+- Aceite PostgreSQL real, Nginx, responsividade e persistência após restart.
+
+Evoluções posteriores: convites e recuperação de acesso, autosserviço com
+SaaS Subscriptions, outras verticais e branding com upload. Nenhuma dessas
+extensões demanda agora microserviços, bancos dedicados ou frontend por cliente.

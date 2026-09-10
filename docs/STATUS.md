@@ -1,8 +1,17 @@
 # Status do projeto
 
-Atualizado em: 2026-09-08
+Atualizado em: 2026-09-10
 
-## Estado
+## Estado vigente — evolução SaaS
+
+Fase ativa: [PHASE-07-SAAS.md](phases/PHASE-07-SAAS.md), antecipada antes do financeiro.
+Implementados tenancy, TenantSettings, vínculos, papéis, módulos, isolamento EF/FKs,
+migration legada, autenticação multi-tenant, provisionamento, PlatformAdmin e onboarding.
+Aceite local concluído em Release e pelo Nginx, com persistência após restart. Evidências consolidadas abaixo.
+As seções seguintes preservam o histórico da base Automotive e não definem mais
+uma instalação = uma oficina.
+
+## Estado anterior
 
 Fases 1, 2, 3 e 4 concluídas e validadas.
 
@@ -107,3 +116,27 @@ Testes:
 - Compose criou banco/schema `ofizzy`, aplicou 6 migrations, deixou os quatro serviços saudáveis pelo Nginx e preservou autenticação após reinício do backend.
 - Permanece apenas o aviso conhecido do bundle inicial do frontend: 740,72 kB para orçamento de 500 kB.
 - Workflow remoto `Pull request` aprovado no commit `4670c67`: backend, frontend e validação Compose concluídos com sucesso.
+
+
+## Aceite SaaS — 2026-09-10
+
+- Backend Release: build sem warnings/erros; 18 testes unitários e 7 integrações
+  aprovados, incluindo falha injetada de provisioning com rollback completo.
+- Frontend: lint aprovado, 28 unitários aprovados, build aprovado (aviso conhecido
+  de 743,95 kB para budget 500 kB). Node 26 exige o workaround de Web Storage em TESTING.
+- E2E determinístico: 27 aprovados, 9 skips condicionais por viewport.
+- E2E real Nginx: bootstrap de operador, provisionamento Alpha pela UI, Beta pela API,
+  onboarding dos dois, login, dashboard, clientes, veículos, criação/edição de OS,
+  impressão HTML e PDF aprovados. Ambos OS 1; IDs do outro tenant retornam 404.
+- Novas telas verificadas em 1440/768/320 px, sem overflow e controles com 44 px.
+- Compose: imagens construídas, 7 migrations aplicadas em banco vazio; serviços com
+  healthchecks saudáveis e Nginx respondendo. Reinício de toda a stack preservou
+  IDs, OS 1 e diagnósticos dos dois tenants, verificados por novo login.
+- Migration também validada sobre dados legados fictícios em PostgreSQL 18,
+  preservando hashes, IDs, snapshots e numeração histórica 42.
+- Stack de aceite isolada `ofizzy-saas-smoke`, porta 18081; banco local não alterado.
+  Deploy remoto não executado. Bootstrap deve ser privado/temporário; migração de
+  produção exige backup e janela sem writers antigos, conforme DEPLOYMENT.
+
+Próximo marco funcional: financeiro operacional tenant-scoped. Convites automáticos,
+recuperação de acesso, novas verticais, upload de logo e cobrança SaaS ficam futuros.

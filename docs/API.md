@@ -27,7 +27,7 @@ Requisições mutáveis exigem `X-XSRF-TOKEN`, obtido pelo cookie legível `XSRF
 - `PUT /api/work-orders/{id}` para OS aberta ou em andamento
 - `PATCH /api/work-orders/{id}/status` com `Open`, `InProgress`, `Completed` ou `Cancelled`
 
-O número é sequencial no PostgreSQL. Dados do cliente, veículo e itens são preservados como snapshots; subtotais e total são calculados pelo backend. OS finalizada ou cancelada é imutável.
+O número é sequencial por tenant no PostgreSQL. Dados do cliente, veículo e itens são preservados como snapshots; subtotais e total são calculados pelo backend. OS finalizada ou cancelada é imutável.
 
 ## Fase 4
 
@@ -46,3 +46,77 @@ Retorna totais de clientes, veículos, ordens ativas/finalizadas e a lista resum
 ## Convenções de listagem
 
 Listagens usam `q`, `page` e `pageSize`; veículos também aceitam `customerId` e ordens aceitam `status`. Respostas paginadas usam `items`, `total`, `page` e `pageSize`.
+
+## SaaS multi-tenant (ADR 0006)
+
+Todas as rotas operacionais existentes conservam seus DTOs e agora isolam pelo tenant
+validado da sessão. TenantId nunca é propriedade aceita em DTO operacional. ID de
+recurso de outra organização resulta em 404; referência indisponível resulta em 409.
+Falta de vínculo, módulo ou permissão resulta em 403. Sem sessão: 401. Entrada
+inválida: 400. Conflitos de índice/FK retornam erro compreensível sem detalhes SQL.
+
+### Identidade e seleção
+
+- `POST /api/auth/login { email, password }`: retorna `{ id, name, email,
+  isPlatformAdmin, tenant }`. `tenant` é nulo quando não existe exatamente um vínculo
+  disponível. Login com único vínculo seleciona automaticamente.
+- `GET /api/auth/me`: mesmo contrato. Tenant contém `id`, `name`, `slug`, `status`,
+  `vertical`, `role`, `onboardingCompleted`, `modules`.
+- `GET /api/auth/tenants`: organizações disponíveis do usuário, com o mesmo DTO de
+  contexto, somente vínculos ativos e estados Active/Pending.
+- `POST /api/auth/tenant { tenantId }`: valida vínculo no banco, revoga refresh atual
+  e emite contexto selecionado. Retorna o usuário/contexto. O ID é uma solicitação de
+  seleção, não autorização. PlatformAdmin também precisa de vínculo para operar dados.
+- `POST /api/auth/refresh`: mantém tenant selecionado e revalida vínculo/estado;
+  rotação transacional, replay revoga família. Retorna o mesmo DTO de usuário.
+- Logout mantém o contrato. Cookies HttpOnly, SameSite e CSRF continuam obrigatórios.
+  Faça GET após login/seleção para renovar o cookie XSRF associado à identidade.
+
+### Administração global
+
+Todas exigem usuário ativo com IsPlatformAdmin persistido, revalidado por request.
+
+- `GET /api/platform/tenants`: lista metadados administrativos, sem dados operacionais.
+- `GET /api/platform/tenants/{id}`: detalhes de tenant.
+- `POST /api/platform/tenants`: provisionamento transacional. Corpo:
+  `{ name, slug, vertical: "Automotive", adminName, email, password?, modules? }`.
+  Slug minúsculo alfanumérico com hífens, até 80 caracteres. Nome até 160.
+  Omissão de modules aplica template Automotive. Array vazio desabilita todos.
+  Novo usuário exige senha com 10–200 caracteres, maiúscula/minúscula/número.
+  Usuário existente ativo exige password nulo/omitido; senha existente nunca muda.
+  Retorna 201 com `{ id, name, slug, status, vertical, onboardingCompletedAt, modules }`.
+- `PUT /api/platform/tenants/{id} { status, modules }`: atualiza estado e módulos,
+  registra autor/data. Active exige onboarding concluído. Enum inválido/dependência
+  inválida resulta em 400; ativação prematura resulta em 409. Não há exclusão física.
+
+Módulos disponíveis: Customers, Catalog, Automotive, WorkOrders. Automotive exige
+Customers; a OS atual exige os quatro. Vertical só pode ser definida no provisionamento
+nesta fase, pois somente Automotive está implementada.
+
+### Configurações e onboarding
+
+- `GET /api/tenant/settings`: configurações do tenant, mesmo DTO de `/api/company`.
+- `PUT /api/tenant/settings`: mesmo corpo de PUT /api/company; exige Owner/Admin,
+  valida entrada. GET e PUT /api/company permanecem aliases HTTP de compatibilidade,
+  não entidades ou serviços duplicados.
+- `POST /api/tenant/onboarding/complete {}`: Owner/Admin confirma configuração;
+  exige nome operacional preenchido, grava OnboardingCompletedAt explicitamente e
+  muda Pending para Active. Idempotente para organização já ativa.
+- Pending pode acessar configurações/onboarding, mas não operações normais.
+  Suspended/Archived não têm contexto operacional disponível.
+
+### Bootstrap da plataforma
+
+`GET /api/setup/status` só retorna required=true quando Platform:BootstrapEnabled
+foi explicitamente habilitado e não há usuários. `POST /api/setup` cria somente o
+operador global inicial, nunca uma empresa. O corpo legado SetupRequest permanece
+compatível (companyName é mantido por compatibilidade, não provisiona tenant).
+Desabilitado por padrão. Use somente por acesso privado durante inicialização.
+Em base legada, conceda ao operador selecionado pelo comando documentado de servidor.
+
+### Autorizações operacionais
+
+Members podem operar clientes/catálogos/OS nos módulos habilitados; somente
+Owner/Admin alteram configurações/concluem onboarding. Owners não acessam APIs de
+plataforma. Dashboard requer Customers/WorkOrders/Automotive; PDFs exigem o módulo
+WorkOrders e contexto Automotive atual. Numeração é independente por tenant.

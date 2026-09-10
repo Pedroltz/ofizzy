@@ -553,3 +553,61 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Repositório privado renomeado para `Pedroltz/ofizzy`, preservando `develop` como branch padrão; `origin` local atualizado e commit publicado.
 - CI remoto aprovado no commit `4670c67` (run `34226277097`): jobs backend, frontend e Compose concluídos com sucesso.
 - O build mantém somente o aviso conhecido do bundle inicial: 740,72 kB para orçamento de 500 kB.
+
+
+## 2026-09-10 — Fundação SaaS multi-tenant
+
+Discovery completo antes de código; ADR 0006 registrada. Company tornou-se
+TenantSettings preservando tabela/IDs e contrato HTTP. Added Tenant/TenantUser/
+TenantModule, CurrentTenant, validação de vínculo/estado por request e autorização
+PlatformAdmin persistida. Bootstrap opt-in separado do onboarding.
+
+Isolamento EF automático em oito entidades (incluindo configurações e linhas),
+proteção de escrita/concurrency token, FKs/índices compostos e contador de OS
+transacional por tenant. Migration segura com backfill legado, snapshots/IDs/hash/
+números preservados e recusa de downgrade destrutivo. Provisionamento atômico com
+template Automotive, associação de usuário existente sem redefinir senha, roles e
+módulos. Refresh serializado com seleção persistida e revogação de replay.
+
+Frontend adaptado incrementalmente: contexto central, seleção fora do shell,
+limpeza de cache, módulos no menu/guards, PlatformAdmin e onboarding ligados a API
+real. Catálogos deixam de carregar quando módulo desabilitado ou tenant Pending.
+Dados fictícios de fallback em configurações/PDF removidos; validator existente
+passou a executar nas atualizações. Logs incluem escopos JSON TenantId/UserId/RequestId.
+CI inclui E2E frontend e deploy aguarda healthchecks; não há pipeline por tenant.
+
+Validações executadas:
+
+- `dotnet build Ofizzy.slnx --configuration Release --no-restore`: sem warnings/erros.
+- `dotnet test Ofizzy.slnx --configuration Release --no-build`: 18 unitários e
+  7 integrações aprovados com PostgreSQL 18 real. Teste inclui trigger temporário
+  que falha durante provisioning e prova rollback de tenant/usuário/configurações.
+- `npm run lint`, `NODE_OPTIONS=--no-experimental-webstorage npm test -- --watch=false`
+  (28 testes) e `npm run build`: aprovados. Node 26 sem workaround reproduziu o
+  problema pré-existente de localStorage; nenhuma alteração de domínio para contorná-lo.
+- `npm run e2e`: 27 aprovados/9 skips de viewport. Atualizado texto do bootstrap e
+  medição passou a esperar a animação PrimeNG. Quatro workers estabilizam a execução.
+- Imagens construídas via Compose; migration sobre banco vazio aplicada com sucesso.
+  Migration sobre banco legado fictício também passou, com OS 42 e snapshots intactos.
+- `npm run e2e -- --config playwright.live.config.ts`: aprovado pelo Nginx na porta
+  18081, sem interceptações. Bootstrap/provisionamento UI, onboarding, Alpha/João/
+  ABC1D23/OS 1 e Beta/Maria/XYZ9Z99/OS 1, edição, dashboard, impressão HTML/PDF e
+  isolamento bidirecional por IDs validados.
+- Reiniciados os quatro containers da stack isolada; `OFIZZY_VERIFY_RESTART=1 npm run
+  e2e -- --config playwright.live.config.ts`: IDs, diagnósticos e OS 1 preservados.
+- Novas telas em 1440/768/320 px sem overflow, com controles de 44 px e inspeção visual.
+
+Limites: aviso de bundle 743,95 kB/500 kB; outras verticais, convites por e-mail,
+recuperação de acesso, upload de logo, pagamentos operacionais e assinatura SaaS não
+implementados. Automotive atual continua íntegra. Deploy remoto não executado;
+base local existente não migrada nem alterada. Alterações locais anteriores foram
+preservadas e separadas dos commits desta tarefa.
+
+
+Validação adicional do conteúdo exato preparado para commit, exportado em
+`/tmp/ofizzy-review` sem as alterações locais anteriores: backend Release build e
+14 unitários/7 integrações aprovados; frontend lint, 28 unitários e build aprovados.
+Os 18 unitários da árvore de trabalho incluem quatro testes preexistentes ainda não
+versionados pelo usuário. Nenhuma dessas alterações anteriores foi incorporada aos
+commits SaaS. Logs da imagem final confirmaram contexto TenantId/UserId/RequestId;
+leitura persistida após atualização final da imagem também passou pelo Nginx.

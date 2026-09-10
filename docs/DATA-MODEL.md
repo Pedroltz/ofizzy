@@ -1,28 +1,66 @@
 # Modelo de dados
 
-## Fundação
+## SaaS Core
 
-- `Company`: configuração única da oficina, incluindo razão social, nome fantasia, CNPJ, contatos, endereço e textos usados nos documentos da OS.
-- `User`: administrador, email normalizado único e hash de senha.
-- `RefreshToken`: somente hash SHA-256, família, expiração, revogação e substituição.
+- `Tenant`: UUID v7, nome administrativo, slug único, vertical tipada, estado
+  Pending/Active/Suspended/Archived, datas, autor de criação/alteração e
+  OnboardingCompletedAt explícito. Razão social/documentos ficam nas configurações,
+  evitando duas fontes para dados fiscais/operacionais.
+- `TenantSettings`: antiga Company; preserva tabela `companies` e seus IDs. FK
+  TenantId única. Nome operacional, razão social, CNPJ, contatos, endereço, LogoPath,
+  textos de impressão, timezone, moeda e LastWorkOrderNumber. Configurações nunca
+  são globais. Nome/textos já alimentam a UI e impressão; upload/editor de logo é futuro.
+- `User`: identidade global, email normalizado único, hash, ativo, datas e privilégio
+  IsPlatformAdmin com PlatformAdminGrantedAt. Não existe User.TenantId.
+- `TenantUser`: PK TenantId/UserId, Role Owner/Admin/Member, IsActive e datas.
+- `TenantModule`: PK TenantId/Module, Enabled. Customers, WorkOrders, Catalog,
+  Automotive. Dependências de Automotive e do contrato atual de OS são validadas.
+- `RefreshToken`: hash SHA-256, família, expiração, revogação/substituição e tenant
+  selecionado opcional. Seleção nula permite identidade sem organização ativa.
 
-## Cadastros
+## Dados operacionais
 
-- `Customer`: dados de contato, documento opcional único e arquivamento lógico.
-- `Vehicle`: pertence a um cliente, possui placa única e arquivamento lógico.
-- `ServiceItem`: serviço de catálogo com preço padrão.
-- `Part`: peça de catálogo com código único, custo e preço de venda.
+Customer, Vehicle, ServiceItem, Part, WorkOrder, WorkOrderService e WorkOrderPart
+possuem TenantId obrigatório e filtro EF global. Não se aceita propriedade pelo DTO.
+Todos os índices operacionais começam por TenantId. Documento de cliente, placa,
+código de peça e número da OS são únicos por tenant, inclusive cadastros arquivados.
+UUIDs continuam únicos globalmente; chaves alternativas TenantId/Id sustentam FKs.
 
-## Ordens de serviço
+Vehicle → Customer, WorkOrder → Customer/Vehicle, linhas → WorkOrder e referências
+opcionais ao catálogo usam FKs compostas. Catálogo é arquivado; referências usam
+RESTRICT, preservando snapshots sem precisar anular TenantId em cascata.
+A aplicação ainda valida cliente ativo, vínculo veículo/cliente e catálogo ativo.
 
-- `WorkOrder`: número sequencial, cliente/veículo de origem, snapshots históricos, diagnóstico, quilometragem e estado.
-- `WorkOrderService`: snapshot da descrição, quantidade e preço unitário; a referência ao catálogo é opcional e usa `SET NULL`.
-- `WorkOrderPart`: snapshot da descrição, código, quantidade e preço unitário; a referência ao catálogo é opcional e usa `SET NULL`.
-- Estados persistidos: `Open`, `InProgress`, `Completed` e `Cancelled`.
-- Subtotais e total não são aceitos do cliente: são calculados a partir de quantidade × preço unitário no backend.
+OS preserva snapshots e estados Open/InProgress/Completed/Cancelled. Totais são
+calculados no backend. Não existem tabelas de pagamentos nesta entrega.
 
-## Convenções
+## Numeração e migração
 
-UUID v7 para chaves; `timestamptz` em UTC; `numeric(14,2)` para dinheiro; quantidades com três casas decimais; número da OS por sequence. Cadastros são arquivados e documentos históricos não são apagados.
+A criação da OS executa UPDATE ... RETURNING em LastWorkOrderNumber da configuração
+atual dentro da mesma transação da OS/linhas. O lock da linha serializa concorrentes;
+rollback não consome número. Não há MAX + 1 durante operação normal.
 
-Índices de consulta cobrem status/data e snapshots de cliente/placa em `WorkOrder`, cliente/atividade em `Vehicle` e atividade em `Customer`. O resumo do dashboard é derivado dessas entidades e não possui tabela própria.
+AddSaasTenancy cria tenant legado quando existe configuração ou usuário, preenche
+TenantId nullable e só depois aplica NOT NULL, unicidade e FKs. Preserva IDs,
+snapshots, hashes e números. O contador legado inicia no maior número histórico sob
+transação de migration. Banco vazio não recebe empresa fictícia. Mais de uma Company
+legada aborta atomicamente com mensagem para mapeamento explícito. Nenhum usuário
+legado vira PlatformAdmin automaticamente. Refresh legado recebe o tenant inicial.
+Downgrade destrutivo é recusado; rollback exige backup anterior validado.
+
+```mermaid
+erDiagram
+ User ||--o{ TenantUser : participa
+ Tenant ||--o{ TenantUser : associa
+ Tenant ||--|| TenantSettings : configura
+ Tenant ||--o{ TenantModule : habilita
+ Tenant ||--o{ Customer : atende
+ Tenant ||--o{ Vehicle : possui
+ Tenant ||--o{ WorkOrder : registra
+ Customer ||--o{ Vehicle : possui
+ WorkOrder ||--o{ WorkOrderService : preserva
+ WorkOrder ||--o{ WorkOrderPart : preserva
+```
+
+Convenções: UUID v7, timestamptz/UTC, numeric(14,2) para dinheiro e três casas para
+quantidades. Não há banco, schema ou sequência física por tenant.

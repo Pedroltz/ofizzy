@@ -29,6 +29,8 @@ jobs:
       - run: npm run lint
       - run: npm test -- --watch=false
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
 
   compose:
     runs-on: ubuntu-latest

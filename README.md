@@ -1,8 +1,8 @@
 # Ofizzy
 
-Sistema simples e rápido para gestão de uma pequena oficina, centrado na Ordem de Serviço.
+Plataforma SaaS multi-tenant para empresas prestadoras de serviços. Automotive é a primeira vertical, centrada na Ordem de Serviço.
 
-O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo completo de OS, configuração da oficina, impressão HTML/PDF, dashboard operacional e interface responsiva para desktop, celular e tablet. O próximo marco funcional é financeiro e pagamentos.
+O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo completo de OS, configuração da oficina, impressão HTML/PDF, dashboard operacional e interface responsiva para desktop, celular e tablet. A fundação SaaS adiciona organizações, usuários com múltiplos vínculos, módulos, provisionamento administrativo e onboarding. Financeiro operacional continua no roadmap.
 
 ## Documentação
 
@@ -20,9 +20,10 @@ O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo comple
 Execute os comandos abaixo a partir da raiz do repositório.
 
 1. Copie `.env.example` para `.env` e substitua as senhas.
-2. Construa e execute a migration: `docker compose --profile tools run --rm --build migrate`.
+2. Construa as imagens (`docker compose build`) e execute a migration: `docker compose --profile tools run --rm migrate`.
 3. Inicie: `docker compose up --build -d`.
-4. Abra `http://localhost:8080` e conclua o primeiro acesso.
+4. Para banco vazio, inicialize o operador da plataforma em acesso privado com `PLATFORM_BOOTSTRAP_ENABLED=true`; desabilite após `/setup`.
+5. Em `/plataforma`, crie tenants. Cada Owner conclui seu próprio onboarding. Consulte [deploy e migração legada](docs/DEPLOYMENT.md) antes de atualizar dados existentes.
 
 ## Desenvolvimento local
 
@@ -65,3 +66,24 @@ npm run build
 O E2E inicia o Angular em `http://127.0.0.1:4300`, intercepta as APIs com dados determinísticos e executa projetos desktop, Pixel 7 e tablet.
 
 Consulte [docs/STATUS.md](docs/STATUS.md) para o estado atual, [docs/ROADMAP.md](docs/ROADMAP.md) para as próximas fases e [AI-HANDOFF.md](AI-HANDOFF.md) para continuidade técnica.
+
+## SaaS: nova empresa não exige deploy
+
+Uma API, um PostgreSQL e Nginx atendem todos os tenants. PlatformAdmin provisiona
+organizações; Owners administram somente suas empresas. Tenant é a empresa cliente
+do Ofizzy; Customer é seu cliente operacional. A migração preserva dados legados,
+IDs e snapshots. Detalhes na [ADR 0006](docs/adr/0006-saas-multi-tenancy.md).
+
+O aceite com API real está em `playwright.live.config.ts`; execute apenas em banco
+descartável vazio com bootstrap explicitamente habilitado:
+
+```bash
+npm run e2e -- --config playwright.live.config.ts
+# Após reiniciar os containers da stack de teste:
+OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.live.config.ts
+```
+
+A origem padrão desse teste é `http://127.0.0.1:18081`, alterável por
+`OFIZZY_E2E_BASE_URL`. Usa somente credenciais fictícias e não deve apontar para
+produção. Em Node 26, execute unitários com `NODE_OPTIONS=--no-experimental-webstorage
+npm test -- --watch=false`; CI e imagem frontend usam Node 24.

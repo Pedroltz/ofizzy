@@ -1,6 +1,29 @@
 # Handoff para IA
 
-Atualizado em: 2026-09-08
+Atualizado em: 2026-09-10
+
+## Prioridade vigente — SaaS (aceite local concluído)
+
+Leia a ADR 0006 e `docs/phases/PHASE-07-SAAS.md` antes de continuar. A fundação
+multi-tenant foi antecipada antes do financeiro. Company virou TenantSettings,
+preservando tabela `companies` e `/api/company`. CurrentTenant é scoped e validado
+no banco; todo dado operacional tem filtro EF e FKs compostas. Sem contexto falha
+fechado. Não use IgnoreQueryFilters para operacional ou assuma User.TenantId.
+
+Provisionamento é transacional, com template Automotive e Owner. User é global;
+TenantUser contém role/ativo. PlatformAdmin é persistido, não derivado de Owner.
+Bootstrap só cria operador, é opt-in e deve ocorrer em acesso privado. Base legada
+exige concessão operacional explícita via `--grant-platform-admin <UUID>`.
+
+Frontend: `/organizacoes`, `/plataforma`, `/onboarding`; TenantContextService e
+AuthService centralizam contexto. Troca de tenant limpa cache e passa fora do shell.
+OS mantém contrato automotivo obrigatório, protegido por módulos. Não generalize
+Vehicle artificialmente antes de implementar outra vertical real.
+
+A stack `ofizzy-saas-smoke` usa porta 18081 e volume separado do ambiente local.
+Credenciais fictícias ficam em `/tmp/ofizzy-saas-smoke.env`; não as versione.
+O E2E real usa `playwright.live.config.ts`, sem mocks nem trace de tokens.
+Os registros anteriores abaixo descrevem o histórico e podem ter contagens antigas.
 
 ## Leia primeiro
 
@@ -92,3 +115,13 @@ Fases 1, 2, 3 e 4 concluídas e aprovadas.
 - O script `scripts/migrate-to-ofizzy.sh` faz backup lógico, restaura em um volume separado e mantém a origem intacta para rollback.
 - Cookies de sessão e proteção antiforgery receberam novos nomes; após a atualização, todos os usuários precisam autenticar novamente.
 - A Fase 5 permanece como próxima entrega funcional.
+
+
+## Evidência final SaaS — 2026-09-10
+
+Build Release sem warnings, 18 unitários/7 integrações backend; frontend lint,
+28 unitários, build; E2E visual 27 aprovados/9 skips; E2E real de criação e após
+restart aprovados. Numeração Alpha/Beta = 1, isolamento por ID, PDF/HTML e
+persistência demonstrados. Imagens/7 migrations/Compose/Nginx validados na stack
+isolada. O bundle de 743,95 kB mantém aviso conhecido. Consulte STATUS e fase SaaS
+para comandos e limites. Não confundir evidência local com deploy remoto.
