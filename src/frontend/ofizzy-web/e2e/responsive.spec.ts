@@ -92,7 +92,7 @@ async function mockApi(page: Page, requestCounts?: Map<string, number>): Promise
     let body: unknown = {};
     if (path === '/api/setup/status') body = { required: false };
     else if (path === '/api/auth/me' || path === '/api/auth/refresh')
-      body = { id: 'user-1', name: 'Usuário Teste', email: 'teste@example.com' };
+      body = { id: 'user-1', name: 'Usuário Teste', email: 'teste@example.com', isPlatformAdmin: false, tenant: { id: 'tenant-1', name: 'Oficina Teste', slug: 'teste', status: 'Active', vertical: 'Automotive', role: 'Owner', onboardingCompleted: true, modules: ['Customers', 'WorkOrders', 'Catalog', 'Automotive'] } };
     else if (path === '/api/dashboard/summary')
       body = {
         totalCustomers: 1,
@@ -212,7 +212,7 @@ test('configuração inicial permanece utilizável em todos os viewports', async
   );
   await page.goto('/setup');
   await expect(
-    page.getByRole('heading', { name: 'Configuração inicial da oficina.' }),
+    page.getByRole('heading', { name: 'Inicialização da plataforma.' }),
   ).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
@@ -234,9 +234,8 @@ test('formulário de OS vira tela cheia e edita itens em cards no celular', asyn
   await page.getByRole('button', { name: 'Nova Ordem' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
-  const box = await dialog.boundingBox();
-  // PrimeNG centers the dialog using a transform, which may round a few CSS pixels.
-  expect(box?.width).toBeGreaterThanOrEqual(page.viewportSize()!.width * 0.98);
+  // Wait for the PrimeNG opening animation before measuring the final layout.
+  await expect.poll(async () => (await dialog.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(page.viewportSize()!.width * 0.98);
   await page.getByRole('button', { name: 'Novo Serviço Avulso' }).click();
   await expect(page.locator('app-work-order-lines-editor .line-card')).toBeVisible();
 });
