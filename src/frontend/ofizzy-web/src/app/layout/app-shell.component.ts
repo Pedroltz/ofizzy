@@ -1,3 +1,4 @@
+import { TenantContextService } from '../core/tenancy/tenant-context.service';
 import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
@@ -13,6 +14,7 @@ export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  readonly tenantContext = inject(TenantContextService);
   readonly user = this.auth.user;
   readonly mobileMenu = signal(false);
 
@@ -24,7 +26,7 @@ export class AppShellComponent {
     return `${capitalized}, ${dayAndMonth}`;
   });
 
-  readonly navigation = [
+  private readonly allNavigation = [
     {
       label: 'Operação',
       items: [
@@ -46,6 +48,17 @@ export class AppShellComponent {
       ],
     },
   ] as const;
+
+  readonly navigation = computed(() => [
+    ...this.allNavigation.map(group => ({ ...group, items: group.items.filter(item => {
+      const modules: Record<string, ('Customers' | 'WorkOrders' | 'Catalog' | 'Automotive')[]> = { '/': ['Customers', 'WorkOrders', 'Automotive'], '/ordens': ['WorkOrders'], '/clientes': ['Customers'], '/veiculos': ['Automotive'] };
+      return (modules[item.route] ?? []).every(m => this.tenantContext.has(m));
+    }) })),
+    { label: 'Organizações', items: [
+      { label: 'Trocar organização', icon: 'pi pi-building', route: '/organizacoes', exact: false },
+      ...(this.user()?.isPlatformAdmin ? [{ label: 'Plataforma', icon: 'pi pi-shield', route: '/plataforma', exact: false }] : [])
+    ] }
+  ]);
 
   async logout(): Promise<void> {
     await this.auth.logout();

@@ -5,12 +5,12 @@
       <span class="sidebar-wordmark" aria-hidden="true">OF</span>
       <span class="brand-info">
         <strong class="brand-title">Ofizzy</strong>
-        <span class="brand-subtitle">Gestão de Oficina</span>
+        <span class="brand-subtitle">{{ tenantContext.tenant()?.name }}</span>
       </span>
     </a>
 
     <div class="sidebar-navigation">
-      @for (group of navigation; track group.label) {
+      @for (group of navigation(); track group.label) {
         <section class="nav-section" [attr.aria-label]="group.label">
           <p class="nav-section-label">{{ group.label }}</p>
           <nav class="sidebar-nav">
@@ -67,10 +67,12 @@
         </span>
       </div>
       <div class="desktop-header__right">
+        @if (tenantContext.has('WorkOrders')) {
         <a routerLink="/ordens" class="header-action-link">
           <i class="pi pi-plus"></i>
           <span>Nova OS</span>
         </a>
+        }
       </div>
     </header>
 
@@ -107,7 +109,7 @@
               <span class="sidebar-wordmark" aria-hidden="true">OF</span>
               <span class="brand-info">
                 <strong class="brand-title">Ofizzy</strong>
-                <span class="brand-subtitle">Gestão de Oficina</span>
+                <span class="brand-subtitle">{{ tenantContext.tenant()?.name }}</span>
               </span>
             </a>
             <button
@@ -121,7 +123,7 @@
           </div>
 
           <div class="sidebar-navigation">
-            @for (group of navigation; track group.label) {
+            @for (group of navigation(); track group.label) {
               <section class="nav-section" [attr.aria-label]="group.label">
                 <p class="nav-section-label">{{ group.label }}</p>
                 <nav class="sidebar-nav">

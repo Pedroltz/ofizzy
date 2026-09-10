@@ -24,5 +24,7 @@ export class AuthService {
     return this.restorePromise;
   }
   logout(): Promise<void> { return firstValueFrom(this.http.post<void>('/api/auth/logout', {})).catch(() => undefined).then(() => { this.cache.clear(); this.currentUser.set(null); }); }
-  private loadAuthenticatedUser(): Promise<void> { return firstValueFrom(this.http.get<CurrentUser>('/api/auth/me')).then((user) => this.currentUser.set(user)); }
+  reload(): Promise<void> { return this.loadAuthenticatedUser(); }
+  selectTenant(tenantId: string): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/auth/tenant', { tenantId })).then(() => { this.cache.clear(); return this.loadAuthenticatedUser(); }); }
+  private loadAuthenticatedUser(): Promise<void> { return firstValueFrom(this.http.get<CurrentUser>('/api/auth/me')).then((user) => { this.cache.clear(); this.currentUser.set(user); }); }
 }

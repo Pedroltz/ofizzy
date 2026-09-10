@@ -8,30 +8,12 @@
       <i class="pi pi-car text-2xl"></i>
     </div>
     <p class="eyebrow">PRIMEIRO ACESSO</p>
-    <h1>Configuração inicial da oficina.</h1>
-    <p>Cadastre os dados essenciais da sua empresa e crie o usuário administrador para iniciar as operações imediatamente.</p>
+    <h1>Inicialização da plataforma.</h1>
+    <p>Crie o administrador global do Ofizzy. As empresas serão provisionadas separadamente no painel da plataforma.</p>
   </section>
 
   <section class="auth-card surface-card">
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
-      <div class="form-section">
-        <div>
-          <span class="step-number"><i class="pi pi-building text-xs"></i></span>
-          <h2>Dados da Oficina</h2>
-        </div>
-        <label>Razão Social / Nome Fantasia
-        <input pInputText formControlName="companyName" autocomplete="organization" placeholder="Ex: Oficina Centro Automotivo" />
-        </label>
-        <div class="two-columns">
-          <label>CNPJ <small class="text-muted">opcional</small>
-            <input pInputText formControlName="cnpj" inputmode="numeric" placeholder="Somente números" />
-          </label>
-          <label>Telefone / WhatsApp <small class="text-muted">opcional</small>
-            <input pInputText formControlName="phone" inputmode="tel" placeholder="(00) 00000-0000" />
-          </label>
-        </div>
-      </div>
-
       <div class="form-section">
         <div>
           <span class="step-number"><i class="pi pi-user text-xs"></i></span>
@@ -54,7 +36,7 @@
       <button type="submit" class="primary-button full-control flex items-center justify-center gap-2" [disabled]="saving()">
         @if (saving()) {
           <i class="pi pi-spin pi-spinner"></i>
-          <span>Criando oficina...</span>
+          <span>Criando administrador...</span>
         } @else {
           <span>Concluir configuração</span>
           <i class="pi pi-check"></i>

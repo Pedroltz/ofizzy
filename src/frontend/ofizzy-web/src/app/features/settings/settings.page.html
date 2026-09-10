@@ -5,15 +5,18 @@
     description="Padronize a precificação de mão de obra e peças e mantenha atualizados os dados operacionais da oficina."
   />
 
-  <p-tabs value="services">
+  <p-tabs [value]="catalogEnabled() ? 'services' : 'workshop'">
     <p-tablist>
+      @if (catalogEnabled()) {
       <p-tab value="services"><i class="pi pi-wrench mr-2" aria-hidden="true"></i> Mão de Obra e Serviços</p-tab>
       <p-tab value="parts"><i class="pi pi-box mr-2" aria-hidden="true"></i> Peças e Insumos</p-tab>
+      }
       <p-tab value="workshop"><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Oficina</p-tab>
     </p-tablist>
 
     <p-tabpanels>
       <!-- Aba: Mão de Obra e Serviços -->
+      @if (catalogEnabled()) {
       <p-tabpanel value="services">
         <div class="catalog-toolbar">
           <div>
@@ -99,6 +102,7 @@
         </div>
       </p-tabpanel>
 
+      }
       <!-- Aba: Dados da Oficina & Impressão -->
       <p-tabpanel value="workshop">
         <div class="catalog-toolbar">
@@ -106,7 +110,7 @@
             <h2>Dados da Oficina & Impressão</h2>
             <p>Estas informações são exibidas no cabeçalho e rodapé da Ordem de Serviço impressa e em relatórios PDF.</p>
           </div>
-          <p-button label="Salvar Configurações" icon="pi pi-check" (onClick)="saveCompany()" [loading]="savingCompany()" />
+          <p-button label="Salvar Configurações" icon="pi pi-check" (onClick)="saveCompany()" [loading]="savingCompany()" [disabled]="!tenantContext.admin()" />
         </div>
 
         <form [formGroup]="companyForm" class="flex flex-col gap-6 max-w-4xl" (ngSubmit)="saveCompany()">
@@ -182,7 +186,7 @@
           </app-section-card>
 
           <div class="pt-2 flex justify-end">
-            <p-button label="Salvar Dados da Oficina" icon="pi pi-check" type="submit" [loading]="savingCompany()" />
+            <p-button label="Salvar Dados da Oficina" icon="pi pi-check" type="submit" [loading]="savingCompany()" [disabled]="!tenantContext.admin()" />
           </div>
         </form>
       </p-tabpanel>

@@ -1,3 +1,4 @@
+import { InputTextModule } from 'primeng/inputtext';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,7 +7,7 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle.compo
 
 @Component({
   selector: 'app-setup-page',
-  imports: [ReactiveFormsModule, ThemeToggleComponent],
+  imports: [InputTextModule, ReactiveFormsModule, ThemeToggleComponent],
   templateUrl: './setup.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -14,7 +15,7 @@ export class SetupPage {
   private readonly fb = inject(FormBuilder); private readonly auth = inject(AuthService); private readonly router = inject(Router);
   readonly saving = signal(false);
   readonly form = this.fb.nonNullable.group({
-    companyName: ['', [Validators.required, Validators.maxLength(160)]], cnpj: [''], phone: [''],
+    companyName: ['Ofizzy Platform', [Validators.required, Validators.maxLength(160)]], cnpj: [''], phone: [''],
     adminName: ['', [Validators.required, Validators.maxLength(120)]], email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)]],
   });
@@ -24,7 +25,7 @@ export class SetupPage {
     try {
       const value = this.form.getRawValue();
       await this.auth.setup({ ...value, cnpj: value.cnpj.replace(/\D/g, '') || null, phone: value.phone.trim() || null });
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl('/plataforma');
     } finally { this.saving.set(false); }
   }
 }

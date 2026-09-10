@@ -1,3 +1,4 @@
+import { TenantContextService } from '../../core/tenancy/tenant-context.service';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -34,6 +35,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPage {
+  readonly tenantContext = inject(TenantContextService);
+  readonly catalogEnabled = () => this.tenantContext.has('Catalog') && this.tenantContext.tenant()?.status === 'Active';
   private readonly api = inject(CatalogApiService);
   private readonly companyApi = inject(CompanyApiService);
   private readonly fb = inject(FormBuilder);
@@ -80,6 +83,7 @@ export class SettingsPage {
   });
 
   constructor() {
+    if (!this.tenantContext.admin()) this.companyForm.disable();
     const services = this.api.peekServices();
     const parts = this.api.peekParts();
     const company = this.companyApi.peek();
@@ -99,8 +103,8 @@ export class SettingsPage {
     );
     try {
       const [services, parts, comp] = await Promise.all([
-        this.api.services(),
-        this.api.parts(),
+        this.catalogEnabled() ? this.api.services() : Promise.resolve({ items: [] }),
+        this.catalogEnabled() ? this.api.parts() : Promise.resolve({ items: [] }),
         this.companyApi.get().catch(() => null)
       ]);
       this.services.set(services.items);

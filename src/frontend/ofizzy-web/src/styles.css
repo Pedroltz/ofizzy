@@ -4796,3 +4796,15 @@ label {
     color: #555555;
   }
 }
+
+/* SaaS administration and organization selection share the existing theme tokens. */
+.tenant-page { max-width: 1200px; margin: 0 auto; padding: clamp(1rem, 3vw, 2rem); overflow-wrap: anywhere; }
+.tenant-page .surface-card { padding: 1.25rem; min-width: 0; margin-block: 1rem; }
+.tenant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
+.tenant-form { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.tenant-page label { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.tenant-page input, .tenant-page .p-select { width: 100%; min-height: 44px; min-width: 0; }
+.tenant-page button, .tenant-link { min-height: 44px; }
+.tenant-link { display: inline-flex; align-items: center; }
+.tenant-page fieldset { min-width: 0; border: 1px solid var(--border-default); padding: .75rem; }
+.tenant-page .tenant-check { flex-direction: row; align-items: center; min-height: 44px; }
