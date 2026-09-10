@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Ofizzy.Api.Modules.Customers;
 using Ofizzy.Api.Modules.Parts;
@@ -7,9 +8,13 @@ using Ofizzy.Api.Modules.WorkOrders;
 
 namespace Ofizzy.Api.Infrastructure.Persistence;
 
-public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, CurrentTenant? currentTenant = null) : DbContext(options)
 {
-    public DbSet<Company> Companies => Set<Company>();
+    public Guid? TenantId => currentTenant?.TenantId;
+    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
+    public DbSet<TenantModule> TenantModules => Set<TenantModule>();
+    public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Customer> Customers => Set<Customer>();
@@ -23,9 +28,31 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("ofizzy");
-        modelBuilder.HasSequence<long>("work_order_number_seq");
-        modelBuilder.Entity<Company>(entity =>
+        modelBuilder.Entity<Tenant>(e =>
         {
+            e.ToTable("tenants"); e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(160); e.Property(x => x.Slug).HasMaxLength(80);
+            e.HasIndex(x => x.Slug).IsUnique();
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Vertical).HasConversion<string>().HasMaxLength(40);
+            e.HasOne(x => x.Settings).WithOne().HasForeignKey<TenantSettings>(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+            e.HasMany(x => x.Modules).WithOne().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<TenantUser>(e =>
+        {
+            e.ToTable("tenant_users"); e.HasKey(x => new { x.TenantId, x.UserId });
+            e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<TenantModule>(e =>
+        {
+            e.ToTable("tenant_modules"); e.HasKey(x => new { x.TenantId, x.Module });
+            e.Property(x => x.Module).HasConversion<string>().HasMaxLength(40);
+        });
+        modelBuilder.Entity<TenantSettings>(entity =>
+        {
+            entity.Property(x => x.Timezone).HasMaxLength(100); entity.Property(x => x.Currency).HasMaxLength(3);
             entity.ToTable("companies"); entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
             entity.Property(x => x.LegalName).HasMaxLength(160);
@@ -66,7 +93,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.Property(x => x.Brand).HasMaxLength(80); entity.Property(x => x.Model).HasMaxLength(120).IsRequired(); entity.Property(x => x.Color).HasMaxLength(50);
             entity.Property(x => x.Chassis).HasMaxLength(40); entity.Property(x => x.Notes).HasMaxLength(2000);
             entity.HasIndex(x => x.Plate).IsUnique(); entity.HasIndex(x => x.Model); entity.HasIndex(x => x.IsActive); entity.HasIndex(x => x.CustomerId);
-            entity.HasOne(x => x.Customer).WithMany(x => x.Vehicles).HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Customer).WithMany(x => x.Vehicles).HasForeignKey(x => new { x.TenantId, x.CustomerId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ServiceItem>(entity =>
         {
@@ -80,22 +107,76 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         });
         modelBuilder.Entity<WorkOrder>(entity =>
         {
-            entity.ToTable("work_orders"); entity.HasKey(x => x.Id); entity.Property(x => x.Number).HasDefaultValueSql("nextval('ofizzy.work_order_number_seq')");
+            entity.ToTable("work_orders"); entity.HasKey(x => x.Id); entity.Property(x => x.Number).ValueGeneratedNever();
             entity.HasIndex(x => x.Number).IsUnique();
             entity.HasIndex(x => x.Status);
             entity.HasIndex(x => x.CreatedAt);
             entity.HasIndex(x => new { x.Status, x.CreatedAt });
             entity.HasIndex(x => x.CustomerName);
             entity.HasIndex(x => x.VehiclePlate);
-            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20); entity.Property(x => x.CustomerName).HasMaxLength(160); entity.Property(x => x.CustomerDocument).HasMaxLength(14); entity.Property(x => x.CustomerPhone).HasMaxLength(20); entity.Property(x => x.VehiclePlate).HasMaxLength(8); entity.Property(x => x.VehicleDescription).HasMaxLength(300); entity.Property(x => x.Complaint).HasMaxLength(3000); entity.Property(x => x.Diagnosis).HasMaxLength(5000); entity.Property(x => x.Notes).HasMaxLength(3000); entity.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict); entity.HasOne(x => x.Vehicle).WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20); entity.Property(x => x.CustomerName).HasMaxLength(160); entity.Property(x => x.CustomerDocument).HasMaxLength(14); entity.Property(x => x.CustomerPhone).HasMaxLength(20); entity.Property(x => x.VehiclePlate).HasMaxLength(8); entity.Property(x => x.VehicleDescription).HasMaxLength(300); entity.Property(x => x.Complaint).HasMaxLength(3000); entity.Property(x => x.Diagnosis).HasMaxLength(5000); entity.Property(x => x.Notes).HasMaxLength(3000); entity.HasOne(x => x.Customer).WithMany().HasForeignKey(x => new { x.TenantId, x.CustomerId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict); entity.HasOne(x => x.Vehicle).WithMany().HasForeignKey(x => new { x.TenantId, x.VehicleId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<WorkOrderService>(entity =>
         {
-            entity.ToTable("work_order_services"); entity.HasKey(x => x.Id); entity.Property(x => x.Description).HasMaxLength(300); entity.Property(x => x.Quantity).HasPrecision(12, 3); entity.Property(x => x.UnitPrice).HasPrecision(14, 2); entity.HasOne(x => x.WorkOrder).WithMany(x => x.Services).HasForeignKey(x => x.WorkOrderId).OnDelete(DeleteBehavior.Cascade); entity.HasOne(x => x.Service).WithMany().HasForeignKey(x => x.ServiceId).OnDelete(DeleteBehavior.SetNull);
+            entity.ToTable("work_order_services"); entity.HasKey(x => x.Id); entity.Property(x => x.Description).HasMaxLength(300); entity.Property(x => x.Quantity).HasPrecision(12, 3); entity.Property(x => x.UnitPrice).HasPrecision(14, 2); entity.HasOne(x => x.WorkOrder).WithMany(x => x.Services).HasForeignKey(x => new { x.TenantId, x.WorkOrderId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Cascade); entity.HasOne(x => x.Service).WithMany().HasForeignKey(x => new { x.TenantId, x.ServiceId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<WorkOrderPart>(entity =>
         {
-            entity.ToTable("work_order_parts"); entity.HasKey(x => x.Id); entity.Property(x => x.Description).HasMaxLength(300); entity.Property(x => x.Code).HasMaxLength(80); entity.Property(x => x.Quantity).HasPrecision(12, 3); entity.Property(x => x.UnitPrice).HasPrecision(14, 2); entity.HasOne(x => x.WorkOrder).WithMany(x => x.Parts).HasForeignKey(x => x.WorkOrderId).OnDelete(DeleteBehavior.Cascade); entity.HasOne(x => x.Part).WithMany().HasForeignKey(x => x.PartId).OnDelete(DeleteBehavior.SetNull);
+            entity.ToTable("work_order_parts"); entity.HasKey(x => x.Id); entity.Property(x => x.Description).HasMaxLength(300); entity.Property(x => x.Code).HasMaxLength(80); entity.Property(x => x.Quantity).HasPrecision(12, 3); entity.Property(x => x.UnitPrice).HasPrecision(14, 2); entity.HasOne(x => x.WorkOrder).WithMany(x => x.Parts).HasForeignKey(x => new { x.TenantId, x.WorkOrderId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Cascade); entity.HasOne(x => x.Part).WithMany().HasForeignKey(x => new { x.TenantId, x.PartId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
         });
+        Scope<TenantSettings>(modelBuilder);
+        Scope<Customer>(modelBuilder);
+        Scope<Vehicle>(modelBuilder);
+        Scope<ServiceItem>(modelBuilder);
+        Scope<Part>(modelBuilder);
+        Scope<WorkOrder>(modelBuilder);
+        Scope<WorkOrderService>(modelBuilder);
+        Scope<WorkOrderPart>(modelBuilder);
+
+        // Every operational index starts with TenantId, including uniqueness constraints.
+        foreach (var entity in modelBuilder.Model.GetEntityTypes().Where(x => typeof(ITenantScoped).IsAssignableFrom(x.ClrType)).ToList())
+        {
+            foreach (var index in entity.GetIndexes().Where(x => x.Properties.All(p => p.Name != "TenantId")).ToList())
+            {
+                var names = new[] { "TenantId" }.Concat(index.Properties.Select(x => x.Name)).ToArray();
+                var unique = index.IsUnique; var filter = index.GetFilter();
+                entity.RemoveIndex(index);
+                var replacement = modelBuilder.Entity(entity.ClrType).HasIndex(names).IsUnique(unique);
+                if (filter is not null) replacement.HasFilter(filter);
+            }
+        }
+    }
+
+    private void Scope<T>(ModelBuilder modelBuilder) where T : class, ITenantScoped
+    {
+        modelBuilder.Entity<T>().HasQueryFilter(x => TenantId != null && x.TenantId == TenantId);
+        modelBuilder.Entity<T>().Property(x => x.TenantId).IsConcurrencyToken();
+        if (typeof(T) != typeof(TenantSettings))
+            modelBuilder.Entity<T>().HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+    }
+
+    private void ValidateOwnership()
+    {
+        foreach (var entry in ChangeTracker.Entries<ITenantScoped>().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
+        {
+            if (TenantId is not { } id) throw new InvalidOperationException("An authenticated tenant context is required for writes.");
+            if (entry.State == EntityState.Added)
+            {
+                if (entry.Entity.TenantId != Guid.Empty && entry.Entity.TenantId != id)
+                    throw new InvalidOperationException("Cross-tenant writes are forbidden.");
+                entry.Entity.TenantId = id;
+            }
+            else if (entry.Entity.TenantId != id || entry.Property(x => x.TenantId).OriginalValue != id)
+                throw new InvalidOperationException("Tenant ownership cannot be changed.");
+        }
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ValidateOwnership(); return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ValidateOwnership(); return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 }

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using Ofizzy.Api.Modules.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +10,7 @@ using Ofizzy.Api.Shared.Validation;
 
 namespace Ofizzy.Api.Authentication;
 [ApiController, Route("api/auth")]
-public sealed class AuthController(ApplicationDbContext db, IValidator<LoginRequest> validator, IPasswordHasher<User> passwordHasher, SessionService sessions) : ControllerBase
+public sealed class AuthController(ApplicationDbContext db, IValidator<LoginRequest> validator, IPasswordHasher<User> passwordHasher, SessionService sessions, CurrentTenant current) : ControllerBase
 {
     [HttpPost("login"), EnableRateLimiting("auth")]
     public async Task<ActionResult<CurrentUserResponse>> Login(LoginRequest request, CancellationToken cancellationToken)
@@ -19,7 +19,7 @@ public sealed class AuthController(ApplicationDbContext db, IValidator<LoginRequ
         var normalized = request.Email.Trim().ToUpperInvariant(); var user = await db.Users.SingleOrDefaultAsync(x => x.NormalizedEmail == normalized, cancellationToken);
         if (user is null || !user.IsActive || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             return Problem(statusCode: 401, title: "Credenciais inválidas", detail: "E-mail ou senha inválidos.");
-        await sessions.IssueAsync(user, Response, cancellationToken: cancellationToken); return Ok(new CurrentUserResponse(user.Id, user.Name, user.Email));
+        await sessions.IssueAsync(user, Response, cancellationToken: cancellationToken); return Ok(ResponseFor(user));
     }
 
     [HttpPost("refresh"), EnableRateLimiting("auth")]
@@ -28,7 +28,7 @@ public sealed class AuthController(ApplicationDbContext db, IValidator<LoginRequ
         if (!Request.Cookies.TryGetValue(SessionService.RefreshCookie, out var token)) return Unauthorized();
         var user = await sessions.RotateAsync(token, Response, cancellationToken);
         if (user is null) { sessions.Clear(Response); return Unauthorized(); }
-        return Ok(new CurrentUserResponse(user.Id, user.Name, user.Email));
+        return Ok(ResponseFor(user));
     }
 
     [HttpPost("logout")]
@@ -40,8 +40,27 @@ public sealed class AuthController(ApplicationDbContext db, IValidator<LoginRequ
     [Authorize, HttpGet("me")]
     public async Task<ActionResult<CurrentUserResponse>> Me(CancellationToken cancellationToken)
     {
-        var subject = User.FindFirstValue("sub"); if (!Guid.TryParse(subject, out var id)) return Unauthorized();
-        var user = await db.Users.Where(x => x.Id == id && x.IsActive).Select(x => new CurrentUserResponse(x.Id, x.Name, x.Email)).SingleOrDefaultAsync(cancellationToken);
-        return user is null ? Unauthorized() : Ok(user);
+        var user = await db.Users.SingleOrDefaultAsync(x => x.Id == current.UserId && x.IsActive, cancellationToken);
+        return user is null ? Unauthorized() : Ok(ResponseFor(user));
     }
+
+    [Authorize, HttpGet("tenants")]
+    public async Task<ActionResult<IReadOnlyList<TenantContextResponse>>> Tenants(CancellationToken ct) => Ok(await db.TenantUsers.AsNoTracking()
+        .Where(x => x.UserId == current.UserId && x.IsActive && (x.Tenant.Status == TenantStatus.Active || x.Tenant.Status == TenantStatus.Pending))
+        .Select(x => new TenantContextResponse(x.TenantId, x.Tenant.Name, x.Tenant.Slug, x.Tenant.Status.ToString(), x.Tenant.Vertical.ToString(), x.Role.ToString(), x.Tenant.OnboardingCompletedAt != null, x.Tenant.Modules.Where(m => m.Enabled).Select(m => m.Module.ToString()).ToArray())).ToListAsync(ct));
+
+    [Authorize, HttpPost("tenant")]
+    public async Task<ActionResult<CurrentUserResponse>> SelectTenant(SelectTenantRequest request, CancellationToken ct)
+    {
+        if (!await db.TenantUsers.AnyAsync(x => x.TenantId == request.TenantId && x.UserId == current.UserId && x.IsActive && (x.Tenant.Status == TenantStatus.Active || x.Tenant.Status == TenantStatus.Pending), ct))
+            return Problem(statusCode: 403, title: "Organização indisponível");
+        var user = await db.Users.SingleAsync(x => x.Id == current.UserId, ct);
+        Request.Cookies.TryGetValue(SessionService.RefreshCookie, out var refresh);
+        await sessions.RevokeAsync(refresh, ct);
+        await sessions.IssueAsync(user, Response, cancellationToken: ct, selectedTenantId: request.TenantId);
+        return Ok(ResponseFor(user));
+    }
+
+    private CurrentUserResponse ResponseFor(User user) => new(user.Id, user.Name, user.Email, user.IsPlatformAdmin,
+        current.Tenant is { } tenant ? new TenantContextResponse(tenant.Id, tenant.Name, tenant.Slug, tenant.Status.ToString(), tenant.Vertical.ToString(), current.Role.ToString()!, tenant.OnboardingCompletedAt != null, tenant.Modules.Where(x => x.Enabled).Select(x => x.Module.ToString()).ToArray()) : null);
 }

@@ -15,7 +15,7 @@ public class WorkOrderPdfTests
     [Fact]
     public void Generates_Pdf_Successfully_For_WorkOrder()
     {
-        var company = new Company
+        var company = new TenantSettings
         {
             Name = "Ofizzy",
             LegalName = "Ofizzy LTDA",

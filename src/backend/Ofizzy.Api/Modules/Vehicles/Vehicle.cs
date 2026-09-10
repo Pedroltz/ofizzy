@@ -2,8 +2,9 @@ using Ofizzy.Api.Modules.Customers;
 
 namespace Ofizzy.Api.Modules.Vehicles;
 
-public sealed class Vehicle
+public sealed class Vehicle : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;

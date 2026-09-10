@@ -1,7 +1,11 @@
 namespace Ofizzy.Api.Infrastructure.Persistence;
 
-public sealed class Company
+public sealed class TenantSettings : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
+    public string Timezone { get; set; } = "America/Sao_Paulo";
+    public string Currency { get; set; } = "BRL";
+    public long LastWorkOrderNumber { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public string Name { get; set; } = string.Empty;
     public string? LegalName { get; set; }
@@ -22,6 +26,8 @@ public sealed class Company
 
 public sealed class User
 {
+    public bool IsPlatformAdmin { get; set; }
+    public DateTimeOffset? PlatformAdminGrantedAt { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -35,6 +41,7 @@ public sealed class User
 
 public sealed class RefreshToken
 {
+    public Guid? TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;

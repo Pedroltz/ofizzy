@@ -7,8 +7,9 @@ namespace Ofizzy.Api.Modules.WorkOrders;
 
 public enum WorkOrderStatus { Open, InProgress, Completed, Cancelled }
 
-public sealed class WorkOrder
+public sealed class WorkOrder : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public long Number { get; set; }
     public Guid CustomerId { get; set; }
@@ -32,8 +33,9 @@ public sealed class WorkOrder
     public List<WorkOrderPart> Parts { get; set; } = [];
 }
 
-public sealed class WorkOrderService
+public sealed class WorkOrderService : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid WorkOrderId { get; set; }
     public WorkOrder WorkOrder { get; set; } = null!;
@@ -44,8 +46,9 @@ public sealed class WorkOrderService
     public decimal UnitPrice { get; set; }
 }
 
-public sealed class WorkOrderPart
+public sealed class WorkOrderPart : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid WorkOrderId { get; set; }
     public WorkOrder WorkOrder { get; set; } = null!;

@@ -44,25 +44,5 @@ public sealed class CatalogFlowTests(OfizzyFactory factory) : IClassFixture<Ofiz
         Assert.Equal(0, vehicles.GetProperty("total").GetInt32());
     }
 
-    private static async Task Setup(HttpClient client)
-    {
-        var status = await client.GetAsync("/api/setup/status");
-        var xsrfCookie = status.Headers.GetValues("Set-Cookie").Single(value => value.StartsWith("XSRF-TOKEN="));
-        var protectionCookie = status.Headers.GetValues("Set-Cookie").Single(value => value.StartsWith("ofizzy_xsrf_protection="));
-        client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", Uri.UnescapeDataString(xsrfCookie.Split(';')[0].Split('=', 2)[1]));
-        client.DefaultRequestHeaders.Add("Cookie", $"{protectionCookie.Split(';')[0]}; {xsrfCookie.Split(';')[0]}");
-
-        var response = await client.PostAsJsonAsync("/api/setup", new { companyName = "Ofizzy", cnpj = (string?)null, phone = (string?)null, adminName = "Administrador", email = "admin@ofizzy.local", password = "Oficina2026" });
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var sessionCookies = response.Headers.GetValues("Set-Cookie").Select(value => value.Split(';')[0]).ToList();
-        sessionCookies.Add(protectionCookie.Split(';')[0]);
-        sessionCookies.Add(xsrfCookie.Split(';')[0]);
-        client.DefaultRequestHeaders.Remove("Cookie");
-        client.DefaultRequestHeaders.Add("Cookie", string.Join("; ", sessionCookies));
-        var authenticated = await client.GetAsync("/api/auth/me");
-        Assert.Equal(HttpStatusCode.OK, authenticated.StatusCode);
-        var authenticatedXsrf = authenticated.Headers.GetValues("Set-Cookie").Single(value => value.StartsWith("XSRF-TOKEN=")).Split(';')[0];
-        client.DefaultRequestHeaders.Remove("X-XSRF-TOKEN");
-        client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", Uri.UnescapeDataString(authenticatedXsrf.Split('=', 2)[1]));
-    }
+    private static Task Setup(HttpClient client) => TenantTestSession.BootstrapOperationalTenant(client);
 }

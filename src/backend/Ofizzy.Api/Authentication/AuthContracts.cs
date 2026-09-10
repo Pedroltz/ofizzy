@@ -3,7 +3,9 @@ using FluentValidation;
 namespace Ofizzy.Api.Authentication;
 public sealed record SetupRequest(string CompanyName, string? Cnpj, string? Phone, string AdminName, string Email, string Password);
 public sealed record LoginRequest(string Email, string Password);
-public sealed record CurrentUserResponse(Guid Id, string Name, string Email);
+public sealed record TenantContextResponse(Guid Id, string Name, string Slug, string Status, string Vertical, string Role, bool OnboardingCompleted, string[] Modules);
+public sealed record CurrentUserResponse(Guid Id, string Name, string Email, bool IsPlatformAdmin = false, TenantContextResponse? Tenant = null);
+public sealed record SelectTenantRequest(Guid TenantId);
 public sealed record SetupStatusResponse(bool Required);
 
 public sealed class SetupRequestValidator : AbstractValidator<SetupRequest>

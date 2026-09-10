@@ -1,7 +1,8 @@
 namespace Ofizzy.Api.Modules.Parts;
 
-public sealed class Part
+public sealed class Part : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {
+    public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public string Name { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;

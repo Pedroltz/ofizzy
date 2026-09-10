@@ -1,3 +1,6 @@
+using FluentValidation;
+using Ofizzy.Api.Shared.Validation;
+using Ofizzy.Api.Modules.Tenancy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,45 +11,25 @@ namespace Ofizzy.Api.Modules.Company;
 [ApiController]
 [Route("api/company")]
 [Authorize]
-public sealed class CompanyController(ApplicationDbContext db) : ControllerBase
+[TenantAccess(AllowPending = true)]
+[Route("api/tenant/settings")]
+public sealed class CompanyController(ApplicationDbContext db, IValidator<UpdateCompanyRequest> validator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<CompanyResponse>> Get(CancellationToken cancellationToken)
     {
-        var company = await db.Companies.FirstOrDefaultAsync(cancellationToken);
-        if (company is null)
-        {
-            company = new Infrastructure.Persistence.Company
-            {
-                Name = "Ofizzy",
-                LegalName = "Ofizzy Gestão de Oficinas LTDA",
-                Phone = "(11) 99999-9999",
-                WhatsApp = "(11) 99999-9999",
-                Email = "contato@ofizzy.local",
-                Address = "Rua das Oficinas, 100",
-                City = "São Paulo",
-                State = "SP",
-                PostalCode = "01001-000",
-                WarrantyTerms = "Garantia legal de 90 dias para os serviços prestados e peças aplicadas, conforme artigo 26 do Código de Defesa do Consumidor.",
-                ReceiptNotes = "Agradecemos pela preferência! Mantenha suas revisões preventivas em dia.",
-                UpdatedAt = DateTimeOffset.UtcNow
-            };
-            db.Companies.Add(company);
-            await db.SaveChangesAsync(cancellationToken);
-        }
+        var company = await db.TenantSettings.FirstOrDefaultAsync(cancellationToken);
+        if (company is null) return NotFound();
 
         return Ok(ToResponse(company));
     }
 
-    [HttpPut]
+    [HttpPut, TenantAccess(Admin = true, AllowPending = true)]
     public async Task<ActionResult<CompanyResponse>> Update([FromBody] UpdateCompanyRequest request, CancellationToken cancellationToken)
     {
-        var company = await db.Companies.FirstOrDefaultAsync(cancellationToken);
-        if (company is null)
-        {
-            company = new Infrastructure.Persistence.Company();
-            db.Companies.Add(company);
-        }
+        var validation = await validator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
+        var company = await db.TenantSettings.SingleAsync(cancellationToken);
 
         company.Name = request.Name.Trim();
         company.LegalName = string.IsNullOrWhiteSpace(request.LegalName) ? null : request.LegalName.Trim();
@@ -67,7 +50,7 @@ public sealed class CompanyController(ApplicationDbContext db) : ControllerBase
         return Ok(ToResponse(company));
     }
 
-    private static CompanyResponse ToResponse(Infrastructure.Persistence.Company c) => new(
+    private static CompanyResponse ToResponse(Infrastructure.Persistence.TenantSettings c) => new(
         c.Id,
         c.Name,
         c.LegalName,

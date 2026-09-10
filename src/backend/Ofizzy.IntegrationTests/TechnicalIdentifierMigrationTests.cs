@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Ofizzy.Api.Infrastructure.Persistence;
@@ -50,7 +52,7 @@ public sealed class TechnicalIdentifierMigrationTests : IAsyncLifetime
             .Options;
         await using (var context = new ApplicationDbContext(options))
         {
-            await context.Database.MigrateAsync();
+            await context.GetService<IMigrator>().MigrateAsync("20260908120000_RenameTechnicalIdentifiersToOfizzy");
         }
 
         await using var verificationConnection = new NpgsqlConnection(_postgres.GetConnectionString());

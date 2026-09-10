@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Ofizzy.Api.Modules.WorkOrders;
 
 namespace Ofizzy.Api.Modules.Dashboard;
 
+[TenantAccess(Modules = new[] { ProductModule.Customers, ProductModule.WorkOrders, ProductModule.Automotive })]
 [Authorize, ApiController, Route("api/dashboard")]
 public sealed class DashboardController(ApplicationDbContext db) : ControllerBase
 {

@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Ofizzy.Api.Shared.Validation;
 
 namespace Ofizzy.Api.Modules.Vehicles;
 
+[TenantAccess(Modules = new[] { ProductModule.Customers, ProductModule.Automotive })]
 [Authorize, ApiController, Route("api/vehicles")]
 public sealed class VehiclesController(ApplicationDbContext db, IValidator<VehicleRequest> validator) : ControllerBase
 {

@@ -19,6 +19,7 @@ public sealed class OfizzyFactory : WebApplicationFactory<Program>, IAsyncLifeti
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:Postgres"] = _postgres.GetConnectionString(),
+            ["Platform:BootstrapEnabled"] = "true",
             ["Jwt:SigningKey"] = TestSigningKey
         }));
         builder.ConfigureServices(services =>

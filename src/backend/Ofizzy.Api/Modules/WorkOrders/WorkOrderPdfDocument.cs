@@ -5,7 +5,7 @@ using Ofizzy.Api.Infrastructure.Persistence;
 
 namespace Ofizzy.Api.Modules.WorkOrders;
 
-public sealed class WorkOrderPdfDocument(WorkOrder order, Ofizzy.Api.Infrastructure.Persistence.Company company) : IDocument
+public sealed class WorkOrderPdfDocument(WorkOrder order, Ofizzy.Api.Infrastructure.Persistence.TenantSettings company) : IDocument
 {
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
 

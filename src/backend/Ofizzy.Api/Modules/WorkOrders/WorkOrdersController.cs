@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Ofizzy.Api.Shared;
 
 namespace Ofizzy.Api.Modules.WorkOrders;
 
+[TenantAccess(Modules = new[] { ProductModule.WorkOrders, ProductModule.Customers, ProductModule.Catalog, ProductModule.Automotive })]
 [Authorize, ApiController, Route("api/work-orders")]
 public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<WorkOrderRequest> validator) : ControllerBase
 {
@@ -31,7 +33,13 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
         if (!await Validate(request, ct)) return ValidationProblem(ModelState);
         var (customer, vehicle) = await GetReferences(request, ct);
         var item = new WorkOrder { CustomerId = customer.Id, VehicleId = vehicle.Id, CustomerName = customer.Name, CustomerDocument = customer.Document, CustomerPhone = customer.Phone ?? customer.WhatsApp, VehiclePlate = vehicle.Plate, VehicleDescription = string.Join(' ', new[] { vehicle.Brand, vehicle.Model, vehicle.Year?.ToString() }.Where(x => !string.IsNullOrWhiteSpace(x))), Mileage = request.Mileage, Complaint = Clean(request.Complaint), Diagnosis = Clean(request.Diagnosis), Notes = Clean(request.Notes) };
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var tenantId = db.TenantId!.Value;
+        // UPDATE locks the tenant counter until the OS and its lines commit.
+        var numbers = await db.Database.SqlQuery<long>($"UPDATE ofizzy.companies SET \"LastWorkOrderNumber\" = \"LastWorkOrderNumber\" + 1 WHERE \"TenantId\" = {tenantId} RETURNING \"LastWorkOrderNumber\" AS \"Value\"").ToListAsync(ct);
+        item.Number = numbers.Single();
         db.WorkOrders.Add(item); await ReplaceLines(item, request, ct); await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
         return CreatedAtAction(nameof(Get), new { item.Id }, await LoadResponse(item.Id, ct));
     }
 
@@ -65,14 +73,7 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
 
         if (order is null) return NotFound();
 
-        var company = await db.Companies.AsNoTracking().FirstOrDefaultAsync(ct) ?? new Infrastructure.Persistence.Company
-        {
-            Name = "Ofizzy",
-            Phone = "(11) 99999-9999",
-            Address = "Rua das Oficinas, 100",
-            City = "São Paulo",
-            State = "SP"
-        };
+        var company = await db.TenantSettings.AsNoTracking().SingleAsync(ct);
 
         var doc = new WorkOrderPdfDocument(order, company);
         var bytes = QuestPDF.Fluent.GenerateExtensions.GeneratePdf(doc);

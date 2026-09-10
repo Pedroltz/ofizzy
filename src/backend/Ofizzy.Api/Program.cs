@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -13,6 +14,7 @@ using Ofizzy.Api.Infrastructure.Persistence;
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -67,6 +69,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<SessionService>();
+builder.Services.AddScoped<CurrentTenant>();
+builder.Services.AddScoped<TenantProvisioningService>();
+builder.Services.AddScoped<TenantAccessFilter>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, PlatformAuthorizationHandler>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<User>, Microsoft.AspNetCore.Identity.PasswordHasher<User>>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -90,7 +96,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         }
     };
 });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options => options.AddPolicy("PlatformAdmin", policy => policy.RequireAuthenticatedUser().AddRequirements(new PlatformAdminRequirement())));
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-XSRF-TOKEN";
@@ -99,7 +105,7 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
-builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute())).AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddControllersWithViews(options => { options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()); options.Filters.AddService<TenantAccessFilter>(); }).AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -116,6 +122,19 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+if (args.Contains("--grant-platform-admin", StringComparer.OrdinalIgnoreCase))
+{
+    var index = Array.FindIndex(args, x => x == "--grant-platform-admin");
+    if (index + 1 >= args.Length || !Guid.TryParse(args[index + 1], out var id))
+        throw new InvalidOperationException("Provide the existing operator user UUID.");
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var user = await db.Users.SingleAsync(x => x.Id == id && x.IsActive);
+    user.IsPlatformAdmin = true; user.PlatformAdminGrantedAt = DateTimeOffset.UtcNow;
+    await db.SaveChangesAsync();
+    app.Logger.LogInformation("Platform administrator explicitly granted by server operator to {UserId}", id);
+    return;
+}
 if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
 {
     await using var scope = app.Services.CreateAsyncScope();
@@ -126,6 +145,7 @@ app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseRateLimiter();
 app.UseAuthentication();
+app.UseMiddleware<TenantContextMiddleware>();
 app.UseAuthorization();
 app.Use(async (context, next) =>
 {

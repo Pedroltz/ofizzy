@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Ofizzy.Api.Shared.Validation;
 
 namespace Ofizzy.Api.Modules.Services;
 
+[TenantAccess(Modules = new[] { ProductModule.Catalog })]
 [Authorize, ApiController, Route("api/services")]
 public sealed class ServicesController(ApplicationDbContext db, IValidator<ServiceRequest> validator) : ControllerBase
 {

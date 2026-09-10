@@ -1,3 +1,4 @@
+using Ofizzy.Api.Modules.Tenancy;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Ofizzy.Api.Shared.Validation;
 
 namespace Ofizzy.Api.Modules.Parts;
 
+[TenantAccess(Modules = new[] { ProductModule.Catalog })]
 [Authorize, ApiController, Route("api/parts")]
 public sealed class PartsController(ApplicationDbContext db, IValidator<PartRequest> validator) : ControllerBase
 {
