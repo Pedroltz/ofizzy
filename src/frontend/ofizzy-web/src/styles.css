@@ -455,6 +455,8 @@ select:focus {
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Eyebrow & Brand */
@@ -1819,6 +1821,7 @@ select:focus {
   background: var(--surface-primary);
 }
 
+.customers-list-table .doc-badge,
 .customers-list-table .contact-pill,
 .vehicles-list-table .font-mono,
 .vehicles-list-table .font-medium {
@@ -1835,12 +1838,6 @@ select:focus {
   .customers-list-table th:nth-child(5),
   .customers-list-table td:nth-child(5),
   .customers-list-table col:nth-child(5),
-  .customers-list-table th:nth-child(6),
-  .customers-list-table td:nth-child(6),
-  .customers-list-table col:nth-child(6),
-  .customers-list-table th:nth-child(7),
-  .customers-list-table td:nth-child(7),
-  .customers-list-table col:nth-child(7),
   .vehicles-list-table th:nth-child(4),
   .vehicles-list-table td:nth-child(4),
   .vehicles-list-table col:nth-child(4),

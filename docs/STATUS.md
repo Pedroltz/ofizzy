@@ -48,6 +48,12 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 
 ## UI Redesign & Visual Consistency
 
+### Ajuste na tabela de clientes e formatação de documentos — 2026-09-11
+
+- Eliminada quebra de linha no badge de Documento (CPF/CNPJ) na listagem tabular de clientes através de `white-space: nowrap`, `flex-shrink: 0` e largura dedicada de `12.5rem`.
+- Grade de clientes simplificada de 8 para 6 colunas, removendo colunas secundárias de cadastro e WhatsApp da tabela (mantidas na íntegra na ficha ao clicar e na visualização mobile por cartões).
+- Validação: lint, build, 33 testes unitários e 27 testes responsivos Playwright aprovados em 320px, 768px e 1440px.
+
 ### Ajuste visual da lista de Ordens de Serviço — 2026-09-04
 
 - Ajustado o modo lista de `/ordens` com espaçamento lateral interno maior nas extremidades, colunas mais equilibradas e área de ações dimensionada para os cinco botões possíveis.

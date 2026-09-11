@@ -9,9 +9,36 @@ describe('ThemeService', () => {
   let doc: Document;
   let matchMediaListeners: Array<(e: MediaQueryListEvent) => void> = [];
   let matchesDark = false;
+  let mockStorage: Record<string, string> = {};
+
+  const mockLocalStorage = {
+    getItem: (key: string) => mockStorage[key] ?? null,
+    setItem: (key: string, value: string) => {
+      mockStorage[key] = String(value);
+    },
+    removeItem: (key: string) => {
+      delete mockStorage[key];
+    },
+    clear: () => {
+      mockStorage = {};
+    },
+    length: 0,
+    key: (_index: number) => null,
+  };
 
   beforeEach(() => {
-    localStorage.clear();
+    mockStorage = {};
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+    mockLocalStorage.clear();
     matchMediaListeners = [];
     matchesDark = false;
 

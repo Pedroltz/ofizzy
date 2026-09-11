@@ -668,3 +668,17 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
   - Backend: build com 0 erros e 0 avisos; 18/18 testes unitários aprovados; 7/7 testes de integração aprovados.
   - Frontend: `npm run lint` aprovado (0 erros); `npm run build` aprovado.
 
+## 2026-09-11 — Ajuste visual da tabela de clientes e suporte a localStorage no Node 22
+
+- **Ajuste visual na tabela de clientes (`customers-list-table`)**:
+  - Resolvido quebramento de linha no campo Documento (CPF/CNPJ): adicionados `white-space: nowrap` e `flex-shrink: 0` na classe `.doc-badge`, além de regra específica com ellipsis em `.customers-list-table .doc-badge`.
+  - Simplificação da grade de clientes: colunas `WhatsApp` e `Cadastro` removidas do grid tabular para desafogar a visualização e evitar poluição visual. Os dados completos (inclusive link direto para conversa no WhatsApp e data de cadastro) continuam imediatamente acessíveis na visualização em cartões (`catalog-cards-grid`) e no modal de detalhes/edição ao clicar no cliente.
+  - Coluna Telefone consolidada para exibir o telefone principal ou WhatsApp disponível com clique direto (`tel:` / `wa.me`), preservando contato rápido.
+  - Ajuste de colunas e larguras no `<colgroup>`: Documento fixado com respiro adequado (`12.5rem`), evitando quebras em qualquer resolução.
+  - Regra `@media (max-width: 900px)` atualizada para ocultar apenas as colunas secundárias de E-mail e Endereço nos tablets, mantendo Cliente, Documento, Telefone e Ações legíveis e utilizáveis sem overflow horizontal.
+- **Ambiente de testes frontend (Node 22)**:
+  - Adicionado mock completo de `localStorage` em `theme.service.spec.ts` para compatibilidade com o ambiente Node 22 sem flags experimentais pendentes.
+- **Validações realizadas**:
+  - Frontend: `npm run lint` aprovado (0 erros, 0 avisos); `npm test` aprovado (7 arquivos, 33/33 testes unitários); `npm run build` aprovado; `npm run e2e -- e2e/responsive.spec.ts` aprovado (27 aprovados, 9 skips condicionais de viewport).
+  - Backend: `dotnet test` aprovado (18 testes unitários e 7 testes de integração aprovados).
+

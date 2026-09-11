@@ -124,13 +124,11 @@
     <app-data-table-wrapper>
       <table class="data-table table-fixed customers-list-table" aria-label="Lista de clientes">
         <colgroup>
-          <col style="width: 20%" />
-          <col style="width: 13%" />
-          <col style="width: 13%" />
-          <col style="width: 13%" />
-          <col style="width: 17%" />
           <col style="width: auto" />
-          <col style="width: 9%" />
+          <col style="width: 12.5rem" />
+          <col style="width: 11.5rem" />
+          <col style="width: 15rem" />
+          <col style="width: auto" />
           <col style="width: 6.25rem" />
         </colgroup>
         <thead>
@@ -138,10 +136,8 @@
             <th>Cliente / Razão Social</th>
             <th>Documento</th>
             <th>Telefone</th>
-            <th>WhatsApp</th>
             <th>E-mail</th>
             <th>Endereço</th>
-            <th>Cadastro</th>
             <th class="text-right">Ações</th>
           </tr>
         </thead>
@@ -171,12 +167,7 @@
               <td>
                 @if (item.phone) {
                   <a [href]="'tel:' + item.phone" class="contact-pill" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-phone"></i> {{ item.phone }}</a>
-                } @else {
-                  <span class="text-muted text-xs">—</span>
-                }
-              </td>
-              <td>
-                @if (item.whatsApp) {
+                } @else if (item.whatsApp) {
                   <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
                 } @else {
                   <span class="text-muted text-xs">—</span>
@@ -191,9 +182,6 @@
               </td>
               <td>
                 <span class="text-xs text-muted max-w-xs truncate inline-block" [title]="item.address || ''">{{ item.address || '—' }}</span>
-              </td>
-              <td>
-                <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
               </td>
               <td class="text-right">
                 <div class="table-actions-group entity-table-actions" aria-label="Ações do cliente">
