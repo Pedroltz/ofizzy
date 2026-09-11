@@ -48,3 +48,34 @@ frontend/Nginx. Impressão HTML e PDF exercitados. Novas telas passaram em 320, 
 `/tmp/ofizzy-live-results` e `/tmp/ofizzy-saas-live.json`; traces desativados.
 Deploy remoto não executado. Banco local apenas inspecionado por contagens: uma
 configuração, um usuário e nenhum customer/vehicle/work order antes da evolução.
+
+## Desenvolvimento local — 2026-09-10
+
+Por decisão do usuário, somente PostgreSQL permanece em Docker (`compose.local.yaml`,
+localhost:5432). API e Angular executam no host: `dotnet run --project
+src/backend/Ofizzy.Api --launch-profile local` e `npm start` em
+`src/frontend/ofizzy-web`. Perfil local habilita bootstrap e migrations em Development;
+proxy Angular liga 4200 à API 5154. Instruções completas no README.
+Stack Docker de smoke parada, volumes preservados. PostgreSQL nativo instalado
+durante a avaliação foi parado; não é utilizado nem necessário neste fluxo.
+Banco de desenvolvimento confirmado com zero usuários e tenants após migrations.
+Smoke local: `/health/ready` via Angular retornou Healthy e `/api/setup/status`
+retornou required=true. Backend build, 18 unitários e 7 integrações aprovados;
+frontend lint, 28 unitários e build aprovados (aviso de bundle conhecido, 744 kB).
+E2E determinístico nesta execução: 25 aprovados, 9 skips e 2 falhas de timeout
+ao aguardar main (mobile / e tablet /ordens); ambos passaram na repetição
+isolada com um worker (2/2). Sem alterações visuais
+ou de domínio; aceite real Nginx/Alpha/Beta da fase SaaS permanece documentado acima.
+
+## Formulário de provisionamento — 2026-09-10
+
+Tela organizada com Fieldset, Message e controles PrimeNG existentes, em seções
+de empresa, administrador e módulos. Identificador converte maiúsculas para
+minúsculas; envio inválido mostra mensagens nos campos, sem botão silenciosamente
+desabilitado. Contratos/backend e dados preservados.
+Validação frontend: lint/build, 28 unitários, 30 E2E aprovados e 9 skips condicionais.
+Após ajuste final de CSS, 3 E2E direcionados aprovados em 1440/768/320 px, sem
+overflow e campos/botão com pelo menos 44 px. Teste usa API interceptada apenas
+no Playwright; produção mantém chamadas reais. Não reexecutados smoke de criação
+real, Compose/migrations ou backend nesta mudança exclusiva de interface.
+Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.

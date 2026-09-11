@@ -43,7 +43,9 @@ Os registros anteriores abaixo descrevem o histórico e podem ter contagens anti
 
 ## Mapa do código
 
-- `src/backend/Ofizzy.Api/Modules`: módulos de negócio.
+- `src/backend/Ofizzy.Api/Platform`: identidade, autenticação, tenancy e configurações da empresa.
+- `src/backend/Ofizzy.Api/BusinessCore`: módulos universais de negócio (clientes, catálogo, ordens de serviço, dashboard).
+- `src/backend/Ofizzy.Api/Verticals`: verticais de negócio por nicho (atualmente `Automotive` para veículos).
 - `src/backend/Ofizzy.Api/Infrastructure`: EF, migrations e erros.
 - `src/frontend/ofizzy-web/src/app/features`: páginas lazy-loaded.
 - `src/frontend/ofizzy-web/src/app/core`: sessão, HTTP e clientes de API.
@@ -116,6 +118,16 @@ Fases 1, 2, 3 e 4 concluídas e aprovadas.
 - Cookies de sessão e proteção antiforgery receberam novos nomes; após a atualização, todos os usuários precisam autenticar novamente.
 - A Fase 5 permanece como próxima entrega funcional.
 
+## Ambiente local — 2026-09-09
+
+- Para desenvolvimento no host, execute `docker compose -f compose.local.yaml up -d`, entre em `src/backend/Ofizzy.Api` e use apenas `dotnet run`.
+- O Compose local contém somente PostgreSQL e reutiliza o volume nomeado `ofizzy_postgres_data`; a porta é publicada apenas no loopback.
+- A API em `Development` assume `Host=localhost;Port=5432;Database=ofizzy;Username=ofizzy`, cria uma chave JWT efêmera se nenhuma for configurada e aplica migrations ao iniciar. User Secrets e variáveis de ambiente continuam tendo precedência.
+- Não replique esses defaults em produção: fora de `Development`, conexão e chave JWT permanecem obrigatórias.
+- O bootstrap reconcilia `public.__EFMigrationsHistory` e `ofizzy.__EFMigrationsHistory` antes/depois de migrar. Isso é necessário porque bancos criados ou renomeados em momentos diferentes podem conter o histórico em schemas distintos; não remova essa compatibilidade sem uma migration de consolidação validada sobre os dois formatos.
+- O setup aceita CNPJ com ou sem máscara; a validação conta 14 dígitos e o controller normaliza o valor antes de persistir.
+Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
+
 
 ## Evidência final SaaS — 2026-09-10
 
@@ -125,3 +137,34 @@ restart aprovados. Numeração Alpha/Beta = 1, isolamento por ID, PDF/HTML e
 persistência demonstrados. Imagens/7 migrations/Compose/Nginx validados na stack
 isolada. O bundle de 743,95 kB mantém aviso conhecido. Consulte STATUS e fase SaaS
 para comandos e limites. Não confundir evidência local com deploy remoto.
+
+## Desenvolvimento local — 2026-09-10
+
+Por decisão do usuário, somente PostgreSQL permanece em Docker (`compose.local.yaml`,
+localhost:5432). API e Angular executam no host: `dotnet run --project
+src/backend/Ofizzy.Api --launch-profile local` e `npm start` em
+`src/frontend/ofizzy-web`. Perfil local habilita bootstrap e migrations em Development;
+proxy Angular liga 4200 à API 5154. Instruções completas no README.
+Stack Docker de smoke parada, volumes preservados. PostgreSQL nativo instalado
+durante a avaliação foi parado; não é utilizado nem necessário neste fluxo.
+Banco de desenvolvimento confirmado com zero usuários e tenants após migrations.
+Smoke local: `/health/ready` via Angular retornou Healthy e `/api/setup/status`
+retornou required=true. Backend build, 18 unitários e 7 integrações aprovados;
+frontend lint, 28 unitários e build aprovados (aviso de bundle conhecido, 744 kB).
+E2E determinístico nesta execução: 25 aprovados, 9 skips e 2 falhas de timeout
+ao aguardar main (mobile / e tablet /ordens); ambos passaram na repetição
+isolada com um worker (2/2). Sem alterações visuais
+ou de domínio; aceite real Nginx/Alpha/Beta da fase SaaS permanece documentado acima.
+
+## Formulário de provisionamento — 2026-09-10
+
+Tela organizada com Fieldset, Message e controles PrimeNG existentes, em seções
+de empresa, administrador e módulos. Identificador converte maiúsculas para
+minúsculas; envio inválido mostra mensagens nos campos, sem botão silenciosamente
+desabilitado. Contratos/backend e dados preservados.
+Validação frontend: lint/build, 28 unitários, 30 E2E aprovados e 9 skips condicionais.
+Após ajuste final de CSS, 3 E2E direcionados aprovados em 1440/768/320 px, sem
+overflow e campos/botão com pelo menos 44 px. Teste usa API interceptada apenas
+no Playwright; produção mantém chamadas reais. Não reexecutados smoke de criação
+real, Compose/migrations ou backend nesta mudança exclusiva de interface.
+Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.

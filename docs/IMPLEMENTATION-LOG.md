@@ -553,6 +553,18 @@ Este arquivo é append-only: correções futuras ganham uma nova entrada.
 - Repositório privado renomeado para `Pedroltz/ofizzy`, preservando `develop` como branch padrão; `origin` local atualizado e commit publicado.
 - CI remoto aprovado no commit `4670c67` (run `34226277097`): jobs backend, frontend e Compose concluídos com sucesso.
 - O build mantém somente o aviso conhecido do bundle inicial: 740,72 kB para orçamento de 500 kB.
+## 2026-09-09 — Execução local com PostgreSQL e `dotnet run`
+
+- Transformado `compose.local.yaml` em arquivo autônomo com somente PostgreSQL 18, bind em `127.0.0.1:5432` e volume persistente `ofizzy_postgres_data`.
+- Adicionados defaults apenas para `Development`: conexão PostgreSQL local, chave JWT efêmera em memória e aplicação automática de migrations na inicialização.
+- Mantida precedência de User Secrets, variáveis de ambiente e `.env`; produção continua falhando cedo sem secrets obrigatórios.
+- Removidos os quatro containers legados da stack `sport-pneus`, sem remover volumes; ao final, somente `ofizzy-local-postgres-1` permaneceu em execução.
+- Validação: `dotnet build Ofizzy.slnx` sem avisos; 14 testes unitários e 4 testes de integração aprovados; `dotnet run` iniciou na porta 5154; health checks live/ready saudáveis; 6 migrations confirmadas no PostgreSQL; frontend lint e build aprovados.
+- Limitações de validação do ambiente: runner frontend em Node 26 sem `localStorage` (17/26 testes passam; 9 do tema falham antes da execução) e Chromium do Playwright ausente. Nenhuma alteração funcional de frontend foi feita.
+- Correção pós-smoke: o EF podia manter `__EFMigrationsHistory` em `ofizzy` enquanto outra execução consultava a cópia em `public`, provocando `42P07 relation already exists`. O bootstrap passou a reconciliar os dois históricos de forma bidirecional antes/depois de migrar. Verificação final: duas execuções consecutivas sem migrations reaplicadas, health ready saudável e 6 registros em cada histórico.
+- Corrigido o falso erro “Informe 14 dígitos” quando o CNPJ do setup chega formatado. O validator agora aceita máscara ou somente números; testes cobrem formatos válidos, quantidades inválidas e o payload mascarado no fluxo de integração.
+Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
+Validação da alteração de login/tema: cenários de login (incluindo troca claro/escuro) e setup aprovados nos três viewports. Suíte completa: 26 aprovados, 9 skips e 1 falha na largura do diálogo móvel de OS, reproduzida na repetição; esse diálogo não foi alterado nesta tarefa.
 
 
 ## 2026-09-10 — Fundação SaaS multi-tenant
@@ -611,3 +623,48 @@ Os 18 unitários da árvore de trabalho incluem quatro testes preexistentes aind
 versionados pelo usuário. Nenhuma dessas alterações anteriores foi incorporada aos
 commits SaaS. Logs da imagem final confirmaram contexto TenantId/UserId/RequestId;
 leitura persistida após atualização final da imagem também passou pelo Nginx.
+
+## Desenvolvimento local — 2026-09-10
+
+Por decisão do usuário, somente PostgreSQL permanece em Docker (`compose.local.yaml`,
+localhost:5432). API e Angular executam no host: `dotnet run --project
+src/backend/Ofizzy.Api --launch-profile local` e `npm start` em
+`src/frontend/ofizzy-web`. Perfil local habilita bootstrap e migrations em Development;
+proxy Angular liga 4200 à API 5154. Instruções completas no README.
+Stack Docker de smoke parada, volumes preservados. PostgreSQL nativo instalado
+durante a avaliação foi parado; não é utilizado nem necessário neste fluxo.
+Banco de desenvolvimento confirmado com zero usuários e tenants após migrations.
+Smoke local: `/health/ready` via Angular retornou Healthy e `/api/setup/status`
+retornou required=true. Backend build, 18 unitários e 7 integrações aprovados;
+frontend lint, 28 unitários e build aprovados (aviso de bundle conhecido, 744 kB).
+E2E determinístico nesta execução: 25 aprovados, 9 skips e 2 falhas de timeout
+ao aguardar main (mobile / e tablet /ordens); ambos passaram na repetição
+isolada com um worker (2/2). Sem alterações visuais
+ou de domínio; aceite real Nginx/Alpha/Beta da fase SaaS permanece documentado acima.
+
+## Formulário de provisionamento — 2026-09-10
+
+Tela organizada com Fieldset, Message e controles PrimeNG existentes, em seções
+de empresa, administrador e módulos. Identificador converte maiúsculas para
+minúsculas; envio inválido mostra mensagens nos campos, sem botão silenciosamente
+desabilitado. Contratos/backend e dados preservados.
+Validação frontend: lint/build, 28 unitários, 30 E2E aprovados e 9 skips condicionais.
+Após ajuste final de CSS, 3 E2E direcionados aprovados em 1440/768/320 px, sem
+overflow e campos/botão com pelo menos 44 px. Teste usa API interceptada apenas
+no Playwright; produção mantém chamadas reais. Não reexecutados smoke de criação
+real, Compose/migrations ou backend nesta mudança exclusiva de interface.
+Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
+
+## 2026-09-10 — Organização modular por tipos e verticais
+
+- Backend reorganizado estruturalmente em 3 pilares de responsabilidade:
+  - `Platform/`: Autenticação, Tenancy e Company Settings.
+  - `BusinessCore/`: Clientes, Catálogo (Services e Parts), Ordens de Serviço e Dashboard.
+  - `Verticals/Automotive/`: Módulo da vertical automotiva (Veículos e contratos correspondentes).
+- Namespace `Ofizzy.Api.Verticals.Automotive` aplicado para isolar a vertical automotiva sem quebrar contratos HTTP de API (`/api/vehicles`).
+- Relações entre entidades preservadas (`Customer.Vehicles`, `WorkOrder.Vehicle`).
+- `ApplicationDbContextModelSnapshot.cs` sincronizado com o novo namespace da entidade `Vehicle`.
+- Validações executadas:
+  - Backend: build com 0 erros e 0 avisos; 18/18 testes unitários aprovados; 7/7 testes de integração aprovados.
+  - Frontend: `npm run lint` aprovado (0 erros); `npm run build` aprovado.
+

@@ -117,6 +117,17 @@ Testes:
 - Permanece apenas o aviso conhecido do bundle inicial do frontend: 740,72 kB para orçamento de 500 kB.
 - Workflow remoto `Pull request` aprovado no commit `4670c67`: backend, frontend e validação Compose concluídos com sucesso.
 
+## Execução local simplificada — 2026-09-09
+
+- `compose.local.yaml` agora é autônomo e inicia somente PostgreSQL 18, exposto exclusivamente em `127.0.0.1:5432`, com volume persistente `ofizzy_postgres_data`.
+- No perfil `Development`, `dotnet run` usa defaults locais sem secrets persistidos, gera uma chave JWT efêmera e aplica automaticamente as migrations.
+- Produção continua exigindo `ConnectionStrings:Postgres` e uma chave JWT real com ao menos 32 bytes.
+- Evidências: backend build sem avisos; 14/14 testes unitários e 4/4 de integração; API iniciada com `dotnet run`; `/health/live` e `/health/ready` saudáveis; 6 migrations aplicadas; frontend lint e build aprovados.
+- Validações frontend não relacionadas ao ajuste ficaram limitadas pelo ambiente: testes unitários falham porque `localStorage` não é fornecido pelo runner atual em Node 26; E2E requer baixar o Chromium do Playwright. O build mantém o aviso conhecido de 740,72 kB.
+- Corrigida a reinicialização da API em bancos onde o EF manteve históricos em `public` e `ofizzy`: a inicialização reconcilia os registros de forma bidirecional e idempotente antes/depois da migration. Duas execuções consecutivas de `dotnet run` foram validadas sem reaplicar migrations; ambos os históricos registram as 6 migrations.
+- Corrigida a configuração inicial com CNPJ formatado: o backend aceita tanto `12345678000190` quanto `12.345.678/0001-90`, valida os 14 dígitos e persiste o valor normalizado.
+Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
+
 
 ## Aceite SaaS — 2026-09-10
 
@@ -140,3 +151,46 @@ Testes:
 
 Próximo marco funcional: financeiro operacional tenant-scoped. Convites automáticos,
 recuperação de acesso, novas verticais, upload de logo e cobrança SaaS ficam futuros.
+
+## Desenvolvimento local — 2026-09-10
+
+Por decisão do usuário, somente PostgreSQL permanece em Docker (`compose.local.yaml`,
+localhost:5432). API e Angular executam no host: `dotnet run --project
+src/backend/Ofizzy.Api --launch-profile local` e `npm start` em
+`src/frontend/ofizzy-web`. Perfil local habilita bootstrap e migrations em Development;
+proxy Angular liga 4200 à API 5154. Instruções completas no README.
+Stack Docker de smoke parada, volumes preservados. PostgreSQL nativo instalado
+durante a avaliação foi parado; não é utilizado nem necessário neste fluxo.
+Banco de desenvolvimento confirmado com zero usuários e tenants após migrations.
+Smoke local: `/health/ready` via Angular retornou Healthy e `/api/setup/status`
+retornou required=true. Backend build, 18 unitários e 7 integrações aprovados;
+frontend lint, 28 unitários e build aprovados (aviso de bundle conhecido, 744 kB).
+E2E determinístico nesta execução: 25 aprovados, 9 skips e 2 falhas de timeout
+ao aguardar main (mobile / e tablet /ordens); ambos passaram na repetição
+isolada com um worker (2/2). Sem alterações visuais
+ou de domínio; aceite real Nginx/Alpha/Beta da fase SaaS permanece documentado acima.
+
+## Formulário de provisionamento — 2026-09-10
+
+Tela organizada com Fieldset, Message e controles PrimeNG existentes, em seções
+de empresa, administrador e módulos. Identificador converte maiúsculas para
+minúsculas; envio inválido mostra mensagens nos campos, sem botão silenciosamente
+desabilitado. Contratos/backend e dados preservados.
+Validação frontend: lint/build, 28 unitários, 30 E2E aprovados e 9 skips condicionais.
+Após ajuste final de CSS, 3 E2E direcionados aprovados em 1440/768/320 px, sem
+overflow e campos/botão com pelo menos 44 px. Teste usa API interceptada apenas
+no Playwright; produção mantém chamadas reais. Não reexecutados smoke de criação
+real, Compose/migrations ou backend nesta mudança exclusiva de interface.
+Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
+
+## Organização modular por tipos e verticais — 2026-09-10
+
+- Reorganizada a arquitetura do backend em fronteiras explícitas:
+  - `Platform/`: Autenticação, Tenancy e Company Settings (TenantSettings).
+  - `BusinessCore/`: Clientes, Catálogo (Services e Parts), Ordens de Serviço e Dashboard.
+  - `Verticals/`: Verticais de negócio especializadas por nicho, iniciando com `Automotive/` (Veículos e contratos automotivos).
+- Namespace `Ofizzy.Api.Verticals.Automotive` reflete a vertical de veículos sem alterar contratos HTTP (`/api/vehicles`).
+- Snapshot do EF Core sincronizado; compilação do backend limpa sem avisos.
+- Validação backend: build com êxito, 18 testes unitários e 7 testes de integração aprovados.
+- Validação frontend: lint e build aprovados com sucesso.
+

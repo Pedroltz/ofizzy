@@ -19,11 +19,11 @@ O assembly atual mantém fronteiras por responsabilidade:
 
 | Camada lógica | Implementação atual | Responsabilidade |
 | --- | --- | --- |
-| SaaS Core | Authentication, Modules/Tenancy | identidade, sessão, vínculos, autorização, provisionamento e administração |
-| TenantSettings | entidade TenantSettings, Modules/Company | dados operacionais/branding, contrato legado `/api/company` |
-| Business Core | Customers, Services, Parts, WorkOrders | clientes, catálogo, snapshots, cálculos e estados |
-| Automotive | Modules/Vehicles e campos automotivos da OS | veículo, placa, quilometragem e relacionamento cliente/veículo |
-| Infraestrutura | ApplicationDbContext, migrations, Nginx | persistência compartilhada e origem única |
+| SaaS Core | Platform/Authentication, Platform/Tenancy | identidade, sessão, vínculos, autorização, provisionamento e administração |
+| TenantSettings | entidade TenantSettings, Platform/Company | dados operacionais/branding, contrato legado `/api/company` |
+| Business Core | BusinessCore/Customers, Services, Parts, WorkOrders, Dashboard | clientes, catálogo, snapshots, cálculos e estados |
+| Automotive (Vertical) | Verticals/Automotive (veículos) e campos automotivos da OS | veículo, placa, quilometragem e relacionamento cliente/veículo |
+| Infraestrutura | Infrastructure/Persistence, migrations, Nginx | persistência compartilhada e origem única |
 
 `CurrentTenant` é scoped, injetado diretamente e preenchido por
 `TenantContextMiddleware` após validar usuário, vínculo e estado no banco.

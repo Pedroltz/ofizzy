@@ -10,4 +10,11 @@ Atualização técnica em 2026-09-08: a identidade interna foi padronizada como 
 
 Evidências da fundação técnica: backend 14 testes unitários e 4 de integração; frontend 26 testes unitários e 27 E2E; build das imagens e smoke pelo Nginx aprovados. A fase continua não iniciada funcionalmente.
 
+Atualização de ambiente em 2026-09-09: o desenvolvimento local foi simplificado para PostgreSQL isolado via `compose.local.yaml` e API via `dotnet run`, com migrations automáticas e defaults restritos ao perfil `Development`. O escopo financeiro permanece não iniciado.
+
+Correção complementar: históricos EF existentes em `public` e `ofizzy` são reconciliados idempotentemente, permitindo reiniciar `dotnet run` sem tentativa de recriar tabelas. Validado com duas inicializações consecutivas, 14 testes unitários e 4 de integração.
+
+Correção de setup: CNPJ opcional passou a aceitar entrada com máscara, mantendo 14 dígitos como regra e persistência normalizada. O escopo financeiro não foi alterado.
+Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
+
 Replanejamento em 2026-09-10: futuros pagamentos devem ser tenant-scoped, com FKs compostas para OS e testes de isolamento. Financeiro operacional não é cobrança de assinatura SaaS.
