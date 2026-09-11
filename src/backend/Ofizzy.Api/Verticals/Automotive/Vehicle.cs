@@ -1,6 +1,6 @@
 using Ofizzy.Api.Modules.Customers;
 
-namespace Ofizzy.Api.Modules.Vehicles;
+namespace Ofizzy.Api.Verticals.Automotive;
 
 public sealed class Vehicle : Ofizzy.Api.Modules.Tenancy.ITenantScoped
 {

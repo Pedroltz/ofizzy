@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Ofizzy.Api.Modules.Vehicles;
+namespace Ofizzy.Api.Verticals.Automotive;
 
 public sealed record VehicleRequest(Guid CustomerId, string Plate, string? Brand, string Model, short? Year, string? Color, int? Mileage, string? Chassis, string? Notes);
 public sealed record VehicleResponse(Guid Id, Guid CustomerId, string CustomerName, string Plate, string? Brand, string Model, short? Year, string? Color, int? Mileage, string? Chassis, string? Notes, bool IsActive, DateTimeOffset CreatedAt);

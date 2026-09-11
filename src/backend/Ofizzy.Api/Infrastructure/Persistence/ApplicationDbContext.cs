@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Ofizzy.Api.Modules.Customers;
 using Ofizzy.Api.Modules.Parts;
 using Ofizzy.Api.Modules.Services;
-using Ofizzy.Api.Modules.Vehicles;
+using Ofizzy.Api.Verticals.Automotive;
 using Ofizzy.Api.Modules.WorkOrders;
 
 namespace Ofizzy.Api.Infrastructure.Persistence;

@@ -8,7 +8,7 @@ using Ofizzy.Api.Infrastructure.Persistence;
 using Ofizzy.Api.Shared;
 using Ofizzy.Api.Shared.Validation;
 
-namespace Ofizzy.Api.Modules.Vehicles;
+namespace Ofizzy.Api.Verticals.Automotive;
 
 [TenantAccess(Modules = new[] { ProductModule.Customers, ProductModule.Automotive })]
 [Authorize, ApiController, Route("api/vehicles")]

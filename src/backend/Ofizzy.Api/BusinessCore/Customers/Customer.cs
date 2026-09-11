@@ -1,3 +1,5 @@
+using Ofizzy.Api.Verticals.Automotive;
+
 namespace Ofizzy.Api.Modules.Customers;
 
 public sealed class Customer : Ofizzy.Api.Modules.Tenancy.ITenantScoped
@@ -14,5 +16,5 @@ public sealed class Customer : Ofizzy.Api.Modules.Tenancy.ITenantScoped
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public List<Vehicles.Vehicle> Vehicles { get; set; } = [];
+    public List<Vehicle> Vehicles { get; set; } = [];
 }
