@@ -21,6 +21,7 @@ import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Part, ServiceItem, Vehicle } from '../../core/api/catalog.models';
 import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
+import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import {
   WorkOrder,
   WorkOrderLineRequest,
@@ -68,6 +69,7 @@ import {
 })
 export class WorkOrdersPage {
   private readonly api = inject(WorkOrderApiService);
+  private readonly viewPreferences = inject(ViewPreferenceService);
   private readonly responsive = inject(ResponsiveLayoutService);
   private readonly catalogs = inject(CatalogApiService);
   private readonly companyApi = inject(CompanyApiService);
@@ -94,7 +96,7 @@ export class WorkOrdersPage {
   readonly page = signal(1);
   readonly pageSize = 12;
   readonly search = this.fb.nonNullable.control('');
-  readonly viewMode = signal<'cards' | 'table'>('table');
+  readonly viewMode = this.viewPreferences.getSignal('work-orders', 'table');
   readonly effectiveViewMode = computed(() =>
     this.responsive.isTabletOrSmaller() ? 'cards' : this.viewMode()
   );

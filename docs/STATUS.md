@@ -48,6 +48,12 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 
 ## UI Redesign & Visual Consistency
 
+### Persistência do modo de visualização (cards/tabela) — 2026-09-11
+
+- Implementado `ViewPreferenceService` conectando a preferência do usuário (tabela vs. blocos) ao `localStorage` com cache em memória e signals reativos.
+- A preferência é memorizada individualmente por tela (`/clientes`, `/veiculos`, `/ordens`, `/plataforma`), permanecendo ativa ao trocar de rota ou atualizar a página.
+- Validação: lint, build, 39 testes unitários (6 no serviço) e 28 testes e2e Playwright aprovados.
+
 ### Ajuste na tabela de clientes e formatação de documentos — 2026-09-11
 
 - Eliminada quebra de linha no badge de Documento (CPF/CNPJ) na listagem tabular de clientes através de `white-space: nowrap`, `flex-shrink: 0` e largura dedicada de `12.5rem`.

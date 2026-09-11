@@ -4,7 +4,9 @@ Atualizado em: 2026-09-11
 
 ## Prioridade vigente — SaaS (aceite local concluído)
 
-Ajuste recente: listagem tabular de clientes otimizada para 6 colunas, com largura de 12.5rem no documento e sem quebras de linha (white-space: nowrap). WhatsApp e cadastro mantidos no modal e nos cartões móveis.
+Ajustes recentes:
+- Persistência do modo de visualização (tabela/cards) via `ViewPreferenceService` conectada ao `localStorage`.
+- Listagem tabular de clientes otimizada para 6 colunas, com largura de 12.5rem no documento e sem quebras de linha (white-space: nowrap). WhatsApp e cadastro mantidos no modal e nos cartões móveis.
 
 Leia a ADR 0006 e `docs/phases/PHASE-07-SAAS.md` antes de continuar. A fundação
 multi-tenant foi antecipada antes do financeiro. Company virou TenantSettings,

@@ -23,7 +23,7 @@ describe('ThemeService', () => {
       mockStorage = {};
     },
     length: 0,
-    key: (_index: number) => null,
+    key: () => null,
   };
 
   beforeEach(() => {

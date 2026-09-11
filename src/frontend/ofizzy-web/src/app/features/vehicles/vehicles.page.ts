@@ -13,6 +13,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Vehicle } from '../../core/api/catalog.models';
+import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import {
   DataTableWrapperComponent,
   DataToolbarComponent,
@@ -25,11 +26,15 @@ import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.s
 
 @Component({ selector:'app-vehicles-page', imports:[ReactiveFormsModule, AutoCompleteModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, PaginatorModule, SkeletonModule, TextareaModule, PageHeaderComponent, DataToolbarComponent, SearchFieldComponent, DataTableWrapperComponent, EmptyStateComponent, LoadingStateComponent], templateUrl:'./vehicles.page.html', changeDetection:ChangeDetectionStrategy.OnPush })
 export class VehiclesPage {
-  private readonly api=inject(CatalogApiService); private readonly fb=inject(FormBuilder); private readonly messages=inject(MessageService); private readonly confirmation=inject(ConfirmationService);
+  private readonly api=inject(CatalogApiService);
+  private readonly viewPreferences = inject(ViewPreferenceService);
+  private readonly fb=inject(FormBuilder);
+  private readonly messages=inject(MessageService);
+  private readonly confirmation=inject(ConfirmationService);
   private readonly responsive = inject(ResponsiveLayoutService);
   readonly items=signal<Vehicle[]>([]); readonly total=signal(0); readonly loading=signal(true); readonly saving=signal(false); readonly dialog=signal(false); readonly editing=signal<Vehicle|null>(null); readonly customerSuggestions=signal<Customer[]>([]);
   readonly search=this.fb.nonNullable.control(''); readonly page=signal(1); readonly pageSize=12;
-  readonly viewMode = signal<'cards' | 'table'>('table');
+  readonly viewMode = this.viewPreferences.getSignal('vehicles', 'table');
   readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
   readonly form=this.fb.group({ customer:this.fb.control<Customer|null>(null,Validators.required), plate:this.fb.nonNullable.control('',[Validators.required,Validators.minLength(7)]), brand:this.fb.nonNullable.control(''), model:this.fb.nonNullable.control('',Validators.required), year:this.fb.control<number|null>(null), color:this.fb.nonNullable.control(''), mileage:this.fb.control<number|null>(null), chassis:this.fb.nonNullable.control(''), notes:this.fb.nonNullable.control('') });
   private loadVersion = 0;

@@ -11,6 +11,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer } from '../../core/api/catalog.models';
+import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import {
   DataTableWrapperComponent,
   DataToolbarComponent,
@@ -42,11 +43,15 @@ import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.s
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomersPage {
-  private readonly api = inject(CatalogApiService); private readonly fb = inject(FormBuilder); private readonly messages = inject(MessageService); private readonly confirmation = inject(ConfirmationService);
+  private readonly api = inject(CatalogApiService);
+  private readonly viewPreferences = inject(ViewPreferenceService);
+  private readonly fb = inject(FormBuilder);
+  private readonly messages = inject(MessageService);
+  private readonly confirmation = inject(ConfirmationService);
   private readonly responsive = inject(ResponsiveLayoutService);
   readonly items = signal<Customer[]>([]); readonly total = signal(0); readonly loading = signal(true); readonly saving = signal(false); readonly dialog = signal(false); readonly editing = signal<Customer | null>(null);
   readonly search = this.fb.nonNullable.control(''); readonly page = signal(1); readonly pageSize = 12;
-  readonly viewMode = signal<'cards' | 'table'>('table');
+  readonly viewMode = this.viewPreferences.getSignal('customers', 'table');
   readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(160)]],

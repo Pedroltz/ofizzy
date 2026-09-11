@@ -12,6 +12,7 @@ import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProductModule } from '../../core/tenancy/tenant-context.service';
+import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
 import { PageHeaderComponent, DataToolbarComponent, SearchFieldComponent, EmptyStateComponent, LoadingStateComponent, StatusBadgeComponent, DataTableWrapperComponent, SectionCardComponent } from '../../shared/components';
 interface PlatformTenant { id: string; name: string; slug: string; status: string; vertical: string; onboardingCompletedAt: string | null; modules: ProductModule[]; }
@@ -20,12 +21,13 @@ export class PlatformPage {
  private readonly http = inject(HttpClient);
  private readonly confirmation = inject(ConfirmationService);
  private readonly messages = inject(MessageService);
+ private readonly viewPreferences = inject(ViewPreferenceService);
  readonly responsive = inject(ResponsiveLayoutService);
  readonly tenants = signal<PlatformTenant[]>([]);
  readonly busy = signal(false); readonly loading = signal(true); readonly loadError = signal(false);
  readonly dialog = signal(false); readonly editing = signal<PlatformTenant | null>(null);
  readonly validation = signal(''); readonly search = signal(''); readonly statusFilter = signal('');
- readonly viewMode = signal<'table' | 'cards'>('table');
+ readonly viewMode = this.viewPreferences.getSignal('tenants', 'table');
  readonly availableModules: ProductModule[] = ['Customers', 'WorkOrders', 'Catalog', 'Automotive'];
  readonly statuses = [{ label: 'Pendente', value: 'Pending' }, { label: 'Ativa', value: 'Active' }, { label: 'Suspensa', value: 'Suspended' }, { label: 'Arquivada', value: 'Archived' }];
  readonly filterStatuses = [{ label: 'Todos os estados', value: '' }, ...this.statuses];

@@ -143,6 +143,35 @@ test('retorno para uma listagem reutiliza os dados da sessão', async ({ page },
   expect(requests.get('/api/customers')).toBe(1);
 });
 
+test('modo de visualização (cards/tabela) persiste após navegação e recarregamento', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  await mockApi(page);
+
+  await page.goto('/clientes');
+  await expect(page.locator('.customers-list-table')).toBeVisible();
+
+  // Alterna para visualização em blocos
+  await page.locator('.data-toolbar__toggle-btn[aria-label="Visualização em Blocos"]').click();
+  await expect(page.locator('.catalog-grid')).toBeVisible();
+  await expect(page.locator('.customers-list-table')).toHaveCount(0);
+
+  // Navega para outra tela
+  await page.locator('.desktop-sidebar a[href="/veiculos"]').click();
+  await expect(page.locator('.vehicles-list-table')).toBeVisible();
+
+  // Retorna para clientes - deve manter visualização em blocos
+  await page.locator('.desktop-sidebar a[href="/clientes"]').click();
+  await expect(page.locator('.catalog-grid')).toBeVisible();
+  await expect(page.locator('.customers-list-table')).toHaveCount(0);
+
+  // Recarrega a página - deve continuar em blocos via localStorage
+  await page.reload();
+  await expect(page.locator('.catalog-grid')).toBeVisible();
+  await expect(page.locator('.customers-list-table')).toHaveCount(0);
+});
+
 test('dashboard dá largura total à lista antes de comprimir cliente e veículo', async ({
   page,
 }, testInfo) => {

@@ -682,3 +682,19 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
   - Frontend: `npm run lint` aprovado (0 erros, 0 avisos); `npm test` aprovado (7 arquivos, 33/33 testes unitários); `npm run build` aprovado; `npm run e2e -- e2e/responsive.spec.ts` aprovado (27 aprovados, 9 skips condicionais de viewport).
   - Backend: `dotnet test` aprovado (18 testes unitários e 7 testes de integração aprovados).
 
+## 2026-09-11 — Persistência otimizada do modo de visualização (cards/tabela)
+
+- **Criação do `ViewPreferenceService` (`core/preferences/view-preference.service.ts`)**:
+  - Serviço root com cache em memória e persistência síncrona/reativa em `localStorage` sob a chave `ofizzy_view_preferences`.
+  - Fornece `getSignal(key, defaultMode)` que devolve um `WritableSignal<ViewMode>` com interceptores de `.set()` e `.update()`.
+  - Zero custo de rede e zero latência (0 ms), sem causar layout shift ao navegar entre páginas ou recarregar (F5).
+  - Isolamento por tela: `customers`, `vehicles`, `work-orders`, `tenants`.
+- **Integração nas telas**:
+  - `CustomersPage`, `VehiclesPage`, `WorkOrdersPage` e `PlatformPage` agora consomem `ViewPreferenceService`.
+  - Preservado o comportamento responsivo móvel do `ResponsiveLayoutService` (celulares continuam usando cards para evitar overflow, enquanto a preferência do usuário para desktop/tablet é preservada).
+- **Validações técnicas**:
+  - Testes unitários do serviço: 6/6 cenários em `view-preference.service.spec.ts` (total frontend: 8 arquivos, 39/39 aprovados).
+  - ESLint: 0 erros, 0 avisos.
+  - Angular Build: compilado com sucesso.
+  - Playwright E2E: novo teste automatizado `modo de visualização (cards/tabela) persiste após navegação e recarregamento` aprovado (total: 28 aprovados, 11 skips de viewport).
+
