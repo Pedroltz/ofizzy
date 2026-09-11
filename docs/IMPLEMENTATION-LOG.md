@@ -729,4 +729,19 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
   - `docs/ARCHITECTURE.md`: Documentada a camada de evolução de frontend para PWA e Offline-First (App Shell, IndexedDB, geração de GUIDs no cliente, fila de sincronização e idempotência).
   - `docs/STATUS.md` e `AI-HANDOFF.md`: Atualizados para refletir o planejamento arquitetural e inclusão no backlog oficial.
 
+## 2026-09-11 — Reorganização modular do frontend com Verticals
+
+- **Alinhamento arquitetural frontend-backend**:
+  - Módulo de veículos movido de `features/vehicles` para `features/verticals/automotive/vehicles`, espelhando a modularidade de `src/backend/Ofizzy.Api/Verticals/Automotive`.
+  - Criado arquivo de exportação de módulo `src/app/features/verticals/automotive/index.ts`.
+  - Atualizados os caminhos relativos de injeção e importação em `vehicles.page.ts`.
+  - Atualizada a rota `/veiculos` em `app.routes.ts` com o novo caminho de lazy loading mantendo a validação de acesso ao módulo `Automotive`.
+- **Validações técnicas**:
+  - Frontend Linter: `npm run lint` aprovado (0 erros, 0 avisos).
+  - Frontend Testes Unitários: `npm test` aprovado (8 arquivos, 39/39 testes unitários).
+  - Frontend Build: `npm run build` aprovado.
+  - Frontend E2E: `npm run e2e -- e2e/responsive.spec.ts` aprovado (28 cenários aprovados, 11 skips condicionais de viewport).
+  - Backend Testes: `dotnet test` aprovado (18 unitários, 7 integração com PostgreSQL real).
+
+
 

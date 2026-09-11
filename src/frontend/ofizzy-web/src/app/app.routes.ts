@@ -14,7 +14,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', canActivate: [tenantGuard], data: { modules: ['Customers', 'WorkOrders', 'Automotive'] }, loadComponent: () => import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage) },
       { path: 'clientes', canActivate: [tenantGuard], data: { modules: ['Customers'] }, loadComponent: () => import('./features/customers/customers.page').then((m) => m.CustomersPage) },
-      { path: 'veiculos', canActivate: [tenantGuard], data: { modules: ['Automotive', 'Customers'] }, loadComponent: () => import('./features/vehicles/vehicles.page').then((m) => m.VehiclesPage) },
+      { path: 'veiculos', canActivate: [tenantGuard], data: { modules: ['Automotive', 'Customers'] }, loadComponent: () => import('./features/verticals/automotive/vehicles/vehicles.page').then((m) => m.VehiclesPage) },
       { path: 'ordens', canActivate: [tenantGuard], data: { modules: ['WorkOrders', 'Catalog', 'Automotive', 'Customers'] }, loadComponent: () => import('./features/work-orders/work-orders.page').then((m) => m.WorkOrdersPage) },
       { path: 'configuracoes', canActivate: [tenantGuard], data: { modules: [] }, loadComponent: () => import('./features/settings/settings.page').then((m) => m.SettingsPage) },
     ],

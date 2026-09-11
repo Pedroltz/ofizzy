@@ -49,6 +49,13 @@ Fases 1, 2, 3 e 4 concluídas e validadas.
 
 ## UI Redesign & Visual Consistency
 
+### Reorganização modular do frontend com Verticals — 2026-09-11
+
+- Alinhamento da arquitetura de pastas do frontend com a estrutura `Verticals` do backend:
+  - Módulo de veículos movido de `features/vehicles` para `features/verticals/automotive/vehicles`.
+  - Criado ponto de entrada `features/verticals/automotive/index.ts` e atualizada a rota `/veiculos` com lazy loading.
+  - Validação: lint 0 erros, build aprovado, 39 testes unitários frontend aprovados, 28 testes E2E Playwright aprovados e 25 testes backend aprovados.
+
 ### Redesenho e conforto visual dos blocos de clientes e veículos — 2026-09-11
 
 - Otimizado o layout dos cards (`catalog-card`) com `align-items: stretch` e `width: 100%`, eliminando o encolhimento e centralização forçada dos elementos internos.

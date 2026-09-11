@@ -5,6 +5,7 @@ Atualizado em: 2026-09-11
 ## Prioridade vigente — SaaS (aceite local concluído)
 
 Ajustes recentes:
+- Reorganização de pastas do frontend com Verticals: módulo de veículos movido para `features/verticals/automotive/vehicles`, espelhando a modularidade do backend (`Verticals/Automotive`).
 - Planejamento arquitetural de PWA & Offline-First (Store & Forward): especificação de persistência local em `IndexedDB` resistente a quedas de energia e sincronização em segundo plano na nuvem documentada em `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` e `docs/PRODUCT-STRATEGY.md`.
 - Redesenho e conforto visual dos blocos de clientes e veículos: preenchimento amplo do frame com `align-items: stretch`, máscara de telefone e agrupamento harmônico de identidade.
 - Persistência do modo de visualização (tabela/cards) via `ViewPreferenceService` conectada ao `localStorage`.
