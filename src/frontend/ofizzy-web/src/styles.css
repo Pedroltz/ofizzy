@@ -4798,13 +4798,35 @@ label {
 }
 
 /* SaaS administration and organization selection share the existing theme tokens. */
-.tenant-page { max-width: 1200px; margin: 0 auto; padding: clamp(1rem, 3vw, 2rem); overflow-wrap: anywhere; }
-.tenant-page .surface-card { padding: 1.25rem; min-width: 0; margin-block: 1rem; }
-.tenant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
-.tenant-form { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
-.tenant-page label { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
-.tenant-page input, .tenant-page .p-select { width: 100%; min-height: 44px; min-width: 0; }
-.tenant-page button, .tenant-link { min-height: 44px; }
-.tenant-link { display: inline-flex; align-items: center; }
-.tenant-page fieldset { min-width: 0; border: 1px solid var(--border-default); padding: .75rem; }
-.tenant-page .tenant-check { flex-direction: row; align-items: center; min-height: 44px; }
+
+
+/* Fluxos SaaS usam os mesmos tokens e componentes dos cadastros operacionais. */
+.saas-page { min-width: 0; }
+.saas-company-card { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; overflow-wrap: anywhere; }
+.saas-company-card h2 { font-size: var(--text-lg); font-weight: var(--font-semibold); }
+.saas-company-card > p-button { margin-top: auto; }
+.saas-card-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); flex-wrap:wrap; }
+.saas-card-heading > i { color:var(--primary); font-size:1.5rem; }
+.saas-table { width:100%; }
+.saas-table td { overflow-wrap:anywhere; }
+.saas-form { display:grid; gap:var(--space-5); }
+.saas-form .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-4); }
+.saas-form .field { display:flex; flex-direction:column; gap:var(--space-2); min-width:0; }
+.saas-form .field label { font-weight:var(--font-semibold); }
+.saas-form input, .saas-form textarea { width:100%; min-height:44px; }
+.saas-form .hint { font-size:var(--text-sm); color:var(--text-secondary); line-height:1.5; }
+.saas-form .module-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
+.saas-form .module-option { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); min-height:44px; cursor:pointer; }
+.saas-form .p-fieldset { min-width:0; }
+.saas-page input, .saas-page button, .saas-dialog button, .saas-form button, .saas-page .p-select, .saas-dialog .p-select { min-height:44px; }
+.saas-page .data-toolbar__toggle-btn { min-width:44px; }
+.saas-form .p-message { margin-top:var(--space-2); }
+.saas-dialog .p-dialog-content { min-width:0; }
+.saas-actions { display:flex; justify-content:flex-end; gap:var(--space-3); flex-wrap:wrap; }
+@media (max-width:640px) {
+ .saas-form .fields, .saas-form .module-options { grid-template-columns:1fr; }
+ .saas-dialog.p-dialog { width:100vw !important; max-width:100vw !important; height:100dvh; max-height:100dvh !important; margin:0; border-radius:0; }
+ .saas-dialog .p-dialog-content { flex:1; padding:var(--space-4); }
+ .saas-dialog .p-dialog-footer { padding:var(--space-4); padding-bottom:max(var(--space-4),env(safe-area-inset-bottom)); }
+ .saas-page .data-toolbar__filters, .saas-page .data-toolbar__filters > p-select { width:100%; }
+}

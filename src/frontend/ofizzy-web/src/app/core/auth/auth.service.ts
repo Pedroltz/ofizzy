@@ -13,6 +13,13 @@ export class AuthService {
   readonly user = this.currentUser.asReadonly();
   readonly authenticated = computed(() => this.currentUser() !== null);
 
+  destination(): string {
+    const user = this.user();
+    if (!user?.tenant) return user?.isPlatformAdmin ? '/plataforma' : '/organizacoes';
+    if (!user.tenant.onboardingCompleted) return '/onboarding';
+    return user.tenant.modules.includes('WorkOrders') ? '/' : '/configuracoes';
+  }
+
   setupRequired(): Promise<boolean> { return firstValueFrom(this.http.get<{ required: boolean }>('/api/setup/status')).then((response) => response.required); }
   setup(request: SetupRequest): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/setup', request)).then(() => this.loadAuthenticatedUser()); }
   login(email: string, password: string): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/auth/login', { email, password })).then(() => this.loadAuthenticatedUser()); }

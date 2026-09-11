@@ -1,6 +1,6 @@
 import { TenantContextService } from '../core/tenancy/tenant-context.service';
 import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { ThemeToggleComponent } from '../shared/components/theme-toggle.component';
 
@@ -14,6 +14,8 @@ export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  readonly platformArea = inject(ActivatedRoute).snapshot.data['platformArea'] === true;
+  readonly home = this.platformArea ? '/organizacoes' : '/';
   readonly tenantContext = inject(TenantContextService);
   readonly user = this.auth.user;
   readonly mobileMenu = signal(false);
@@ -49,7 +51,10 @@ export class AppShellComponent {
     },
   ] as const;
 
-  readonly navigation = computed(() => [
+  readonly navigation = computed(() => this.platformArea ? [{ label: 'Sua conta', items: [
+    ...(this.user()?.isPlatformAdmin ? [{ label: 'Empresas', icon: 'pi pi-building', route: '/plataforma', exact: false }] : []),
+    { label: 'Minhas organizações', icon: 'pi pi-th-large', route: '/organizacoes', exact: false },
+  ] }] : [
     ...this.allNavigation.map(group => ({ ...group, items: group.items.filter(item => {
       const modules: Record<string, ('Customers' | 'WorkOrders' | 'Catalog' | 'Automotive')[]> = { '/': ['Customers', 'WorkOrders', 'Automotive'], '/ordens': ['WorkOrders'], '/clientes': ['Customers'], '/veiculos': ['Automotive'] };
       return (modules[item.route] ?? []).every(m => this.tenantContext.has(m));

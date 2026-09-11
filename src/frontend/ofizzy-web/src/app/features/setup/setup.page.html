@@ -1,11 +1,11 @@
 <main class="auth-page">
   <div class="auth-top-bar">
-    <app-theme-toggle />
+    <app-theme-toggle placement="bottom" />
   </div>
 
   <section class="auth-intro">
     <div class="brand-mark">
-      <i class="pi pi-car text-2xl"></i>
+      <i class="pi pi-building text-2xl"></i>
     </div>
     <p class="eyebrow">PRIMEIRO ACESSO</p>
     <h1>Inicialização da plataforma.</h1>
@@ -22,9 +22,11 @@
         <label>Nome completo
           <input pInputText formControlName="adminName" autocomplete="name" placeholder="Ex: Carlos Silva" />
         </label>
+        @if (form.controls.adminName.touched && form.controls.adminName.invalid) { <p-message severity="error" size="small">Informe o nome do administrador, com até 120 caracteres.</p-message> }
         <label>E-mail corporativo
         <input pInputText formControlName="email" type="email" autocomplete="email" placeholder="admin@ofizzy.local" />
         </label>
+        @if (form.controls.email.touched && form.controls.email.invalid) { <p-message severity="error" size="small">Informe um e-mail válido.</p-message> }
         <label>Senha de acesso
           <input pInputText formControlName="password" type="password" autocomplete="new-password" placeholder="Mínimo 10 caracteres com maiúscula, minúscula e número" />
         </label>
@@ -33,15 +35,7 @@
         }
       </div>
 
-      <button type="submit" class="primary-button full-control flex items-center justify-center gap-2" [disabled]="saving()">
-        @if (saving()) {
-          <i class="pi pi-spin pi-spinner"></i>
-          <span>Criando administrador...</span>
-        } @else {
-          <span>Concluir configuração</span>
-          <i class="pi pi-check"></i>
-        }
-      </button>
+      <p-button type="submit" label="Concluir configuração" [fluid]="true" [loading]="saving()" [disabled]="saving()" />
     </form>
   </section>
 </main>

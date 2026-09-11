@@ -201,7 +201,15 @@ test('login permanece utilizável em todos os viewports', async ({ page }) => {
     route.fulfill({ status: 401, body: '{}' }),
   );
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: 'Acessar o sistema' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Acesse sua conta Ofizzy' })).toBeVisible();
+  await expect(page.locator('.brand-mark')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Alternar tema de aparência' }).click();
+  await expect(page.getByRole('menu')).toBeInViewport();
+  await page.getByRole('menuitemradio', { name: 'Escuro' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Alternar tema de aparência' }).click();
+  await page.getByRole('menuitemradio', { name: 'Claro' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expectNoHorizontalOverflow(page);
 });
 

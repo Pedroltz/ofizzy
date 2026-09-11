@@ -16,7 +16,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         @if (actionLabel()) {
           <button type="button" class="primary-button" (click)="action.emit()">
             @if (actionIcon()) {
-              <i [class]="actionIcon()"></i>
+              <i [class]="actionIcon()" aria-hidden="true"></i>
             }
             <span>{{ actionLabel() }}</span>
           </button>

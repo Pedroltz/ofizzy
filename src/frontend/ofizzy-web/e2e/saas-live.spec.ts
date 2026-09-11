@@ -47,13 +47,14 @@ test('SaaS real pelo Nginx: provisionamento, onboarding, Alpha/Beta e persistên
   await page.getByRole('button', { name: 'Concluir configuração' }).click();
   await expect(page.getByRole('heading', { name: 'Administração da plataforma' })).toBeVisible();
   await layout(page, 'platform');
-  await page.getByLabel('Nome', { exact: true }).fill('Mecânica Alpha');
+  await page.getByRole('button', { name: 'Nova empresa', exact: true }).first().click();
+  await page.getByLabel('Nome da empresa', { exact: true }).fill('Mecânica Alpha');
   await page.getByLabel('Identificador').fill('alpha');
   await page.getByLabel('Nome do administrador').fill('Proprietário Alpha');
   await page.getByLabel('E-mail do administrador').fill('alpha@smoke.test');
   await page.getByLabel('Senha inicial').fill(password);
-  await page.getByRole('button', { name: 'Criar tenant', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Mecânica Alpha' })).toBeVisible();
+  await page.getByRole('button', { name: 'Criar empresa', exact: true }).click();
+  await expect(page.getByText('Mecânica Alpha', { exact: true })).toBeVisible();
   const alpha = (await json(page.context(), 'GET', '/api/platform/tenants'))[0];
   const beta = await json(page.context(), 'POST', '/api/platform/tenants', { name: 'Mecânica Beta', slug: 'beta', vertical: 'Automotive', adminName: 'Proprietário Beta', email: 'beta@smoke.test', password, modules: ['Customers', 'WorkOrders', 'Catalog', 'Automotive'] });
   const aContext = await browser.newContext({ baseURL }); const bContext = await browser.newContext({ baseURL });
@@ -61,12 +62,11 @@ test('SaaS real pelo Nginx: provisionamento, onboarding, Alpha/Beta e persistên
   for (const [tab, email, name] of [[a, 'alpha@smoke.test', 'Mecânica Alpha'], [b, 'beta@smoke.test', 'Mecânica Beta']] as const) {
     await tab.goto('/login'); await tab.locator('[formControlName="email"]').fill(email); await tab.locator('[formControlName="password"]').fill(password);
     await tab.locator('button[type="submit"]').click();
-    await expect(tab.getByRole('heading', { name: 'Configure sua empresa' })).toBeVisible();
+    await expect(tab.getByRole('heading', { name, exact: true })).toBeVisible();
     await expect(tab.locator('[formControlName="name"]')).toHaveValue(name);
     await tab.locator('[formControlName="legalName"]').fill(name + ' Serviços');
-    await tab.getByRole('button', { name: 'Salvar Dados da Oficina' }).click();
     if (tab === a) await layout(tab, 'onboarding');
-    await tab.getByRole('button', { name: 'Concluir onboarding' }).click();
+    await tab.getByRole('button', { name: 'Salvar e concluir configuração' }).click();
     await expect(tab).toHaveURL(baseURL + '/');
   }
   const ar = await seed(aContext, 'João', 'ABC1D23'); const br = await seed(bContext, 'Maria', 'XYZ9Z99');
@@ -84,7 +84,7 @@ test('SaaS real pelo Nginx: provisionamento, onboarding, Alpha/Beta e persistên
   await a.getByRole('button', { name: 'Imprimir' }).click();
   await a.emulateMedia({ media: 'print' }); await expect(a.locator('.wo-print-sheet')).toBeVisible();
   await a.emulateMedia({ media: 'screen' });
-  await a.goto('/organizacoes'); await expect(a.getByRole('heading', { name: 'Suas organizações' })).toBeVisible();
+  await a.goto('/organizacoes'); await expect(a.getByRole('heading', { name: 'Minhas organizações' })).toBeVisible();
   await layout(a, 'organizations');
   // Persist only nonsecret fixture identifiers, never cookies or session storage.
   writeFileSync('/tmp/ofizzy-saas-live.json', JSON.stringify({ alpha, beta, ar, br }));

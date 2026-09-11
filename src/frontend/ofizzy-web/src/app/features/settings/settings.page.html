@@ -1,8 +1,8 @@
 <section class="page-container">
   <app-page-header
-    eyebrow="TABELAS DE PREÇO & OFICINA"
+    eyebrow="GESTÃO DA EMPRESA"
     title="Configurações e Catálogo"
-    description="Padronize a precificação de mão de obra e peças e mantenha atualizados os dados operacionais da oficina."
+    description="Padronize a precificação de mão de obra e peças e mantenha atualizados os dados operacionais da empresa."
   />
 
   <p-tabs [value]="catalogEnabled() ? 'services' : 'workshop'">
@@ -11,7 +11,7 @@
       <p-tab value="services"><i class="pi pi-wrench mr-2" aria-hidden="true"></i> Mão de Obra e Serviços</p-tab>
       <p-tab value="parts"><i class="pi pi-box mr-2" aria-hidden="true"></i> Peças e Insumos</p-tab>
       }
-      <p-tab value="workshop"><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Oficina</p-tab>
+      <p-tab value="workshop"><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Empresa</p-tab>
     </p-tablist>
 
     <p-tabpanels>
@@ -39,14 +39,14 @@
               </div>
               <div class="card-actions">
                 <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar serviço" (onClick)="openService(item)" />
-                <p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar serviço" (onClick)="archiveService(item)" />
+                <p-button icon="pi pi-folder-open" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar serviço" (onClick)="archiveService(item)" />
               </div>
             </article>
           } @empty {
             <app-empty-state
               icon="pi pi-wrench"
               title="Nenhum serviço cadastrado"
-              description="Cadastre os serviços comuns da oficina (alinhamento 3D, balanceamento, montagem de pneus, cambagem)."
+              description="Cadastre os serviços prestados pela empresa e seus valores de referência."
               actionLabel="Cadastrar Serviço"
               actionIcon="pi pi-plus"
               (action)="openService()"
@@ -60,7 +60,7 @@
         <div class="catalog-toolbar">
           <div>
             <h2>Peças e Insumos Cadastrados</h2>
-            <p>Controle códigos de referência, preços de custo e margens para agilizar o lançamento na oficina.</p>
+            <p>Controle códigos de referência, preços de custo e margens para agilizar o lançamento na empresa.</p>
           </div>
           <p-button label="Nova Peça" icon="pi pi-plus" (onClick)="openPart()" />
         </div>
@@ -86,7 +86,7 @@
               </div>
               <div class="card-actions">
                 <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar peça" (onClick)="openPart(item)" />
-                <p-button icon="pi pi-archive" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar peça" (onClick)="archivePart(item)" />
+                <p-button icon="pi pi-folder-open" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar peça" (onClick)="archivePart(item)" />
               </div>
             </article>
           } @empty {
@@ -103,92 +103,9 @@
       </p-tabpanel>
 
       }
-      <!-- Aba: Dados da Oficina & Impressão -->
+      <!-- Aba: Dados da Empresa & Impressão -->
       <p-tabpanel value="workshop">
-        <div class="catalog-toolbar">
-          <div>
-            <h2>Dados da Oficina & Impressão</h2>
-            <p>Estas informações são exibidas no cabeçalho e rodapé da Ordem de Serviço impressa e em relatórios PDF.</p>
-          </div>
-          <p-button label="Salvar Configurações" icon="pi pi-check" (onClick)="saveCompany()" [loading]="savingCompany()" [disabled]="!tenantContext.admin()" />
-        </div>
-
-        <form [formGroup]="companyForm" class="flex flex-col gap-6 max-w-4xl" (ngSubmit)="saveCompany()">
-          <!-- Bloco 1: Identificação -->
-          <app-section-card title="Identificação da Oficina" subtitle="Nome e dados cadastrais exibidos nos documentos">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Nome Fantasia *</label>
-              <input pInputText formControlName="name" class="w-full" placeholder="Ex: Oficina Centro Automotivo" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Razão Social</label>
-              <input pInputText formControlName="legalName" class="w-full" placeholder="Ex: Oficina Comércio e Serviços LTDA" />
-              </div>
-            </div>
-            <div class="mt-4">
-              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">CNPJ / CPF</label>
-              <input pInputText formControlName="cnpj" class="w-full md:w-1/2" placeholder="Ex: 00.000.000/0001-00" />
-            </div>
-          </app-section-card>
-
-          <!-- Bloco 2: Contatos -->
-          <app-section-card title="Canais de Contato" subtitle="Informações para retorno e atendimento ao cliente">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Telefone Comercial</label>
-                <input pInputText formControlName="phone" class="w-full" placeholder="Ex: (11) 3333-4444" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">WhatsApp / Celular</label>
-                <input pInputText formControlName="whatsApp" class="w-full" placeholder="Ex: (11) 99999-8888" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">E-mail de Contato</label>
-                <input pInputText formControlName="email" type="email" class="w-full" placeholder="Ex: contato@ofizzy.com.br" />
-              </div>
-            </div>
-          </app-section-card>
-
-          <!-- Bloco 3: Localização -->
-          <app-section-card title="Endereço e Localização" subtitle="Endereço impresso na ordem de serviço">
-            <div>
-              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Endereço Completo</label>
-              <input pInputText formControlName="address" class="w-full" placeholder="Ex: Av. das Nações, 1500, Galpão 2" />
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Cidade</label>
-                <input pInputText formControlName="city" class="w-full" placeholder="Ex: São Paulo" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Estado (UF)</label>
-                <input pInputText formControlName="state" class="w-full" placeholder="Ex: SP" maxlength="2" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">CEP</label>
-                <input pInputText formControlName="postalCode" class="w-full" placeholder="Ex: 01001-000" />
-              </div>
-            </div>
-          </app-section-card>
-
-          <!-- Bloco 4: Termos e Observações -->
-          <app-section-card title="Termos Operacionais e Garantia" subtitle="Textos automáticos inseridos no fechamento e impressão da OS">
-            <div>
-              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Termo de Garantia Padrão (Rodapé da OS)</label>
-              <textarea pTextarea formControlName="warrantyTerms" rows="3" class="w-full" placeholder="Texto de garantia impresso na folha A4 e no PDF da OS..."></textarea>
-              <small class="text-muted text-xs">Aparecerá automaticamente antes do campo de assinatura do cliente na impressão da OS.</small>
-            </div>
-            <div class="mt-4">
-              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Mensagem de Agradecimento / Observações Finais</label>
-              <textarea pTextarea formControlName="receiptNotes" rows="2" class="w-full" placeholder="Mensagem de agradecimento ou orientações preventivas aos clientes..."></textarea>
-            </div>
-          </app-section-card>
-
-          <div class="pt-2 flex justify-end">
-            <p-button label="Salvar Dados da Oficina" icon="pi pi-check" type="submit" [loading]="savingCompany()" [disabled]="!tenantContext.admin()" />
-          </div>
-        </form>
+        <app-company-settings-form />
       </p-tabpanel>
     </p-tabpanels>
   </p-tabs>

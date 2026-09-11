@@ -4,9 +4,11 @@ import { authGuard, guestGuard, setupGuard, tenantGuard, platformGuard } from '.
 export const routes: Routes = [
   { path: 'setup', canActivate: [setupGuard], loadComponent: () => import('./features/setup/setup.page').then((m) => m.SetupPage) },
   { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage) },
+  { path: '', canMatch: [(_route, segments) => ['organizacoes', 'plataforma', 'onboarding'].includes(segments[0]?.path)], canActivate: [authGuard], data: { platformArea: true }, loadComponent: () => import('./layout/app-shell.component').then(m => m.AppShellComponent), children: [
   { path: 'organizacoes', canActivate: [authGuard], loadComponent: () => import('./features/tenancy/organizations.page').then(m => m.OrganizationsPage) },
   { path: 'plataforma', canActivate: [authGuard, platformGuard], loadComponent: () => import('./features/tenancy/platform.page').then(m => m.PlatformPage) },
   { path: 'onboarding', canActivate: [authGuard], loadComponent: () => import('./features/tenancy/onboarding.page').then(m => m.OnboardingPage) },
+  ] },
   {
     path: '', canActivate: [authGuard, tenantGuard], loadComponent: () => import('./layout/app-shell.component').then((m) => m.AppShellComponent),
     children: [

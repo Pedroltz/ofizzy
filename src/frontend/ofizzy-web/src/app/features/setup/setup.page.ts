@@ -1,3 +1,5 @@
+import { MessageModule } from 'primeng/message';
+import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,7 +9,7 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle.compo
 
 @Component({
   selector: 'app-setup-page',
-  imports: [InputTextModule, ReactiveFormsModule, ThemeToggleComponent],
+  imports: [MessageModule, ButtonModule, InputTextModule, ReactiveFormsModule, ThemeToggleComponent],
   templateUrl: './setup.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

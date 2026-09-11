@@ -1,22 +1,19 @@
 <main class="auth-page login-layout">
   <div class="auth-top-bar">
-    <app-theme-toggle />
+    <app-theme-toggle placement="bottom" />
   </div>
 
   <section class="auth-intro">
-    <div class="brand-mark">
-      <i class="pi pi-car text-2xl"></i>
-    </div>
-        <p class="eyebrow">OFIZZY</p>
-    <h1>Gestão inteligente para sua oficina.</h1>
-    <p>Acompanhe ordens de serviço, veículos e clientes com rapidez, clareza e total controle operacional.</p>
+    <p class="eyebrow">OFIZZY</p>
+    <h1>Gestão inteligente para sua empresa.</h1>
+    <p>Organize clientes, serviços e operações em um só lugar.</p>
   </section>
 
   <section class="auth-card login-card surface-card">
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
       <header>
-        <h2>Acessar o sistema</h2>
-        <p>Informe suas credenciais para entrar na oficina.</p>
+        <h2>Acesse sua conta Ofizzy</h2>
+        <p>Entre para acessar suas empresas ou administrar a plataforma.</p>
       </header>
 
       <label>E-mail corporativo
@@ -27,19 +24,14 @@
         <input pInputText formControlName="password" type="password" autocomplete="current-password" placeholder="••••••••" />
       </label>
 
+      @if (form.controls.email.touched && form.controls.email.invalid) { <p-message severity="error" size="small">Informe um e-mail válido.</p-message> }
+      @if (form.controls.password.touched && form.controls.password.invalid) { <p-message severity="error" size="small">Informe sua senha.</p-message> }
       @if (invalidCredentials()) {
         <p class="field-error"><i class="pi pi-exclamation-triangle mr-1.5"></i> E-mail ou senha incorretos. Verifique suas credenciais.</p>
       }
 
-      <button type="submit" class="primary-button full-control flex items-center justify-center gap-2" [disabled]="saving()">
-        @if (saving()) {
-          <i class="pi pi-spin pi-spinner"></i>
-          <span>Entrando...</span>
-        } @else {
-          <span>Entrar no sistema</span>
-          <i class="pi pi-arrow-right"></i>
-        }
-      </button>
+      <p-button type="submit" label="Entrar no sistema" [fluid]="true" [loading]="saving()" [disabled]="saving()" />
+
     </form>
   </section>
 </main>

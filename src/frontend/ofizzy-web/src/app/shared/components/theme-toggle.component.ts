@@ -4,6 +4,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { ThemeService } from '../../core/theme/theme.service';
@@ -30,6 +31,7 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
       @if (isOpen()) {
         <div
           class="theme-toggle__menu surface-card"
+          [class.theme-toggle__menu--below]="placement() === 'bottom'"
           role="menu"
           aria-label="Opções de tema"
         >
@@ -63,7 +65,7 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
       display: inline-flex;
       align-items: center;
       gap: var(--space-2);
-      min-height: 2.25rem;
+      min-height: 44px;
       padding: 0.4rem 0.65rem;
       border: 1px solid var(--border-default);
       border-radius: var(--radius-sm);
@@ -128,6 +130,7 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
     }
 
     .theme-toggle__option {
+      min-height: 44px;
       display: flex;
       align-items: center;
       gap: var(--space-2);
@@ -159,10 +162,18 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
       margin-left: auto;
       font-size: 0.75rem;
     }
+
+    .theme-toggle__menu--below {
+      bottom: auto;
+      top: calc(100% + var(--space-1));
+      left: auto;
+      right: 0;
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeToggleComponent {
+  readonly placement = input<'top' | 'bottom'>('top');
   private readonly themeService = inject(ThemeService);
   private readonly elementRef = inject(ElementRef);
 

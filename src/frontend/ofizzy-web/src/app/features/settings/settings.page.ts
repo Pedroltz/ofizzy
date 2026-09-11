@@ -10,11 +10,10 @@ import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Part, ServiceItem } from '../../core/api/catalog.models';
-import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
+import { CompanySettingsFormComponent } from './company-settings-form.component';
 import {
   EmptyStateComponent,
   PageHeaderComponent,
-  SectionCardComponent,
 } from '../../shared/components';
 
 @Component({
@@ -28,9 +27,9 @@ import {
     TabsModule,
     TextareaModule,
     PageHeaderComponent,
+    CompanySettingsFormComponent,
     EmptyStateComponent,
-    SectionCardComponent,
-  ],
+    ],
   templateUrl: './settings.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,17 +37,14 @@ export class SettingsPage {
   readonly tenantContext = inject(TenantContextService);
   readonly catalogEnabled = () => this.tenantContext.has('Catalog') && this.tenantContext.tenant()?.status === 'Active';
   private readonly api = inject(CatalogApiService);
-  private readonly companyApi = inject(CompanyApiService);
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
 
   readonly services = signal<ServiceItem[]>([]);
   readonly parts = signal<Part[]>([]);
-  readonly company = signal<CompanyResponse | null>(null);
   readonly loading = signal(true);
   readonly saving = signal(false);
-  readonly savingCompany = signal(false);
   readonly serviceDialog = signal(false);
   readonly partDialog = signal(false);
   readonly editingService = signal<ServiceItem | null>(null);
@@ -67,82 +63,22 @@ export class SettingsPage {
     salePrice: [0, [Validators.required, Validators.min(0)]]
   });
 
-  readonly companyForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(160)]],
-    legalName: [''],
-    cnpj: [''],
-    phone: [''],
-    whatsApp: [''],
-    email: [''],
-    address: [''],
-    city: [''],
-    state: [''],
-    postalCode: [''],
-    warrantyTerms: [''],
-    receiptNotes: ['']
-  });
-
   constructor() {
-    if (!this.tenantContext.admin()) this.companyForm.disable();
-    const services = this.api.peekServices();
-    const parts = this.api.peekParts();
-    const company = this.companyApi.peek();
+    const services = this.api.peekServices(); const parts = this.api.peekParts();
     if (services) this.services.set(services.items);
     if (parts) this.parts.set(parts.items);
-    if (company) {
-      this.company.set(company);
-      this.patchCompany(company);
-    }
-    this.loading.set(!services && !parts && !company);
     void this.load();
   }
 
   async load(): Promise<void> {
-    this.loading.set(
-      !this.api.peekServices() && !this.api.peekParts() && !this.companyApi.peek()
-    );
+    this.loading.set(true);
     try {
-      const [services, parts, comp] = await Promise.all([
+      const [services, parts] = await Promise.all([
         this.catalogEnabled() ? this.api.services() : Promise.resolve({ items: [] }),
         this.catalogEnabled() ? this.api.parts() : Promise.resolve({ items: [] }),
-        this.companyApi.get().catch(() => null)
       ]);
-      this.services.set(services.items);
-      this.parts.set(parts.items);
-      if (comp) {
-        this.company.set(comp);
-        this.patchCompany(comp);
-      }
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  private patchCompany(comp: CompanyResponse): void {
-    this.companyForm.patchValue({
-      name: comp.name || '', legalName: comp.legalName || '', cnpj: comp.cnpj || '',
-      phone: comp.phone || '', whatsApp: comp.whatsApp || '', email: comp.email || '',
-      address: comp.address || '', city: comp.city || '', state: comp.state || '',
-      postalCode: comp.postalCode || '', warrantyTerms: comp.warrantyTerms || '',
-      receiptNotes: comp.receiptNotes || ''
-    });
-  }
-
-  async saveCompany(): Promise<void> {
-    if (this.companyForm.invalid) {
-      this.companyForm.markAllAsTouched();
-      return;
-    }
-    this.savingCompany.set(true);
-    try {
-      const updated = await this.companyApi.update(this.companyForm.getRawValue());
-      this.company.set(updated);
-      this.messages.add({ severity: 'success', summary: 'Dados da oficina salvos com sucesso!' });
-    } catch {
-      this.messages.add({ severity: 'error', summary: 'Erro ao salvar dados da oficina.' });
-    } finally {
-      this.savingCompany.set(false);
-    }
+      this.services.set(services.items); this.parts.set(parts.items);
+    } finally { this.loading.set(false); }
   }
 
   openService(item?: ServiceItem): void {

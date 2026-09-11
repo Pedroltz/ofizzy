@@ -1,0 +1,82 @@
+@if (loading()) { <app-loading-state mode="cards" [count]="3" /> }
+@else if (loadError()) { <app-empty-state title="Não foi possível carregar os dados da empresa" description="Tente novamente antes de editar as configurações." actionLabel="Tentar novamente" (action)="load()" /> }
+@else {
+        <form [formGroup]="form" class="saas-form" (ngSubmit)="save()">
+          <!-- Bloco 1: Identificação -->
+          <app-section-card title="Identificação da Empresa" subtitle="Nome e dados cadastrais exibidos nos documentos">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="company-name" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Nome Fantasia *</label>
+<input pInputText id="company-name" formControlName="name" maxlength="160" class="w-full" placeholder="Ex: Empresa Central" />
+              </div>
+              <div>
+                <label for="company-legalName" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Razão Social</label>
+<input pInputText id="company-legalName" formControlName="legalName" maxlength="160" class="w-full" placeholder="Ex: Empresa Comércio e Serviços LTDA" />
+              </div>
+            </div>
+            <div class="mt-4">
+              <label for="company-cnpj" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">CNPJ / CPF</label>
+<input pInputText id="company-cnpj" formControlName="cnpj" maxlength="18" class="w-full md:w-1/2" placeholder="Ex: 00.000.000/0001-00" />
+            </div>
+          </app-section-card>
+
+          @if (form.controls.name.touched && form.controls.name.invalid) { <p-message severity="error">Informe o nome da empresa, com até 160 caracteres.</p-message> }
+          <!-- Bloco 2: Contatos -->
+          <app-section-card title="Canais de Contato" subtitle="Informações para retorno e atendimento ao cliente">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label for="company-phone" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Telefone Comercial</label>
+<input pInputText id="company-phone" formControlName="phone" maxlength="20" class="w-full" placeholder="Ex: (11) 3333-4444" />
+              </div>
+              <div>
+                <label for="company-whatsApp" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">WhatsApp / Celular</label>
+<input pInputText id="company-whatsApp" formControlName="whatsApp" maxlength="20" class="w-full" placeholder="Ex: (11) 99999-8888" />
+              </div>
+              <div>
+                <label for="company-email" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">E-mail de Contato</label>
+<input pInputText id="company-email" formControlName="email" maxlength="254" type="email" class="w-full" placeholder="Ex: contato@ofizzy.com.br" />
+              </div>
+            </div>
+          </app-section-card>
+
+          <!-- Bloco 3: Localização -->
+          <app-section-card title="Endereço e Localização" subtitle="Endereço impresso na ordem de serviço">
+            <div>
+              <label for="company-address" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Endereço Completo</label>
+<input pInputText id="company-address" formControlName="address" maxlength="500" class="w-full" placeholder="Ex: Av. das Nações, 1500, Galpão 2" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <label for="company-city" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Cidade</label>
+<input pInputText id="company-city" formControlName="city" maxlength="100" class="w-full" placeholder="Ex: São Paulo" />
+              </div>
+              <div>
+                <label for="company-state" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Estado (UF)</label>
+<input pInputText id="company-state" formControlName="state" class="w-full" placeholder="Ex: SP" maxlength="2" />
+              </div>
+              <div>
+                <label for="company-postalCode" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">CEP</label>
+<input pInputText id="company-postalCode" formControlName="postalCode" maxlength="10" class="w-full" placeholder="Ex: 01001-000" />
+              </div>
+            </div>
+          </app-section-card>
+
+          <!-- Bloco 4: Termos e Observações -->
+          <app-section-card title="Termos Operacionais e Garantia" subtitle="Textos automáticos inseridos no fechamento e impressão da OS">
+            <div>
+              <label for="company-warrantyTerms" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Termo de Garantia Padrão (Rodapé da OS)</label>
+<textarea pTextarea id="company-warrantyTerms" formControlName="warrantyTerms" maxlength="1000" rows="3" class="w-full" placeholder="Texto de garantia impresso na folha A4 e no PDF da OS..."></textarea>
+              <small class="text-muted text-xs">Aparecerá automaticamente antes do campo de assinatura do cliente na impressão da OS.</small>
+            </div>
+            <div class="mt-4">
+              <label for="company-receiptNotes" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Mensagem de Agradecimento / Observações Finais</label>
+<textarea pTextarea id="company-receiptNotes" formControlName="receiptNotes" maxlength="1000" rows="2" class="w-full" placeholder="Mensagem de agradecimento ou orientações preventivas aos clientes..."></textarea>
+            </div>
+          </app-section-card>
+
+          @if (form.controls.email.touched && form.controls.email.invalid) { <p-message severity="error">Informe um e-mail de contato válido.</p-message> }
+          <div class="pt-2 flex justify-end">
+            <p-button label="{{ completeOnSave() ? 'Salvar e concluir configuração' : 'Salvar dados da empresa' }}" icon="pi pi-check" type="submit" [loading]="saving()" [disabled]="!context.admin() || loading() || saving()" />
+          </div>
+        </form>
+}
