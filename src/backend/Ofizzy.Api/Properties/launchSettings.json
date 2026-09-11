@@ -1,6 +1,17 @@
-﻿{
+{
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
+    "local": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5154",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Postgres": "Host=127.0.0.1;Port=5432;Database=ofizzy;Username=ofizzy",
+        "Platform__BootstrapEnabled": "true"
+      }
+    },
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,

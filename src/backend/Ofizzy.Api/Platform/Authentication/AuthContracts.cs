@@ -13,7 +13,9 @@ public sealed class SetupRequestValidator : AbstractValidator<SetupRequest>
     public SetupRequestValidator()
     {
         RuleFor(x => x.CompanyName).NotEmpty().MaximumLength(160);
-        RuleFor(x => x.Cnpj).Matches("^[0-9]{14}$").When(x => !string.IsNullOrWhiteSpace(x.Cnpj)).WithMessage("Informe 14 dígitos.");
+        RuleFor(x => x.Cnpj)
+            .Must(value => string.IsNullOrWhiteSpace(value) || value.Count(char.IsDigit) == 14)
+            .WithMessage("Informe um CNPJ com 14 dígitos.");
         RuleFor(x => x.Phone).MaximumLength(20); RuleFor(x => x.AdminName).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(254);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(10).Matches("[A-Z]").WithMessage("Inclua uma letra maiúscula.").Matches("[a-z]").WithMessage("Inclua uma letra minúscula.").Matches("[0-9]").WithMessage("Inclua um número.");

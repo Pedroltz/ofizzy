@@ -75,6 +75,9 @@ public sealed class TechnicalIdentifierMigrationTests : IAsyncLifetime
         Assert.False(reader.GetBoolean(1));
         Assert.Equal(1, reader.GetInt64(2));
         Assert.True(reader.GetBoolean(3));
+
+        await using var secondContext = new ApplicationDbContext(options);
+        await secondContext.GetService<IMigrator>().MigrateAsync("20260908120000_RenameTechnicalIdentifiersToOfizzy");
     }
 
     public Task InitializeAsync() => _postgres.StartAsync();

@@ -27,22 +27,49 @@ Execute os comandos abaixo a partir da raiz do repositório.
 
 ## Desenvolvimento local
 
-Para executar somente o PostgreSQL com Docker e manter backend/frontend no host:
+Somente o PostgreSQL roda no Docker. Backend (.NET SDK 10) e frontend (Node.js 24
+LTS/npm) executam na máquina, em terminais separados. A partir da raiz:
 
 ```bash
-docker compose -f compose.yaml -f compose.local.yaml up -d postgres
+# Banco persistente em localhost:5432
+docker compose -f compose.local.yaml up -d
 ```
-
-Defina `ConnectionStrings__Postgres` apontando para `localhost:5432` antes de iniciar a API. O frontend usa `proxy.conf.json` no modo desenvolvimento para encaminhar `/api` para a API local em `http://localhost:5154`.
-
-Para executar a API diretamente com `dotnet run`, configure uma vez os valores locais via .NET User Secrets. O projeto já possui `UserSecretsId`; os segredos são carregados automaticamente no perfil `Development` e nunca devem ser versionados:
 
 ```bash
-dotnet user-secrets set "Jwt:SigningKey" "<chave-aleatória-com-ao-menos-32-bytes>" --project src/backend/Ofizzy.Api
-dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;Database=ofizzy;Username=ofizzy;Password=<senha-local>" --project src/backend/Ofizzy.Api
+# API em http://localhost:5154, com migrations automáticas
+dotnet run --project src/backend/Ofizzy.Api --launch-profile local
 ```
 
-Para desenvolvimento: `docker compose -f compose.yaml -f compose.dev.yaml up --build`.
+```bash
+# Angular em http://localhost:4200
+cd src/frontend/ofizzy-web
+npm ci  # instalação/atualização das dependências
+npm start
+```
+
+Acesse **http://localhost:4200/setup** no banco vazio para criar o operador da
+plataforma. Depois, crie a empresa em `/plataforma` e conclua seu onboarding.
+O perfil `local` habilita bootstrap em desenvolvimento e conecta ao PostgreSQL
+Docker (`127.0.0.1:5432`, banco/usuário `ofizzy`). O proxy Angular encaminha `/api`
+e `/health` à API na porta 5154. Nginx não é necessário neste fluxo local.
+
+Encerre API/Angular com Ctrl+C. Para parar o banco:
+`docker compose -f compose.local.yaml stop`. Os dados persistem no volume;
+não use `down --volumes` se desejar preservá-los. A autenticação `trust` deste
+Compose é apenas para desenvolvimento em máquina confiável, com porta restrita
+a localhost; não utilize esta configuração em produção.
+
+A API gera uma chave JWT efêmera, portanto reiniciar exige novo login. User
+Secrets existentes têm precedência sobre a conexão do perfil local. Para usar
+a conexão acima, remova uma configuração antiga, se houver:
+
+```bash
+dotnet user-secrets remove "ConnectionStrings:Postgres" --project src/backend/Ofizzy.Api
+```
+
+Para uma chave estável, configure `Jwt:SigningKey` por User Secrets sem versionar
+a chave. Os perfis anteriores `http`/`https` continuam disponíveis. O deploy
+central continua usando o Compose completo; não é necessário iniciá-lo para desenvolver.
 
 ## Validação
 

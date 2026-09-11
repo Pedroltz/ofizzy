@@ -36,6 +36,7 @@ public sealed class OfizzyFactory : WebApplicationFactory<Program>, IAsyncLifeti
         Environment.SetEnvironmentVariable("Jwt__SigningKey", TestSigningKey);
         await using var scope = Services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+        await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()

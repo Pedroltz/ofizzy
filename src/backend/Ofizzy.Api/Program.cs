@@ -50,6 +50,14 @@ if (builder.Environment.IsDevelopment())
             }
         }
     }
+
+    var developmentDefaults = new Dictionary<string, string?>();
+    if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Postgres")))
+        developmentDefaults["ConnectionStrings:Postgres"] = "Host=localhost;Port=5432;Database=ofizzy;Username=ofizzy";
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Jwt:SigningKey"]))
+        developmentDefaults["Jwt:SigningKey"] = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(48));
+    if (developmentDefaults.Count > 0)
+        builder.Configuration.AddInMemoryCollection(developmentDefaults);
 }
 
 var connectionString = builder.Configuration.GetConnectionString("Postgres");
@@ -137,9 +145,18 @@ if (args.Contains("--grant-platform-admin", StringComparer.OrdinalIgnoreCase))
 }
 if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
 {
+    await ReconcileMigrationHistoryAsync(connectionString);
     await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+    await ReconcileMigrationHistoryAsync(connectionString);
     return;
+}
+if (app.Environment.IsDevelopment())
+{
+    await ReconcileMigrationHistoryAsync(connectionString);
+    await using var scope = app.Services.CreateAsyncScope();
+    await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+    await ReconcileMigrationHistoryAsync(connectionString);
 }
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
@@ -163,5 +180,38 @@ app.MapHealthChecks("/health/live", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
 app.MapControllers();
 app.Run();
+
+static async Task ReconcileMigrationHistoryAsync(string connectionString)
+{
+    await using var connection = new Npgsql.NpgsqlConnection(connectionString);
+    await connection.OpenAsync();
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+        """
+        DO $ofizzy$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'ofizzy') THEN
+                CREATE TABLE IF NOT EXISTS public."__EFMigrationsHistory" (
+                    "MigrationId" character varying(150) NOT NULL PRIMARY KEY,
+                    "ProductVersion" character varying(32) NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS ofizzy."__EFMigrationsHistory" (
+                    "MigrationId" character varying(150) NOT NULL PRIMARY KEY,
+                    "ProductVersion" character varying(32) NOT NULL
+                );
+                INSERT INTO public."__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+                SELECT "MigrationId", "ProductVersion"
+                FROM ofizzy."__EFMigrationsHistory"
+                ON CONFLICT ("MigrationId") DO NOTHING;
+                INSERT INTO ofizzy."__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+                SELECT "MigrationId", "ProductVersion"
+                FROM public."__EFMigrationsHistory"
+                ON CONFLICT ("MigrationId") DO NOTHING;
+            END IF;
+        END
+        $ofizzy$;
+        """;
+    await command.ExecuteNonQueryAsync();
+}
 
 public partial class Program;
