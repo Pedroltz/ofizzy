@@ -3,7 +3,7 @@
 ## Visão
 
 Plataforma SaaS multi-tenant para gestão de empresas prestadoras de serviços,
-com módulos e verticais especializadas. Automotive é a primeira vertical:
+com módulos e verticais especializadas (estratégia detalhada em [PRODUCT-STRATEGY.md](PRODUCT-STRATEGY.md)). Automotive é a primeira vertical:
 Cliente → Veículo → Ordem de Serviço → Diagnóstico → Serviços/Peças → Finalização
 → Impressão. Pagamentos e financeiro operacional continuam como próxima entrega.
 

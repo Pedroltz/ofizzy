@@ -6,7 +6,7 @@ O MVP atual inclui autenticação, clientes, veículos, catálogos, ciclo comple
 
 ## Documentação
 
-- [Visão e limites do produto](docs/PROJECT.md)
+- [Visão e limites do produto](docs/PROJECT.md) e [estratégia de foco](docs/PRODUCT-STRATEGY.md)
 - [Status atual](docs/STATUS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Arquitetura](docs/ARCHITECTURE.md) e [modelo de dados](docs/DATA-MODEL.md)
