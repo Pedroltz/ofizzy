@@ -48,6 +48,13 @@ Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento,
 
 ## UI Redesign & Visual Consistency
 
+### Redesenho e conforto visual dos blocos de clientes e veículos — 2026-09-11
+
+- Otimizado o layout dos cards (`catalog-card`) com `align-items: stretch` e `width: 100%`, eliminando o encolhimento e centralização forçada dos elementos internos.
+- Clientes: agrupamento harmônico de Avatar, Nome e E-mail à esquerda com Documento à direita; máscara automática de telefone `(DD) 9XXXX-XXXX`.
+- Veículos: placa em destaque à esquerda e ano/cor à direita; especificações e observações ocupando a largura integral do frame.
+- Validação: lint, build, 39 testes unitários e 28 testes e2e Playwright aprovados.
+
 ### Persistência do modo de visualização (cards/tabela) — 2026-09-11
 
 - Implementado `ViewPreferenceService` conectando a preferência do usuário (tabela vs. blocos) ao `localStorage` com cache em memória e signals reativos.

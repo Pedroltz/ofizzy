@@ -5,6 +5,7 @@ Atualizado em: 2026-09-11
 ## Prioridade vigente — SaaS (aceite local concluído)
 
 Ajustes recentes:
+- Redesenho e conforto visual dos blocos de clientes e veículos: preenchimento amplo do frame com `align-items: stretch`, máscara de telefone e agrupamento harmônico de identidade.
 - Persistência do modo de visualização (tabela/cards) via `ViewPreferenceService` conectada ao `localStorage`.
 - Listagem tabular de clientes otimizada para 6 colunas, com largura de 12.5rem no documento e sem quebras de linha (white-space: nowrap). WhatsApp e cadastro mantidos no modal e nos cartões móveis.
 

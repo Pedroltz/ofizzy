@@ -44,24 +44,24 @@
           (keydown.enter)="open(item)"
           (keydown.space)="$event.preventDefault(); open(item)"
         >
-          <!-- Cabeçalho: Avatar e Documento -->
+          <!-- Cabeçalho: Avatar, Identidade e Documento -->
           <div class="catalog-card-header">
-            <div class="spacious-avatar">{{ initials(item.name) }}</div>
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="spacious-avatar flex-shrink-0">{{ initials(item.name) }}</div>
+              <div class="catalog-card-identity min-w-0 flex-1">
+                <h2 [title]="item.name">{{ item.name }}</h2>
+                @if (item.email) {
+                  <span class="catalog-card-subtitle" [title]="item.email">
+                    <i class="pi pi-envelope text-muted flex-shrink-0"></i>
+                    <span class="truncate">{{ item.email }}</span>
+                  </span>
+                }
+              </div>
+            </div>
             @if (item.document) {
-              <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+              <span class="doc-badge flex-shrink-0"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
             } @else {
-              <span class="text-xs text-muted font-medium italic">Sem documento</span>
-            }
-          </div>
-
-          <!-- Identidade -->
-          <div class="catalog-card-identity">
-            <h2 [title]="item.name">{{ item.name }}</h2>
-            @if (item.email) {
-              <span class="catalog-card-subtitle" [title]="item.email">
-                <i class="pi pi-envelope text-muted"></i>
-                <span>{{ item.email }}</span>
-              </span>
+              <span class="text-xs text-muted font-medium italic flex-shrink-0">Sem doc</span>
             }
           </div>
 
@@ -70,7 +70,7 @@
             <div class="catalog-meta-row">
               <span class="catalog-meta-label"><i class="pi pi-phone"></i> Telefone</span>
               @if (item.phone) {
-                <a [href]="'tel:' + item.phone" class="catalog-meta-value hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">{{ item.phone }}</a>
+                <a [href]="'tel:' + cleanPhone(item.phone)" class="catalog-meta-value hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">{{ formatPhone(item.phone) }}</a>
               } @else {
                 <span class="text-xs text-muted italic">Não informado</span>
               }
@@ -80,7 +80,7 @@
               <span class="catalog-meta-label"><i class="pi pi-whatsapp text-success"></i> WhatsApp</span>
               @if (item.whatsApp) {
                 <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="catalog-meta-value text-success font-bold hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
-                  {{ item.whatsApp }}
+                  {{ formatPhone(item.whatsApp) }}
                 </a>
               } @else {
                 <span class="text-xs text-muted italic">Não informado</span>
@@ -88,7 +88,7 @@
             </div>
 
             @if (item.address) {
-              <div class="catalog-card-info pt-1.5 border-t border-subtle">
+              <div class="catalog-card-info pt-2 border-t border-subtle">
                 <i class="pi pi-map-marker text-muted mt-0.5 flex-shrink-0"></i>
                 <span class="truncate" [title]="item.address">{{ item.address }}</span>
               </div>

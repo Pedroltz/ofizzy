@@ -48,11 +48,11 @@
           <div class="catalog-card-header">
             <span class="plate-badge large">{{ item.plate }}</span>
             @if (item.year || item.color) {
-              <span class="doc-badge">
+              <span class="doc-badge flex-shrink-0">
                 <i class="pi pi-calendar"></i> {{ item.year ? item.year : '' }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}
               </span>
             } @else {
-              <span class="text-xs text-muted font-medium italic"><i class="pi pi-car mr-1"></i>Veículo</span>
+              <span class="text-xs text-muted font-medium italic flex-shrink-0"><i class="pi pi-car mr-1"></i>Veículo</span>
             }
           </div>
 
@@ -62,7 +62,7 @@
               {{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}
             </h2>
             <span class="catalog-card-subtitle" [title]="'Proprietário: ' + item.customerName">
-              <i class="pi pi-user text-muted"></i>
+              <i class="pi pi-user text-muted flex-shrink-0"></i>
               <span>Proprietário: <strong class="text-primary">{{ item.customerName }}</strong></span>
             </span>
           </div>

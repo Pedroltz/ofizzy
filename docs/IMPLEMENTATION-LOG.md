@@ -698,3 +698,22 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
   - Angular Build: compilado com sucesso.
   - Playwright E2E: novo teste automatizado `modo de visualização (cards/tabela) persiste após navegação e recarregamento` aprovado (total: 28 aprovados, 11 skips de viewport).
 
+## 2026-09-11 — Redesenho e conforto visual dos blocos de clientes e veículos
+
+- **Layout e preenchimento de frame (`catalog-card`)**:
+  - Aplicada regra `align-items: stretch !important;` e `width: 100%;` em `.catalog-card`, eliminando o confinamento forçado ao centro herdado de `.entity-card`.
+  - `.catalog-card-header`: ajustado para 100% da largura com `justify-content: space-between`.
+  - `.catalog-card-identity`: alinhamento à esquerda (`text-align: left`) e `width: 100%`, com hierarquia clara entre título e subtítulo.
+  - `.catalog-card-meta-box`: largura integral com padding confortável (`0.85rem 1rem`), integrando os campos de contato e especificações sem recuos excessivos.
+  - `.catalog-card-notes`: transformado em banner de largura total com ícone e fundo suave (`var(--warning-soft)`).
+  - `.catalog-card-footer`: linha divisória e rodapé ocupando 100% da largura, com data à esquerda e ações à direita.
+- **Clientes (`CustomersPage`)**:
+  - Avatar, Nome e E-mail integrados em conjunto visual alinhado à esquerda; Documento posicionado no canto superior direito.
+  - Adicionado helper `formatPhone` para aplicar máscara em telefones brasileiros `(DD) 9XXXX-XXXX` ou `(DD) XXXX-XXXX`, mantendo link do WhatsApp limpo.
+- **Veículos (`VehiclesPage`)**:
+  - Placa e badge de Ano/Cor ancorados nas extremidades do cabeçalho.
+  - Modelo e Proprietário alinhados à esquerda; especificações e observações ocupando a largura do frame.
+- **Validações técnicas**:
+  - Frontend: ESLint 0 erros; 39/39 testes unitários aprovados; build compilado com sucesso; 28 testes E2E Playwright aprovados sem regressões.
+  - Backend: 25/25 testes aprovados (18 unitários, 7 integração).
+
