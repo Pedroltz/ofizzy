@@ -717,3 +717,16 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
   - Frontend: ESLint 0 erros; 39/39 testes unitários aprovados; build compilado com sucesso; 28 testes E2E Playwright aprovados sem regressões.
   - Backend: 25/25 testes aprovados (18 unitários, 7 integração).
 
+## 2026-09-11 — Documentação e planejamento: PWA e Operação Offline-First (Store & Forward)
+
+- **Planejamento de PWA e Resiliência Operacional**:
+  - Especificada a evolução para Progressive Web App (PWA) no Angular com `@angular/service-worker` e `manifest.webmanifest` para instalação nativa no celular, tablet e desktop.
+  - Especificado o modelo arquitetural *Offline-First* com persistência local em `IndexedDB` (via `Dexie.js`) para suportar quedas de energia no galpão e falta de conectividade no pátio externo da oficina.
+  - Mapeado o alinhamento com a arquitetura existente do Ofizzy: aproveitamento das chaves primárias em `Guid` (UUIDs) permitindo geração de IDs válidos no cliente, fila de despacho FIFO (`SyncQueue`), garantia de idempotência e atribuição do sequencial amigável da OS (`LastWorkOrderNumber`) pelo backend.
+- **Documentação atualizada**:
+  - `docs/ROADMAP.md`: Adicionada seção dedicada com itens de checklist para PWA e Operação Offline-First no backlog de evolução.
+  - `docs/PRODUCT-STRATEGY.md`: Incorporado como diferencial competitivo chave para oficinas mecânicas no diagnóstico de produto e no diagrama de trilha estratégica (Etapa 2 - Eficiência e Operação no Pátio).
+  - `docs/ARCHITECTURE.md`: Documentada a camada de evolução de frontend para PWA e Offline-First (App Shell, IndexedDB, geração de GUIDs no cliente, fila de sincronização e idempotência).
+  - `docs/STATUS.md` e `AI-HANDOFF.md`: Atualizados para refletir o planejamento arquitetural e inclusão no backlog oficial.
+
+

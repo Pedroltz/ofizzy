@@ -131,3 +131,25 @@ Os critérios detalhados vivem em `phases/`. Um item só é concluído após bui
 Evoluções posteriores: convites e recuperação de acesso, autosserviço com
 SaaS Subscriptions, outras verticais e branding com upload. Nenhuma dessas
 extensões demanda agora microserviços, bancos dedicados ou frontend por cliente.
+
+---
+
+## PWA & Operação Offline-First (Backlog de Resiliência Operacional)
+
+Capacidade de instalação nativa e resiliência para o pátio e chão de oficina (falta de sinal, oscilações de rede e quedas de energia):
+
+- [ ] **PWA Base (Instalabilidade & App Shell)**:
+  - Adição de `@angular/pwa` e `@angular/service-worker`.
+  - Configuração do `manifest.webmanifest` (ícones responsivos, tema escuro/claro, modo `standalone`).
+  - Cache permanente do App Shell (HTML, CSS, JS, ícones e fontes) para carregamento instantâneo mesmo sem conexão.
+  - Instalação direta no celular, tablet e desktop sem depender de lojas de aplicativos.
+- [ ] **Persistência Local Anti-Queda de Energia (Store & Forward)**:
+  - Armazenamento local persistente em `IndexedDB` (via wrapper tipado `Dexie.js`) para suportar desligamento abrupto do dispositivo ou queda de energia.
+  - Fila de sincronização local (`SyncQueue`) para acumular aberturas/edições de OS, clientes e veículos em estado pendente.
+  - Geração de identificadores únicos no cliente via GUID/UUID (aproveitando as chaves primárias `Guid` nativas da API .NET e do PostgreSQL).
+  - Indicador visual no cabeçalho sobre o estado de conexão (*Online*, *Sem conexão — X pendências salvas*, *Sincronizando...*).
+- [ ] **Sincronização Automática com a Nuvem (Cloud Sync)**:
+  - Detecção automática do retorno da conexão via eventos `online` do navegador e `Background Sync API`.
+  - Despacho em lote/FIFO das operações locais para a API .NET com cabeçalho de idempotência.
+  - Atribuição do número sequencial definitivo da OS (`LastWorkOrderNumber`) pelo backend após confirmação no PostgreSQL.
+

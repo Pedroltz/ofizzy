@@ -43,6 +43,9 @@ O Ofizzy posiciona-se como um **Vertical SaaS** (software como serviço vertical
    * Alerta visual de estoque baixo para peças críticas.
 3. **Comunicação Direta via WhatsApp:**
    * Botão de 1 clique na OS para enviar orçamento ou aviso de conclusão formatado diretamente para o WhatsApp do cliente.
+4. **PWA e Operação no Pátio com Resiliência Offline (Offline-First):**
+   * Aplicativo instalável no celular/tablet para atendimento ao lado do veículo no pátio da oficina.
+   * Proteção contra quedas de energia e oscilações de Wi-Fi: gravação imediata no navegador (`IndexedDB`) e sincronização automática com a nuvem na volta da rede.
 
 ---
 
@@ -50,7 +53,7 @@ O Ofizzy posiciona-se como um **Vertical SaaS** (software como serviço vertical
 
 ```mermaid
 flowchart TD
-    A["Etapa 1: MVP Completo e Vendável"] --> B["Etapa 2: Retenção e Fidelização"]
+    A["Etapa 1: MVP Completo e Vendável"] --> B["Etapa 2: Retenção e Eficiência Operacional"]
     B --> C["Etapa 3: Expansão Modular"]
     
     subgraph A ["Etapa 1 — Fechar o Ciclo da Oficina"]
@@ -59,10 +62,11 @@ flowchart TD
         A3["Disparo de orçamento/OS via WhatsApp Web"]
     end
     
-    subgraph B ["Etapa 2 — Aumentar o Faturamento da Oficina"]
-        B1["Histórico unificado do veículo por placa"]
-        B2["Lembretes de revisão preventiva por tempo/km"]
-        B3["Convite e recuperação autônoma de acesso por e-mail"]
+    subgraph B ["Etapa 2 — Eficiência e Operação no Pátio"]
+        B1["PWA e Operação Offline-First (Pátio & Queda de Rede)"]
+        B2["Histórico unificado do veículo por placa"]
+        B3["Lembretes de revisão preventiva por tempo/km"]
+        B4["Convite e recuperação autônoma de acesso por e-mail"]
     end
     
     subgraph C ["Etapa 3 — Escala e Novos Mercados"]

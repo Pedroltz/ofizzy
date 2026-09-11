@@ -59,3 +59,19 @@ flowchart LR
 
 Extrações futuras possíveis: Notifications, Documents/Reports, Integrations,
 SaaS Subscriptions e AI/Automation. Nenhum serviço distribuído foi criado.
+
+## Evolução de Frontend: PWA e Offline-First (Store & Forward)
+
+Para atender a realidade operacional de oficinas mecânicas (atendimento em pátio externo, oscilações de Wi-Fi e quedas de energia no galpão), o frontend foi projetado de forma desacoplada para suportar Progressive Web App (PWA) com padrão **Offline-First**:
+
+1. **App Shell & Service Worker**:
+   - `@angular/service-worker` e `manifest.webmanifest` gerenciam o cache permanente dos bundles estáticos (HTML/JS/CSS/fontes). Permite inicialização instantânea e instalação como aplicativo nativo em celulares, tablets e desktops (modo `standalone`).
+2. **Persistência Local Resistente a Falhas de Energia**:
+   - Camada de banco de dados no navegador baseada em `IndexedDB` (via biblioteca tipada `Dexie.js`), gravada em disco no dispositivo do cliente.
+   - Em caso de corte de energia, encerramento do navegador ou falta de internet, rascunhos e cadastros operacionais permanecem salvos em uma fila local (`SyncQueue`).
+3. **Harmonia com Chaves Primárias em GUID**:
+   - Todas as entidades do Ofizzy (`Customer`, `Vehicle`, `WorkOrder`, etc.) utilizam chaves primárias em `Guid` (UUID). Isso permite que o frontend gere identificadores válidos localmente no cliente sem necessidade de consultar o PostgreSQL previamente.
+4. **Sincronização Automática e Idempotência**:
+   - Na recuperação de conectividade (via eventos de rede e `Background Sync API`), um serviço despacha a fila em ordem para a API .NET.
+   - O backend garante idempotência da requisição, confirma a persistência no PostgreSQL compartilhado e aloca o número sequencial oficial da OS (`LastWorkOrderNumber`).
+

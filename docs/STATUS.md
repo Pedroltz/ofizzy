@@ -1,6 +1,6 @@
 # Status do projeto
 
-Atualizado em: 2026-09-10
+Atualizado em: 2026-09-11
 
 ## Estado vigente — evolução SaaS
 
@@ -37,7 +37,8 @@ Fases 1, 2, 3 e 4 concluídas e validadas.
 
 ## Próximo marco
 
-Fase 5 — Financeiro e Pagamentos (registro de pagamentos, formas de pagamento, parcelas, caixa e fechamento financeiro).
+- **Fase 5 — Financeiro e Pagamentos** (registro de pagamentos, formas de pagamento, parcelas, caixa e fechamento financeiro).
+- **PWA & Resiliência Offline-First (Backlog)**: suporte a instalação nativa, persistência local em `IndexedDB` resistente a quedas de energia/sinal e sincronização automática com a nuvem na volta da rede.
 
 ## Atenções
 
