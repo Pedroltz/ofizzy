@@ -431,6 +431,10 @@
     </div>
   }
 
+  @if (detailDialog() && viewing(); as order) {
+    @if (order.status === 'Completed') { <app-work-order-fiscal [order]="order" /> }
+  }
+
   <ng-template #footer>
     @if (viewing(); as order) {
       <div class="wo-dialog-footer">

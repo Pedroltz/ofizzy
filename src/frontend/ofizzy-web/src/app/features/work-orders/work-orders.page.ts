@@ -1,3 +1,4 @@
+import { WorkOrderFiscalComponent } from '../fiscal/work-order-fiscal.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -63,6 +64,7 @@ import {
     LoadingStateComponent,
     DataTableWrapperComponent,
     WorkOrderLinesEditorComponent,
+    WorkOrderFiscalComponent,
   ],
   templateUrl: './work-orders.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

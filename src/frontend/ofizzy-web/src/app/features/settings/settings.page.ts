@@ -1,3 +1,4 @@
+import { FiscalSettingsComponent } from '../fiscal/fiscal-settings.component';
 import { TenantContextService } from '../../core/tenancy/tenant-context.service';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -28,6 +29,7 @@ import {
     TextareaModule,
     PageHeaderComponent,
     CompanySettingsFormComponent,
+    FiscalSettingsComponent,
     EmptyStateComponent,
     ],
   templateUrl: './settings.page.html',

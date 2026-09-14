@@ -1,0 +1,38 @@
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { FiscalValue } from './fiscal-api.service';
+export interface FiscalField { key: string; label: string; type?: 'number' | 'date' | 'password'; options?: { label: string; value: FiscalValue }[]; }
+export function fiscalForm(fields: FiscalField[], values: Record<string, FiscalValue> = {}) { return new FormGroup(Object.fromEntries(fields.map(f => [f.key, new FormControl<FiscalValue>(values[f.key] ?? (f.type === 'number' ? null : ''))]))); }
+export const addressFields: FiscalField[] = [
+  { key: 'street', label: 'Logradouro' }, { key: 'number', label: 'Número' }, { key: 'district', label: 'Bairro' },
+  { key: 'city', label: 'Município' }, { key: 'cityCode', label: 'Código IBGE do município' }, { key: 'state', label: 'UF' }, { key: 'postalCode', label: 'CEP (somente números)' }
+];
+export const productFields: FiscalField[] = [
+  { key: 'ncm', label: 'NCM' }, { key: 'cest', label: 'CEST (quando aplicável)' }, { key: 'origin', label: 'Código da origem' },
+  { key: 'unit', label: 'Unidade' }, { key: 'gtin', label: 'GTIN ou SEM GTIN' }, { key: 'cfop', label: 'CFOP' }, { key: 'csosn', label: 'CSOSN' },
+  { key: 'pisCst', label: 'CST PIS' }, { key: 'cofinsCst', label: 'CST COFINS' },
+  { key: 'retainedStBase', label: 'Base ST anterior por unidade', type: 'number' }, { key: 'retainedStAmount', label: 'ICMS ST anterior por unidade', type: 'number' },
+  { key: 'substituteAmount', label: 'ICMS substituto por unidade', type: 'number' }, { key: 'stRate', label: 'Alíquota ST (%)', type: 'number' }
+];
+export const serviceFields: FiscalField[] = [
+  { key: 'nationalCode', label: 'Código de tributação nacional' }, { key: 'municipalCode', label: 'Código municipal (quando aplicável)' },
+  { key: 'nbs', label: 'NBS (quando aplicável)' }, { key: 'approximateTaxRate', label: 'Percentual aproximado de tributos do Simples', type: 'number' }
+];
+@Component({
+  selector: 'app-fiscal-fields', standalone: true, imports: [ReactiveFormsModule, InputTextModule, InputNumberModule, SelectModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<div class="fiscal-grid" [formGroup]="form()">@for (field of fields(); track field.key) {
+    <label [for]="prefix() + field.key">{{ field.label }}
+      @if (field.options) { <p-select [inputId]="prefix() + field.key" [formControlName]="field.key" [options]="field.options" optionLabel="label" optionValue="value" appendTo="body" /> }
+      @else if (field.type === 'number') { <p-inputnumber [inputId]="prefix() + field.key" [formControlName]="field.key" [minFractionDigits]="0" [maxFractionDigits]="4" locale="pt-BR" /> }
+      @else { <input pInputText [id]="prefix() + field.key" [type]="field.type || 'text'" [formControlName]="field.key" autocomplete="off" maxlength="255" /> }
+    </label>
+  }</div>`,
+  styles: `:host{display:block;min-width:0}.fiscal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}label{display:flex;flex-direction:column;gap:.4rem;min-width:0;color:var(--text-primary)}input{min-height:44px;width:100%;min-width:0}p-select,p-inputnumber{width:100%;min-width:0;min-height:44px}:host ::ng-deep .p-inputnumber-input{min-width:0;width:100%;min-height:44px}@media(max-width:640px){input,:host ::ng-deep input{font-size:16px}}`
+})
+export class FiscalFieldsComponent {
+  readonly fields = input.required<FiscalField[]>(); readonly form = input.required<ReturnType<typeof fiscalForm>>(); readonly prefix = input('fiscal-');
+}

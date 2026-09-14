@@ -12,6 +12,7 @@
       <p-tab value="parts"><i class="pi pi-box mr-2" aria-hidden="true"></i> Peças e Insumos</p-tab>
       }
       <p-tab value="workshop"><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Empresa</p-tab>
+      @if (tenantContext.admin()) { <p-tab value="fiscal"><i class="pi pi-file-check mr-2" aria-hidden="true"></i> Fiscal</p-tab> }
     </p-tablist>
 
     <p-tabpanels>
@@ -107,6 +108,7 @@
       <p-tabpanel value="workshop">
         <app-company-settings-form />
       </p-tabpanel>
+      @if (tenantContext.admin()) { <p-tabpanel value="fiscal"><ng-template #content><app-fiscal-settings /></ng-template></p-tabpanel> }
     </p-tabpanels>
   </p-tabs>
 </section>
