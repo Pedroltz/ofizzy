@@ -276,3 +276,84 @@ test('formulário de OS vira tela cheia e edita itens em cards no celular', asyn
   await page.getByRole('button', { name: 'Novo Serviço Avulso' }).click();
   await expect(page.locator('app-work-order-lines-editor .line-card')).toBeVisible();
 });
+
+test('preparação fiscal da OS finalizada mantém formulário acessível', async ({ page }, testInfo) => {
+  if (testInfo.project.name === 'mobile') await page.setViewportSize({ width: 320, height: 740 });
+  await mockApi(page);
+  const completed = { ...order, status: 'Completed', completedAt: '2026-09-12T12:00:00Z' };
+  let preparation: Record<string, unknown> = { name: customer.name, document: '12345678909', address: {}, products: {}, services: {} };
+  await page.route('**/api/work-orders**', async route => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith('/fiscal')) {
+      if (route.request().method() === 'PUT') { preparation = route.request().postDataJSON(); await route.fulfill({ status: 204 }); return; }
+      await route.fulfill({ json: { preparation, issues: [{ field: 'certificate', message: 'Cadastre o certificado A1.' }], productsTotal: 300, servicesTotal: 120, status: 'Pending', documents: [] } });
+    } else await route.fulfill({ json: path.endsWith('/order-1') ? completed : { items: [completed], total: 1, page: 1, pageSize: 12 } });
+  });
+  await page.route('**/api/parts/*/fiscal', route => route.fulfill({ json: {} }));
+  await page.route('**/api/services/*/fiscal', route => route.fulfill({ json: {} }));
+  await page.goto('/ordens');
+  await page.getByText(customer.name, { exact: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Documentos fiscais', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Preparação fiscal', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Preparação fiscal da OS' });
+  await expect(dialog).toBeVisible();
+  await dialog.locator('#recipient-name').fill('Tomador alterado');
+  await dialog.getByRole('button', { name: 'Salvar preparação' }).click();
+  await expect.poll(() => preparation['name']).toBe('Tomador alterado');
+  const bounds = await dialog.evaluate(el => ({ scroll: el.scrollWidth, width: el.clientWidth }));
+  expect(bounds.scroll).toBeLessThanOrEqual(bounds.width + 1);
+  const input = await dialog.locator('#recipient-name').boundingBox();
+  expect(input!.height).toBeGreaterThanOrEqual(44);
+});
+
+test('inutilização fiscal confirma intervalo e recupera protocolo pendente', async ({ page }, testInfo) => {
+  if (testInfo.project.name === 'mobile') await page.setViewportSize({ width: 320, height: 900 });
+  await mockApi(page);
+  let records = [{ id: 'inut-1', series: 1, year: 2026, firstNumber: 3, lastNumber: 3, environment: 'Homologation', state: 'Pending', protocol: '', message: 'Resultado inconclusivo.', createdAt: '2026-09-12T12:00:00Z' }];
+  let creates = 0;
+  await page.route('**/api/fiscal/settings', route => route.fulfill({ json: { settings: { cnpj: '11222333000181', legalName: 'Oficina Teste', address: {}, environment: 'Homologation', regime: 'SimplesNacional', nfeEnabled: true, nfseEnabled: true, nfeSeries: 1, dpsSeries: 1 }, certificate: null, encryptionConfigured: false, productionAllowed: false } }));
+  await page.route('**/api/fiscal/nfe/inutilizations**', async route => {
+    if (route.request().url().endsWith('/sync')) { records = [{ ...records[0], state: 'Confirmed', protocol: '135260000000001', message: 'Protocolo confirmado.' }]; await route.fulfill({ status: 204 }); }
+    else if (route.request().method() === 'POST') { creates++; expect(route.request().postDataJSON()).toMatchObject({ series: 1, firstNumber: 5, lastNumber: 5 }); await route.fulfill({ status: 409, json: { detail: 'O número não está reservado neste sistema.' } }); }
+    else await route.fulfill({ json: records });
+  });
+  await page.goto('/configuracoes');
+  await page.getByRole('tab', { name: 'Fiscal', exact: true }).click();
+  await page.getByText('Histórico e inutilização NF-e', { exact: true }).click();
+  await page.getByRole('button', { name: 'Recuperar protocolo', exact: true }).click();
+  await expect(page.getByText('Protocolo: 135260000000001')).toBeVisible();
+  await page.locator('#inut-firstNumber').fill('5'); await page.locator('#inut-lastNumber').fill('5');
+  await page.locator('#inut-reason').fill('Numeração rejeitada para teste da oficina');
+  await page.getByRole('button', { name: 'Revisar inutilização', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Confirmar inutilização', exact: true });
+  await expect(dialog).toBeVisible(); expect(creates).toBe(0);
+  await dialog.getByRole('button', { name: 'Confirmar inutilização', exact: true }).click();
+  await expect(dialog.getByText('O número não está reservado neste sistema.')).toBeVisible();
+  expect(creates).toBe(1);
+  await expectNoHorizontalOverflow(page);
+  expect((await dialog.getByRole('button', { name: 'Voltar', exact: true }).boundingBox())!.height).toBeGreaterThanOrEqual(44);
+});
+
+for (const available of [false, true]) {
+  test(`certificado de teste respeita capacidade do servidor: ${available}`, async ({ page }, testInfo) => {
+    if (testInfo.project.name === 'mobile') await page.setViewportSize({ width: 320, height: 900 });
+    await mockApi(page);
+    await page.route('**/api/fiscal/settings', route => route.fulfill({ json: {
+      settings: { cnpj: '11222333000181', legalName: 'Oficina Teste', address: {}, environment: 'Homologation', regime: 'SimplesNacional', nfeEnabled: true, nfseEnabled: true, nfeSeries: 1, dpsSeries: 1 },
+      certificate: null, encryptionConfigured: true, productionAllowed: false, devToolsAvailable: available,
+    } }));
+    await page.route('**/api/fiscal/dev/certificate', route => route.fulfill({ status: 404, json: { detail: 'Utilitário indisponível' } }));
+    await page.goto('/configuracoes');
+    await page.getByRole('tab', { name: 'Fiscal', exact: true }).click();
+    await expect(page.locator('#issuer-cnpj')).toHaveValue('11222333000181');
+    const button = page.getByRole('button', { name: 'Baixar certificado A1 de teste (Dev)', exact: true });
+    if (available) {
+      await expect(button).toBeVisible();
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await button.click();
+      await expect(page.getByText(/Não foi possível baixar o certificado de teste/)).toBeVisible();
+      await expect(page.locator('#issuer-cnpj')).toHaveValue('11222333000181');
+    } else await expect(button).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  });
+}
