@@ -13,7 +13,8 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
             ConflictException => 409,
             FluentValidation.ValidationException => 400,
             Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException => 409,
-            Microsoft.EntityFrameworkCore.DbUpdateException { InnerException: Npgsql.PostgresException { SqlState: "23505" or "23503" } } => 409,
+            Microsoft.EntityFrameworkCore.DbUpdateException { InnerException: Npgsql.PostgresException { SqlState: "23505" or "23503" or "40001" } } => 409,
+            Npgsql.PostgresException { SqlState: "40001" } => 409,
             _ => 500
         };
         if (status == 500) logger.LogError(exception, "Unhandled request failure for tenant {TenantId}, user {UserId}, request {RequestId}", context.Items["TenantId"], context.Items["UserId"], context.TraceIdentifier);

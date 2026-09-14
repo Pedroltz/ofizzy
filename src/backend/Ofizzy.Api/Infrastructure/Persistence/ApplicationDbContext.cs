@@ -1,4 +1,5 @@
 using Ofizzy.Api.Modules.Tenancy;
+using Ofizzy.Api.Modules.Fiscal;
 using Microsoft.EntityFrameworkCore;
 using Ofizzy.Api.Modules.Customers;
 using Ofizzy.Api.Modules.Parts;
@@ -24,6 +25,16 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
     public DbSet<WorkOrderService> WorkOrderServices => Set<WorkOrderService>();
     public DbSet<WorkOrderPart> WorkOrderParts => Set<WorkOrderPart>();
+
+    public DbSet<FiscalSettings> FiscalSettingsEntries => Set<FiscalSettings>();
+    public DbSet<ProductFiscalProfile> ProductFiscalProfileEntries => Set<ProductFiscalProfile>();
+    public DbSet<ServiceFiscalProfile> ServiceFiscalProfileEntries => Set<ServiceFiscalProfile>();
+    public DbSet<FiscalPreparation> FiscalPreparationEntries => Set<FiscalPreparation>();
+    public DbSet<FiscalSequence> FiscalSequenceEntries => Set<FiscalSequence>();
+    public DbSet<FiscalDocument> FiscalDocumentEntries => Set<FiscalDocument>();
+    public DbSet<FiscalEvent> FiscalEventEntries => Set<FiscalEvent>();
+
+    public DbSet<FiscalInutilization> FiscalInutilizationEntries => Set<FiscalInutilization>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -132,6 +143,30 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         Scope<WorkOrder>(modelBuilder);
         Scope<WorkOrderService>(modelBuilder);
         Scope<WorkOrderPart>(modelBuilder);
+
+        modelBuilder.Entity<FiscalSettings>(e => { e.ToTable("fiscal_settings"); e.HasIndex(x => x.TenantId).IsUnique(); e.Property(x => x.Version).IsConcurrencyToken(); });
+        modelBuilder.Entity<ProductFiscalProfile>(e => { e.ToTable("fiscal_products"); e.HasIndex(x => x.PartId).IsUnique(); e.HasOne<Part>().WithMany().HasForeignKey(x => new { x.TenantId, x.PartId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict); });
+        modelBuilder.Entity<ServiceFiscalProfile>(e => { e.ToTable("fiscal_services"); e.HasIndex(x => x.ServiceId).IsUnique(); e.HasOne<ServiceItem>().WithMany().HasForeignKey(x => new { x.TenantId, x.ServiceId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict); });
+        modelBuilder.Entity<FiscalPreparation>(e => { e.ToTable("fiscal_preparations"); e.HasIndex(x => x.WorkOrderId).IsUnique(); e.Property(x => x.Version).IsConcurrencyToken(); e.HasOne<WorkOrder>().WithMany().HasForeignKey(x => new { x.TenantId, x.WorkOrderId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict); });
+        modelBuilder.Entity<FiscalSequence>(e => { e.ToTable("fiscal_sequences"); e.HasIndex(x => new { x.Kind, x.Environment, x.Series }).IsUnique(); e.Property(x => x.Version).IsConcurrencyToken(); });
+        modelBuilder.Entity<FiscalDocument>(e => {
+            e.ToTable("fiscal_documents"); e.Property(x => x.Version).IsConcurrencyToken();
+            e.Property(x => x.Total).HasPrecision(18, 2);
+            e.HasAlternateKey(x => new { x.TenantId, x.Id });
+            e.HasIndex(x => new { x.Kind, x.Environment, x.Series, x.Number }).IsUnique();
+            e.HasIndex(x => new { x.WorkOrderId, x.Kind, x.Environment }).IsUnique().HasFilter("\"State\" NOT IN (6, 7)");
+            e.HasOne<WorkOrder>().WithMany().HasForeignKey(x => new { x.TenantId, x.WorkOrderId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FiscalEvent>(e => { e.ToTable("fiscal_events"); e.HasOne<FiscalDocument>().WithMany().HasForeignKey(x => new { x.TenantId, x.DocumentId }).HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict); });
+        modelBuilder.Entity<FiscalInutilization>(e => { e.ToTable("fiscal_inutilizations"); e.Property(x => x.Version).IsConcurrencyToken(); e.HasIndex(x => new { x.Environment, x.Series, x.Year, x.FirstNumber, x.LastNumber }).IsUnique(); });
+        Scope<FiscalInutilization>(modelBuilder);
+        Scope<FiscalSettings>(modelBuilder);
+        Scope<ProductFiscalProfile>(modelBuilder);
+        Scope<ServiceFiscalProfile>(modelBuilder);
+        Scope<FiscalPreparation>(modelBuilder);
+        Scope<FiscalSequence>(modelBuilder);
+        Scope<FiscalDocument>(modelBuilder);
+        Scope<FiscalEvent>(modelBuilder);
 
         // Every operational index starts with TenantId, including uniqueness constraints.
         foreach (var entity in modelBuilder.Model.GetEntityTypes().Where(x => typeof(ITenantScoped).IsAssignableFrom(x.ClrType)).ToList())

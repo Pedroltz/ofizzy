@@ -20,6 +20,10 @@
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="QuestPDF" Version="2025.1.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="BusinessCore/Fiscal/Schemas/**/*.xsd" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

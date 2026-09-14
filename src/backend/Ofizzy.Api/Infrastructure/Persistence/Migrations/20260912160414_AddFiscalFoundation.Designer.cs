@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ofizzy.Api.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Ofizzy.Api.Infrastructure.Persistence;
 namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260912160414_AddFiscalFoundation")]
+    partial class AddFiscalFoundation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -342,7 +345,7 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId", "WorkOrderId", "Kind", "Environment")
                         .IsUnique()
-                        .HasFilter("\"State\" NOT IN (6, 7)");
+                        .HasFilter("\"State\" <> 7");
 
                     b.HasIndex("TenantId", "Kind", "Environment", "Series", "Number")
                         .IsUnique();
@@ -387,72 +390,6 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "DocumentId");
 
                     b.ToTable("fiscal_events", "ofizzy");
-                });
-
-            modelBuilder.Entity("Ofizzy.Api.Modules.Fiscal.FiscalInutilization", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Environment")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("FirstNumber")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("LastNumber")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset?>("LeaseUntil")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Protocol")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RequestXml")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ResponseXml")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Series")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("TenantId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId", "Environment", "Series", "Year", "FirstNumber", "LastNumber")
-                        .IsUnique();
-
-                    b.ToTable("fiscal_inutilizations", "ofizzy");
                 });
 
             modelBuilder.Entity("Ofizzy.Api.Modules.Fiscal.FiscalPreparation", b =>
@@ -1088,15 +1025,6 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId", "DocumentId")
                         .HasPrincipalKey("TenantId", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Ofizzy.Api.Modules.Fiscal.FiscalInutilization", b =>
-                {
-                    b.HasOne("Ofizzy.Api.Modules.Tenancy.Tenant", null)
-                        .WithMany()
-                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

@@ -1,4 +1,5 @@
 using Ofizzy.Api.Modules.Tenancy;
+using Ofizzy.Api.Modules.Fiscal;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -78,6 +79,19 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<CurrentTenant>();
+builder.Services.AddSingleton<FiscalCertificateVault>();
+builder.Services.AddScoped<FiscalPreparationService>();
+builder.Services.AddScoped<FiscalEmissionService>();
+builder.Services.AddScoped<NationalFiscalGateway>();
+builder.Services.AddScoped<DevSimulatedFiscalGateway>();
+builder.Services.AddScoped<IFiscalGateway>(sp =>
+{
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    var config = sp.GetRequiredService<IConfiguration>();
+    if (env.IsDevelopment() && config.GetValue<bool>("Fiscal:SimulateGateway"))
+        return sp.GetRequiredService<DevSimulatedFiscalGateway>();
+    return sp.GetRequiredService<NationalFiscalGateway>();
+});
 builder.Services.AddScoped<TenantProvisioningService>();
 builder.Services.AddScoped<TenantAccessFilter>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, PlatformAuthorizationHandler>();

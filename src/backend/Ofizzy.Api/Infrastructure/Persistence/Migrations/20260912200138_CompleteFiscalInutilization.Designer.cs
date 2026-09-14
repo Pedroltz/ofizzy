@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ofizzy.Api.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Ofizzy.Api.Infrastructure.Persistence;
 namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260912200138_CompleteFiscalInutilization")]
+    partial class CompleteFiscalInutilization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -406,9 +409,6 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
 
                     b.Property<long>("LastNumber")
                         .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset?>("LeaseUntil")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Message")
                         .HasColumnType("text");
