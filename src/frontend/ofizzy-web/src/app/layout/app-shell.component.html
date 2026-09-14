@@ -32,9 +32,6 @@
     </div>
 
     <div class="sidebar-footer">
-      <div class="sidebar-theme-row">
-        <app-theme-toggle />
-      </div>
       <div class="sidebar-user">
         <div class="user-avatar">
           {{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}
@@ -67,6 +64,7 @@
         </span>
       </div>
       <div class="desktop-header__right">
+        <app-theme-toggle mode="switch" />
         @if (!platformArea && tenantContext.has('WorkOrders')) {
         <a routerLink="/ordens" class="header-action-link">
           <i class="pi pi-plus"></i>
@@ -91,6 +89,7 @@
         <strong>Ofizzy</strong>
       </a>
       <div class="mobile-header__right">
+        <app-theme-toggle mode="switch" />
         <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
       </div>
     </header>
@@ -146,9 +145,6 @@
           </div>
 
           <div class="sidebar-footer">
-            <div class="sidebar-theme-row">
-              <app-theme-toggle />
-            </div>
             <div class="sidebar-user drawer-user">
               <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
               <div class="user-details">

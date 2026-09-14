@@ -880,6 +880,21 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
 - **Validações e Testes (Frontend)**:
   - ESLint: aprovado com 0 erros e 0 avisos (`npm run lint`).
   - Vitest: 39 testes unitários aprovados em 8 arquivos (`npx ng test --no-watch`).
-  - Angular Build: compilação de produção aprovada com sucesso (`npm run build`).
   - Playwright: 40 testes responsivos aprovados em Desktop, Tablet e Mobile 320px sem overflow horizontal e com controles $\ge 44$ px (`npx playwright test e2e/responsive.spec.ts`).
+
+## 2026-09-14 — Evolução do controle de tema (modo switch na barra superior)
+
+- **Controle de Tema como Chave / Switch (`ThemeToggleComponent`)**:
+  - Adicionado suporte a `mode="switch"` ao lado do modo `dropdown` padrão.
+  - No modo switch, o componente renderiza uma chave deslizante elegante com ícones de sol e lua (`pi-sun` e `pi-moon`), trilho suave, `role="switch"` e acessibilidade compatível com leitores de tela e navegação por teclado (`min-height: 44px`, `min-width: 44px`, `focus-visible`).
+- **Barra Superior (`AppShellComponent`)**:
+  - Movido o controle de tema para o cabeçalho superior (`desktop-header__right`), posicionado diretamente ao lado do botão **Nova OS**.
+  - No cabeçalho móvel (`mobile-header__right`), a chave de tema também foi inserida ao lado do avatar do usuário.
+  - O rodapé da sidebar foi despoluído, mantendo o foco nas informações do usuário autenticado e botão de encerramento de sessão.
+- **Validações e Testes**:
+  - ESLint: 0 erros e 0 avisos (`npm run lint`).
+  - Vitest: 40 testes unitários aprovados em 8 arquivos (`npx ng test --no-watch`), incluindo novo teste para o modo switch.
+  - Angular Build: compilação de produção aprovada com sucesso (`npm run build`).
+  - Playwright: 58 testes aprovados (11 skips) em Desktop, Tablet e Mobile (`npx playwright test`).
+
 

@@ -13,49 +13,164 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
 @Component({
   selector: 'app-theme-toggle',
   template: `
-    <div class="theme-toggle">
+    @if (mode() === 'switch') {
       <button
         type="button"
-        class="theme-toggle__btn"
-        (click)="isOpen.set(!isOpen())"
-        [attr.aria-expanded]="isOpen()"
-        aria-haspopup="menu"
-        aria-label="Alternar tema de aparência"
-        [title]="'Tema: ' + currentLabel()"
+        class="theme-switch"
+        (click)="toggle()"
+        [attr.aria-label]="activeTheme() === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
+        [attr.aria-checked]="activeTheme() === 'dark'"
+        role="switch"
+        [title]="activeTheme() === 'dark' ? 'Tema escuro ativo (clique para alternar)' : 'Tema claro ativo (clique para alternar)'"
       >
-        <i [class]="currentIcon()" aria-hidden="true"></i>
-        <span class="theme-toggle__label">{{ currentLabel() }}</span>
-        <i class="pi pi-chevron-down theme-toggle__chevron" [class.rotated]="isOpen()" aria-hidden="true"></i>
+        <span class="theme-switch__track" [class.theme-switch__track--dark]="activeTheme() === 'dark'">
+          <span class="theme-switch__icon sun" aria-hidden="true"><i class="pi pi-sun"></i></span>
+          <span class="theme-switch__thumb">
+            <i [class]="activeTheme() === 'dark' ? 'pi pi-moon' : 'pi pi-sun'" aria-hidden="true"></i>
+          </span>
+          <span class="theme-switch__icon moon" aria-hidden="true"><i class="pi pi-moon"></i></span>
+        </span>
       </button>
-
-      @if (isOpen()) {
-        <div
-          class="theme-toggle__menu surface-card"
-          [class.theme-toggle__menu--below]="placement() === 'bottom'"
-          role="menu"
-          aria-label="Opções de tema"
+    } @else {
+      <div class="theme-toggle">
+        <button
+          type="button"
+          class="theme-toggle__btn"
+          (click)="isOpen.set(!isOpen())"
+          [attr.aria-expanded]="isOpen()"
+          aria-haspopup="menu"
+          aria-label="Alternar tema de aparência"
+          [title]="'Tema: ' + currentLabel()"
         >
-          @for (opt of options; track opt.value) {
-            <button
-              type="button"
-              class="theme-toggle__option"
-              [class.active]="preference() === opt.value"
-              role="menuitemradio"
-              [attr.aria-checked]="preference() === opt.value"
-              (click)="selectTheme(opt.value)"
-            >
-              <i [class]="opt.icon" aria-hidden="true"></i>
-              <span>{{ opt.label }}</span>
-              @if (preference() === opt.value) {
-                <i class="pi pi-check theme-toggle__check" aria-hidden="true"></i>
-              }
-            </button>
-          }
-        </div>
-      }
-    </div>
+          <i [class]="currentIcon()" aria-hidden="true"></i>
+          <span class="theme-toggle__label">{{ currentLabel() }}</span>
+          <i class="pi pi-chevron-down theme-toggle__chevron" [class.rotated]="isOpen()" aria-hidden="true"></i>
+        </button>
+
+        @if (isOpen()) {
+          <div
+            class="theme-toggle__menu surface-card"
+            [class.theme-toggle__menu--below]="placement() === 'bottom'"
+            role="menu"
+            aria-label="Opções de tema"
+          >
+            @for (opt of options; track opt.value) {
+              <button
+                type="button"
+                class="theme-toggle__option"
+                [class.active]="preference() === opt.value"
+                role="menuitemradio"
+                [attr.aria-checked]="preference() === opt.value"
+                (click)="selectTheme(opt.value)"
+              >
+                <i [class]="opt.icon" aria-hidden="true"></i>
+                <span>{{ opt.label }}</span>
+                @if (preference() === opt.value) {
+                  <i class="pi pi-check theme-toggle__check" aria-hidden="true"></i>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
   `,
   styles: [`
+    /* Switch Style (Header) */
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    .theme-switch:focus-visible {
+      outline: none;
+    }
+
+    .theme-switch:focus-visible .theme-switch__track {
+      box-shadow: var(--focus-ring);
+    }
+
+    .theme-switch__track {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 3.25rem;
+      height: 1.85rem;
+      padding: 0 0.4rem;
+      background: var(--surface-hover);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      transition: background-color var(--transition-fast), border-color var(--transition-fast);
+      user-select: none;
+    }
+
+    .theme-switch:hover .theme-switch__track {
+      border-color: var(--primary);
+    }
+
+    .theme-switch__track--dark {
+      background: var(--surface-secondary);
+      border-color: var(--primary);
+    }
+
+    .theme-switch__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      z-index: 1;
+      pointer-events: none;
+      transition: color var(--transition-fast);
+    }
+
+    .theme-switch__icon.sun {
+      color: var(--warning);
+    }
+
+    .theme-switch__icon.moon {
+      color: var(--text-muted);
+    }
+
+    .theme-switch__track--dark .theme-switch__icon.moon {
+      color: var(--primary);
+    }
+
+    .theme-switch__thumb {
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: var(--radius-full);
+      background: var(--surface-primary);
+      border: 1px solid var(--border-default);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--primary);
+      transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+      z-index: 2;
+    }
+
+    .theme-switch__track--dark .theme-switch__thumb {
+      transform: translateX(1.4rem);
+      background: var(--primary);
+      color: var(--primary-text);
+      border-color: var(--primary);
+    }
+
+    /* Dropdown Style (Auth / Settings) */
     .theme-toggle {
       position: relative;
       display: inline-block;
@@ -173,6 +288,7 @@ import { THEME_OPTIONS, ThemePreference } from '../../core/theme/theme.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeToggleComponent {
+  readonly mode = input<'dropdown' | 'switch'>('dropdown');
   readonly placement = input<'top' | 'bottom'>('top');
   private readonly themeService = inject(ThemeService);
   private readonly elementRef = inject(ElementRef);
@@ -197,6 +313,10 @@ export class ThemeToggleComponent {
     return pref === 'dark' ? 'pi pi-moon' : 'pi pi-sun';
   }
 
+  toggle(): void {
+    this.themeService.toggle();
+  }
+
   selectTheme(theme: ThemePreference): void {
     this.themeService.setPreference(theme);
     this.isOpen.set(false);
@@ -214,3 +334,4 @@ export class ThemeToggleComponent {
     this.isOpen.set(false);
   }
 }
+

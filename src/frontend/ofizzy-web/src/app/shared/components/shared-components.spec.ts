@@ -270,5 +270,27 @@ describe('Shared Design System Components', () => {
       expect(themeService.preference()).toBe('dark');
       expect(fixture.componentInstance.isOpen()).toBe(false);
     });
+
+    it('should toggle theme when clicked in switch mode', async () => {
+      await TestBed.configureTestingModule({
+        imports: [ThemeToggleComponent],
+        providers: [ThemeService],
+      }).compileComponents();
+
+      const fixture = TestBed.createComponent(ThemeToggleComponent);
+      fixture.componentRef.setInput('mode', 'switch');
+      const themeService = TestBed.inject(ThemeService);
+      fixture.detectChanges();
+
+      const switchBtn = fixture.nativeElement.querySelector('button.theme-switch') as HTMLButtonElement;
+      expect(switchBtn).not.toBeNull();
+
+      const initial = themeService.activeTheme();
+      switchBtn.click();
+      fixture.detectChanges();
+
+      const expected = initial === 'dark' ? 'light' : 'dark';
+      expect(themeService.activeTheme()).toBe(expected);
+    });
   });
 });
