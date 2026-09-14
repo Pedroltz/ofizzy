@@ -13,29 +13,49 @@ import { FiscalFieldsComponent, FiscalField, fiscalForm } from './fiscal-fields.
   selector: 'app-fiscal-inutilizations', standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, ReactiveFormsModule, ButtonModule, DialogModule, MessageModule, TextareaModule, FiscalFieldsComponent],
   template: `<section aria-label="Inutilização de numeração NF-e">
-    <p>Use somente para números reservados pelo Ofizzy cuja emissão foi rejeitada. A SEFAZ deve confirmar que não existe NF-e autorizada. A inutilização confirmada é definitiva.</p>
+    <p class="text-sm text-secondary mb-4">Use somente para números reservados pelo Ofizzy cuja emissão foi rejeitada. A SEFAZ deve confirmar que não existe NF-e autorizada. A inutilização confirmada é definitiva.</p>
     <app-fiscal-fields [fields]="fields" [form]="form" prefix="inut-" />
-    <label for="inut-reason">Justificativa (15 a 255 caracteres)</label>
-    <textarea pTextarea id="inut-reason" [formControl]="reason" rows="3" maxlength="255"></textarea>
-    @if (error()) { <p-message severity="error">{{ error() }}</p-message> }
-    <div class="actions"><p-button label="Revisar inutilização" [disabled]="busy()" (onClick)="review()" /><p-button label="Atualizar histórico" [loading]="busy()" (onClick)="load()" /></div>
-    <div role="status" aria-live="polite">{{ result() }}</div>
+    <div class="mt-4 mb-3">
+      <label for="inut-reason" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Justificativa (15 a 255 caracteres)</label>
+      <textarea pTextarea id="inut-reason" [formControl]="reason" rows="3" maxlength="255" class="w-full"></textarea>
+    </div>
+    @if (error()) { <p-message severity="error" class="my-3 block">{{ error() }}</p-message> }
+    <div class="flex flex-wrap gap-2.5 items-center my-4">
+      <p-button label="Revisar inutilização" [disabled]="busy()" (onClick)="review()" />
+      <p-button label="Atualizar histórico" [outlined]="true" [loading]="busy()" (onClick)="load()" />
+    </div>
+    @if (result()) { <div role="status" aria-live="polite" class="my-3"><p-message severity="info">{{ result() }}</p-message></div> }
     <div class="history">@for (item of records(); track item.id) {
-      <article><strong>Série {{ item.series }} · {{ item.firstNumber }} a {{ item.lastNumber }}</strong>
-        <p>{{ item.environment === 'Production' ? 'Produção' : 'Homologação' }} · {{ item.year }} · {{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-        <p>{{ label(item.state) }} — {{ item.message }}</p>
-        @if (item.protocol) { <p>Protocolo: {{ item.protocol }}</p> }
-        @if (item.state === 'Pending') { <p-button label="Recuperar protocolo" [disabled]="busy()" (onClick)="recover(item)" /> }
+      <article class="history-card">
+        <div class="flex items-center justify-between gap-2">
+          <strong class="text-primary text-sm">Série {{ item.series }} · {{ item.firstNumber }} a {{ item.lastNumber }}</strong>
+          <span class="font-mono text-xs px-2 py-0.5 rounded border border-subtle bg-surface-secondary text-secondary">{{ item.year }}</span>
+        </div>
+        <p class="text-xs text-muted m-0">{{ item.environment === 'Production' ? 'Produção' : 'Homologação' }} · {{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p class="text-sm text-secondary m-0">{{ label(item.state) }} — {{ item.message }}</p>
+        @if (item.protocol) { <p class="text-xs font-mono text-muted m-0">Protocolo: {{ item.protocol }}</p> }
+        @if (item.state === 'Pending') {
+          <div class="mt-2 pt-2 border-t border-subtle">
+            <p-button label="Recuperar protocolo" [outlined]="true" size="small" [disabled]="busy()" (onClick)="recover(item)" />
+          </div>
+        }
       </article>
-    } @empty { <p>Nenhum pedido registrado.</p> }</div>
+    } @empty { <p class="text-sm text-muted m-0">Nenhum pedido registrado.</p> }</div>
   </section>
   <p-dialog header="Confirmar inutilização" [modal]="true" [visible]="confirming()" (visibleChange)="confirming.set($event)" [style]="{ width: 'min(32rem, 94vw)' }">
-    <p>Inutilizar números {{ form.controls['firstNumber'].value }} a {{ form.controls['lastNumber'].value }}, série {{ form.controls['series'].value }}, ano {{ form.controls['year'].value }} no ambiente fiscal configurado?</p>
-    <p>Depois da confirmação da SEFAZ, esses números não poderão ser usados.</p>
-    @if (error()) { <p-message severity="error">{{ error() }}</p-message> }
-    <div class="actions"><p-button label="Confirmar inutilização" severity="danger" [loading]="busy()" (onClick)="create()" /><p-button label="Voltar" [disabled]="busy()" (onClick)="confirming.set(false)" /></div>
+    <div class="flex flex-col gap-3 py-1">
+      <p class="text-secondary text-sm m-0">Inutilizar números {{ form.controls['firstNumber'].value }} a {{ form.controls['lastNumber'].value }}, série {{ form.controls['series'].value }}, ano {{ form.controls['year'].value }} no ambiente fiscal configurado?</p>
+      <p class="text-secondary text-sm m-0">Depois da confirmação da SEFAZ, esses números não poderão ser usados.</p>
+      @if (error()) { <p-message severity="error" class="block">{{ error() }}</p-message> }
+    </div>
+    <ng-template #footer>
+      <div class="dialog-actions">
+        <p-button label="Voltar" [text]="true" severity="secondary" [disabled]="busy()" (onClick)="confirming.set(false)" />
+        <p-button label="Confirmar inutilização" severity="danger" [loading]="busy()" (onClick)="create()" />
+      </div>
+    </ng-template>
   </p-dialog>`,
-  styles: `:host,section{display:block;min-width:0}textarea{display:block;width:100%;min-height:44px;margin:.5rem 0 1rem}.actions{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.history{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1rem}article{border:1px solid var(--border-subtle);border-radius:.75rem;padding:1rem;min-width:0}p,strong{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}@media(max-width:640px){textarea{font-size:16px}}`
+  styles: `:host,section{display:block;min-width:0}.history{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1rem;margin-top:1rem}.history-card{border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:1.25rem;background:var(--surface-primary);display:flex;flex-direction:column;gap:0.5rem;min-width:0}textarea{display:block;width:100%;min-height:44px}p,strong{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}.dialog-actions{display:flex;justify-content:flex-end;gap:0.5rem;padding-top:0.75rem}@media(max-width:640px){textarea{font-size:16px}}`
 })
 export class FiscalInutilizationsComponent {
   private readonly api = inject(FiscalApiService); private readonly destroy = inject(DestroyRef);

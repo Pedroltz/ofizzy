@@ -855,3 +855,31 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
   - Backend: 55 testes unitários aprovados (0 falhas) e 10 testes de integração aprovados (0 falhas) em `Ofizzy.slnx` com `Release`.
   - Frontend: ESLint aprovado (0 erros, 0 avisos), 39 testes unitários Vitest aprovados (8/8 suítes) e build de produção executado com êxito.
   - E2E Playwright: 58 testes aprovados, 11 skips de viewport em 69 testes (100% dos testes aplicáveis passando em Desktop, Tablet e Mobile).
+
+## 2026-09-14 — Revisão de margens, espaçamentos e padronização PrimeNG no frontend
+
+- **Modal da Ordem de Serviço (`work-orders.page.html`)**:
+  - Posicionamento do componente `<app-work-order-fiscal>` movido para dentro de `.wo-dialog-content` (após `.wo-summary-card`), herdando padding ergonômico interno (`2rem 2.25rem`) e espaçamento vertical entre cartões.
+- **Grid de Campos Fiscais (`fiscal-fields.component.ts`)**:
+  - Desacoplamento dos `<label>` em contêineres `.fiscal-field` com tipografia em caixa alta e tracking.
+  - Grid responsivo em 2 colunas (`minmax(0, 1fr)`) com suporte a `colSpan: 2` (utilizado para nome do cliente e logradouro), colapsando em coluna única em telas móveis ($\le 640$ px).
+  - Controles com altura mínima de 44 px preservada.
+- **Configurações Fiscais (`fiscal-settings.component.ts`)**:
+  - Separação clara de Dados Gerais e Endereço Fiscal com subtítulos em caixa alta e divisores sutis.
+  - Barra de ações dedicada para salvamento com alinhamento à direita e divisor superior.
+  - Card visual para o certificado digital A1 com badge de status "Ativo".
+- **Inutilização de NF-e (`fiscal-inutilizations.component.ts`)**:
+  - Histórico de inutilizações reorganizado em grid de cards `.history-card`.
+  - Diálogo de confirmação com rodapé padronizado em `<ng-template #footer>`.
+- **Painel e Modais Fiscais da OS (`work-order-fiscal.component.ts`)**:
+  - Valores e totais em pílulas estruturadas (`.fiscal-value-pill`), tags PrimeNG com severidade contextual para situação e listas de pendências com espaçamento legível.
+  - Modal de *Preparação fiscal da OS* completamente reformulado com classe `.wo-center-dialog.fiscal-prep-dialog`, banner informativo superior com `.icon-circle info` e organização em 4 cartões com `SectionCardComponent` (*Dados do Tomador*, *Endereço Fiscal*, *Declaração de Pagamento* e *Itens e Tributação* em `p-fieldset`).
+  - Modal de *Cancelar documento fiscal* com alerta de impacto SEFAZ / Prefeitura e textarea estilizado.
+  - Otimização da folha de estilos do componente para respeitar o limite de 4.00 kB do Angular sem avisos de budget.
+  - Compatibilidade total com seletores de acessibilidade Playwright (`Salvar preparação`, `Confirmar cancelamento`, `Preparação fiscal`, `#recipient-name`).
+- **Validações e Testes (Frontend)**:
+  - ESLint: aprovado com 0 erros e 0 avisos (`npm run lint`).
+  - Vitest: 39 testes unitários aprovados em 8 arquivos (`npx ng test --no-watch`).
+  - Angular Build: compilação de produção aprovada com sucesso (`npm run build`).
+  - Playwright: 40 testes responsivos aprovados em Desktop, Tablet e Mobile 320px sem overflow horizontal e com controles $\ge 44$ px (`npx playwright test e2e/responsive.spec.ts`).
+

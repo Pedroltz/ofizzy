@@ -19,35 +19,93 @@ import { FiscalFieldsComponent, FiscalField, fiscalForm, addressFields, productF
     <div class="fiscal-settings">
       <p-message severity="info">Configure os dados com a contabilidade. Serviços e produtos geram documentos separados. A operação fiscal não registra recebimentos no financeiro.</p-message>
       @if (actionError()) { <p-message severity="error">{{ actionError() }}</p-message> }
-      @if (loadError()) { <p-message severity="error">Não foi possível carregar a configuração.</p-message><p-button label="Tentar novamente" (onClick)="load()" /> }
+      @if (loadError()) {
+        <div class="flex items-center gap-2">
+          <p-message severity="error">Não foi possível carregar a configuração.</p-message>
+          <p-button label="Tentar novamente" icon="pi pi-refresh" [outlined]="true" (onClick)="load()" />
+        </div>
+      }
       @if (data(); as value) {
-        <p-fieldset legend="Dados fiscais da empresa"><app-fiscal-fields [fields]="settingsFields" [form]="settingsForm" prefix="issuer-" /><app-fiscal-fields [fields]="addressFields" [form]="addressForm" prefix="issuer-address-" /></p-fieldset>
-        <p-button label="Salvar configuração fiscal" [loading]="busy()" (onClick)="save()" />
-        <p-fieldset legend="Certificado digital A1">
-          @if (value.certificate; as certificate) { <p>{{ certificate.subject }} · Validade: {{ certificate.expiresAt | date:'dd/MM/yyyy' }}</p> }
-          @else { <p>Nenhum certificado cadastrado.</p> }
-          @if (!value.encryptionConfigured) { <p-message severity="warn">O administrador do servidor precisa configurar a proteção fiscal antes do envio do certificado.</p-message> }
-          <label for="fiscal-file">Arquivo A1 (.pfx ou .p12)<input id="fiscal-file" type="file" accept=".pfx,.p12" (change)="chooseFile($event)" /></label>
-          <label for="fiscal-password">Senha do certificado<input pInputText id="fiscal-password" type="password" [formControl]="password" autocomplete="new-password" /></label>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-            <p-button label="Cadastrar ou substituir certificado" [loading]="busy()" (onClick)="upload()" />
-            @if (value.devToolsAvailable) { <p-button label="Baixar certificado A1 de teste (Dev)" ariaLabel="Baixar certificado A1 de teste (Dev)" severity="secondary" [outlined]="true" icon="pi pi-download" (onClick)="downloadTestCert()" /> }
+        <p-fieldset legend="Dados fiscais da empresa" styleClass="fiscal-fieldset">
+          <div class="fiscal-section">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Dados Gerais e Tributários</h4>
+            <app-fiscal-fields [fields]="settingsFields" [form]="settingsForm" prefix="issuer-" />
+          </div>
+          <div class="fiscal-section pt-4 border-t border-subtle mt-4">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Endereço Fiscal da Empresa</h4>
+            <app-fiscal-fields [fields]="addressFields" [form]="addressForm" prefix="issuer-address-" />
+          </div>
+          <div class="flex justify-end mt-4 pt-3 border-t border-subtle">
+            <p-button label="Salvar configuração fiscal" icon="pi pi-check" [loading]="busy()" (onClick)="save()" />
           </div>
         </p-fieldset>
-        <p-fieldset legend="Classificação fiscal do catálogo">
-          <p>Selecione um item. Perfis suportados de produtos: revenda interna 5102/102 ou 5405/500. Dados de ST são valores por unidade, conforme documentação de entrada.</p>
-          <label for="fiscal-search">Buscar no catálogo<input pInputText id="fiscal-search" [formControl]="search" /></label><p-button label="Buscar itens" (onClick)="searchCatalog()" />
-          <p-select inputId="fiscal-catalog" ariaLabel="Item do catálogo" [options]="catalog()" optionLabel="label" optionValue="value" [formControl]="selected" (onChange)="loadProfile()" appendTo="body" placeholder="Selecione serviço ou produto" />
+        <p-fieldset legend="Certificado digital A1" styleClass="fiscal-fieldset">
+          @if (value.certificate; as certificate) {
+            <div class="fiscal-cert-badge mb-4">
+              <div class="flex items-center gap-2.5">
+                <i class="pi pi-shield text-success text-lg" aria-hidden="true"></i>
+                <div>
+                  <strong class="text-primary text-sm block">{{ certificate.subject }}</strong>
+                  <span class="text-xs text-muted">Validade: {{ certificate.expiresAt | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              <span class="font-mono text-xs text-success bg-success-soft px-2 py-0.5 rounded border border-subtle">Ativo</span>
+            </div>
+          } @else {
+            <p class="text-sm text-muted mb-4">Nenhum certificado cadastrado.</p>
+          }
+          @if (!value.encryptionConfigured) {
+            <p-message severity="warn" class="mb-4 block">O administrador do servidor precisa configurar a proteção fiscal antes do envio do certificado.</p-message>
+          }
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="fiscal-file" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Arquivo A1 (.pfx ou .p12)</label>
+              <input id="fiscal-file" type="file" accept=".pfx,.p12" class="w-full" (change)="chooseFile($event)" />
+            </div>
+            <div>
+              <label for="fiscal-password" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Senha do certificado</label>
+              <input pInputText id="fiscal-password" type="password" [formControl]="password" autocomplete="new-password" class="w-full" />
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2.5 items-center mt-2">
+            <p-button label="Cadastrar ou substituir certificado" [loading]="busy()" (onClick)="upload()" />
+            @if (value.devToolsAvailable) {
+              <p-button label="Baixar certificado A1 de teste (Dev)" ariaLabel="Baixar certificado A1 de teste (Dev)" severity="secondary" [outlined]="true" icon="pi pi-download" (onClick)="downloadTestCert()" />
+            }
+          </div>
+        </p-fieldset>
+        <p-fieldset legend="Classificação fiscal do catálogo" styleClass="fiscal-fieldset">
+          <p class="text-sm text-muted mb-4">Selecione um item. Perfis suportados de produtos: revenda interna 5102/102 ou 5405/500. Dados de ST são valores por unidade, conforme documentação de entrada.</p>
+          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end mb-4">
+            <div>
+              <label for="fiscal-search" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Buscar no catálogo</label>
+              <input pInputText id="fiscal-search" [formControl]="search" placeholder="Digite para buscar produtos e serviços..." class="w-full" />
+            </div>
+            <p-button label="Buscar itens" [outlined]="true" (onClick)="searchCatalog()" />
+          </div>
+          <div class="mb-4">
+            <label for="fiscal-catalog" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Item do catálogo</label>
+            <p-select inputId="fiscal-catalog" ariaLabel="Item do catálogo" [options]="catalog()" optionLabel="label" optionValue="value" [formControl]="selected" (onChange)="loadProfile()" appendTo="body" placeholder="Selecione serviço ou produto" class="w-full" />
+          </div>
           @if (profileForm(); as form) {
-            <app-fiscal-fields [fields]="profileKind() === 'parts' ? productFields : serviceFields" [form]="form" prefix="profile-" />
-            <p-button label="Salvar classificação" [loading]="busy()" (onClick)="saveProfile()" />
+            <div class="pt-4 border-t border-subtle mt-4">
+              <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Parâmetros Fiscais do Item</h4>
+              <app-fiscal-fields [fields]="profileKind() === 'parts' ? productFields : serviceFields" [form]="form" prefix="profile-" />
+              <div class="flex justify-end mt-4 pt-3 border-t border-subtle">
+                <p-button label="Salvar classificação" icon="pi pi-check" [loading]="busy()" (onClick)="saveProfile()" />
+              </div>
+            </div>
           }
         </p-fieldset>
-        @if (tenant.has('WorkOrders')) { <p-fieldset legend="Histórico e inutilização NF-e" [toggleable]="true" [collapsed]="true"><app-fiscal-inutilizations /></p-fieldset> }
+        @if (tenant.has('WorkOrders')) {
+          <p-fieldset legend="Histórico e inutilização NF-e" [toggleable]="true" [collapsed]="true" styleClass="fiscal-fieldset">
+            <app-fiscal-inutilizations />
+          </p-fieldset>
+        }
       }
     </div>
   } @else { <p-message severity="info">A configuração fiscal é administrada pelo responsável da organização.</p-message> }`,
-  styles: `.fiscal-settings{display:flex;flex-direction:column;gap:1.25rem;min-width:0}label{display:flex;flex-direction:column;gap:.5rem;margin:1rem 0}input{min-height:44px;max-width:100%}p-select{width:100%;min-height:44px}app-fiscal-fields{margin-bottom:1rem}p{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}@media(max-width:640px){input{font-size:16px}}`
+  styles: `.fiscal-settings{display:flex;flex-direction:column;gap:1.75rem;min-width:0}.fiscal-cert-badge{padding:0.75rem 1rem;border-radius:var(--radius-sm);background:var(--surface-secondary);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap}input{min-height:44px;max-width:100%}p-select{width:100%;min-height:44px}p{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}@media(max-width:640px){input{font-size:16px}}`
 })
 export class FiscalSettingsComponent {
   readonly tenant = inject(TenantContextService); private readonly api = inject(FiscalApiService); private readonly catalogs = inject(CatalogApiService); private readonly messages = inject(MessageService);
