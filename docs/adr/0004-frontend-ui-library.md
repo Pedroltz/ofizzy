@@ -24,3 +24,7 @@ Angular Material é mantido junto ao ecossistema Angular e distribuído sob lice
 
 - [Licença do Angular Components (MIT)](https://github.com/angular/components/blob/main/LICENSE)
 - [Licença e histórico do PrimeNG](https://github.com/primefaces/primeng/blob/master/LICENSE.md)
+
+## Contexto de continuidade — 13/09/2026
+
+Esta ADR preserva a decisão e o contexto de sua data. A implementação atual mantém monólito modular, SaaS por tenant e PrimeNG 21 conforme as decisões posteriores aplicáveis. A integração fiscal direta está registrada na [ADR 0007](0007-direct-fiscal-integration.md). Estado e próximas entregas: [STATUS](../STATUS.md) e [NEXT-STEPS](../NEXT-STEPS.md).

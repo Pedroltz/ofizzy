@@ -20,3 +20,7 @@ Leia nesta ordem antes de alterar o projeto: `docs/PROJECT.md`, `docs/STATUS.md`
 ## Definição de pronto
 
 Código compilando não basta. A entrega precisa funcionar pelo Nginx, persistir após reinício, ter validações e erros compreensíveis, testes proporcionais ao risco e documentação suficiente para outra IA continuar sem redescobrir decisões.
+
+## Referências de continuidade — 13/09/2026
+
+A fase ativa é [PHASE-08-FISCAL.md](docs/phases/PHASE-08-FISCAL.md). Consultar [NEXT-STEPS.md](docs/NEXT-STEPS.md) para dependências e critérios de aceite. As regras obrigatórias acima permanecem vigentes; resultados locais não equivalem a homologação externa.

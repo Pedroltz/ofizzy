@@ -120,3 +120,13 @@ Members podem operar clientes/catálogos/OS nos módulos habilitados; somente
 Owner/Admin alteram configurações/concluem onboarding. Owners não acessam APIs de
 plataforma. Dashboard requer Customers/WorkOrders/Automotive; PDFs exigem o módulo
 WorkOrders e contexto Automotive atual. Numeração é independente por tenant.
+
+## Fiscal — desenvolvimento
+
+Contratos e permissões em [FISCAL.md](FISCAL.md#rotas). APIs exigem sessão, antiforgery nas mutações e tenant válido. Produção fiscal depende de homologação; a presença das rotas não indica autorização para emissão real.
+
+## Contratos fiscais e recuperação — 13/09/2026
+
+O catálogo completo de rotas está em [FISCAL.md](FISCAL.md). DTOs de preparação, configurações e perfis passam por validação no backend; TenantId não é escolhido pelo cliente. Owner/Admin gerencia configuração, certificado, perfis, cancelamento e inutilização; membros acessam preparação/emissão/download conforme permissões.
+
+`GET /api/fiscal/nfe/inutilizations` retorna até 100 pedidos recentes do tenant; `POST /api/fiscal/nfe/inutilizations/{id}/sync` recupera o protocolo usando o XML original. Concorrência retorna 409; ID de outro tenant retorna 404. Resposta de processamento não significa autorização: a UI deve ler o estado retornado. ZIP contém somente autorizados no ambiente atual, podendo ser parcial. [Pendências](NEXT-STEPS.md).

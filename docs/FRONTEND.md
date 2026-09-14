@@ -25,4 +25,10 @@ npm run build
 
 O Playwright valida login, setup e todas as rotas autenticadas em desktop, Pixel 7 e tablet usando APIs interceptadas. O servidor de teste utiliza `http://127.0.0.1:4300` e não altera o banco local.
 
-Em ambientes sem Node no host, use a imagem oficial Node 24 conforme os comandos registrados na [documentação principal](../README.md). O build possui aviso não bloqueante: bundle inicial de aproximadamente 736 kB para orçamento de 500 kB.
+Em ambientes sem Node no host, use a imagem oficial Node 24 conforme os comandos registrados na [documentação principal](../README.md). O build possui aviso não bloqueante: bundle inicial de 780,45 kB no aceite de 13/09/2026 para orçamento de 500 kB.
+
+## Interface fiscal — 13/09/2026
+
+`features/fiscal` integra configurações e detalhes da OS finalizada com serviços HTTP tipados e persistência no backend. Preservar PrimeNG 21, tokens e permissões. Mostrar documentos separados na OS mista, erros por campo, resultados inconclusivos e autorização parcial. A tela administrativa permite confirmar intervalos, ver histórico e recuperar inutilização sem perder os campos em erro.
+
+Smoke fiscal real usa playwright.fiscal.config.ts, Nginx na porta 18082 e PostgreSQL isolado; a suíte responsiva usa API interceptada. A verificação do novo formulário cobriu 1440/768/320 px. [Testes](TESTING.md) e [próximos passos](NEXT-STEPS.md).

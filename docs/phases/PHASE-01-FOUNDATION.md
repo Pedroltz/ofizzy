@@ -20,3 +20,9 @@
 - PostgreSQL, backend e frontend: healthy; Nginx ativo.
 - Migration executada em banco vazio e smoke HTTP completo aprovado.
 - Banco final recriado sem usuário para preservar a experiência de primeiro acesso.
+
+## Continuidade consolidada — 13/09/2026
+
+Fundação permanece concluída localmente. Setup atual cria operador da plataforma; organizações são provisionadas pela fundação SaaS, não por uma instalação exclusiva por oficina.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

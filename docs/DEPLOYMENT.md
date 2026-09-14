@@ -54,3 +54,11 @@ refresh legado é associado ao tenant inicial durante migration.
 
 Para a primeira transição use janela de manutenção; deploys posteriores continuam
 centralizados. Nginx, certificados, volumes e secrets permanecem únicos da plataforma.
+
+## Publicação do módulo fiscal — 13/09/2026
+
+As três migrations fiscais são AddFiscalFoundation, CompleteFiscalInutilization e AddFiscalInutilizationLease; a stack isolada validada totaliza dez migrations. Conferir histórico do ambiente de destino e backup antes da aplicação. A publicação da API precisa incluir BusinessCore/Fiscal/Schemas.
+
+Configurar as chaves externas por secrets ou override privado do Compose, conforme [FISCAL.md](FISCAL.md); não assumir que variáveis do host são repassadas automaticamente. Manter ProductionEnabled=false até homologação e liberação do tenant. Smoke fiscal em 18082 usa HTTP/Development apenas em ambiente isolado; produção requer HTTPS.
+
+Imagens, migrations e restart foram validados localmente; isso não registra deploy remoto nem homologação. Antes da liberação, cumprir [próximos passos](NEXT-STEPS.md) e [restauração fiscal](BACKUP-RESTORE.md).

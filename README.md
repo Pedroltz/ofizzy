@@ -114,3 +114,9 @@ A origem padrão desse teste é `http://127.0.0.1:18081`, alterável por
 `OFIZZY_E2E_BASE_URL`. Usa somente credenciais fictícias e não deve apontar para
 produção. Em Node 26, execute unitários com `NODE_OPTIONS=--no-experimental-webstorage
 npm test -- --watch=false`; CI e imagem frontend usam Node 24.
+
+## Estado fiscal e continuidade
+
+A fase 8 integra documentos fiscais de serviços e produtos à OS concluída. Configuração, preparação, emissão/consulta, downloads, cancelamento e recuperação de inutilização estão implementados localmente. Ainda faltam revisão de leiautes/PDFs e homologação externa; produção permanece bloqueada por padrão.
+
+Consulte [Status](docs/STATUS.md), [Plano fiscal](PLANO-XML-CONTABILIDADE.md), [Operação fiscal](docs/FISCAL.md), [Testes](docs/TESTING.md) e [Próximos passos](docs/NEXT-STEPS.md).

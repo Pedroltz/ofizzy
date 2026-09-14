@@ -1,6 +1,11 @@
 # Roadmap
 
-Prioridade vigente: fundação SaaS multi-tenant ([Fase SaaS](phases/PHASE-07-SAAS.md)), antecipada antes do financeiro. Automotive preservada. Novos tenants são provisionados sem deploy.
+Prioridade vigente: [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md), antes do financeiro. A fundação SaaS tem aceite local concluído. Automotive preservada; novos tenants são provisionados sem deploy.
+
+- [x] Fase 7 — Fundação SaaS e provisionamento, com aceite local.
+- [ ] Fase 8 — Fluxos fiscais implementados localmente; revisão e homologação pendentes.
+
+Sequência executável e critérios de aceite: [NEXT-STEPS.md](NEXT-STEPS.md).
 
 
 - [x] Fase 1 — Fundação: projetos, banco, migration, setup, autenticação, shell, containers e CI.
@@ -153,3 +158,6 @@ Capacidade de instalação nativa e resiliência para o pátio e chão de oficin
   - Despacho em lote/FIFO das operações locais para a API .NET com cabeçalho de idempotência.
   - Atribuição do número sequencial definitivo da OS (`LastWorkOrderNumber`) pelo backend após confirmação no PostgreSQL.
 
+## Leitura dos registros de evolução — 13/09/2026
+
+Os checklists de UI abaixo/acima registram incrementos já realizados; não significam conclusão de backup, financeiro ou homologação fiscal. PWA continua proposta futura. A ordem operacional vigente é a de [NEXT-STEPS.md](NEXT-STEPS.md).

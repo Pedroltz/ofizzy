@@ -745,3 +745,113 @@ Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
 
 
 
+
+## 2026-09-12 — Fundação fiscal e continuidade do piloto
+
+- Adicionados módulo Fiscal, DTOs, perfis, preparação, certificado cifrado, documentos,
+  eventos, sequências e duas migrations; preservado monólito e isolamento por tenant.
+- Integração de configurações e OS com PrimeNG 21, XML/DPS assinados, adaptadores diretos,
+  estados de emissão parcial, downloads condicionados e bloqueio de produção.
+- Corrigidos schema de assinatura NFS-e com DTD legado, data/total em nova tentativa,
+  acompanhamento de emissão parcial, identificação de cancelamento e índice histórico.
+- Backend: build Release sem warnings; 34 unitários; 9 integrações, incluindo cenário
+  de timeout/reenvio idempotente aprovado com gateway de teste.
+- Frontend: lint, 39 unitários, build; E2E final 49 aprovados/11 skips. Preparação fiscal
+  verificada em desktop/tablet/320 px. Falha inicial de seletor com ícone corrigida por ariaLabel.
+- Compose isolado/18082: imagens, nove migrations, configuração e preparação pelo Nginx,
+  persistência após restart dos quatro containers. Nenhuma chamada real de emissão.
+- Piloto informado durante a sessão: Igaraçu do Tietê/SP, Simples Nacional. A fonte municipal
+  confirma padrão nacional desde 01/08/2026 para ME/EPP Simples. Registrado na fase 8.
+- Pendências explícitas de schemas vigentes/RTC, PDFs oficiais, eventos, recuperação de
+  inutilização e homologação. Não declarar a feature pronta para produção.
+
+
+## 2026-09-13 — Eventos e recuperação de inutilização fiscal
+
+- Validadores XSD locais para cancelamento NF-e/NFS-e e inutilização; schemas oficiais
+  de cancelamento separados para evitar conflitos de tipos.
+- Recuperação administrativa com o XML original, confirmação de protocolo 102/563
+  vinculada ao CNPJ/ambiente/UF/faixa, lease persistido de dois minutos e eventos das tentativas.
+- Nova migration aditiva `AddFiscalInutilizationLease`; nenhuma pendência de modelo EF.
+- Interface real para histórico, solicitação com confirmação e recuperação; erros no
+  diálogo mantêm os dados. API impede inutilizar números não reservados ou autorizados.
+- Backend Release sem avisos/erros; suíte completa 40 unitários/9 integrações. Testes
+  dirigidos finais: 22 unitários fiscais/2 integrações, incluindo falha de comunicação,
+  pedido idêntico no reenvio, consulta simultânea bloqueada e protocolo de faixa divergente.
+- Frontend lint,39 unitários/build; E2E completo52 aprovados/11 skips. Tela fiscal nova
+  verificada em 1440/768/320 px, sem overflow e com controles testados de pelo menos44 px.
+- Imagens Compose reconstruídas; décima migration aplicada sobre o banco isolado
+  existente. Smoke Nginx aprovou histórico, erro da faixa inexistente e isolamento do
+  endpoint de recuperação por ID. Não houve transmissão a órgão fiscal.
+- Permanecem atualização das NTs/schemas NF-e vigentes, revisão dos PDFs oficiais e
+  homologação externa do piloto Igaraçu do Tietê/SP, Simples Nacional.
+
+- Aceite final: smoke real aprovado antes e após reinício dos quatro containers;
+  configuração e preparação preservadas. Outro tenant recebe 404 ao recuperar um
+  pedido existente e não visualiza seu histórico. Teste fiscal direcionado aprovado.
+
+## 2026-09-13 — Consolidação documental e próximos passos
+
+A pedido do usuário, revisados os Markdown do projeto: status/handoff consolidados, plano de XML alinhado à emissão oficial de serviços e produtos, referências de arquitetura/API/dados/UI/operação atualizadas, fases e ADRs contextualizadas. Adicionados NEXT-STEPS e ADR 0007. Status, handoff e proposta inicial preservados em docs/archive como registros históricos.
+
+A ordem futura é revisar schemas/NTs e PDFs, ampliar cenários de falha, preparar cadastro/acesso do piloto, homologar e só então liberar produção. Financeiro permanece posterior; pagamento fiscal não é recebimento. Recuperação de inutilização já está implementada, e não deve continuar listada como tarefa de desenvolvimento pendente.
+
+Esta alteração é documental: os resultados de backend/frontend/migrations/Compose/smoke de 13/09 pertencem à implementação previamente registrada. Não houve nova execução dessas suítes nem transmissão fiscal nesta revisão. Verificação documental: 40 arquivos Markdown conferidos, nenhum link local quebrado e git diff --check sem erros. Foram atualizados os 35 documentos existentes e adicionados dois documentos de referência e três arquivos históricos.
+
+## 2026-09-13 — Conclusão de DANFE, DANFSe e conformidade do Simples Nacional
+
+- **DANFE Oficial (NF-e modelo 55)**:
+  - Implementado em `FiscalPdf.cs` com canhoto destacável de recebimento no topo ("RECEBEMOS DE [Emitente] OS PRODUTOS...", Data de Recebimento, Identificação e Assinatura do Recebedor, NF-e Nº, Série).
+  - Chave de acesso de 44 dígitos formatada em 11 blocos de 4 caracteres para legibilidade e digitação manual.
+  - Código de barras Code 128C integrado via ZXing e SVG vetorial de alta definição.
+  - Grade estruturada oficial da SEFAZ com cabeçalho de emitente, indicação 1-Saída em caixa destacada, natureza da operação, protocolo de autorização de uso, destinatário/remetente, forma de pagamento, cálculo detalhado do imposto em duas linhas, transporte/volumes e tabela completa de produtos/peças com alinhamento numérico tabular.
+  - Grupo `infAdic` com `infCpl` preenchido conforme Resolução CGSN nº 140/2018 ("DOCUMENTO EMITIDO POR ME OU EPP OPTANTE PELO SIMPLES NACIONAL. NAO GERA DIREITO A CREDITO FISCAL DE IPI.") e identificação da Ordem de Serviço de origem (`OS #0001`).
+- **DANFSe Oficial (Padrão Nacional Sefin)**:
+  - Implementado em `FiscalPdf.cs` no padrão do Sistema Nacional da NFS-e.
+  - QR Code oficial gerado via ZXing para consulta pública no Portal Nacional da NFS-e.
+  - Identificação completa com número da NFS-e, série, data/hora de emissão, competência, e identificadores da DPS de origem (número, série e data).
+  - Dados do prestador e tomador com CPF/CNPJ formatado e inscrição municipal.
+  - Discriminação dos serviços, código de tributação nacional, código municipal e NBS.
+  - Tributação municipal e valores com base de cálculo, alíquota de ISSQN, ISSQN retido (Sim/Não) e destaque em verde com fundo suave para o Valor Líquido da NFS-e.
+  - Grupo `infoCompl` com `xPed` e `xInfComp` na DPS.
+- **Banners de Status**:
+  - Inclusão de tarja em vermelho "SEM VALOR FISCAL — EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO" para documentos em homologação.
+  - Inclusão de tarja "DOCUMENTO CANCELADO" para documentos com cancelamento homologado.
+- **Validações e Testes**:
+  - Backend: build em Release com 0 avisos e 0 erros; 44 testes unitários (4 novos cenários para DANFE, DANFSe, banners e validação de tags no XSD) e 9 testes de integração com Testcontainers / PostgreSQL 18 real aprovados.
+  - Frontend: ESLint aprovado (0 erros, 0 avisos); 39 testes unitários Vitest aprovados; build de produção aprovado; 52 testes E2E do Playwright aprovados (11 skips de viewport).
+
+## 2026-09-13 — Ambiente de testes locais com dados forjados e Gateway Simulado de Desenvolvimento
+
+- **DevSimulatedFiscalGateway**:
+  - Implementado em `DevSimulatedFiscalGateway.cs`, ativado exclusivamente quando `builder.Environment.IsDevelopment()` é verdadeiro E `"Fiscal:SimulateGateway": true`.
+  - Simula respostas de autorização oficial da SEFAZ para NF-e mod. 55 com protocolo `135260000000001`, envelopamento em `<nfeProc versao="4.00">` e carimbo `<protNFe>`.
+  - Simula autorização da NFS-e Nacional com chave de 50 dígitos e protocolo.
+  - Simula cancelamento (`cStat=101`) e inutilização de numeração (`cStat=102`).
+  - Permite validar 100% do fluxo visual no navegador, banco PostgreSQL real e geração de PDF de DANFE e DANFSe sem conexão de rede com a SEFAZ.
+- **Gerador de Certificado A1 Fictício para Desenvolvimento**:
+  - Implementado em `FiscalDevController.cs` (`GET /api/fiscal/dev/certificate`), restrito a `IsDevelopment()`.
+  - Gera em memória um certificado PKCS#12 (.pfx) com chave privada RSA 2048 bits e extensão ICP-Brasil OID `2.16.76.1.3.3` preenchida com o CNPJ cadastrado na empresa (senha padrão: `teste123`).
+  - Adicionado botão *"Baixar certificado A1 de teste (Dev)"* na tela de Configurações Fiscais do frontend.
+  - Exercita o fluxo real de validação do arquivo, conferência do CNPJ, proteção com AES-GCM no cofre `FiscalCertificateVault` e gravação no PostgreSQL.
+- **Validações e Testes**:
+  - Backend: 48 testes unitários (4 novos testes em `FiscalDevSimulationTests.cs` cobrindo compatibilidade do SAN ICP-Brasil com o cofre, geração de `<nfeProc>`, autorização de NFS-e, geração de PDF do DANFE/DANFSe e cancelamento/inutilização simulados) e 9 testes de integração com PostgreSQL 18 real aprovados (100%).
+  - Frontend: ESLint aprovado (0 erros, 0 avisos), 39 testes unitários Vitest aprovados e build de produção aprovado.
+
+## Revisão independente — 13/09/2026
+
+Revisão das alterações recentes registrada em [relatório de revisão](REVIEW-2026-09-13.md). Foram encontrados problemas na separação persistente de simulação, resposta fictícia de NFS-e, leitura de campos do DANFSe, cobertura dos testes e disponibilidade/permissões do certificado de desenvolvimento. As declarações anteriores de conformidade integral dos PDFs não constituem aceite comprovado e precisam da correção/validação descrita no relatório. Atualização de schemas/NTs e homologação externa permanecem pendentes.
+
+Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e 9 integrações; frontend lint/39 unitários/build e 52 E2E/11 skips. Não houve alteração de código, transmissão fiscal, reconstrução Compose ou novo smoke/restart. Check EF de modelo não executou por ausência de dotnet-ef no PATH.
+
+## 2026-09-13 — Estabilização do DANFE, altura de toque e validação integral
+
+- **Correção de restrição de layout no QuestPDF (`FiscalPdf.cs`)**:
+  - Diagnosticada exceção `DocumentLayoutException` durante geração do DANFE da NF-e com o debugger ativado do QuestPDF: o elemento de código de barras Code 128 possuía `Height(32)` com aspect ratio vetorial de 7,925, exigindo 253,6 px de largura, o que excedia os 247 px disponíveis na coluna do cabeçalho.
+  - Ajustada a altura do código de barras vetorial para `28` px (`Height(28)`), mantendo o código de barras nítido e dentro da largura disponível sem truncamento ou overflow.
+- **Acessibilidade móvel em Configurações Fiscais (`fiscal-settings.component.ts`)**:
+  - Adicionado `:host ::ng-deep .p-button { min-height: 44px; }` ao componente de configurações fiscais, assegurando que o botão de utilitário de teste em desenvolvimento (*"Baixar certificado A1 de teste (Dev)"*) e demais botões atinjam a área de toque mínima de 44 px exigida por `AGENTS.md` e testada por `e2e/responsive.spec.ts`.
+- **Validações e Testes completos**:
+  - Backend: 55 testes unitários aprovados (0 falhas) e 10 testes de integração aprovados (0 falhas) em `Ofizzy.slnx` com `Release`.
+  - Frontend: ESLint aprovado (0 erros, 0 avisos), 39 testes unitários Vitest aprovados (8/8 suítes) e build de produção executado com êxito.
+  - E2E Playwright: 58 testes aprovados, 11 skips de viewport em 69 testes (100% dos testes aplicáveis passando em Desktop, Tablet e Mobile).

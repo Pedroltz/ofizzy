@@ -5,7 +5,7 @@
 - `Tenant`: UUID v7, nome administrativo, slug único, vertical tipada, estado
   Pending/Active/Suspended/Archived, datas, autor de criação/alteração e
   OnboardingCompletedAt explícito. Razão social/documentos ficam nas configurações,
-  evitando duas fontes para dados fiscais/operacionais.
+  separadas da identidade administrativa do tenant. TenantSettings mantém dados operacionais; FiscalSettings mantém o cadastro fiscal estruturado da emissão.
 - `TenantSettings`: antiga Company; preserva tabela `companies` e seus IDs. FK
   TenantId única. Nome operacional, razão social, CNPJ, contatos, endereço, LogoPath,
   textos de impressão, timezone, moeda e LastWorkOrderNumber. Configurações nunca
@@ -64,3 +64,17 @@ erDiagram
 
 Convenções: UUID v7, timestamptz/UTC, numeric(14,2) para dinheiro e três casas para
 quantidades. Não há banco, schema ou sequência física por tenant.
+
+## Persistência fiscal — 13/09/2026
+
+| Entidade | Responsabilidade |
+| --- | --- |
+| FiscalSettings | Emitente fiscal estruturado, ambiente e certificado cifrado; separado dos dados operacionais de TenantSettings |
+| ProductFiscalProfile / ServiceFiscalProfile | Classificações fiscais vinculadas ao catálogo |
+| FiscalPreparation | Dados complementares e snapshots da OS |
+| FiscalSequence | Numeração por tenant, tipo, ambiente e série |
+| FiscalDocument | Identidade, estado, XML assinado/autorizado, protocolo e concorrência |
+| FiscalEvent | Histórico de tentativas e respostas |
+| FiscalInutilization | Intervalo, XML original, protocolo, estado e LeaseUntil |
+
+As oito entidades são isoladas por TenantId. FKs compostas e índices por tenant preservam vínculos. Documentos Cancelled=6 e Inutilized=7 saem do índice de documento ativo, permanecendo no histórico. Novas migrations: AddFiscalFoundation, CompleteFiscalInutilization e AddFiscalInutilizationLease. A numeração fiscal é distinta de LastWorkOrderNumber. [Operação](FISCAL.md) e [evolução](NEXT-STEPS.md).

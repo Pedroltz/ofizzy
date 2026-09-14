@@ -6,12 +6,11 @@
 - Integração usa PostgreSQL real via Testcontainers e requer Docker.
 - Antes de concluir uma fase, validar o fluxo completo pelo Nginx e registrar comandos/resultados em `IMPLEMENTATION-LOG.md`.
 
-## Baseline atual
+## Baseline da implementação — 13/09/2026
 
-- Backend: 14 testes unitários e 3 testes de integração aprovados.
-- Frontend: 22 testes Vitest aprovados em 4 arquivos de teste.
-- E2E responsivo: 23 cenários aprovados e 4 ignorados por não se aplicarem ao viewport, em projetos desktop, Pixel 7 e tablet.
-- Build frontend aprovado com aviso não bloqueante: bundle inicial de aproximadamente 736 kB para orçamento de 500 kB.
+Backend Release: build sem avisos/erros, 40 unitários e 9 integrações aprovados. Frontend: lint, 39 unitários e build aprovados; 52 E2E aprovados e 11 skips condicionais. Bundle inicial 780,45 kB para budget de 500 kB. Dez migrations aplicadas no banco isolado e modelo EF sem mudanças pendentes.
+
+Esses números são evidências da implementação anterior à consolidação documental, não execuções novas a cada edição deste arquivo.
 
 ## Aceite SaaS
 
@@ -36,3 +35,11 @@ Após `docker compose ... restart`, execute
 `OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.live.config.ts` para
 confirmar persistência. Essa suíte não deve apontar para produção. A suíte
 `responsive.spec.ts` continua isolada e determinística, com APIs interceptadas.
+
+## Aceite fiscal e reprodução — 13/09/2026
+
+FiscalEmissionTests usa HTTP, PostgreSQL, certificado fictício e assinatura/XSD reais, substituindo somente o gateway oficial. Cobre emissão mista, timeout/reenvio do mesmo XML, NF-e não reenviada, inutilização/recuperação, protocolo e concorrência. FiscalIsolationTests e verificações de recuperação cobrem papéis e isolamento.
+
+Em src/frontend/ofizzy-web, executar `npm run e2e -- --config playwright.fiscal.config.ts` contra a stack isolada na porta 18082. Após reiniciar somente essa stack, executar `OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.fiscal.config.ts`. O smoke real usa dados fictícios, trace desligado e confirma persistência, rejeição sem A1 e bloqueio de faixa não reservada. Não transmite a órgão fiscal.
+
+Homologação oficial, conformidade integral de PDF e exercício de restauração permanecem no [plano de próximos passos](NEXT-STEPS.md).

@@ -27,3 +27,9 @@ Status: **Concluída e Validada (2026-09-03)**
 - [x] Contém todos os campos obrigatórios (oficina, cliente, veículo, itens, valores e assinaturas).
 - [x] Testes de unidade e integração aprovados (`14/14` unit tests e `3/3` integration tests).
 - [x] Smoke test via Nginx na porta 8080 confirmando geração do PDF (`%PDF`, status 200, 96 KB) e persistência das configurações da oficina.
+
+## Continuidade consolidada — 13/09/2026
+
+Impressão/PDF da OS permanece entregue e é documento operacional. DANFE/DANFSe pertencem à fase 8 e ainda exigem revisão de conformidade e homologação.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

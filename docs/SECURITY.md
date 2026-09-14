@@ -34,3 +34,9 @@ Logs da request incluem TenantId, UserId e RequestId sem payloads pessoais.
 Testes de aceite real usam stack/banco isolados, sem interceptar API. Traces estão
 desativados nesse conjunto para não gravar cookies. A suíte visual determinística
 continua separada e não é evidência de isolamento de banco.
+
+## Proteção fiscal — 13/09/2026
+
+A1 é armazenado cifrado com AES-GCM, chave externa versionada e vínculo ao tenant/keyId. A senha do upload não é persistida; leitura expõe apenas metadados. Manter chaves anteriores enquanto houver certificados dependentes e não registrar XMLs completos, senhas, tokens ou certificados em logs.
+
+Respostas oficiais exigem correlação de identidade/protocolo; XML recebido proíbe DTD e schemas resolvem somente arquivos locais autorizados. Incerteza não autoriza liberar numeração. Produção exige Fiscal:ProductionEnabled e tenant em Fiscal:HomologatedTenants. [Operação](FISCAL.md), [restauração](BACKUP-RESTORE.md) e [próximos passos](NEXT-STEPS.md).

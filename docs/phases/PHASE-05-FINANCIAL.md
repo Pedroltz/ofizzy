@@ -2,7 +2,7 @@
 
 Recebimentos, estornos, status derivado e painel básico. Aceite: impedir valor acima do saldo, manter histórico e calcular a receber/recebido hoje/recebido no mês.
 
-Status: **não iniciada; fundação SaaS PHASE-07-SAAS antecipada antes desta fase**.
+Status em 13/09/2026: **não iniciada; SaaS tem aceite local e a fase 8 fiscal é a prioridade anterior a esta fase**.
 
 A antecipação de responsividade e E2E da Fase 6 não altera este escopo. A implementação financeira deverá reutilizar os padrões móveis atuais, preservar os snapshots da OS e manter cálculos financeiros autoritativos no backend.
 
@@ -18,3 +18,9 @@ Correção de setup: CNPJ opcional passou a aceitar entrada com máscara, manten
 Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
 
 Replanejamento em 2026-09-10: futuros pagamentos devem ser tenant-scoped, com FKs compostas para OS e testes de isolamento. Financeiro operacional não é cobrança de assinatura SaaS.
+
+## Continuidade consolidada — 13/09/2026
+
+A informação de pagamento declarada na NF-e não implementa recebimento financeiro. Próximo incremento desta fase exige saldo e estornos no backend, histórico e testes de isolamento por tenant.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

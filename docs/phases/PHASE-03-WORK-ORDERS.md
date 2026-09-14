@@ -30,3 +30,9 @@ Nenhuma pendência técnica. Todos os itens de aceite foram atendidos e comprova
 - Frontend: lint com 0 erros/avisos, 1 teste Vitest aprovado e build de produção aprovado (`dist/ofizzy-web`).
 - Compose & Nginx: stack completa em execução saudável na porta 8080 (`postgres`, `backend`, `frontend`, `nginx`).
 - Persistência e Smoke: criação, edição, avanço de status para `InProgress` e `Completed` validados com sucesso via Nginx em `http://localhost:8080` e dados persistidos no PostgreSQL após reinício do Docker Compose.
+
+## Continuidade consolidada — 13/09/2026
+
+OS permanece concluída como fluxo operacional. Numeração atual usa LastWorkOrderNumber por tenant. Preparação e emissão fiscal ocorrem após conclusão, preservando os snapshots da OS.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

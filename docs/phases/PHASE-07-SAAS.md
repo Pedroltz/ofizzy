@@ -79,3 +79,9 @@ overflow e campos/botão com pelo menos 44 px. Teste usa API interceptada apenas
 no Playwright; produção mantém chamadas reais. Não reexecutados smoke de criação
 real, Compose/migrations ou backend nesta mudança exclusiva de interface.
 Aviso de bundle permanece (~749 kB). Capturas em /tmp/ofizzy-platform-*.png.
+
+## Continuidade consolidada — 13/09/2026
+
+Fundação SaaS tem aceite local concluído. O módulo Fiscal reutiliza contexto, papéis, filtros e FKs por tenant; não cria um banco separado por oficina.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

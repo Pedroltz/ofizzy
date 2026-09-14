@@ -30,3 +30,12 @@ Todas as alterações relevantes serão registradas aqui seguindo Keep a Changel
 - Impressão da OS passou a preservar termos e assinaturas em documentos longos e não gerar páginas vazias em documentos curtos.
 - Atalho de Nova OS foi centralizado no cabeçalho global e o seletor de tema na barra lateral/drawer móvel.
 - Documentação geral foi centralizada em `docs/`; apenas o índice `README.md` e os arquivos de orientação para IA permanecem na raiz.
+
+## Atualizações ainda não publicadas — 13/09/2026
+
+- Fundação SaaS com tenants, vínculos, permissões, provisionamento e isolamento persistido.
+- Módulo fiscal com preparação, A1 cifrado, emissão/consulta/cancelamento e downloads de serviços/produtos; recuperação de inutilização e lease persistido.
+- Três migrations fiscais e interface PrimeNG integrada à OS/configurações.
+- Consolidação documental e [próximos passos](NEXT-STEPS.md).
+
+Aceite local registrado em [STATUS](STATUS.md). Não representa release publicada ou homologação fiscal externa.

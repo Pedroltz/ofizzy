@@ -43,3 +43,9 @@ Histórico do veículo, busca global, filtros, responsividade final, acessibilid
 - [x] Dashboard dá largura total à lista em notebooks, compacta colunas auxiliares e alterna para cards pela largura real disponível, sem clipping ou overflow.
 - [x] Listagem de OS compacta colunas no notebook e usa cards obrigatórios até 900 px, preservando Cliente/Veículo e ações sem overflow.
 - [x] Código revisado sem estado morto ou regra CSS duplicada nos pontos alterados; validações essenciais preservadas.
+
+## Continuidade consolidada — 13/09/2026
+
+Acabamento continua parcial. Evidências antigas nesta fase são datadas; backup/restauração fiscal, observabilidade e otimização do bundle continuam trabalhos futuros.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

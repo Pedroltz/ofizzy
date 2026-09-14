@@ -16,3 +16,9 @@ Aceite concluído em 2026-09-01: cada fluxo funciona ponta a ponta pelo frontend
 
 - 9 testes unitários e 2 testes de integração aprovados no aceite da fase.
 - Lint, teste e build do frontend aprovados.
+
+## Continuidade consolidada — 13/09/2026
+
+Cadastros permanecem concluídos. Perfis fiscais de produtos/serviços são persistidos separadamente no módulo Fiscal; arquivamento e snapshots históricos permanecem.
+
+O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.

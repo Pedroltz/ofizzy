@@ -71,7 +71,7 @@ flowchart TD
     
     subgraph C ["Etapa 3 — Escala e Novos Mercados"]
         C1["Contas a Pagar (compras com fornecedores de peças)"]
-        C2["Emissão de NFS-e / NF-e via API parceira (PlugNotas, Focus NFe)"]
+        C2["Emissão direta de NFS-e Nacional / NF-e SP — fase 8"]
         C3["Segunda vertical especializada (ex: Assistência Técnica)"]
     end
 ```
@@ -83,7 +83,13 @@ flowchart TD
 No Ofizzy, adotou-se o princípio: **"Cadastros são arquivados; documentos históricos não são apagados."**
 
 * **Por que não apagar fisicamente registros com histórico?**
-  1. **Integridade de Documentos:** Uma Ordem de Serviço concluída é um documento fiscal e contratual. Excluir o cliente ou veículo causaria quebra de integridade referencial ou destruição do histórico da oficina.
-  2. **Garantia e CDC:** O Código de Defesa do Consumidor exige comprovação de garantia (mínimo de 90 dias) e guarda comercial por até 5 anos.
-  3. **Segurança contra Erros Operacionais:** O arquivamento lógico permite restaurar dados com um único clique.
-* **Evolução planejada:** Permitir a exclusão física (*Hard Delete*) **exclusivamente** para cadastros recém-criados que nunca foram vinculados a nenhuma Ordem de Serviço.
+  1. **Integridade de Documentos:** Uma Ordem de Serviço concluída é um documento operacional com histórico contratual; não substitui NF-e ou NFS-e. Excluir o cliente ou veículo causaria quebra de integridade referencial ou destruição do histórico da oficina.
+  2. **Garantia e CDC:** A política de guarda e os termos de garantia devem ser definidos com orientação responsável, sem presumir um prazo único para todos os documentos.
+  3. **Segurança contra Erros Operacionais:** O arquivamento lógico preserva os dados e o histórico; não há fluxo de restauração em um clique entregue.
+* **Evolução planejada:** Manter arquivamento de cadastros e preservação dos documentos históricos, conforme as regras atuais do projeto.
+
+## Prioridade aceita — 13/09/2026
+
+A decisão do usuário antecipa a fase fiscal ao financeiro: emissão direta de NFS-e Nacional e NF-e SP, sem intermediário pago, para Igaraçu do Tietê/SP no Simples Nacional. A implementação local existe, mas revisão de leiautes/PDFs e homologação impedem liberação. A1, infraestrutura e manutenção continuam dependências. APIs pagas não são requisito do plano vigente.
+
+Cadastros são arquivados e documentos históricos preservados; referências a restauração em um clique ou exclusão futura não constituem fluxos implementados. Estoque, PWA, cobrança SaaS e venda avulsa continuam backlog. [Sequência de entrega](NEXT-STEPS.md).

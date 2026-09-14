@@ -5,7 +5,7 @@
 Plataforma SaaS multi-tenant para gestão de empresas prestadoras de serviços,
 com módulos e verticais especializadas (estratégia detalhada em [PRODUCT-STRATEGY.md](PRODUCT-STRATEGY.md)). Automotive é a primeira vertical:
 Cliente → Veículo → Ordem de Serviço → Diagnóstico → Serviços/Peças → Finalização
-→ Impressão. Pagamentos e financeiro operacional continuam como próxima entrega.
+→ Impressão. A prioridade atual é concluir a emissão fiscal da fase 8; pagamentos e financeiro operacional vêm depois.
 
 Tenant é a organização cliente do Ofizzy. Customer é o cliente atendido por essa
 organização. Uma pessoa pode participar de várias organizações por TenantUser.
@@ -31,6 +31,14 @@ operador em canal privado; não há envio automático de convite nesta fase.
 
 Outras verticais, convites por e-mail, SaaS Subscriptions, autosserviço e cobrança
 SaaS podem reutilizar o provisionamento. Não implementados agora: pagamentos SaaS,
-estoque, fornecedores, agenda, documentos fiscais, WhatsApp, bancos dedicados,
+estoque, fornecedores, agenda, WhatsApp, bancos dedicados,
 domínios customizados ou outros frontends. Não haverá microserviços sem necessidade
 concreta. Financeiro operacional é distinto da assinatura SaaS.
+
+## Desenvolvimento em andamento — fiscal
+
+Documentos fiscais foram antecipados por solicitação do usuário. A [fase 8](phases/PHASE-08-FISCAL.md) registra implementação e pendências; ainda não há homologação externa ou liberação de produção.
+
+## Prioridades consolidadas — 13/09/2026
+
+Fiscal usa integração direta, sem intermediário pago, para o piloto Igaraçu do Tietê/SP, Simples Nacional. A recuperação de inutilização já está implementada; revisão de schemas/PDFs e homologação são os próximos marcos. [Sequência e critérios](NEXT-STEPS.md).
