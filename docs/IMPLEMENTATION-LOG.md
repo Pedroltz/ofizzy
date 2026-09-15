@@ -912,5 +912,21 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
   - Backend: 56 testes unitários aprovados (`Ofizzy.UnitTests`) e 10 testes de integração aprovados (`Ofizzy.IntegrationTests`), totalizando 100% de aprovação.
   - Frontend: ESLint aprovado (0 warnings/errors), 40 testes unitários Vitest aprovados, 21 testes E2E do Playwright aprovados (Desktop, Mobile, Tablet) e build de produção aprovado.
 
+## 2026-09-15 — Renovação silenciosa de sessão (Silent Refresh) no Frontend
+
+- **Causa Raiz Resolvida**:
+  - Token de acesso JWT expira em 15 minutos (`AccessTokenMinutes = 15`). Após inatividade, a API retornava `401 Unauthorized`. O interceptor anterior ignorava 401 sem disparar refresh, travando interações em tela sem recarregar (F5).
+- **Frontend (Angular)**:
+  - Criado `authRefreshInterceptor`: captura HTTP 401, dispara `POST /api/auth/refresh` em segundo plano e repete a requisição original de forma transparente.
+  - `AuthService`: implementado `refreshSession(): Promise<boolean>` com desduplicação concorrente via `refreshPromise` e `handleSessionExpired()`.
+  - `app.config.ts`: registrado `authRefreshInterceptor` na cadeia HTTP antes de `apiErrorInterceptor`.
+  - Se o refresh falhar (expiração total de 30 dias), redireciona para `/login` e apresenta aviso contextual com `MessageService`.
+- **Validações e Testes**:
+  - Frontend: 44 testes unitários Vitest aprovados (`auth-refresh.interceptor.spec.ts` incluído).
+  - ESLint: 0 erros e 0 avisos.
+  - Playwright: 21 testes de plataforma aprovados em Desktop, Tablet e Mobile.
+  - Build de produção: aprovado.
+
+
 
 

@@ -10,6 +10,7 @@ export class AuthService {
   private readonly cache = inject(SessionDataCacheService);
   private readonly currentUser = signal<CurrentUser | null>(null);
   private restorePromise?: Promise<boolean>;
+  private refreshPromise?: Promise<boolean>;
   readonly user = this.currentUser.asReadonly();
   readonly authenticated = computed(() => this.currentUser() !== null);
 
@@ -30,6 +31,15 @@ export class AuthService {
       .then((user) => { this.currentUser.set(user); return true; }).catch(() => false).finally(() => { this.restorePromise = undefined; });
     return this.restorePromise;
   }
+  refreshSession(): Promise<boolean> {
+    if (this.refreshPromise) return this.refreshPromise;
+    this.refreshPromise = firstValueFrom(this.http.post<CurrentUser>('/api/auth/refresh', {}))
+      .then((user) => { this.currentUser.set(user); return true; })
+      .catch(() => { this.handleSessionExpired(); return false; })
+      .finally(() => { this.refreshPromise = undefined; });
+    return this.refreshPromise;
+  }
+  handleSessionExpired(): void { this.cache.clear(); this.currentUser.set(null); }
   logout(): Promise<void> { return firstValueFrom(this.http.post<void>('/api/auth/logout', {})).catch(() => undefined).then(() => { this.cache.clear(); this.currentUser.set(null); }); }
   reload(): Promise<void> { return this.loadAuthenticatedUser(); }
   selectTenant(tenantId: string): Promise<void> { return firstValueFrom(this.http.post<CurrentUser>('/api/auth/tenant', { tenantId })).then(() => { this.cache.clear(); return this.loadAuthenticatedUser(); }); }
