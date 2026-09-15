@@ -1,6 +1,6 @@
 import { expect, test, Page } from '@playwright/test';
 const modules = ['Customers', 'WorkOrders', 'Catalog', 'Automotive'];
-const tenant = { id: 'alpha', name: 'Empresa Alpha', slug: 'alpha', status: 'Pending', vertical: 'Automotive', onboardingCompletedAt: null, modules };
+const tenant = { id: 'alpha', name: 'Empresa Alpha', slug: 'alpha', status: 'Pending', vertical: 'Automotive', onboardingCompletedAt: null, modules, fiscalProductionReleased: false, fiscalProductionReleasedAt: null };
 const operator = { id: 'operator', name: 'Operador', email: 'operator@example.test', isPlatformAdmin: true, tenant: null };
 async function base(page: Page, user: unknown = operator) {
   if (test.info().project.name === 'mobile') await page.setViewportSize({ width: 320, height: 800 });
@@ -80,7 +80,19 @@ test('edição explica ativação e confirma suspensão sem alterar lista antes 
   await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Gerenciar empresa', exact: true })).toBeHidden();
-  expect(saved).toEqual({ status: 'Suspended', modules });
+  expect(saved).toEqual({ status: 'Suspended', modules, fiscalProductionReleased: false });
+});
+
+test('edição permite liberar ambiente de produção fiscal para a organização', async ({ page }) => {
+  await base(page); let saved: unknown; let current = { ...tenant };
+  await page.route('**/api/platform/tenants', route => route.fulfill({ json: [current] }));
+  await page.route('**/api/platform/tenants/alpha', route => { saved = route.request().postDataJSON(); current = { ...current, ...(saved as object), fiscalProductionReleased: true, fiscalProductionReleasedAt: '2026-09-15T15:00:00Z' }; return route.fulfill({ json: current }); });
+  await page.goto('/plataforma');
+  await page.getByRole('button', { name: /Gerenciar/ }).click();
+  await page.getByRole('checkbox', { name: /Liberar ambiente de produção fiscal/ }).check();
+  await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Gerenciar empresa', exact: true })).toBeHidden();
+  expect(saved).toEqual({ status: 'Pending', modules, fiscalProductionReleased: true });
 });
 
 test('organizações mostra ausência de vínculo e permite navegar na plataforma', async ({ page }) => {

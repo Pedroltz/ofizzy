@@ -65,7 +65,7 @@ public sealed class FiscalEmissionService(ApplicationDbContext db, CurrentTenant
     {
         var d=await db.FiscalDocumentEntries.SingleOrDefaultAsync(x=>x.Id==id,ct) ?? throw new ConflictException("Documento não encontrado.");
         if(d.State is FiscalState.Cancelled or FiscalState.Inutilized || (!queryOnly&&cancelReason==null&&d.State==FiscalState.Authorized)) return;
-        FiscalReleaseGate.EnsureAllowed(config, db.TenantId, d.Environment);
+        await FiscalReleaseGate.EnsureAllowedAsync(db, config, d.Environment, ct);
         if(d.Kind==FiscalKind.Nfe && await db.FiscalInutilizationEntries.AnyAsync(x=>x.Environment==d.Environment&&x.Series==d.Series&&x.FirstNumber<=d.Number&&x.LastNumber>=d.Number&&x.State=="Pending",ct))
             throw new ConflictException("Existe uma inutilização pendente para este número. O administrador deve recuperar o protocolo em Configurações > Fiscal.");
         if(d.LeaseUntil>DateTimeOffset.UtcNow) return;

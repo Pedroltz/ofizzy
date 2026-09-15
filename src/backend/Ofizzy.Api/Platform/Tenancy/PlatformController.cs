@@ -5,14 +5,14 @@ using Ofizzy.Api.Infrastructure.Persistence;
 
 namespace Ofizzy.Api.Modules.Tenancy;
 
-public sealed record PlatformTenantResponse(Guid Id, string Name, string Slug, TenantStatus Status, BusinessVertical Vertical, DateTimeOffset? OnboardingCompletedAt, ProductModule[] Modules);
-public sealed record UpdateTenantRequest(TenantStatus Status, ProductModule[] Modules);
+public sealed record PlatformTenantResponse(Guid Id, string Name, string Slug, TenantStatus Status, BusinessVertical Vertical, DateTimeOffset? OnboardingCompletedAt, ProductModule[] Modules, bool FiscalProductionReleased, DateTimeOffset? FiscalProductionReleasedAt);
+public sealed record UpdateTenantRequest(TenantStatus Status, ProductModule[] Modules, bool? FiscalProductionReleased = null);
 
 [Authorize(Policy = "PlatformAdmin"), ApiController, Route("api/platform/tenants")]
 public sealed class PlatformController(ApplicationDbContext db, TenantProvisioningService provisioning, CurrentTenant current) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<PlatformTenantResponse>>> List(CancellationToken ct) => Ok(await db.Tenants.AsNoTracking().OrderBy(x => x.Name).Select(x => new PlatformTenantResponse(x.Id, x.Name, x.Slug, x.Status, x.Vertical, x.OnboardingCompletedAt, x.Modules.Where(m => m.Enabled).Select(m => m.Module).ToArray())).ToListAsync(ct));
+    public async Task<ActionResult<IReadOnlyList<PlatformTenantResponse>>> List(CancellationToken ct) => Ok(await db.Tenants.AsNoTracking().OrderBy(x => x.Name).Select(x => new PlatformTenantResponse(x.Id, x.Name, x.Slug, x.Status, x.Vertical, x.OnboardingCompletedAt, x.Modules.Where(m => m.Enabled).Select(m => m.Module).ToArray(), x.FiscalProductionReleased, x.FiscalProductionReleasedAt)).ToListAsync(ct));
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PlatformTenantResponse>> Get(Guid id, CancellationToken ct)
@@ -38,6 +38,12 @@ public sealed class PlatformController(ApplicationDbContext db, TenantProvisioni
         if (request.Status == TenantStatus.Active && tenant.OnboardingCompletedAt is null)
             return Problem(statusCode: 409, title: "O administrador da organização precisa concluir o onboarding.");
         tenant.Status = request.Status; tenant.UpdatedAt = DateTimeOffset.UtcNow; tenant.UpdatedByUserId = current.UserId;
+        if (request.FiscalProductionReleased.HasValue && request.FiscalProductionReleased.Value != tenant.FiscalProductionReleased)
+        {
+            tenant.FiscalProductionReleased = request.FiscalProductionReleased.Value;
+            tenant.FiscalProductionReleasedAt = request.FiscalProductionReleased.Value ? DateTimeOffset.UtcNow : null;
+            tenant.FiscalProductionReleasedByUserId = request.FiscalProductionReleased.Value ? current.UserId : null;
+        }
         foreach (var module in Enum.GetValues<ProductModule>())
         {
             var existing = tenant.Modules.SingleOrDefault(x => x.Module == module);
@@ -46,5 +52,5 @@ public sealed class PlatformController(ApplicationDbContext db, TenantProvisioni
         }
         await db.SaveChangesAsync(ct); return Ok(Map(tenant));
     }
-    private static PlatformTenantResponse Map(Tenant x) => new(x.Id, x.Name, x.Slug, x.Status, x.Vertical, x.OnboardingCompletedAt, x.Modules.Where(m => m.Enabled).Select(m => m.Module).ToArray());
+    private static PlatformTenantResponse Map(Tenant x) => new(x.Id, x.Name, x.Slug, x.Status, x.Vertical, x.OnboardingCompletedAt, x.Modules.Where(m => m.Enabled).Select(m => m.Module).ToArray(), x.FiscalProductionReleased, x.FiscalProductionReleasedAt);
 }

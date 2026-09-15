@@ -21,17 +21,17 @@ Configurações, perfis, preparação, certificado A1 cifrado, sequências, docu
 
 Documentos auxiliares finalizados conforme manuais regulamentares: DANFE oficial com canhoto destacável de recebimento, chave de 44 dígitos formatada em blocos, código de barras Code 128C, grade padrão SEFAZ e cláusulas obrigatórias do Simples Nacional (`infAdic`/`infCpl`). DANFSe oficial com QR Code do padrão nacional, identificação da DPS de origem, competência e detalhamento de ISSQN e tributos federais aproximados. Ambiente de desenvolvimento local conta com `DevSimulatedFiscalGateway` e download de certificado A1 autoassinado para testes manuais no navegador sem emissor pago.
 
-## Última validação da implementação — 13/09/2026
+## Última validação da implementação — 15/09/2026
 
 | Verificação | Resultado registrado |
 | --- | --- |
-| Backend Release | Build sem avisos/erros; 55 unitários e 10 integrações aprovados (100%) |
-| Frontend | Lint aprovado (0 erros/avisos), 39 unitários Vitest e build de produção aprovados |
-| E2E determinístico | 58 aprovados; 11 skips condicionais por viewport (69 testes no total) |
-| Responsividade fiscal | 1440/768/320 px; sem overflow e controles com altura mínima >= 44 px (inclusive utilitário de dev) |
-| Layout de impressão | DANFE e DANFSe validados sem conflitos de constraint no QuestPDF (altura do barcode ajustada para 28 px) |
-| PostgreSQL | 10 migrations no banco isolado; modelo EF sem alterações pendentes |
-| Compose/Nginx | Imagens e smoke aprovados, inclusive após reinício dos quatro containers |
+| Backend Release | Build sem avisos/erros; 56 unitários e 10 integrações aprovados (100%) |
+| Frontend | Lint aprovado (0 erros/avisos), 40 unitários Vitest e build de produção aprovados |
+| E2E determinístico | 21 testes de plataforma aprovados em Desktop, Tablet e Mobile; 58 testes gerais aprovados (11 skips) |
+| Responsividade | 1440/768/320 px; sem overflow e controles com altura mínima >= 44 px |
+| Layout de impressão | DANFE e DANFSe validados sem conflitos de constraint no QuestPDF |
+| PostgreSQL | 11 migrations no banco; migration AddTenantFiscalProductionRelease aplicada com sucesso |
+| Liberação de Produção | Controle visual em `/plataforma` permitindo liberação de produção fiscal pelo operador master |
 
 Os testes de integração substituem o gateway externo; o smoke real sem A1 valida persistência e bloqueios, sem transmissão fiscal. O ambiente de desenvolvimento dispõe de simulação local para validação de ponta a ponta na interface. Essas evidências não equivalem a autorização de órgão fiscal. O build frontend mantém aviso de bundle inicial de 780,45 kB para budget de 500 kB.
 

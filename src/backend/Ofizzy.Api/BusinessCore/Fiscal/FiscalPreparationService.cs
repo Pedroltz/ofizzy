@@ -80,9 +80,7 @@ public sealed class FiscalPreparationService(ApplicationDbContext db, FiscalCert
         }
         if (lines.Where(x => x.Service != null).Select(x => x.Service).Distinct().Count() > 1) issues.Add(new("services", "Todos os serviços da NFS-e devem usar a mesma classificação e perfil fiscal."));
         if (string.Join("; ", order.Services.Select(x => x.Description)).Length > 1800) issues.Add(new("services", "A descrição agregada dos serviços excede 1800 caracteres."));
-        // An explicit server allowlist is the release gate, separate from tenant settings.
-        var allowed = config.GetSection("Fiscal:HomologatedTenants").Get<string[]>() ?? [];
-        if (issuer.Environment == FiscalEnvironment.Production && (!config.GetValue<bool>("Fiscal:ProductionEnabled") || !allowed.Contains(db.TenantId.ToString())))
+        if (!await FiscalReleaseGate.IsTenantAllowedAsync(db, config, issuer.Environment, ct))
             issues.Add(new("environment", "Produção ainda não homologada para esta organização."));
         return new(order, settings, new(issuer, recipient, order.Number, DateTimeOffset.UtcNow, lines), issues);
     }

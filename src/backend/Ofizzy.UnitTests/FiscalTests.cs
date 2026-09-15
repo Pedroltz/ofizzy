@@ -125,6 +125,16 @@ public sealed class FiscalTests
         FiscalReleaseGate.EnsureAllowed(config, tenant, FiscalEnvironment.Homologation);
     }
     [Fact]
+    public void Production_allowed_when_tenant_is_released_in_database()
+    {
+        var tenant = Guid.NewGuid();
+        var emptyConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+        Assert.False(FiscalReleaseGate.IsAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: false));
+        Assert.Throws<Ofizzy.Api.Infrastructure.Errors.ConflictException>(() => FiscalReleaseGate.EnsureAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: false));
+        Assert.True(FiscalReleaseGate.IsAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: true));
+        FiscalReleaseGate.EnsureAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: true);
+    }
+    [Fact]
     public void Cancellation_for_another_key_is_never_applied()
     {
         var document = new FiscalDocument { Identity = "123" };

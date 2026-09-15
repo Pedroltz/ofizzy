@@ -23,6 +23,9 @@ public sealed class Tenant
     public Guid? UpdatedByUserId { get; set; }
     public TenantSettings Settings { get; set; } = null!;
     public List<TenantModule> Modules { get; set; } = [];
+    public bool FiscalProductionReleased { get; set; }
+    public DateTimeOffset? FiscalProductionReleasedAt { get; set; }
+    public Guid? FiscalProductionReleasedByUserId { get; set; }
 }
 
 public sealed class TenantUser

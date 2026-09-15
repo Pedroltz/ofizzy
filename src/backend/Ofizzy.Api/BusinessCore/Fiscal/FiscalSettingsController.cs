@@ -26,8 +26,9 @@ public sealed class FiscalSettingsController(ApplicationDbContext db, FiscalCert
                 Address: new(Street: company.Address ?? "", City: company.City ?? "", State: company.State ?? "", PostalCode: company.PostalCode ?? ""));
         }
         else data = FiscalJson.Required<FiscalSettingsData>(entity.Data);
+        var productionAllowed = await FiscalReleaseGate.IsTenantAllowedAsync(db, configuration, FiscalEnvironment.Production, ct);
         return new FiscalSettingsResponse(data, entity?.CertificateExpiresAt is {} expires ? new(entity.CertificateSubject!, expires, entity.CertificateThumbprint!) : null,
-            vault.Configured, configuration.GetValue<bool>("Fiscal:ProductionEnabled"),
+            vault.Configured, productionAllowed,
             FiscalReleaseGate.DevToolsAvailable(environment, configuration, data.Environment));
     }
     [HttpPut("settings")]
@@ -35,8 +36,8 @@ public sealed class FiscalSettingsController(ApplicationDbContext db, FiscalCert
     {
         var result = new FiscalSettingsValidator().Validate(request);
         if (!result.IsValid) return ValidationProblem(new ValidationProblemDetails(result.ToDictionary()));
-        if (request.Environment == FiscalEnvironment.Production && !configuration.GetValue<bool>("Fiscal:ProductionEnabled"))
-            throw new ConflictException("Produção fiscal ainda não foi liberada no servidor após homologação.");
+        if (request.Environment == FiscalEnvironment.Production)
+            await FiscalReleaseGate.EnsureAllowedAsync(db, configuration, request.Environment, ct);
         var entity = await db.FiscalSettingsEntries.SingleOrDefaultAsync(ct);
         if (entity == null) { entity = new(); db.FiscalSettingsEntries.Add(entity); }
         else

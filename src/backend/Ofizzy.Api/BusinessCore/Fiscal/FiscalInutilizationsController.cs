@@ -18,7 +18,7 @@ public sealed class FiscalInutilizationsController(ApplicationDbContext db,Curre
         if(request.Series is <1 or >889 || request.FirstNumber<1 || request.LastNumber>999999999 || request.LastNumber<request.FirstNumber || request.LastNumber-request.FirstNumber>=100 || request.Year is <2000 or >2099 || request.Reason?.Trim().Length is not (>=15 and <=255)) throw new ConflictException("Informe série, ano, intervalo de até 100 números e justificativa de 15 a 255 caracteres.");
         var settings=await db.FiscalSettingsEntries.SingleOrDefaultAsync(ct)??throw new ConflictException("Configure os dados fiscais.");
         var issuer=FiscalJson.Required<FiscalSettingsData>(settings.Data);
-        FiscalReleaseGate.EnsureAllowed(config, db.TenantId, issuer.Environment);
+        await FiscalReleaseGate.EnsureAllowedAsync(db, config, issuer.Environment, ct);
         // Only numbers reserved by Ofizzy and definitively rejected may be invalidated.
         var docs=await db.FiscalDocumentEntries.Where(x=>x.Kind==FiscalKind.Nfe&&x.Environment==issuer.Environment&&x.Series==request.Series&&x.Number>=request.FirstNumber&&x.Number<=request.LastNumber).ToListAsync(ct);
         if(docs.Count!=request.LastNumber-request.FirstNumber+1 || docs.Any(x=>x.State!=FiscalState.Rejected || x.AuthorizedXml!=null || FiscalJson.Required<FiscalSnapshot>(x.Snapshot).IssuedAt.Year!=request.Year))
@@ -54,7 +54,7 @@ public sealed class FiscalInutilizationsController(ApplicationDbContext db,Curre
     }
     private async Task<IActionResult> Process(FiscalInutilization record, bool recovery, CancellationToken ct)
     {
-        FiscalReleaseGate.EnsureAllowed(config, db.TenantId, record.Environment);
+        await FiscalReleaseGate.EnsureAllowedAsync(db, config, record.Environment, ct);
         if(record.State == "Confirmed") return NoContent();
         if(record.State == "Rejected") throw new ConflictException("Pedido rejeitado. Revise a justificativa e solicite novamente pelo formulário.");
         if(record.LeaseUntil > DateTimeOffset.UtcNow) throw new ConflictException("Uma consulta desta inutilização já está em andamento. Aguarde antes de atualizar.");

@@ -48,6 +48,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             e.Property(x => x.Vertical).HasConversion<string>().HasMaxLength(40);
             e.HasOne(x => x.Settings).WithOne().HasForeignKey<TenantSettings>(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasMany(x => x.Modules).WithOne().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.FiscalProductionReleased).HasDefaultValue(false);
         });
         modelBuilder.Entity<TenantUser>(e =>
         {

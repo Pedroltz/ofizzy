@@ -23,7 +23,7 @@ Todas as entidades fiscais usam TenantId, filtros e FKs compostas. Owner/Admin a
 
 Uma OS mista tem NF-e e NFS-e independentes. Autorização parcial não autoriza reenviar o documento já autorizado. Resultado inconclusivo exige consulta/recuperação; não liberar numeração nem substituir o XML assinado. Downloads dependem de XML autorizado persistido. Cancelamento preserva histórico.
 
-Produção permanece condicionada a `Fiscal:ProductionEnabled` e `Fiscal:HomologatedTenants`. O simulador de desenvolvimento nunca opera em ambiente de produção. XSD NF-e incorporado é baseline antigo, não prova conformidade vigente. DANFE e DANFSe atendem aos manuais e foram testados com fixtures autorizadas; homologação oficial permanece obrigatória antes de produção. Não apresentar teste com gateway substituído como homologação oficial.
+Produção permanece condicionada à liberação do operador da plataforma em `/plataforma` (`Tenant.FiscalProductionReleased`), com suporte mantido a `Fiscal:ProductionEnabled` e `Fiscal:HomologatedTenants`. O simulador de desenvolvimento nunca opera em ambiente de produção. XSD NF-e incorporado é baseline antigo, não prova conformidade vigente. DANFE e DANFSe atendem aos manuais e foram testados com fixtures autorizadas; homologação oficial permanece obrigatória antes de produção. Não apresentar teste com gateway substituído como homologação oficial.
 
 ## Retomar o trabalho
 
@@ -31,7 +31,7 @@ Seguir [Próximos passos](docs/NEXT-STEPS.md). [FISCAL.md](docs/FISCAL.md) cont�
 
 Desenvolvimento habitual: PostgreSQL via `compose.local.yaml`, API no host (`dotnet run --project src/backend/Ofizzy.Api --launch-profile local`) e Angular (`npm start` em `src/frontend/ofizzy-web`). Proxy 4200 → 5154. Smoke fiscal usa stack isolada `ofizzy-fiscal-smoke`, porta 18082; confirmar estado antes de reutilizar. Não alterar o volume de desenvolvimento para executar smoke.
 
-Último aceite da implementação em 13/09: backend build/55 unitários/10 integrações aprovados (100%); frontend lint/39 unitários/build; 58 E2E/11 skips; migrations, Compose e Nginx antes/depois de restart. Bundle 780,45 kB com aviso de budget. QuestPDF DANFE corrigido para restrição de aspecto do barcode Code 128 (altura 28 px) e botões de configuração fiscal com `min-height: 44px`. Comandos e limites em [TESTING.md](docs/TESTING.md).
+Último aceite da implementação em 15/09/2026: backend build/56 unitários/10 integrações aprovados (100%); frontend lint/40 unitários/build; 21 E2E de plataforma aprovados em Desktop, Tablet e Mobile; migration AddTenantFiscalProductionRelease adicionada. Comandos e limites em [TESTING.md](docs/TESTING.md).
 
 Preservar alterações de código já presentes na árvore. Registrar novas evidências em STATUS, IMPLEMENTATION-LOG e fase 8. O [handoff anterior](docs/archive/HANDOFF-ATE-2026-09-13.md) foi arquivado para consulta histórica; não define tarefas vigentes.
 

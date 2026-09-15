@@ -897,4 +897,20 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
   - Angular Build: compilação de produção aprovada com sucesso (`npm run build`).
   - Playwright: 58 testes aprovados (11 skips) em Desktop, Tablet e Mobile (`npx playwright test`).
 
+## 2026-09-15 — Liberação do ambiente fiscal de produção via interface da plataforma
+
+- **Modelagem e Migração (PostgreSQL / EF Core)**:
+  - Adicionados campos `FiscalProductionReleased` (boolean, default false), `FiscalProductionReleasedAt` (timestamp with time zone, nullable) e `FiscalProductionReleasedByUserId` (uuid, nullable) na entidade `Tenant`.
+  - Criada migration `20260915181631_AddTenantFiscalProductionRelease`.
+- **Backend (.NET)**:
+  - `PlatformController`: Atualizados `PlatformTenantResponse` e `UpdateTenantRequest` para expor e atualizar `FiscalProductionReleased` com auditoria de data/hora e identificador do usuário autenticado.
+  - `FiscalReleaseGate`: Implementados métodos assíncronos `IsTenantAllowedAsync` e `EnsureAllowedAsync` verificando a liberação persistida no banco com fallback para as configurações de servidor (`Fiscal:HomologatedTenants` e `Fiscal:ProductionEnabled`).
+  - Integrado o release gate em `FiscalSettingsController`, `FiscalEmissionService`, `FiscalInutilizationsController` e `FiscalPreparationService`.
+- **Frontend (Angular / PrimeNG)**:
+  - `platform.page.ts` e `platform.page.html`: Exibição de badge do status fiscal (`Produção liberada` vs `Homologação`) na tabela e cards, e inserção do campo "Liberar ambiente de produção fiscal" com texto explicativo e data de liberação no modal de gerenciamento da empresa.
+- **Validações e Testes**:
+  - Backend: 56 testes unitários aprovados (`Ofizzy.UnitTests`) e 10 testes de integração aprovados (`Ofizzy.IntegrationTests`), totalizando 100% de aprovação.
+  - Frontend: ESLint aprovado (0 warnings/errors), 40 testes unitários Vitest aprovados, 21 testes E2E do Playwright aprovados (Desktop, Mobile, Tablet) e build de produção aprovado.
+
+
 

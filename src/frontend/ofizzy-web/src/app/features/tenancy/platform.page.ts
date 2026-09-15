@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -15,8 +16,8 @@ import { ProductModule } from '../../core/tenancy/tenant-context.service';
 import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import { ResponsiveLayoutService } from '../../shared/layout/responsive-layout.service';
 import { PageHeaderComponent, DataToolbarComponent, SearchFieldComponent, EmptyStateComponent, LoadingStateComponent, StatusBadgeComponent, DataTableWrapperComponent, SectionCardComponent } from '../../shared/components';
-interface PlatformTenant { id: string; name: string; slug: string; status: string; vertical: string; onboardingCompletedAt: string | null; modules: ProductModule[]; }
-@Component({ selector: 'app-platform', imports: [FormsModule, ButtonModule, InputTextModule, SelectModule, CheckboxModule, FieldsetModule, MessageModule, DialogModule, TableModule, PageHeaderComponent, DataToolbarComponent, SearchFieldComponent, EmptyStateComponent, LoadingStateComponent, StatusBadgeComponent, DataTableWrapperComponent, SectionCardComponent], changeDetection: ChangeDetectionStrategy.OnPush, templateUrl: './platform.page.html' })
+interface PlatformTenant { id: string; name: string; slug: string; status: string; vertical: string; onboardingCompletedAt: string | null; modules: ProductModule[]; fiscalProductionReleased: boolean; fiscalProductionReleasedAt: string | null; }
+@Component({ selector: 'app-platform', imports: [DatePipe, FormsModule, ButtonModule, InputTextModule, SelectModule, CheckboxModule, FieldsetModule, MessageModule, DialogModule, TableModule, PageHeaderComponent, DataToolbarComponent, SearchFieldComponent, EmptyStateComponent, LoadingStateComponent, StatusBadgeComponent, DataTableWrapperComponent, SectionCardComponent], changeDetection: ChangeDetectionStrategy.OnPush, templateUrl: './platform.page.html' })
 export class PlatformPage {
  private readonly http = inject(HttpClient);
  private readonly confirmation = inject(ConfirmationService);
@@ -34,7 +35,7 @@ export class PlatformPage {
  readonly editStatuses = computed(() => this.statuses.map(s => ({ ...s, disabled: s.value === 'Active' && !this.editing()?.onboardingCompletedAt })));
  readonly moduleLabels: Record<ProductModule, string> = { Customers: 'Clientes', WorkOrders: 'Ordens de serviço', Catalog: 'Catálogo', Automotive: 'Automotive · Veículos' };
  readonly filtered = computed(() => this.tenants().filter(t => (!this.statusFilter() || t.status === this.statusFilter()) && (t.name + ' ' + t.slug).toLocaleLowerCase('pt-BR').includes(this.search().trim().toLocaleLowerCase('pt-BR'))));
- draft = this.empty(); editStatus = 'Pending';
+ draft = this.empty(); editStatus = 'Pending'; editFiscalProduction = false;
  constructor() { void this.load(); }
  private empty() { return { name: '', slug: '', vertical: 'Automotive', adminName: '', email: '', password: '', modules: [...this.availableModules] }; }
  statusLabel(status: string): string { return this.statuses.find(x => x.value === status)?.label ?? status; }
@@ -42,7 +43,8 @@ export class PlatformPage {
  open(tenant?: PlatformTenant): void {
   this.editing.set(tenant ? { ...tenant, modules: [...tenant.modules] } : null);
   this.draft = this.empty(); this.validation.set('');
-  if (tenant) { this.draft.modules = [...tenant.modules]; this.editStatus = tenant.status; }
+  if (tenant) { this.draft.modules = [...tenant.modules]; this.editStatus = tenant.status; this.editFiscalProduction = tenant.fiscalProductionReleased; }
+  else { this.editFiscalProduction = false; }
   this.dialog.set(true);
  }
  async load(): Promise<void> {
@@ -67,7 +69,7 @@ export class PlatformPage {
   this.busy.set(true);
   const tenant = this.editing();
   try {
-   if (tenant) await firstValueFrom(this.http.put('/api/platform/tenants/' + tenant.id, { status: this.editStatus, modules: this.draft.modules }));
+   if (tenant) await firstValueFrom(this.http.put('/api/platform/tenants/' + tenant.id, { status: this.editStatus, modules: this.draft.modules, fiscalProductionReleased: this.editFiscalProduction }));
    else await firstValueFrom(this.http.post('/api/platform/tenants', { ...this.draft, password: this.draft.password || null }));
    this.dialog.set(false); this.draft = this.empty();
    this.messages.add({ severity: 'success', summary: tenant ? 'Empresa atualizada' : 'Empresa criada', detail: tenant ? undefined : 'O administrador informado pode entrar para concluir a configuração inicial.' });
