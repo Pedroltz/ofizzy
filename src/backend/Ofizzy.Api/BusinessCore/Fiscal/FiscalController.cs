@@ -34,7 +34,16 @@ public sealed class FiscalController(ApplicationDbContext db, FiscalPreparationS
             throw new ConflictException("Aguarde a confirmação da tentativa atual antes de alterar a preparação.");
         var entity=await db.FiscalPreparationEntries.SingleOrDefaultAsync(x=>x.WorkOrderId==id,ct);
         if(entity==null){entity=new(){WorkOrderId=id};db.FiscalPreparationEntries.Add(entity);}
-        entity.Data=FiscalJson.Write(request);entity.Version=Guid.NewGuid();await db.SaveChangesAsync(ct);return NoContent();
+        var sanitizedServices = request.Services?.ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value with
+            {
+                NationalCode = kvp.Value.NationalCode?.Trim() ?? "",
+                MunicipalCode = string.IsNullOrWhiteSpace(kvp.Value.MunicipalCode) ? null : kvp.Value.MunicipalCode.Trim(),
+                Nbs = string.IsNullOrWhiteSpace(kvp.Value.Nbs) ? null : kvp.Value.Nbs.Trim()
+            });
+        var sanitized = request with { Services = sanitizedServices };
+        entity.Data=FiscalJson.Write(sanitized);entity.Version=Guid.NewGuid();await db.SaveChangesAsync(ct);return NoContent();
     }
     [HttpPost("api/work-orders/{id:guid}/fiscal/issue")]
     public async Task<IActionResult> Issue(Guid id,CancellationToken ct)

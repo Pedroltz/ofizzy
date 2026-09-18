@@ -113,7 +113,7 @@
   </p-tabs>
 </section>
 
-<p-dialog [header]="editingService() ? 'Editar Serviço' : 'Novo Serviço'" [modal]="true" [visible]="serviceDialog()" (visibleChange)="serviceDialog.set($event)" [style]="{ width: 'min(36rem, 94vw)' }">
+<p-dialog [header]="editingService() ? 'Editar Serviço' : 'Novo Serviço'" [modal]="true" [visible]="serviceDialog()" (visibleChange)="serviceDialog.set($event)" [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }" styleClass="catalog-item-dialog">
   <form [formGroup]="serviceForm" class="dialog-form" (ngSubmit)="saveService()">
     <label>Nome do Serviço
       <input pInputText formControlName="name" placeholder="Ex: Alinhamento 3D Dianteiro / Traseiro" />
@@ -124,6 +124,39 @@
     <label>Preço Padrão Sugerido
       <p-inputnumber formControlName="defaultPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
     </label>
+
+    @if (tenantContext.admin()) {
+      <div class="fiscal-accordion-card">
+        <div class="fiscal-toggle-header">
+          <label for="service-fiscal-toggle">
+            <div class="fiscal-icon-badge">
+              <i class="pi pi-file-check" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-primary">Classificação Fiscal (NFS-e)</span>
+                @if (loadingServiceFiscal()) {
+                  <i class="pi pi-spin pi-spinner text-xs text-muted" aria-hidden="true"></i>
+                }
+              </div>
+              <p class="text-xs text-secondary m-0">Vincule código de tributação para emissão automática de serviços</p>
+            </div>
+          </label>
+          <p-toggleswitch [formControl]="serviceFiscalEnabled" inputId="service-fiscal-toggle" />
+        </div>
+
+        @if (serviceFiscalEnabled.value) {
+          <div class="fiscal-fields-body">
+            <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-subtle">
+              <span class="text-xs font-semibold text-muted uppercase tracking-wider">Parâmetros de Serviço (NFS-e Nacional)</span>
+              <span class="text-xs text-secondary">Ex: 140101 (Reparação/Manutenção)</span>
+            </div>
+            <app-fiscal-fields [fields]="serviceFields" [form]="serviceFiscalForm" prefix="dialog-srv-" />
+          </div>
+        }
+      </div>
+    }
+
     <div class="dialog-actions">
       <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="serviceDialog.set(false)" />
       <p-button type="submit" [label]="editingService() ? 'Salvar Alterações' : 'Cadastrar Serviço'" icon="pi pi-check" [loading]="saving()" />
@@ -131,7 +164,7 @@
   </form>
 </p-dialog>
 
-<p-dialog [header]="editingPart() ? 'Editar Peça' : 'Nova Peça'" [modal]="true" [visible]="partDialog()" (visibleChange)="partDialog.set($event)" [style]="{ width: 'min(36rem, 94vw)' }">
+<p-dialog [header]="editingPart() ? 'Editar Peça' : 'Nova Peça'" [modal]="true" [visible]="partDialog()" (visibleChange)="partDialog.set($event)" [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }" styleClass="catalog-item-dialog">
   <form [formGroup]="partForm" class="dialog-form" (ngSubmit)="savePart()">
     <div class="two-columns">
       <label>Nome / Descrição da Peça
@@ -149,6 +182,39 @@
         <p-inputnumber formControlName="salePrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
       </label>
     </div>
+
+    @if (tenantContext.admin()) {
+      <div class="fiscal-accordion-card">
+        <div class="fiscal-toggle-header">
+          <label for="part-fiscal-toggle">
+            <div class="fiscal-icon-badge">
+              <i class="pi pi-file-check" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-primary">Classificação Fiscal (NF-e)</span>
+                @if (loadingPartFiscal()) {
+                  <i class="pi pi-spin pi-spinner text-xs text-muted" aria-hidden="true"></i>
+                }
+              </div>
+              <p class="text-xs text-secondary m-0">Vincule NCM, CFOP e tributação para permitir emissão fiscal direta da OS</p>
+            </div>
+          </label>
+          <p-toggleswitch [formControl]="partFiscalEnabled" inputId="part-fiscal-toggle" />
+        </div>
+
+        @if (partFiscalEnabled.value) {
+          <div class="fiscal-fields-body">
+            <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-subtle">
+              <span class="text-xs font-semibold text-muted uppercase tracking-wider">Parâmetros Fiscais do Produto</span>
+              <span class="text-xs text-secondary">Padrão sugerido: Revenda 5102 / CSOSN 102</span>
+            </div>
+            <app-fiscal-fields [fields]="productFields" [form]="partFiscalForm" prefix="dialog-part-" />
+          </div>
+        }
+      </div>
+    }
+
     <div class="dialog-actions">
       <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="partDialog.set(false)" />
       <p-button type="submit" [label]="editingPart() ? 'Salvar Alterações' : 'Cadastrar Peça'" icon="pi pi-check" [loading]="saving()" />

@@ -64,15 +64,26 @@ import { FiscalFieldsComponent, FiscalField, fiscalForm, addressFields, productF
             </div>
             <div>
               <label for="fiscal-password" class="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Senha do certificado</label>
-              <input pInputText id="fiscal-password" type="password" [formControl]="password" autocomplete="new-password" class="w-full" />
+              <input pInputText id="fiscal-password" type="password" [formControl]="password" autocomplete="new-password" class="w-full" [invalid]="password.invalid && password.touched" />
+              @if (password.invalid && password.touched) {
+                <small class="fiscal-error-msg" role="alert">
+                  <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+                  <span>Informe a senha do certificado</span>
+                </small>
+              }
             </div>
           </div>
           <div class="flex flex-wrap gap-2.5 items-center mt-2">
             <p-button label="Cadastrar ou substituir certificado" [loading]="busy()" (onClick)="upload()" />
-            @if (value.devToolsAvailable) {
+            @if (value.devToolsAvailable && isHomologation()) {
               <p-button label="Baixar certificado A1 de teste (Dev)" ariaLabel="Baixar certificado A1 de teste (Dev)" severity="secondary" [outlined]="true" icon="pi pi-download" (onClick)="downloadTestCert()" />
             }
           </div>
+          @if (value.devToolsAvailable && isHomologation()) {
+            <div class="dev-cert-subtle-hint">
+              <span>Senha padrão de homologação: <span class="font-mono">teste123</span></span>
+            </div>
+          }
         </p-fieldset>
         <p-fieldset legend="Classificação fiscal do catálogo" styleClass="fiscal-fieldset">
           <p class="text-sm text-muted mb-4">Selecione um item. Perfis suportados de produtos: revenda interna 5102/102 ou 5405/500. Dados de ST são valores por unidade, conforme documentação de entrada.</p>
@@ -105,7 +116,7 @@ import { FiscalFieldsComponent, FiscalField, fiscalForm, addressFields, productF
       }
     </div>
   } @else { <p-message severity="info">A configuração fiscal é administrada pelo responsável da organização.</p-message> }`,
-  styles: `.fiscal-settings{display:flex;flex-direction:column;gap:1.75rem;min-width:0}.fiscal-cert-badge{padding:0.75rem 1rem;border-radius:var(--radius-sm);background:var(--surface-secondary);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap}input{min-height:44px;max-width:100%}p-select{width:100%;min-height:44px}p{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}@media(max-width:640px){input{font-size:16px}}`
+  styles: `.fiscal-settings{display:flex;flex-direction:column;gap:1.75rem;min-width:0}.fiscal-cert-badge{padding:0.75rem 1rem;border-radius:var(--radius-sm);background:var(--surface-secondary);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap}.dev-cert-subtle-hint{margin-top:0.4rem;font-size:0.75rem;color:var(--text-muted)}input{min-height:44px;max-width:100%}p-select{width:100%;min-height:44px}p{overflow-wrap:anywhere}:host ::ng-deep .p-button{min-height:44px}@media(max-width:640px){input{font-size:16px}}`
 })
 export class FiscalSettingsComponent {
   readonly tenant = inject(TenantContextService); private readonly api = inject(FiscalApiService); private readonly catalogs = inject(CatalogApiService); private readonly messages = inject(MessageService);
@@ -114,12 +125,16 @@ export class FiscalSettingsComponent {
   readonly data = signal<FiscalSettingsResponse | null>(null); readonly busy = signal(false); readonly loadError = signal(false);
   readonly addressFields = addressFields; readonly productFields = productFields; readonly serviceFields = serviceFields;
   readonly settingsFields: FiscalField[] = [
-    { key: 'cnpj', label: 'CNPJ (somente números)' }, { key: 'legalName', label: 'Razão social' }, { key: 'stateRegistration', label: 'Inscrição estadual' }, { key: 'municipalRegistration', label: 'Inscrição municipal' },
-    { key: 'regime', label: 'Regime', options: [{ label: 'MEI', value: 'MEI' }, { label: 'Simples Nacional', value: 'SimplesNacional' }] },
-    { key: 'environment', label: 'Ambiente', options: [{ label: 'Homologação (sem valor fiscal)', value: 'Homologation' }, { label: 'Produção (exige liberação)', value: 'Production' }] },
+    { key: 'cnpj', label: 'CNPJ (somente números)', required: true, pattern: /^\d{14}$/, patternMessage: 'CNPJ deve conter 14 dígitos numéricos' },
+    { key: 'legalName', label: 'Razão social', required: true, maxLength: 60 },
+    { key: 'stateRegistration', label: 'Inscrição estadual', maxLength: 14 },
+    { key: 'municipalRegistration', label: 'Inscrição municipal', maxLength: 15 },
+    { key: 'regime', label: 'Regime', required: true, options: [{ label: 'MEI', value: 'MEI' }, { label: 'Simples Nacional', value: 'SimplesNacional' }] },
+    { key: 'environment', label: 'Ambiente', required: true, options: [{ label: 'Homologação (sem valor fiscal)', value: 'Homologation' }, { label: 'Produção (exige liberação)', value: 'Production' }] },
     { key: 'nfeEnabled', label: 'NF-e de produtos', options: [{ label: 'Desabilitada', value: false }, { label: 'Habilitada', value: true }] },
     { key: 'nfseEnabled', label: 'NFS-e de serviços', options: [{ label: 'Desabilitada', value: false }, { label: 'Habilitada', value: true }] },
-    { key: 'nfeSeries', label: 'Série da NF-e', type: 'number' }, { key: 'dpsSeries', label: 'Série da DPS', type: 'number' }
+    { key: 'nfeSeries', label: 'Série da NF-e', type: 'number', required: true },
+    { key: 'dpsSeries', label: 'Série da DPS', type: 'number', required: true }
   ];
   readonly settingsForm = fiscalForm(this.settingsFields); readonly addressForm = fiscalForm(addressFields);
   readonly password = new FormControl('', { nonNullable: true }); private file: File | null = null;
@@ -143,20 +158,85 @@ export class FiscalSettingsComponent {
       this.catalog.set([...parts.items.map(x => ({ label: 'Produto · ' + x.name, value: 'parts/' + x.id })), ...services.items.map(x => ({ label: 'Serviço · ' + x.name, value: 'services/' + x.id }))]);
     } catch { if (this.valid()) this.actionError.set('Não foi possível buscar os itens do catálogo.'); }
   }
-  async save() { if (this.busy()) return; this.busy.set(true); this.actionError.set(''); try { await this.api.saveSettings({ ...this.settingsForm.getRawValue(), address: this.addressForm.getRawValue() as unknown as FiscalAddress } as unknown as FiscalSettings); if (this.valid()) { this.messages.add({ severity: 'success', summary: 'Configuração fiscal salva' }); await this.load(); } } catch { if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.'); } finally { if (this.valid()) this.busy.set(false); } }
+  async save() {
+    if (this.busy()) return;
+    if (this.settingsForm.get('nfeEnabled')?.value && !this.settingsForm.get('stateRegistration')?.value) {
+      this.settingsForm.get('stateRegistration')?.setErrors({ custom: 'Inscrição estadual é obrigatória quando a NF-e estiver habilitada.' });
+    }
+    if (this.settingsForm.invalid || this.addressForm.invalid) {
+      this.settingsForm.markAllAsTouched();
+      this.addressForm.markAllAsTouched();
+      this.messages.add({ severity: 'error', summary: 'Dados fiscais pendentes', detail: 'Preencha os campos destacados em vermelho antes de salvar.' });
+      return;
+    }
+    this.busy.set(true); this.actionError.set('');
+    try {
+      await this.api.saveSettings({ ...this.settingsForm.getRawValue(), address: this.addressForm.getRawValue() as unknown as FiscalAddress } as unknown as FiscalSettings);
+      if (this.valid()) { this.messages.add({ severity: 'success', summary: 'Configuração fiscal salva' }); await this.load(); }
+    } catch {
+      if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.');
+    } finally {
+      if (this.valid()) this.busy.set(false);
+    }
+  }
   chooseFile(event: Event) { this.file = (event.target as HTMLInputElement).files?.[0] ?? null; }
-  async upload() { if (this.busy()) return; if (!this.file) { this.messages.add({ severity: 'warn', summary: 'Selecione o certificado A1' }); return; } this.busy.set(true); this.actionError.set(''); try { await this.api.certificate(this.file, this.password.value); if (this.valid()) { this.password.reset(); this.file = null; await this.load(); this.messages.add({ severity: 'success', summary: 'Certificado protegido e cadastrado' }); } } catch { if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.'); } finally { this.password.reset(); if (this.valid()) this.busy.set(false); } }
+  async upload() {
+    if (this.busy()) return;
+    if (!this.file) { this.messages.add({ severity: 'warn', summary: 'Selecione o arquivo do certificado A1' }); return; }
+    if (!this.password.value) {
+      this.password.setErrors({ required: true });
+      this.password.markAsTouched();
+      this.messages.add({ severity: 'warn', summary: 'Informe a senha do certificado A1' });
+      return;
+    }
+    this.busy.set(true); this.actionError.set('');
+    try {
+      await this.api.certificate(this.file, this.password.value);
+      if (this.valid()) { this.password.reset(); this.file = null; await this.load(); this.messages.add({ severity: 'success', summary: 'Certificado protegido e cadastrado' }); }
+    } catch {
+      if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.');
+    } finally {
+      this.password.reset();
+      if (this.valid()) this.busy.set(false);
+    }
+  }
   async loadProfile() { const selected = this.selected.value; if (!selected) return; const [kind, id] = selected.split('/') as ['parts' | 'services', string]; this.profileForm.set(null); try { const data = await this.api.profile(kind, id); if (!this.valid() || this.selected.value !== selected) return; this.profileKind.set(kind); this.profileForm.set(fiscalForm(kind === 'parts' ? productFields : serviceFields, data)); } catch { if (this.valid()) this.actionError.set('Não foi possível carregar a classificação.'); } }
-  async saveProfile() { const form = this.profileForm(); if (!form || !this.selected.value || this.busy()) return; const [kind, id] = this.selected.value.split('/') as ['parts' | 'services', string]; this.busy.set(true); this.actionError.set(''); try { await this.api.saveProfile(kind, id, form.getRawValue()); if (this.valid()) this.messages.add({ severity: 'success', summary: 'Classificação fiscal salva' }); } catch { if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.'); } finally { if (this.valid()) this.busy.set(false); } }
+  async saveProfile() {
+    const form = this.profileForm();
+    if (!form || !this.selected.value || this.busy()) return;
+    if (form.invalid) {
+      form.markAllAsTouched();
+      this.messages.add({ severity: 'error', summary: 'Classificação fiscal pendente', detail: 'Preencha os campos destacados em vermelho antes de salvar.' });
+      return;
+    }
+    const [kind, id] = this.selected.value.split('/') as ['parts' | 'services', string];
+    this.busy.set(true); this.actionError.set('');
+    try {
+      await this.api.saveProfile(kind, id, form.getRawValue());
+      if (this.valid()) this.messages.add({ severity: 'success', summary: 'Classificação fiscal salva' });
+    } catch {
+      if (this.valid()) this.actionError.set('Não foi possível salvar. Revise os dados e a mensagem retornada pelo servidor.');
+    } finally {
+      if (this.valid()) this.busy.set(false);
+    }
+  }
+  isHomologation(): boolean {
+    const formEnv = this.settingsForm.get('environment')?.value;
+    const currentEnv = formEnv ?? this.data()?.settings?.environment;
+    return currentEnv === 'Homologation' || currentEnv === '2' || currentEnv === 2;
+  }
   async downloadTestCert() {
-    if (!this.data()?.devToolsAvailable || this.busy()) return;
+    if (!this.data()?.devToolsAvailable || !this.isHomologation() || this.busy()) return;
     this.busy.set(true); this.actionError.set('');
     try {
       const blob = await this.api.downloadDevCertificate();
       if (!this.valid()) return;
       const cnpj = this.settingsForm.get('cnpj')?.value || 'teste';
       saveFiscalBlob(blob, `ofizzy-dev-${cnpj}.pfx`);
-      this.messages.add({ severity: 'info', summary: 'Certificado de teste baixado', detail: 'Senha padrão: teste123' });
+      this.password.setValue('teste123');
+      this.password.markAsDirty();
+      this.password.markAsTouched();
+      this.messages.add({ severity: 'info', summary: 'Certificado de teste baixado', detail: 'Senha padrão: teste123 (preenchida no formulário)' });
     } catch {
       if (this.valid()) this.actionError.set('Não foi possível baixar o certificado de teste. Disponível apenas em desenvolvimento com simulação e homologação habilitadas.');
     } finally { if (this.valid()) this.busy.set(false); }

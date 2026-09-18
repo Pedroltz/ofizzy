@@ -57,9 +57,17 @@ public sealed class ServiceFiscalValidator : AbstractValidator<ServiceFiscalData
 {
     public ServiceFiscalValidator()
     {
-        RuleFor(x => x.NationalCode).Matches("^[0-9]{6}$");
-        RuleFor(x => x.MunicipalCode).Matches("^[0-9]{3}$").When(x => !string.IsNullOrEmpty(x.MunicipalCode));
-        RuleFor(x => x.Nbs).Matches("^[0-9]{9}$").When(x => !string.IsNullOrEmpty(x.Nbs));
+        RuleFor(x => x.NationalCode)
+            .Matches("^[0-9]{6}$")
+            .WithMessage("O código de tributação nacional deve conter exatamente 6 dígitos numéricos.");
+        RuleFor(x => x.MunicipalCode)
+            .Matches("^[0-9]{3}$")
+            .WithMessage("O código municipal (quando informado) deve conter exatamente 3 dígitos numéricos.")
+            .When(x => !string.IsNullOrWhiteSpace(x.MunicipalCode));
+        RuleFor(x => x.Nbs)
+            .Matches("^[0-9]{9}$")
+            .WithMessage("O NBS (quando informado) deve conter exatamente 9 dígitos numéricos.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Nbs));
         RuleFor(x => x.ApproximateTaxRate).InclusiveBetween(0, 100);
     }
 }

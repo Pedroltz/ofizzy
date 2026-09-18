@@ -107,10 +107,16 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
     public async Task<IActionResult> Service(Guid id, ServiceFiscalData request, CancellationToken ct)
     {
         if (!await db.Services.AnyAsync(x => x.Id == id, ct)) return NotFound();
-        var validation = new ServiceFiscalValidator().Validate(request);
+        var sanitized = request with
+        {
+            NationalCode = request.NationalCode?.Trim() ?? "",
+            MunicipalCode = string.IsNullOrWhiteSpace(request.MunicipalCode) ? null : request.MunicipalCode.Trim(),
+            Nbs = string.IsNullOrWhiteSpace(request.Nbs) ? null : request.Nbs.Trim()
+        };
+        var validation = new ServiceFiscalValidator().Validate(sanitized);
         if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         var entity = await db.ServiceFiscalProfileEntries.SingleOrDefaultAsync(x => x.ServiceId == id, ct);
         if (entity == null) { entity = new() { ServiceId = id }; db.ServiceFiscalProfileEntries.Add(entity); }
-        entity.Data = FiscalJson.Write(request); await db.SaveChangesAsync(ct); return NoContent();
+        entity.Data = FiscalJson.Write(sanitized); await db.SaveChangesAsync(ct); return NoContent();
     }
 }
