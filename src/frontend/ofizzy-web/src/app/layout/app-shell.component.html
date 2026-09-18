@@ -1,13 +1,12 @@
 <div class="app-layout">
   <!-- Desktop Sidebar -->
   <aside class="desktop-sidebar" aria-label="Navegação principal">
-    <a [routerLink]="home" class="sidebar-brand" aria-label="Ofizzy — Início">
-      <span class="sidebar-wordmark" aria-hidden="true">OF</span>
-      <span class="brand-info">
-        <strong class="brand-title">Ofizzy</strong>
-        <span class="brand-subtitle">{{ platformArea ? 'Organizações e acessos' : tenantContext.tenant()?.name }}</span>
-      </span>
-    </a>
+    <div class="sidebar-logo-container">
+      <a [routerLink]="home" class="sidebar-logo-link" title="Ofizzy — Sistema de Ordem de Serviço">
+        <img src="assets/logo.png" alt="Ofizzy" class="sidebar-logo-image logo-light" />
+        <img src="assets/logo-dark.png" alt="Ofizzy" class="sidebar-logo-image logo-dark" />
+      </a>
+    </div>
 
     <div class="sidebar-navigation">
       @for (group of navigation(); track group.label) {
@@ -58,10 +57,7 @@
     <!-- Desktop Header -->
     <header class="desktop-header">
       <div class="desktop-header__left">
-        <span class="desktop-header__date">
-          <i class="pi pi-calendar"></i>
-          <span>{{ todayFormatted() }}</span>
-        </span>
+        <app-organization-switcher [home]="home" [platformArea]="platformArea" />
       </div>
       <div class="desktop-header__right">
         <app-theme-toggle mode="switch" />
@@ -84,10 +80,7 @@
       >
         <i class="pi pi-bars"></i>
       </button>
-      <a [routerLink]="home" class="mobile-brand" aria-label="Ofizzy — Início">
-        <span class="sidebar-wordmark small" aria-hidden="true">OF</span>
-        <strong>Ofizzy</strong>
-      </a>
+      <app-organization-switcher [home]="home" [platformArea]="platformArea" [compact]="true" />
       <div class="mobile-header__right">
         <app-theme-toggle mode="switch" />
         <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
@@ -104,13 +97,12 @@
           aria-label="Menu principal"
         >
           <div class="drawer-header">
-            <a [routerLink]="home" class="sidebar-brand" (click)="mobileMenu.set(false)">
-              <span class="sidebar-wordmark" aria-hidden="true">OF</span>
-              <span class="brand-info">
-                <strong class="brand-title">Ofizzy</strong>
-                <span class="brand-subtitle">{{ platformArea ? 'Organizações e acessos' : tenantContext.tenant()?.name }}</span>
-              </span>
-            </a>
+            <div class="sidebar-logo-container drawer-logo">
+              <a [routerLink]="home" class="sidebar-logo-link" (click)="mobileMenu.set(false)" title="Ofizzy">
+                <img src="assets/logo.png" alt="Ofizzy" class="sidebar-logo-image logo-light" />
+                <img src="assets/logo-dark.png" alt="Ofizzy" class="sidebar-logo-image logo-dark" />
+              </a>
+            </div>
             <button
               type="button"
               class="mobile-close-btn"

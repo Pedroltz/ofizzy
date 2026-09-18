@@ -3,10 +3,11 @@ import { ChangeDetectionStrategy, Component, HostListener, computed, inject, sig
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { ThemeToggleComponent } from '../shared/components/theme-toggle.component';
+import { OrganizationSwitcherComponent } from './organization-switcher.component';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, OrganizationSwitcherComponent],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,6 +20,11 @@ export class AppShellComponent {
   readonly tenantContext = inject(TenantContextService);
   readonly user = this.auth.user;
   readonly mobileMenu = signal(false);
+
+  constructor() {
+    void this.tenantContext.loadUserTenants();
+  }
+
 
   readonly todayFormatted = computed(() => {
     const d = new Date();
@@ -59,10 +65,9 @@ export class AppShellComponent {
       const modules: Record<string, ('Customers' | 'WorkOrders' | 'Catalog' | 'Automotive')[]> = { '/': ['Customers', 'WorkOrders', 'Automotive'], '/ordens': ['WorkOrders'], '/clientes': ['Customers'], '/veiculos': ['Automotive'] };
       return (modules[item.route] ?? []).every(m => this.tenantContext.has(m));
     }) })),
-    { label: 'Organizações', items: [
-      { label: 'Trocar organização', icon: 'pi pi-building', route: '/organizacoes', exact: false },
-      ...(this.user()?.isPlatformAdmin ? [{ label: 'Plataforma', icon: 'pi pi-shield', route: '/plataforma', exact: false }] : [])
-    ] }
+    ...(this.user()?.isPlatformAdmin ? [{ label: 'Administração', items: [
+      { label: 'Plataforma', icon: 'pi pi-shield', route: '/plataforma', exact: false }
+    ] }] : [])
   ]);
 
   async logout(): Promise<void> {
