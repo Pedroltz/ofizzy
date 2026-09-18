@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -11,6 +11,17 @@ export const authRefreshInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const messages = inject(MessageService);
+  const xsrf = inject(HttpXsrfTokenExtractor);
+  const expire = () => {
+    if (authService.handleSessionExpired()) {
+      void router.navigateByUrl('/login');
+      messages.add({
+        severity: 'warn',
+        summary: 'Sessão expirada',
+        detail: 'Sua sessão expirou. Faça login novamente.',
+      });
+    }
+  };
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -21,15 +32,15 @@ export const authRefreshInterceptor: HttpInterceptorFn = (req, next) => {
       return from(authService.refreshSession()).pipe(
         switchMap((success) => {
           if (success) {
-            return next(req);
+            const token = xsrf.getToken();
+            const retry = token && req.headers.has('X-XSRF-TOKEN')
+              ? req.clone({ setHeaders: { 'X-XSRF-TOKEN': token } }) : req;
+            return next(retry).pipe(catchError((retryError: HttpErrorResponse) => {
+              if (retryError.status === 401) expire();
+              return throwError(() => retryError);
+            }));
           }
-          authService.handleSessionExpired();
-          void router.navigateByUrl('/login');
-          messages.add({
-            severity: 'warn',
-            summary: 'Sessão expirada',
-            detail: 'Sua sessão expirou por inatividade. Faça login novamente.',
-          });
+          expire();
           return throwError(() => error);
         }),
       );

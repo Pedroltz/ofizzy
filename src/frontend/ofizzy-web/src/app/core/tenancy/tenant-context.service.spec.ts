@@ -15,4 +15,23 @@ describe('TenantContextService', () => {
     user.set({ ...user()!, tenant: { ...user()!.tenant!, id: 'beta', role: 'Member', modules: ['Customers'] } });
     expect(context.has('Automotive')).toBe(false); expect(context.admin()).toBe(false);
   });
+
+  it('determines hasMultipleTenants based on userTenants length', () => {
+    const user = signal<CurrentUser | null>(null);
+    TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: { user } }] });
+    const context = TestBed.inject(TenantContextService);
+
+    expect(context.hasMultipleTenants()).toBe(false);
+
+    context.setTenants([
+      { id: '1', name: 'Org 1', slug: 'org-1', status: 'Active', vertical: 'Automotive', role: 'Owner', onboardingCompleted: true, modules: [] }
+    ]);
+    expect(context.hasMultipleTenants()).toBe(false);
+
+    context.setTenants([
+      { id: '1', name: 'Org 1', slug: 'org-1', status: 'Active', vertical: 'Automotive', role: 'Owner', onboardingCompleted: true, modules: [] },
+      { id: '2', name: 'Org 2', slug: 'org-2', status: 'Active', vertical: 'Automotive', role: 'Member', onboardingCompleted: true, modules: [] }
+    ]);
+    expect(context.hasMultipleTenants()).toBe(true);
+  });
 });

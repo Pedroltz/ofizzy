@@ -146,3 +146,51 @@ test('organizações permite tentar novamente e selecionar entre múltiplos vín
   await page.locator('article').filter({ has: page.getByRole('heading', { name: 'Empresa Beta' }) }).getByRole('button').click();
   await expect(page).toHaveURL(/\/onboarding$/); expect(selected).toEqual({ tenantId: 'beta' });
 });
+
+test('seletor da marca na barra superior exibe dropdown apenas quando houver múltiplas empresas', async ({ page }, testInfo) => {
+  const isDesktop = testInfo.project.name === 'desktop';
+  const container = isDesktop ? page.locator('.desktop-sidebar') : page.locator('.mobile-header');
+  const brandLink = isDesktop ? container.locator('a.sidebar-brand') : container.locator('a.mobile-brand');
+  const trigger = container.locator('button.org-switcher-trigger');
+
+  // Caso 1: Usuário com apenas 1 empresa vinculada
+  await base(page, { ...operator, isPlatformAdmin: false });
+  await page.route('**/api/auth/tenants', route => route.fulfill({ json: [{ ...tenant, role: 'Owner', onboardingCompleted: true }] }));
+  await page.goto('/');
+  await expect(brandLink).toBeVisible();
+  await expect(trigger).toHaveCount(0);
+
+  // Caso 2: Usuário com 2 empresas vinculadas
+  let selectedTenant: unknown;
+  await page.route('**/api/auth/tenants', route => route.fulfill({
+    json: [
+      { ...tenant, role: 'Owner', onboardingCompleted: true },
+      { ...tenant, id: 'tenant-beta', name: 'Oficina Beta', role: 'Member', onboardingCompleted: true }
+    ]
+  }));
+  await page.route('**/api/auth/tenant', route => {
+    selectedTenant = route.request().postDataJSON();
+    return route.fulfill({ json: {} });
+  });
+  await page.reload();
+
+  await expect(trigger).toBeVisible();
+  await expect(trigger.locator('.org-switcher-chevron')).toBeVisible();
+
+  // Clica para abrir o popover
+  await trigger.click();
+  const popover = page.locator('.org-switcher-popover');
+  await expect(popover).toBeVisible();
+  await expect(popover.getByText('Suas organizações')).toBeVisible();
+  await expect(popover.getByText('Oficina Beta')).toBeVisible();
+
+  // Seleciona a outra empresa
+  await page.route('**/api/auth/me', route => route.fulfill({
+    json: { ...operator, tenant: { ...tenant, id: 'tenant-beta', name: 'Oficina Beta', role: 'Member', onboardingCompleted: true } }
+  }));
+  await page.route('**/api/company', route => route.fulfill({ json: { name: 'Oficina Beta' } }));
+
+  await popover.getByRole('option', { name: /Oficina Beta/ }).click();
+  expect(selectedTenant).toEqual({ tenantId: 'tenant-beta' });
+});
+
