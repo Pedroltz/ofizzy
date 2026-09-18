@@ -1,5 +1,35 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal — 18/09/2026
+
+O cadastro de clientes foi expandido para suportar endereço estruturado e dados fiscais:
+- Novos campos no modelo `Customer`: `PostalCode`, `Street`, `Number`, `District`, `City`, `State`, `CityCode` (IBGE 7 dígitos) e `StateRegistration` (Inscrição Estadual).
+- Interface de cliente com card dedicado `Localização & Dados Fiscais` e integração com a API pública do ViaCEP, preenchendo automaticamente o logradouro, bairro, cidade, UF e código IBGE do município.
+- No `FiscalPreparationService`: a preparação fiscal da OS identifica se o destinatário não possui endereço preenchido e hidrata automaticamente os dados fiscais a partir do cliente (`Customer`), incluindo endereço completo, Inscrição Estadual e indicador de IE (`RecipientIeIndicator`), evitando digitação repetitiva e erros de validação da SEFAZ.
+
+Validação: 56 unitários + 10 integrações backend aprovados; frontend lint aprovado (0 erros/avisos), 69 unitários Vitest aprovados em 12 arquivos, build de produção aprovado.
+
+## Exibição da senha do Certificado A1 Dev e refinamento de validação fiscal — 18/09/2026
+
+Adicionada a exibição sutil da senha padrão do certificado A1 de homologação (`teste123`) em texto discreto logo abaixo do botão de cadastrar/substituir em Configurações Fiscais.
+O botão de download de certificado de teste passa a ser renderizado estritamente quando o ambiente fiscal for `Homologação` (`isHomologation()`) e o servidor estiver em modo de desenvolvimento com simulação ativa (`devToolsAvailable`).
+As mensagens de validação fiscal de itens de serviço e produtos na Ordem de Serviço agora incluem o nome/descrição do item como prefixo, eliminando mensagens duplicadas anônimas e integrando com o destaque em vermelho do campo no modal via chave camelCase.
+
+Validação: 56 unitários + 10 integrações backend aprovados; frontend lint aprovado (0 erros/avisos), 69 unitários Vitest aprovados em 12 arquivos, build de produção aprovado.
+
+## Formatação monetária e automação do pagamento da NF-e na Preparação Fiscal — 18/09/2026
+
+Adicionado suporte ao tipo `currency` no formulário fiscal (`p-inputnumber mode="currency" currency="BRL" locale="pt-BR"`) padronizando o campo de pagamento declarado da NF-e e os campos de Substituição Tributária (`retainedStBase`, `retainedStAmount`, `substituteAmount`).
+Implementada a automação de valores: o backend e o frontend calculam e preenchem automaticamente o valor de pagamento com base no somatório das peças da OS (`partsTotal`), vinculando a "Dinheiro" (01) ou "Sem pagamento" (90 com R$ 0,00), eliminando a digitação manual redundante e prevenindo rejeições SEFAZ de divergência de valor com botão auxiliar de sincronização imediata.
+
+Validação: 56 unitários + 10 integrações backend aprovados; frontend lint aprovado (0 erros/avisos), 69 unitários Vitest aprovados em 12 arquivos, build de produção aprovado.
+
+## Manutenção transversal de sessão — 16/09/2026
+
+Corrigido falso aviso de expiração causado por XSRF vinculado à identidade anterior do cookie de acesso. Renovação sincroniza XSRF, preserva sessões em falhas temporárias e mantém o usuário no login quando o refresh ou a repetição recebe 401. Sem mudanças de regra fiscal, schema ou interface visual.
+
+Validação: backend build/56 unitários/10 integrações; frontend lint/51 unitários/build; 61 E2E existentes e 9 novos aprovados (11 skips existentes). Smoke real pelo Nginx/PostgreSQL aprovado antes e após restart, incluindo escrita persistida e sessão expirada. Migration runner sem pendências. Aviso preexistente de budget frontend: 783,12 kB para 500 kB. Não constitui homologação fiscal nem deploy de produção.
+
 Estado em 2026-09-13: implementação em desenvolvimento, ainda sem homologação fiscal externa.
 Esta fase foi antecipada por solicitação do usuário. A fundação SaaS da fase 7 permanece vigente.
 

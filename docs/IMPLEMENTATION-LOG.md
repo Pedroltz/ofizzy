@@ -922,11 +922,87 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
   - `app.config.ts`: registrado `authRefreshInterceptor` na cadeia HTTP antes de `apiErrorInterceptor`.
   - Se o refresh falhar (expiração total de 30 dias), redireciona para `/login` e apresenta aviso contextual com `MessageService`.
 - **Validações e Testes**:
-  - Frontend: 44 testes unitários Vitest aprovados (`auth-refresh.interceptor.spec.ts` incluído).
-  - ESLint: 0 erros e 0 avisos.
-  - Playwright: 21 testes de plataforma aprovados em Desktop, Tablet e Mobile.
-  - Build de produção: aprovado.
 
+## 2026-09-17 — Troca de organizações na barra superior e expansão do logotipo na barra lateral
+
+- **Troca de Organizações no Cabeçalho Superior (`desktop-header`)**:
+  - Removido o seletor da barra lateral e inserido na barra superior (`desktop-header__left`) no lugar da data.
+  - Exibição do nome completo da organização (`Arroba Pneus - Igaraçu do Tietê`, etc.) com ícone e chevron dropdown, sem o título redundante "Ofizzy" e sem o quadrado `OF`.
+  - Popover nativo PrimeNG (`.org-switcher-popover`) com largura expandida (`18rem` a `24rem`), acomodando nomes completos com respiro, checkmark na empresa ativa e link para a plataforma.
+- **Logotipo Oficial e Alternância Dinâmica por Tema**:
+  - Adicionado suporte a logotipo específico para o tema escuro (`logo-dark.png`) com base na imagem enviada pelo usuário, com transparência e contraste nativos para fundos pretos.
+  - Alternância automática via CSS entre `logo.png` (tema claro) e `logo-dark.png` (tema escuro) no desktop e mobile, eliminando fundo branco no modo escuro.
+  - Redimensionado para preencher com equilíbrio a largura da barra lateral (`max-width: 220px`, `max-height: 65px`).
+- **Barra Superior Flutuante e Seletor de Organização Minimalista**:
+  - Seletor de organizações (`desktop-header__left`) simplificado para estética minimalista: transparente por padrão, sem bordas marcadas, caixas internas ou sombras (`box-shadow: none`), integrando-se naturalmente à barra superior.
+  - Hover sutil em forma de cápsula (`var(--surface-hover)`), chevron simplificado e preservação total do dropdown popover nativo PrimeNG (`.org-switcher-popover`).
+  - Cabeçalho flutuante (`desktop-header` e `mobile-header`) com margens externas, cantos suavemente arredondados (`var(--radius-lg)` = 12px), contorno sutil (`1px solid var(--border-subtle)`) e sem sombras pesadas (`box-shadow: none`).
+- **Validação Técnica**:
+  - Frontend Lint: `npm run lint` aprovado (0 erros, 0 avisos).
+  - Frontend Testes: `npm test` aprovado (12 arquivos, 68/68 testes unitários).
+  - Frontend Build: `npm run build` aprovado.
+  - Backend Testes: `dotnet test` aprovado (56/56 testes unitários).
+
+## 2026-09-18 — Favicons oficiais em alta resolução e multi-resolução
+
+- **Processamento e Geração de Favicons**:
+  - Imagem do ícone com engrenagem e checkmark (`ChatGPT Image 17 de set. de 2026, 15_40_02.png`) tratada e exportada para os assets de cabeçalho do navegador em `src/frontend/ofizzy-web/public/`.
+  - Criado `favicon.ico` com múltiplas camadas (16×16, 32×32, 48×48, 64×64 px) para compatibilidade universal com navegadores desktop legados e modernos.
+  - Criado `favicon.png` em alta resolução (512×512 px) com fundo transparente e margem de respiro de 5% para evitar cortes nas abas.
+  - Criado `apple-touch-icon.png` (180×180 px) para atalhos móveis em iOS e Android.
+- **Configuração no HTML**:
+  - Atualizado `src/frontend/ofizzy-web/src/index.html` com tags `<link rel="icon" type="image/png" href="favicon.png">`, `<link rel="icon" type="image/x-icon" href="favicon.ico">` e `<link rel="apple-touch-icon" href="apple-touch-icon.png">`.
+  - Preservadas as tags críticas existentes: `<base href="/">`, `<meta name="viewport">`, tipografia Google Fonts Inter e o script autoexecutável de inicialização de tema.
+- **Validações e Testes**:
+  - Frontend Lint: aprovado com 0 erros e 0 avisos (`npm run lint`).
+  - Frontend Testes: 68 testes unitários aprovados em 12 arquivos (`npm test`).
+  - Frontend Build: compilação de produção aprovada com sucesso (`npm run build`), gerando os arquivos de favicon diretamente na raiz pública (`dist/ofizzy-web/browser/`).
+
+## 2026-09-18 — Formatação monetária e automação do pagamento da NF-e na Preparação Fiscal
+
+- **Formatação Monetária Padrão BRL em Controles Fiscais**:
+  - Implementado o suporte a `type: 'currency'` na interface `FiscalField` e no componente `FiscalFieldsComponent`.
+  - Renderiza o PrimeNG `p-inputnumber` com `mode="currency"`, `currency="BRL"`, `locale="pt-BR"`, `placeholder="R$ 0,00"` e altura mínima de 44 px, alinhando-se ao comportamento dos demais campos monetários da aplicação.
+  - Atualizados os campos de pagamento da NF-e (`paymentAmount`) e valores unitários de ST (`retainedStBase`, `retainedStAmount`, `substituteAmount`) para usar `type: 'currency'`.
+- **Automação do Valor e Forma de Pagamento da NF-e**:
+  - Backend (`FiscalPreparationService`): calcula o somatório de peças da OS (`partsTotal = order.Parts.Sum(x => x.Quantity * x.UnitPrice)`). Se `PaymentAmount` for nulo ou na primeira carga da preparação, atribui automaticamente `PaymentAmount: partsTotal` e `PaymentCode: "01"` ("Dinheiro"), ou `0` com `PaymentCode: "90"` ("Sem pagamento") quando a OS não possuir peças.
+  - Frontend (`WorkOrderFiscalComponent`):
+    - Preenche automaticamente o total de peças ao abrir a preparação da OS quando o valor estiver em branco.
+    - Sincronização reativa ao mudar o meio de pagamento: selecionar "Sem pagamento" (90) ajusta imediatamente o valor para `0` (`R$ 0,00`); selecionar outro meio de pagamento restaura o total das peças.
+    - Card de auxílio com dica informativa da regra da SEFAZ e botão de ação rápida `Usar total da NF-e (R$ X,XX)`.
+- **Validações e Testes**:
+  - Frontend Lint: `npm run lint` aprovado (0 erros, 0 avisos).
+  - Frontend Testes: `npm test` aprovado com 69/69 testes unitários em 12 arquivos (incluindo teste para campo `currency`).
+  - Frontend Build: `npm run build` aprovado sem estouro de orçamento por componente.
+  - Backend Testes: `dotnet test` aprovado com 56 unitários + 10 de integração (100%).
+
+## 2026-09-18 — Exibição da senha do Certificado A1 Dev e refinamento de validação fiscal
+
+- **Certificado Digital A1 de Teste em Homologação**:
+  - Exibição condicional do botão de download do certificado A1 dev: visível exclusivamente quando o ambiente configurado for `Homologação` (`isHomologation()`) e as ferramentas de desenvolvimento estiverem ativas no servidor (`devToolsAvailable`).
+  - Indicação discreta da senha padrão (`teste123`) posicionada em texto sutil (`.dev-cert-subtle-hint`) logo abaixo dos botões de ação do certificado.
+  - Ao clicar para baixar o arquivo `.pfx`, o sistema também autopreenche a senha no formulário e avisa via notificação Toast.
+- **Refinamento na Validação Fiscal e Resolução de Erros Duplicados**:
+  - Mensagens de pendência de itens da OS (peças e serviços) agora trazem o nome/descrição do item como prefixo (ex: `[Item]: O código municipal...`), eliminando mensagens de erro anônimas e duplicadas na tela da OS.
+  - Corrigido o mapeamento de propriedades nos controles do diálogo de preparação fiscal (`camelCase` matching), permitindo que campos com pendências fiquem destacados em vermelho no formulário.
+  - Sanitização de espaços em branco: campos opcionais como código municipal e NBS vazios são gravados e validados como `null`, prevenindo falsos positivos de validação.
+  - Limpeza realizada nos registros de teste locais no PostgreSQL para normalizar códigos municipais incorretos do seed de dev.
+## 2026-09-18 — Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal
+
+- **Estruturação de Endereço e Dados Fiscais no Cliente**:
+  - Adicionados campos fiscais ao modelo `Customer`: `PostalCode` (CEP 8 dígitos), `Street` (Logradouro), `Number` (Número), `District` (Bairro), `City` (Cidade), `State` (UF 2 letras), `CityCode` (Código IBGE 7 dígitos) e `StateRegistration` (Inscrição Estadual).
+  - Criada migration EF Core `20260918165000_AddCustomerFiscalAddress` e executada no banco PostgreSQL (`ofizzy.customers`).
+  - Implementada validação no backend via FluentValidation (`CustomerContracts.cs`) com regras de tamanho e formato para CEP, UF e Código IBGE. O campo livre `Address` é automaticamente gerado caso omitido.
+- **Frontend e Consulta Pública ViaCEP**:
+  - Interface do diálogo de cliente (`CustomersPage`) atualizada com o card `Localização & Dados Fiscais`, toques mínimos de 44px e responsividade mobile.
+  - Implementada busca com feedback visual no serviço público ViaCEP ao digitar ou perder foco no campo de CEP, autopreenchendo Logradouro, Bairro, Cidade, UF e o Código IBGE do município.
+- **Automação Completa na Preparação Fiscal da Ordem de Serviço**:
+  - `FiscalPreparationService`: ao carregar ou preparar a emissão da OS (NFS-e ou NF-e), hidrata automaticamente os dados fiscais do destinatário (`recipient.Address`, `StateRegistration` e `RecipientIeIndicator`) a partir do cadastro do cliente associado à OS (`WorkOrder.CustomerId`), dispensando preenchimento manual redundante.
+- **Validações e Testes**:
+  - Frontend Lint: `npm run lint` aprovado (0 erros, 0 avisos).
+  - Frontend Testes: `npm test` aprovado com 69/69 testes unitários em 12 arquivos.
+  - Frontend Build: `npm run build` aprovado.
+  - Backend Testes: `dotnet test` aprovado com 56 unitários + 10 de integração (100%).
 
 
 
