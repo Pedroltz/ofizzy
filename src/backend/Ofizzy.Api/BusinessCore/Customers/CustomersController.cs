@@ -37,7 +37,38 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
     {
         var validation = await validator.ValidateAsync(request, ct); if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         var document = TextNormalization.Digits(request.Document); await EnsureDocumentAvailable(document, null, ct);
-        var item = new Customer { Name = TextNormalization.Required(request.Name), Document = document, Phone = TextNormalization.Optional(request.Phone), WhatsApp = TextNormalization.Optional(request.WhatsApp), Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(), Address = TextNormalization.Optional(request.Address), Notes = TextNormalization.Optional(request.Notes) };
+        var street = TextNormalization.Optional(request.Street);
+        var number = TextNormalization.Optional(request.Number);
+        var district = TextNormalization.Optional(request.District);
+        var city = TextNormalization.Optional(request.City);
+        var state = TextNormalization.Optional(request.State)?.ToUpperInvariant();
+        var postalCode = TextNormalization.Digits(request.PostalCode);
+        var cityCode = TextNormalization.Digits(request.CityCode);
+        var stateRegistration = TextNormalization.Digits(request.StateRegistration);
+        var address = TextNormalization.Optional(request.Address);
+        if (string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(street))
+        {
+            var parts = new[] { street, number, district, city, state }.Where(p => !string.IsNullOrWhiteSpace(p));
+            address = string.Join(", ", parts);
+        }
+        var item = new Customer
+        {
+            Name = TextNormalization.Required(request.Name),
+            Document = document,
+            Phone = TextNormalization.Optional(request.Phone),
+            WhatsApp = TextNormalization.Optional(request.WhatsApp),
+            Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(),
+            Address = address,
+            Notes = TextNormalization.Optional(request.Notes),
+            PostalCode = postalCode,
+            Street = street,
+            Number = number,
+            District = district,
+            City = city,
+            State = state,
+            CityCode = cityCode,
+            StateRegistration = stateRegistration
+        };
         db.Customers.Add(item); await db.SaveChangesAsync(ct); return CreatedAtAction(nameof(Get), new { item.Id }, ToResponse(item));
     }
 
@@ -47,8 +78,24 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         var validation = await validator.ValidateAsync(request, ct); if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound();
         var document = TextNormalization.Digits(request.Document); await EnsureDocumentAvailable(document, id, ct);
+        var street = TextNormalization.Optional(request.Street);
+        var number = TextNormalization.Optional(request.Number);
+        var district = TextNormalization.Optional(request.District);
+        var city = TextNormalization.Optional(request.City);
+        var state = TextNormalization.Optional(request.State)?.ToUpperInvariant();
+        var postalCode = TextNormalization.Digits(request.PostalCode);
+        var cityCode = TextNormalization.Digits(request.CityCode);
+        var stateRegistration = TextNormalization.Digits(request.StateRegistration);
+        var address = TextNormalization.Optional(request.Address);
+        if (string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(street))
+        {
+            var parts = new[] { street, number, district, city, state }.Where(p => !string.IsNullOrWhiteSpace(p));
+            address = string.Join(", ", parts);
+        }
         item.Name = TextNormalization.Required(request.Name); item.Document = document; item.Phone = TextNormalization.Optional(request.Phone); item.WhatsApp = TextNormalization.Optional(request.WhatsApp);
-        item.Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(); item.Address = TextNormalization.Optional(request.Address); item.Notes = TextNormalization.Optional(request.Notes); item.UpdatedAt = DateTimeOffset.UtcNow;
+        item.Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(); item.Address = address; item.Notes = TextNormalization.Optional(request.Notes);
+        item.PostalCode = postalCode; item.Street = street; item.Number = number; item.District = district; item.City = city; item.State = state; item.CityCode = cityCode; item.StateRegistration = stateRegistration;
+        item.UpdatedAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(ct); return Ok(ToResponse(item));
     }
 
@@ -64,6 +111,10 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
     public async Task<IActionResult> Restore(Guid id, CancellationToken ct) { var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound(); item.IsActive = true; item.UpdatedAt = DateTimeOffset.UtcNow; await db.SaveChangesAsync(ct); return NoContent(); }
 
     private async Task EnsureDocumentAvailable(string? document, Guid? currentId, CancellationToken ct) { if (document is not null && await db.Customers.AnyAsync(x => x.Document == document && x.Id != currentId, ct)) throw new ConflictException("Já existe um cliente com este CPF/CNPJ."); }
-    private static System.Linq.Expressions.Expression<Func<Customer, CustomerResponse>> Map() => x => new(x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt);
-    private static CustomerResponse ToResponse(Customer x) => new(x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt);
+    private static System.Linq.Expressions.Expression<Func<Customer, CustomerResponse>> Map() => x => new(
+        x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt,
+        x.PostalCode, x.Street, x.Number, x.District, x.City, x.State, x.CityCode, x.StateRegistration);
+    private static CustomerResponse ToResponse(Customer x) => new(
+        x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt,
+        x.PostalCode, x.Street, x.Number, x.District, x.City, x.State, x.CityCode, x.StateRegistration);
 }

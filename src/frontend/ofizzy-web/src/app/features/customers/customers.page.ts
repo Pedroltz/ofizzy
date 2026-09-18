@@ -53,6 +53,7 @@ export class CustomersPage {
   readonly search = this.fb.nonNullable.control(''); readonly page = signal(1); readonly pageSize = 12;
   readonly viewMode = this.viewPreferences.getSignal('customers', 'table');
   readonly effectiveViewMode = computed(() => this.responsive.isMobile() ? 'cards' : this.viewMode());
+  readonly loadingCep = signal(false);
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(160)]],
     document: ['', [(c) => {
@@ -63,7 +64,24 @@ export class CustomersPage {
     whatsApp: [''],
     email: ['', Validators.email],
     address: [''],
-    notes: ['']
+    notes: [''],
+    postalCode: ['', [(c) => {
+      const v = (c.value || '').replace(/\D/g, '');
+      return (!v || v.length === 8) ? null : { invalidCep: true };
+    }]],
+    street: ['', [Validators.maxLength(120)]],
+    number: ['', [Validators.maxLength(20)]],
+    district: ['', [Validators.maxLength(60)]],
+    city: ['', [Validators.maxLength(60)]],
+    state: ['', [(c) => {
+      const v = (c.value || '').trim();
+      return (!v || v.length === 2) ? null : { invalidState: true };
+    }]],
+    cityCode: ['', [(c) => {
+      const v = (c.value || '').replace(/\D/g, '');
+      return (!v || v.length === 7) ? null : { invalidCityCode: true };
+    }]],
+    stateRegistration: ['', [Validators.maxLength(20)]],
   });
 
   private loadVersion = 0;
@@ -90,8 +108,142 @@ export class CustomersPage {
       }
     }
   }
-  open(item?: Customer): void { this.editing.set(item ?? null); this.form.reset(item ? { name:item.name, document:item.document ?? '', phone:item.phone ?? '', whatsApp:item.whatsApp ?? '', email:item.email ?? '', address:item.address ?? '', notes:item.notes ?? '' } : { name:'', document:'', phone:'', whatsApp:'', email:'', address:'', notes:'' }); this.dialog.set(true); }
-  async save(): Promise<void> { if (this.form.invalid) { this.form.markAllAsTouched(); return; } this.saving.set(true); try { const value = this.form.getRawValue(); await this.api.saveCustomer({ name:value.name, document:value.document || null, phone:value.phone || null, whatsApp:value.whatsApp || null, email:value.email || null, address:value.address || null, notes:value.notes || null }, this.editing()?.id); this.messages.add({ severity:'success', summary:this.editing() ? 'Cliente atualizado' : 'Cliente criado' }); this.dialog.set(false); await this.load(); } finally { this.saving.set(false); } }
+
+  async searchCep(): Promise<void> {
+    const rawCep = (this.form.controls.postalCode.value || '').replace(/\D/g, '');
+    if (rawCep.length !== 8) {
+      this.messages.add({ severity: 'warn', summary: 'CEP incompleto', detail: 'Digite um CEP com 8 dígitos para consultar.' });
+      return;
+    }
+    this.loadingCep.set(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      if (!response.ok) {
+        throw new Error('Falha ao consultar serviço de CEP.');
+      }
+      const data = await response.json() as {
+        erro?: boolean | string;
+        logradouro?: string;
+        bairro?: string;
+        localidade?: string;
+        uf?: string;
+        ibge?: string;
+      };
+
+      if (data.erro === true || data.erro === 'true') {
+        this.messages.add({ severity: 'warn', summary: 'CEP não localizado', detail: 'Não encontramos endereço correspondente ao CEP informado.' });
+        return;
+      }
+
+      this.form.patchValue({
+        street: data.logradouro || this.form.controls.street.value,
+        district: data.bairro || this.form.controls.district.value,
+        city: data.localidade || this.form.controls.city.value,
+        state: data.uf || this.form.controls.state.value,
+        cityCode: data.ibge || this.form.controls.cityCode.value,
+      });
+
+      this.messages.add({
+        severity: 'success',
+        summary: 'Endereço encontrado',
+        detail: `${data.localidade || ''} - ${data.uf || ''}`
+      });
+    } catch {
+      this.messages.add({
+        severity: 'warn',
+        summary: 'Consulta indisponível',
+        detail: 'Não foi possível consultar o ViaCEP no momento. Preencha os campos manualmente.'
+      });
+    } finally {
+      this.loadingCep.set(false);
+    }
+  }
+
+  onCepBlur(): void {
+    const rawCep = (this.form.controls.postalCode.value || '').replace(/\D/g, '');
+    if (rawCep.length === 8 && !this.form.controls.city.value && !this.loadingCep()) {
+      void this.searchCep();
+    }
+  }
+
+  open(item?: Customer): void {
+    this.editing.set(item ?? null);
+    this.form.reset(item ? {
+      name: item.name,
+      document: item.document ?? '',
+      phone: item.phone ?? '',
+      whatsApp: item.whatsApp ?? '',
+      email: item.email ?? '',
+      address: item.address ?? '',
+      notes: item.notes ?? '',
+      postalCode: item.postalCode ?? '',
+      street: item.street ?? '',
+      number: item.number ?? '',
+      district: item.district ?? '',
+      city: item.city ?? '',
+      state: item.state ?? '',
+      cityCode: item.cityCode ?? '',
+      stateRegistration: item.stateRegistration ?? '',
+    } : {
+      name: '',
+      document: '',
+      phone: '',
+      whatsApp: '',
+      email: '',
+      address: '',
+      notes: '',
+      postalCode: '',
+      street: '',
+      number: '',
+      district: '',
+      city: '',
+      state: '',
+      cityCode: '',
+      stateRegistration: '',
+    });
+    this.dialog.set(true);
+  }
+
+  async save(): Promise<void> {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    try {
+      const value = this.form.getRawValue();
+      const cleanCep = value.postalCode ? value.postalCode.replace(/\D/g, '') : null;
+      const cleanCityCode = value.cityCode ? value.cityCode.replace(/\D/g, '') : null;
+      const cleanState = value.state ? value.state.trim().toUpperCase() : null;
+
+      await this.api.saveCustomer({
+        name: value.name,
+        document: value.document || null,
+        phone: value.phone || null,
+        whatsApp: value.whatsApp || null,
+        email: value.email || null,
+        address: value.address || null,
+        notes: value.notes || null,
+        postalCode: cleanCep,
+        street: value.street || null,
+        number: value.number || null,
+        district: value.district || null,
+        city: value.city || null,
+        state: cleanState,
+        cityCode: cleanCityCode,
+        stateRegistration: value.stateRegistration || null,
+      }, this.editing()?.id);
+
+      this.messages.add({
+        severity: 'success',
+        summary: this.editing() ? 'Cliente atualizado' : 'Cliente criado'
+      });
+      this.dialog.set(false);
+      await this.load();
+    } finally {
+      this.saving.set(false);
+    }
+  }
   archive(item: Customer): void { this.confirmation.confirm({ header:'Arquivar cliente', message:`Arquivar ${item.name} e seus veículos? O histórico será preservado.`, icon:'pi pi-folder-open', acceptLabel:'Arquivar', rejectLabel:'Voltar', acceptButtonProps:{ severity:'danger' }, accept:async()=>{ await this.api.archiveCustomer(item.id); this.messages.add({ severity:'success', summary:'Cliente arquivado' }); await this.load(); } }); }
   changePage(event: PaginatorState): void { this.page.set((event.page ?? 0) + 1); void this.load(); }
   initials(name: string): string { const parts = (name || '').trim().split(/\s+/).filter(Boolean); return parts.slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'C'; }

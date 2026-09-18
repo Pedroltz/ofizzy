@@ -16,7 +16,48 @@ public sealed class FiscalPreparationService(ApplicationDbContext db, FiscalCert
         var preparation = await db.FiscalPreparationEntries.AsNoTracking().SingleOrDefaultAsync(x => x.WorkOrderId == id, ct);
         var timezone = await db.TenantSettings.Select(x => x.Timezone).SingleAsync(ct);
         var competence = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(order.CompletedAt ?? order.CreatedAt, TimeZoneInfo.FindSystemTimeZoneById(timezone)).DateTime);
-        var recipient = preparation == null ? new FiscalPreparationData(Document: order.CustomerDocument, Name: order.CustomerName, Competence: competence) : FiscalJson.Required<FiscalPreparationData>(preparation.Data);
+        var partsTotal = FiscalValidation.Money(order.Parts.Sum(x => x.Quantity * x.UnitPrice));
+        var customer = await db.Customers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == order.CustomerId, ct);
+        FiscalAddress? defaultAddress = null;
+        if (customer != null && !string.IsNullOrWhiteSpace(customer.Street) && !string.IsNullOrWhiteSpace(customer.CityCode))
+        {
+            defaultAddress = new FiscalAddress(
+                Street: customer.Street ?? "",
+                Number: customer.Number ?? "S/N",
+                District: customer.District ?? "",
+                City: customer.City ?? "",
+                CityCode: customer.CityCode ?? "",
+                State: customer.State ?? "",
+                PostalCode: customer.PostalCode ?? "");
+        }
+        var defaultIe = customer?.StateRegistration;
+        var defaultIeIndicator = string.IsNullOrWhiteSpace(defaultIe) ? "9" : "1";
+
+        var recipient = preparation == null
+            ? new FiscalPreparationData(
+                Address: defaultAddress,
+                Document: order.CustomerDocument ?? customer?.Document,
+                Name: order.CustomerName ?? customer?.Name,
+                StateRegistration: defaultIe,
+                RecipientIeIndicator: defaultIeIndicator,
+                Competence: competence,
+                PaymentCode: order.Parts.Count > 0 ? "01" : "90",
+                PaymentAmount: order.Parts.Count > 0 ? partsTotal : 0)
+            : FiscalJson.Required<FiscalPreparationData>(preparation.Data);
+        if (preparation != null)
+        {
+            if (recipient.Address == null && defaultAddress != null)
+                recipient = recipient with { Address = defaultAddress };
+            if (string.IsNullOrWhiteSpace(recipient.StateRegistration) && !string.IsNullOrWhiteSpace(defaultIe))
+                recipient = recipient with { StateRegistration = defaultIe, RecipientIeIndicator = defaultIeIndicator };
+            if (order.Parts.Count > 0)
+            {
+                if (string.IsNullOrWhiteSpace(recipient.PaymentCode))
+                    recipient = recipient with { PaymentCode = "01" };
+                if (recipient.PaymentAmount == null)
+                    recipient = recipient with { PaymentAmount = recipient.PaymentCode == "90" ? 0 : partsTotal };
+            }
+        }
         var products = await db.ProductFiscalProfileEntries.AsNoTracking().ToDictionaryAsync(x => x.PartId, x => x.Data, ct);
         var services = await db.ServiceFiscalProfileEntries.AsNoTracking().ToDictionaryAsync(x => x.ServiceId, x => x.Data, ct);
         var lines = new List<FiscalLine>();
@@ -30,6 +71,14 @@ public sealed class FiscalPreparationService(ApplicationDbContext db, FiscalCert
         {
             var profile = recipient.Services?.GetValueOrDefault(s.Id);
             if (profile == null && s.ServiceId is {} sid && services.TryGetValue(sid, out var data)) profile = FiscalJson.Required<ServiceFiscalData>(data);
+            if (profile != null)
+            {
+                profile = profile with
+                {
+                    MunicipalCode = string.IsNullOrWhiteSpace(profile.MunicipalCode) ? null : profile.MunicipalCode.Trim(),
+                    Nbs = string.IsNullOrWhiteSpace(profile.Nbs) ? null : profile.Nbs.Trim()
+                };
+            }
             lines.Add(new(s.Id, s.Id.ToString("N"), s.Description, s.Quantity, s.UnitPrice, null, profile));
         }
         var issues = new List<FiscalIssue>();
@@ -60,21 +109,22 @@ public sealed class FiscalPreparationService(ApplicationDbContext db, FiscalCert
             if (!issuer.NfseEnabled) issues.Add(new("settings.nfseEnabled", "Habilite a emissão de serviços nas configurações fiscais."));
             if (FiscalValidation.Money(order.Services.Sum(x => x.Quantity * x.UnitPrice)) <= 0) issues.Add(new("services", "Os serviços devem ter valor fiscal positivo."));
         }
+        static string ToCamel(string s) => string.IsNullOrEmpty(s) ? s : char.ToLowerInvariant(s[0]) + s[1..];
         foreach (var line in lines)
         {
             var isProduct = order.Parts.Any(x => x.Id == line.Id);
             if (isProduct)
             {
                 if (line.Product == null) issues.Add(new($"products.{line.Id}", $"Complete os dados fiscais de {line.Description}."));
-                else foreach (var e in new ProductFiscalValidator().Validate(line.Product).Errors) issues.Add(new($"products.{line.Id}.{e.PropertyName}", e.ErrorMessage));
+                else foreach (var e in new ProductFiscalValidator().Validate(line.Product).Errors) issues.Add(new($"products.{line.Id}.{ToCamel(e.PropertyName)}", $"{line.Description}: {e.ErrorMessage}"));
             }
             else
             {
                 if (line.Service == null) issues.Add(new($"services.{line.Id}", $"Classifique o serviço {line.Description}."));
                 else
                 {
-                    foreach (var e in new ServiceFiscalValidator().Validate(line.Service).Errors) issues.Add(new($"services.{line.Id}.{e.PropertyName}", e.ErrorMessage));
-                    if (issuer.Regime == "SimplesNacional" && line.Service.ApproximateTaxRate == null) issues.Add(new($"services.{line.Id}.approximateTaxRate", "Informe o percentual aproximado dos tributos do Simples, validado pela contabilidade."));
+                    foreach (var e in new ServiceFiscalValidator().Validate(line.Service).Errors) issues.Add(new($"services.{line.Id}.{ToCamel(e.PropertyName)}", $"{line.Description}: {e.ErrorMessage}"));
+                    if (issuer.Regime == "SimplesNacional" && line.Service.ApproximateTaxRate == null) issues.Add(new($"services.{line.Id}.approximateTaxRate", $"{line.Description}: Informe o percentual aproximado dos tributos do Simples, validado pela contabilidade."));
                 }
             }
         }

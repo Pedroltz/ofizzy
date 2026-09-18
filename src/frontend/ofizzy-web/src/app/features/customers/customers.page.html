@@ -236,8 +236,72 @@
         <input pInputText formControlName="email" type="email" placeholder="cliente@email.com" />
       </label>
     </div>
-    <label>Endereço Completo <small class="text-muted">opcional</small>
-      <input pInputText formControlName="address" placeholder="Rua, número, bairro, cidade - UF" />
+    <div class="customer-address-card">
+      <div class="customer-address-header">
+        <div>
+          <div class="customer-address-title">
+            <i class="pi pi-map-marker text-primary"></i> Localização &amp; Dados Fiscais
+          </div>
+          <p class="customer-address-subtitle">
+            Preenchimento automático na emissão fiscal (NFS-e / NF-e) das ordens de serviço deste cliente
+          </p>
+        </div>
+      </div>
+
+      <div class="customer-address-body">
+        <div class="two-columns">
+          <label>CEP <small class="text-muted">8 dígitos</small>
+            <div class="flex gap-2">
+              <input pInputText formControlName="postalCode" inputmode="numeric" maxlength="9" placeholder="00000-000" (blur)="onCepBlur()" class="flex-1 min-w-0" />
+              <p-button type="button" icon="pi pi-search" [loading]="loadingCep()" (onClick)="searchCep()" title="Buscar endereço no ViaCEP" aria-label="Buscar endereço no ViaCEP" severity="secondary" />
+            </div>
+            @if (form.controls.postalCode.errors?.['invalidCep'] && form.controls.postalCode.touched) {
+              <small class="field-error-text">CEP deve conter exatamente 8 dígitos</small>
+            }
+          </label>
+
+          <label>Inscrição Estadual (IE) <small class="text-muted">opcional / PJ</small>
+            <input pInputText formControlName="stateRegistration" placeholder="Isento ou inscrição estadual" />
+          </label>
+        </div>
+
+        <div class="two-columns">
+          <label>Logradouro / Rua
+            <input pInputText formControlName="street" placeholder="Ex: Av. Brasil" />
+          </label>
+          <label>Número
+            <input pInputText formControlName="number" placeholder="Ex: 123 ou S/N" />
+          </label>
+        </div>
+
+        <div class="two-columns">
+          <label>Bairro
+            <input pInputText formControlName="district" placeholder="Ex: Centro" />
+          </label>
+          <label>Cidade
+            <input pInputText formControlName="city" placeholder="Ex: São Paulo" />
+          </label>
+        </div>
+
+        <div class="two-columns">
+          <label>UF (Estado) <small class="text-muted">2 letras</small>
+            <input pInputText formControlName="state" maxlength="2" placeholder="Ex: SP" class="uppercase" />
+            @if (form.controls.state.errors?.['invalidState'] && form.controls.state.touched) {
+              <small class="field-error-text">UF deve ter 2 letras (ex: SP, MG, RJ)</small>
+            }
+          </label>
+          <label>Cód. IBGE Município <small class="text-muted">7 dígitos</small>
+            <input pInputText formControlName="cityCode" inputmode="numeric" maxlength="7" placeholder="Ex: 3550308 (automático via CEP)" />
+            @if (form.controls.cityCode.errors?.['invalidCityCode'] && form.controls.cityCode.touched) {
+              <small class="field-error-text">Código IBGE deve conter 7 dígitos</small>
+            }
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <label>Complemento / Ponto de Referência <small class="text-muted">opcional</small>
+      <input pInputText formControlName="address" placeholder="Apto, bloco ou ponto de referência..." />
     </label>
     <label>Observações Adicionais <small class="text-muted">opcional</small>
       <textarea pTextarea formControlName="notes" rows="3" placeholder="Informações de preferência, faturamento ou restrições..."></textarea>

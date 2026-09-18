@@ -96,6 +96,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.Property(x => x.Name).HasMaxLength(160).IsRequired(); entity.Property(x => x.Document).HasMaxLength(14);
             entity.Property(x => x.Phone).HasMaxLength(20); entity.Property(x => x.WhatsApp).HasMaxLength(20); entity.Property(x => x.Email).HasMaxLength(254);
             entity.Property(x => x.Address).HasMaxLength(500); entity.Property(x => x.Notes).HasMaxLength(2000);
+            entity.Property(x => x.PostalCode).HasMaxLength(8); entity.Property(x => x.Street).HasMaxLength(60);
+            entity.Property(x => x.Number).HasMaxLength(60); entity.Property(x => x.District).HasMaxLength(60);
+            entity.Property(x => x.City).HasMaxLength(60); entity.Property(x => x.State).HasMaxLength(2);
+            entity.Property(x => x.CityCode).HasMaxLength(7); entity.Property(x => x.StateRegistration).HasMaxLength(14);
             entity.HasIndex(x => x.Name); entity.HasIndex(x => x.Phone); entity.HasIndex(x => x.IsActive);
             entity.HasIndex(x => x.Document).IsUnique().HasFilter("\"Document\" IS NOT NULL");
         });
