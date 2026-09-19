@@ -1,5 +1,60 @@
 # Continuidade do Ofizzy
 
+## Refatoração abrangente de legibilidade, enriquecimento fiscal e dados de teste — 19/09/2026
+
+- **Refatoração de Legibilidade, Organização e Padronização de Código**:
+  - Eliminação de múltiplas instruções em linha única em camadas críticas do backend (`SetupController`, `SessionService`, `PlatformController`, `TenantProvisioningService`, `OnboardingController`, `TenantContextMiddleware`, `TenantAccessFilter`, `PlatformAuthorizationHandler`, `GlobalExceptionHandler` e `Program.cs`).
+  - Records e DTOs reformatados verticalmente com indentação canônica de 4 espaços (`VehicleContracts.cs`, `PlatformController.cs`, etc.).
+  - FluentValidation: quebra individualizada por regra (`.NotEmpty()`, `.MaximumLength()`, `.Matches()`) em validadores de plataforma, multitenancy e veículos.
+  - Testes E2E (`session.spec.ts`): eliminação de condicionais aglutinadas em linha única e padronização semântica de asserções.
+  - Zero alterações em contratos públicos, regras de negócio ou banco de dados.
+- **Enriquecimento e Semente de Dados com Validação Fiscal Total**:
+  - Cadastrados novos registros reais em ambos os tenants piloto (`Arroba Pneus - Igaraçu do Tietê` e `Arroba Pneus - Barra Bonita`):
+    - Clientes PF com CPFs matematicamente válidos pela Receita Federal (módulo 11) e PJ com CNPJs e Inscrições Estaduais válidas.
+    - Endereços completos com código IBGE de 7 dígitos (`3520004` e `3505302`) compatíveis com a UF São Paulo (`SP`).
+    - Veículos reais com placas válidas (padrão Mercosul), ano, modelo, KM e chassis.
+    - Ordens de Serviço concluídas com peças e serviços vinculados aos respectivos perfis fiscais (NCM, CEST, CFOP, CSOSN, alíquotas de ST anterior e Código Nacional de NFS-e `140101`).
+    - Preparações fiscais (`fiscal_preparations`) persistidas e validadas, prontas para emissão de NF-e e NFS-e.
+- **Validação Automatizada**:
+  - Backend: 56 testes unitários aprovados (`dotnet test src/backend/Ofizzy.UnitTests/Ofizzy.UnitTests.csproj`).
+  - Frontend: compilação e build de produção aprovados (`npm --prefix src/frontend/ofizzy-web run build`).
+
+
+## Layout "Fit to Screen" em todas as telas paginadas e dashboard — 18/09/2026
+
+- **Enquadramento Perfeito de Tela (Fit to Screen / No Extra Scroll)**:
+  - Container principal (`.app-main-area`): configurado com `height: 100vh; height: 100dvh; max-height: 100dvh; overflow: hidden;` no desktop, eliminando a rolagem global da janela do navegador.
+  - Área de conteúdo (`.app-content`): configurada com `flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;`. O cabeçalho e menu lateral permanecem estáticos, com rolagem confinada apenas se estritamente necessário.
+  - Estrutura de páginas (`.page-container`): definida com `flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;` e paddings verticais otimizados (`clamp(1rem, 2vw, 1.5rem)`), integrando cabeçalho, filtros e tabela para caber em telas 1080p, 768p e notebooks sem rolagem desnecessária.
+  - Wrapper da tabela (`app-data-table-wrapper` / `.data-table-wrapper`): configurado como flex container `flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;`, com área de rolagem interna (`.data-table-wrapper__scroll`) suportando overflow vertical e horizontal sem transbordar a página externa.
+  - Cabeçalho de tabela fixo (`.data-table th`): `position: sticky; top: 0; z-index: 2;` garantindo que os nomes das colunas permaneçam sempre à vista caso a tabela precise rolar internamente.
+  - Barra de ferramentas de dados (`app-data-toolbar`): margem inferior reduzida e `flex-shrink: 0`.
+  - Tabelas de dados (`.data-table` / `.work-orders-list-table`): compactação de padding vertical de células (`0.5rem 0.75rem`), aumentando a densidade visual e alinhando perfeitamente os itens com a paginação na mesma tela.
+  - Paginador PrimeNG (`.p-paginator`): padding compacto (`0.35rem 0.6rem`), botões de página reduzidos para `2rem` e `flex-shrink: 0`, fixando-o na base da tela sem exigir scroll para visualização.
+  - Grids de cartões (`.catalog-grid`, `.order-grid`): configurados com `flex: 1 1 auto; min-height: 0; overflow-y: auto;` e gaps/paddings otimizados (`1rem` e `var(--space-3)`).
+  - Painel / Dashboard (`.dashboard-page-container`): espaçamentos e gaps ajustados para `var(--space-3)` e `var(--space-4)`.
+  - Responsividade móvel preservada: em telas <= 900px, a estrutura adapta-se dinamicamente para `height: auto` e `max-height: none` com toques mínimos >= 44px e sem estouro horizontal.
+- **Validação**: Frontend lint (0 erros/avisos), 69/69 testes unitários aprovados em 12 arquivos, build de produção aprovado; Backend com 56 unitários + 10 testes de integração aprovados (100%).
+
+
+## Robustez do catálogo de serviços e peças com busca, paginação e visualizações (tabela/cards) — 18/09/2026
+
+- **Busca, Paginação e Toolbar no Catálogo de Ajustes**:
+  - `CatalogApiService` e `SessionDataCacheService` atualizados com parâmetros de paginação (`page`, `pageSize`) e busca textual (`q`), consumindo os endpoints paginados do backend.
+  - Abas "Mão de Obra e Serviços" e "Peças e Insumos" em `SettingsPage`:
+    - Adicionado `app-search-field` com debounce de 250ms para busca rápida em tempo real.
+    - Adicionado `app-data-toolbar` com contador de itens e alternância de layout (Tabela / Grid de Cards).
+    - Adicionado `p-paginator` PrimeNG com seletor de linhas por página (`[12, 24, 48]`).
+    - Adicionados componentes compartilhados `app-empty-state` e `app-loading-state` para transições visuais consistentes.
+- **Modos de Exibição Responsivos (Tabela / Grid de Cards)**:
+  - Tabela completa PrimeNG para desktop com ações diretas (edição, perfil fiscal e arquivamento).
+  - Cards detalhados com alvos de toque >= 44px para telas menores e tablets sem scroll horizontal indesejado.
+- **Padronização de Indentação e Organização do Código**:
+  - Backend (.NET): `.editorconfig` na raiz padronizando 4 espaços para C#, quebras de linha e remoção de instruções comprimidas. Executado `dotnet format whitespace`.
+  - Frontend (Angular): scripts `"format"` e `"format:check"` adicionados ao `package.json` e execução completa do Prettier e ESLint.
+- **Validação**: Frontend lint (0 erros/avisos), 69 testes unitários Vitest aprovados em 12 arquivos, build de produção aprovado; Backend com 56 testes unitários e 10 testes de integração aprovados (100%).
+
+
 ## Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal — 18/09/2026
 
 - **Endereço Estruturado e Dados Fiscais no Cliente**:

@@ -1,5 +1,75 @@
 # Status do projeto
 
+## Refatoração abrangente de legibilidade, enriquecimento fiscal e dados de teste — 19/09/2026
+
+- **Refatoração de Legibilidade, Organização e Padronização de Código**:
+  - Eliminação de múltiplas instruções em linha única em camadas críticas do backend (`SetupController`, `SessionService`, `PlatformController`, `TenantProvisioningService`, `OnboardingController`, `TenantContextMiddleware`, `TenantAccessFilter`, `PlatformAuthorizationHandler`, `GlobalExceptionHandler` e `Program.cs`).
+  - Records e DTOs reformatados verticalmente com indentação canônica de 4 espaços (`VehicleContracts.cs`, `PlatformController.cs`, etc.).
+  - FluentValidation: quebra individualizada por regra (`.NotEmpty()`, `.MaximumLength()`, `.Matches()`) em validadores de plataforma, multitenancy e veículos.
+  - Testes E2E (`session.spec.ts`): eliminação de condicionais aglutinadas em linha única e padronização semântica de asserções.
+  - Zero alterações em contratos públicos, regras de negócio ou banco de dados.
+- **Enriquecimento e Semente de Dados com Validação Fiscal Total**:
+  - Cadastrados novos registros reais em ambos os tenants piloto (`Arroba Pneus - Igaraçu do Tietê` e `Arroba Pneus - Barra Bonita`):
+    - Clientes PF com CPFs matematicamente válidos pela Receita Federal (módulo 11) e PJ com CNPJs e Inscrições Estaduais válidas.
+    - Endereços completos com código IBGE de 7 dígitos (`3520004` e `3505302`) compatíveis com a UF São Paulo (`SP`).
+    - Veículos reais com placas válidas (padrão Mercosul), ano, modelo, KM e chassis.
+    - Ordens de Serviço concluídas com peças e serviços vinculados aos respectivos perfis fiscais (NCM, CEST, CFOP, CSOSN, alíquotas de ST anterior e Código Nacional de NFS-e `140101`).
+    - Preparações fiscais (`fiscal_preparations`) persistidas e validadas, prontas para emissão de NF-e e NFS-e.
+- **Validação Automatizada**:
+  - Backend: 56 testes unitários aprovados (`dotnet test src/backend/Ofizzy.UnitTests/Ofizzy.UnitTests.csproj`).
+  - Frontend: compilação e build de produção aprovados (`npm --prefix src/frontend/ofizzy-web run build`).
+
+
+## Layout "Fit to Screen" em todas as telas paginadas e dashboard — 18/09/2026
+
+- **Enquadramento Perfeito de Tela (Fit to Screen, Widescreen & Dinâmico)**:
+  - Densidade e Capacidade de Linhas por Página (`pageSize = 18`):
+    - O número de linhas/itens por página foi expandido de 12 para 18 em todas as telas paginadas (Ordens de Serviço, Clientes, Veículos e Catálogo de Peças/Serviços), preenchendo a tela com dados reais e aproveitando a verticalidade antes de quebrar para a próxima página.
+    - O espaçamento natural e compacto das linhas da tabela foi mantido (`padding: 0.5rem 0.75rem`), garantindo visual limpo sem esticar forçadamente a altura dos textos.
+    - O paginador mantém sincronia precisa com o índice inicial (`[first]="(page() - 1) * pageSize"`).
+  - Container principal (`.app-main-area`): configurado com `height: 100vh; height: 100dvh; max-height: 100dvh; overflow: hidden;` no desktop, contendo o cabeçalho superior e a área de trabalho sem extrapolar a tela.
+  - Área de conteúdo (`.app-content`): configurada com `flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;`, permitindo que apenas o conteúdo interno role suavemente se a resolução for muito baixa, mantendo o cabeçalho sempre visível.
+  - Estrutura de páginas (`.page-container`): definida com `flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;`, garantindo que todo o conjunto de cabeçalho, filtros, tabela e paginação caiba confortavelmente em telas 1080p, 768p e notebooks sem rolagem desnecessária.
+  - Wrapper da tabela (`app-data-table-wrapper` / `.data-table-wrapper`): configurado como flex container `flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;`, com área de rolagem interna (`.data-table-wrapper__scroll`) suportando rolagem vertical e horizontal contida, impedindo scroll na página externa.
+  - Cabeçalho de tabela fixo (`.data-table th`): `position: sticky; top: 0; z-index: 2;` mantendo as colunas sempre visíveis caso a tabela precise rolar internamente.
+  - Barra de ferramentas de dados (`app-data-toolbar`): espaçamento inferior reduzido para `var(--space-3)` e `flex-shrink: 0`.
+  - Tabelas de dados (`.data-table` / `.work-orders-list-table`): compactação de padding vertical de células (`0.5rem 0.75rem`), proporcionando densidade de dados limpa e profissional com mais informações visíveis ao mesmo tempo.
+  - Paginador PrimeNG (`.p-paginator`): padding compacto (`0.35rem 0.6rem`), botões de página enxutos (`height: 2rem; min-width: 2rem;`), margem superior reduzida e `flex-shrink: 0`, fixando-o na base da tela sem exigir rolagem para encontrá-lo.
+  - Grids de cartões (`.catalog-grid`, `.order-grid`): configurados com `flex: 1 1 auto; min-height: 0; overflow-y: auto;` e gaps/paddings otimizados (`1rem` e `var(--space-3)`).
+  - Painel / Dashboard (`.dashboard-page-container`): redução de espaçamentos verticais e gaps dos KPIs e painéis para `var(--space-3)` e `var(--space-4)`.
+  - Responsividade móvel preservada: em telas <= 900px, a estrutura flexibiliza automaticamente para `height: auto` e `max-height: none` com toques mínimos >= 44px e sem estouro horizontal.
+- **Posicionamento Unificado das Ações Primárias (Nova OS, Novo Cliente, Novo Veículo)**:
+  - Os botões de criação ("Nova Ordem", "Novo Cliente", "Novo Veículo") foram movidos do cabeçalho de página (`app-page-header`) para a barra de ferramentas de dados (`app-data-toolbar` no slot `toolbar-actions`).
+  - Isso alinha o botão principal diretamente à altura dos filtros, pesquisa e visualizações (tabela/cards), garantindo uma hierarquia visual limpa e ergonômica sem sobrecarregar o topo da página.
+- **Exibição Dinâmica de Endereço em Clientes**:
+  - Implementado o método formatador `formatAddress(item: Customer)` em `CustomersPage`, compondo e exibindo inteligentemente o endereço tanto na listagem em tabela quanto nos cards:
+    - Se o cliente possuir `address` composto preenchido, exibe-o diretamente.
+    - Se o cliente possuir os campos fiscais estruturados (`street`, `number`, `district`, `city`, `state`, `postalCode`), formata dinamicamente a linha completa (`Rua, Número, Bairro, Cidade - UF, CEP XXXXX-XXX`), eliminando os travessões vazios (`—`) na lista.
+- **Validação e Homologação Fiscal dos Exemplos Locais**:
+  - Ajustados os perfis fiscais de serviços (`fiscal_services`): código de tributação nacional padronizado com 6 dígitos (`140101`) e NBS/Código Municipal compatíveis.
+  - Ajustados os perfis fiscais de peças e produtos (`fiscal_products`): preenchidos os dados de substituição tributária (ST anterior) retida (`RetainedStBase`, `RetainedStAmount`, `SubstituteAmount`, `StRate`) exigidos para operações com CSOSN 500 / CFOP 5405.
+  - Sincronizado certificado A1 de homologação dev (`Oficina Teste Dev`) e configuração de regime Simples Nacional para ambas as organizações cadastradas.
+  - Ordens finalizadas agora carregam sem nenhuma pendência impeditiva, permitindo emissão imediata de NF-e e NFS-e pelo gateway simulado de homologação.
+- **Validação**: Frontend lint (0 erros/avisos), 69/69 testes unitários aprovados em 12 arquivos, build de produção aprovado; Backend com 56 testes unitários + 10 testes de integração aprovados (100%).
+
+
+## Robustez do catálogo de serviços e peças com busca, paginação e visualizações (tabela/cards) — 18/09/2026
+
+- **Busca e Paginação no Catálogo**:
+  - `CatalogApiService` e `SessionDataCacheService` atualizados com suporte a paginação (`page`, `pageSize`) e consulta (`q`), integrando com os endpoints backend já paginados.
+  - Implementado `app-search-field` com debounce de 250ms nas abas de "Mão de Obra e Serviços" e "Peças e Insumos" da página de Ajustes (`settings.page`).
+  - Implementado `app-data-toolbar` com contador dinâmico de itens, busca integrada e alternância de visualização (`table` vs `cards`).
+  - Adicionado componente `p-paginator` PrimeNG com navegação por páginas, `rowsPerPageOptions: [12, 24, 48]` e persistência de estado reativa.
+  - Adicionados estados vazios (`app-empty-state`) e de carregamento (`app-loading-state`).
+- **Modos de Exibição Responsivos (Tabela / Grid de Cards)**:
+  - Visualização em tabela rica com PrimeNG `p-table`, badges de status, formatação monetária e botões de ação rápida (editar, configurar perfil fiscal, arquivar).
+  - Visualização em cards responsivos para mobile e tablet com área de toque mínima >= 44px, badges contextuais e botões táteis.
+- **Padronização de Indentação e Organização do Código**:
+  - Backend (.NET): remoção de linhas comprimidas com múltiplas instruções/ponto-e-vírgula e if inline no backend (`FiscalController.cs`, `WorkOrdersController.cs`), criação do `.editorconfig` oficial na raiz e execução do `dotnet format whitespace`.
+  - Frontend (Angular): adição de scripts npm `"format"` e `"format:check"` e formatação via Prettier em todo o projeto web.
+- **Validação**: Frontend lint (0 erros/avisos), 69 testes unitários Vitest aprovados em 12 arquivos, build de produção aprovado; Backend com 56 testes unitários e 10 testes de integração aprovados (100%).
+
+
 ## Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal — 18/09/2026
 
 - **Endereço Estruturado e Dados Fiscais no Cliente**:
