@@ -3,9 +3,6 @@
     eyebrow="CADASTROS"
     title="Clientes"
     description="Base de proprietários e frotistas com contatos e documentos."
-    actionLabel="Novo Cliente"
-    actionIcon="pi pi-plus"
-    (action)="open()"
   />
 
   <app-data-toolbar
@@ -20,6 +17,10 @@
         placeholder="Pesquisar por nome, CPF/CNPJ, telefone ou e-mail..."
       />
     </div>
+
+    <div toolbar-actions>
+      <p-button label="Novo Cliente" icon="pi pi-plus" (onClick)="open()" />
+    </div>
   </app-data-toolbar>
 
   @if (loading()) {
@@ -28,7 +29,11 @@
     <app-empty-state
       icon="pi pi-users"
       title="Nenhum cliente encontrado"
-      [description]="search.value ? 'Nenhum resultado corresponde aos termos pesquisados.' : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.'"
+      [description]="
+        search.value
+          ? 'Nenhum resultado corresponde aos termos pesquisados.'
+          : 'Cadastre o primeiro cliente da oficina para emitir ordens de serviço.'
+      "
       actionLabel="Novo Cliente"
       actionIcon="pi pi-plus"
       (action)="open()"
@@ -59,7 +64,9 @@
               </div>
             </div>
             @if (item.document) {
-              <span class="doc-badge flex-shrink-0"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+              <span class="doc-badge flex-shrink-0"
+                ><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span
+              >
             } @else {
               <span class="text-xs text-muted font-medium italic flex-shrink-0">Sem doc</span>
             }
@@ -70,16 +77,31 @@
             <div class="catalog-meta-row">
               <span class="catalog-meta-label"><i class="pi pi-phone"></i> Telefone</span>
               @if (item.phone) {
-                <a [href]="'tel:' + cleanPhone(item.phone)" class="catalog-meta-value hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">{{ formatPhone(item.phone) }}</a>
+                <a
+                  [href]="'tel:' + cleanPhone(item.phone)"
+                  class="catalog-meta-value hover:underline"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                  >{{ formatPhone(item.phone) }}</a
+                >
               } @else {
                 <span class="text-xs text-muted italic">Não informado</span>
               }
             </div>
 
             <div class="catalog-meta-row">
-              <span class="catalog-meta-label"><i class="pi pi-whatsapp text-success"></i> WhatsApp</span>
+              <span class="catalog-meta-label"
+                ><i class="pi pi-whatsapp text-success"></i> WhatsApp</span
+              >
               @if (item.whatsApp) {
-                <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="catalog-meta-value text-success font-bold hover:underline" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                <a
+                  [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="catalog-meta-value text-success font-bold hover:underline"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                >
                   {{ formatPhone(item.whatsApp) }}
                 </a>
               } @else {
@@ -87,10 +109,10 @@
               }
             </div>
 
-            @if (item.address) {
+            @if (formatAddress(item)) {
               <div class="catalog-card-info pt-2 border-t border-subtle">
                 <i class="pi pi-map-marker text-muted mt-0.5 flex-shrink-0"></i>
-                <span class="truncate" [title]="item.address">{{ item.address }}</span>
+                <span class="truncate" [title]="formatAddress(item)">{{ formatAddress(item) }}</span>
               </div>
             }
           </div>
@@ -109,10 +131,24 @@
               <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
             </span>
             <div class="card-actions entity-card-actions" aria-label="Ações do cliente">
-              <button type="button" class="entity-card-action" title="Editar cliente" aria-label="Editar cliente" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="entity-card-action"
+                title="Editar cliente"
+                aria-label="Editar cliente"
+                (click)="$event.stopPropagation(); open(item)"
+                (keydown)="$event.stopPropagation()"
+              >
                 <i class="pi pi-pencil" aria-hidden="true"></i>
               </button>
-              <button type="button" class="entity-card-action danger" title="Arquivar cliente" aria-label="Arquivar cliente" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="entity-card-action danger"
+                title="Arquivar cliente"
+                aria-label="Arquivar cliente"
+                (click)="$event.stopPropagation(); archive(item)"
+                (keydown)="$event.stopPropagation()"
+              >
                 <i class="pi pi-folder-open" aria-hidden="true"></i>
               </button>
             </div>
@@ -159,36 +195,76 @@
               </td>
               <td>
                 @if (item.document) {
-                  <span class="doc-badge"><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span>
+                  <span class="doc-badge"
+                    ><i class="pi pi-id-card"></i> {{ formatDocument(item.document) }}</span
+                  >
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
               </td>
               <td>
                 @if (item.phone) {
-                  <a [href]="'tel:' + item.phone" class="contact-pill" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-phone"></i> {{ item.phone }}</a>
+                  <a
+                    [href]="'tel:' + item.phone"
+                    class="contact-pill"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()"
+                    ><i class="pi pi-phone"></i> {{ item.phone }}</a
+                  >
                 } @else if (item.whatsApp) {
-                  <a [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)" target="_blank" rel="noopener noreferrer" class="contact-pill whatsapp" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a>
+                  <a
+                    [href]="'https://wa.me/55' + cleanPhone(item.whatsApp)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="contact-pill whatsapp"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()"
+                    ><i class="pi pi-whatsapp"></i> {{ item.whatsApp }}</a
+                  >
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
               </td>
               <td>
                 @if (item.email) {
-                  <a [href]="'mailto:' + item.email" class="contact-pill" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><i class="pi pi-envelope"></i> {{ item.email }}</a>
+                  <a
+                    [href]="'mailto:' + item.email"
+                    class="contact-pill"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()"
+                    ><i class="pi pi-envelope"></i> {{ item.email }}</a
+                  >
                 } @else {
                   <span class="text-muted text-xs">—</span>
                 }
               </td>
               <td>
-                <span class="text-xs text-muted max-w-xs truncate inline-block" [title]="item.address || ''">{{ item.address || '—' }}</span>
+                <span
+                  class="text-xs text-muted max-w-xs truncate inline-block"
+                  [title]="formatAddress(item)"
+                  >{{ formatAddress(item) || '—' }}</span
+                >
               </td>
               <td class="text-right">
                 <div class="table-actions-group entity-table-actions" aria-label="Ações do cliente">
-                  <button type="button" class="tbl-action-btn edit" title="Editar cliente" aria-label="Editar cliente" (click)="$event.stopPropagation(); open(item)" (keydown)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="tbl-action-btn edit"
+                    title="Editar cliente"
+                    aria-label="Editar cliente"
+                    (click)="$event.stopPropagation(); open(item)"
+                    (keydown)="$event.stopPropagation()"
+                  >
                     <i class="pi pi-pencil"></i>
                   </button>
-                  <button type="button" class="tbl-action-btn delete" title="Arquivar cliente" aria-label="Arquivar cliente" (click)="$event.stopPropagation(); archive(item)" (keydown)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="tbl-action-btn delete"
+                    title="Arquivar cliente"
+                    aria-label="Arquivar cliente"
+                    (click)="$event.stopPropagation(); archive(item)"
+                    (keydown)="$event.stopPropagation()"
+                  >
                     <i class="pi pi-folder-open"></i>
                   </button>
                 </div>
@@ -212,27 +288,55 @@
   }
 </section>
 
-<p-dialog [header]="editing() ? 'Editar Cliente' : 'Novo Cliente'" [modal]="true" [visible]="dialog()" (visibleChange)="dialog.set($event)" [style]="{ width: 'min(42rem, 94vw)' }">
+<p-dialog
+  [header]="editing() ? 'Editar Cliente' : 'Novo Cliente'"
+  [modal]="true"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [style]="{ width: 'min(42rem, 94vw)' }"
+>
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
-    <label>Nome Completo / Razão Social
-      <input pInputText formControlName="name" autocomplete="name" placeholder="Ex: Roberto Carlos Pereira" />
+    <label
+      >Nome Completo / Razão Social
+      <input
+        pInputText
+        formControlName="name"
+        autocomplete="name"
+        placeholder="Ex: Roberto Carlos Pereira"
+      />
     </label>
     <div class="two-columns">
-      <label>CPF / CNPJ <small class="text-muted">opcional</small>
-        <input pInputText formControlName="document" inputmode="numeric" placeholder="11 dígitos (CPF) ou 14 (CNPJ)" />
+      <label
+        >CPF / CNPJ <small class="text-muted">opcional</small>
+        <input
+          pInputText
+          formControlName="document"
+          inputmode="numeric"
+          placeholder="11 dígitos (CPF) ou 14 (CNPJ)"
+        />
         @if (form.controls.document.errors?.['invalidDocument'] && form.controls.document.touched) {
-          <small class="field-error-text">Informe 11 dígitos para CPF ou 14 dígitos para CNPJ</small>
+          <small class="field-error-text"
+            >Informe 11 dígitos para CPF ou 14 dígitos para CNPJ</small
+          >
         }
       </label>
-      <label>Telefone Comercial / Fixo <small class="text-muted">opcional</small>
+      <label
+        >Telefone Comercial / Fixo <small class="text-muted">opcional</small>
         <input pInputText formControlName="phone" inputmode="tel" placeholder="(00) 0000-0000" />
       </label>
     </div>
     <div class="two-columns">
-      <label>WhatsApp / Celular <small class="text-muted">opcional</small>
-        <input pInputText formControlName="whatsApp" inputmode="tel" placeholder="(00) 90000-0000" />
+      <label
+        >WhatsApp / Celular <small class="text-muted">opcional</small>
+        <input
+          pInputText
+          formControlName="whatsApp"
+          inputmode="tel"
+          placeholder="(00) 90000-0000"
+        />
       </label>
-      <label>E-mail de Contato <small class="text-muted">opcional</small>
+      <label
+        >E-mail de Contato <small class="text-muted">opcional</small>
         <input pInputText formControlName="email" type="email" placeholder="cliente@email.com" />
       </label>
     </div>
@@ -243,56 +347,101 @@
             <i class="pi pi-map-marker text-primary"></i> Localização &amp; Dados Fiscais
           </div>
           <p class="customer-address-subtitle">
-            Preenchimento automático na emissão fiscal (NFS-e / NF-e) das ordens de serviço deste cliente
+            Preenchimento automático na emissão fiscal (NFS-e / NF-e) das ordens de serviço deste
+            cliente
           </p>
         </div>
       </div>
 
       <div class="customer-address-body">
         <div class="two-columns">
-          <label>CEP <small class="text-muted">8 dígitos</small>
+          <label
+            >CEP <small class="text-muted">8 dígitos</small>
             <div class="flex gap-2">
-              <input pInputText formControlName="postalCode" inputmode="numeric" maxlength="9" placeholder="00000-000" (blur)="onCepBlur()" class="flex-1 min-w-0" />
-              <p-button type="button" icon="pi pi-search" [loading]="loadingCep()" (onClick)="searchCep()" title="Buscar endereço no ViaCEP" aria-label="Buscar endereço no ViaCEP" severity="secondary" />
+              <input
+                pInputText
+                formControlName="postalCode"
+                inputmode="numeric"
+                maxlength="9"
+                placeholder="00000-000"
+                (blur)="onCepBlur()"
+                class="flex-1 min-w-0"
+              />
+              <p-button
+                type="button"
+                icon="pi pi-search"
+                [loading]="loadingCep()"
+                (onClick)="searchCep()"
+                title="Buscar endereço no ViaCEP"
+                aria-label="Buscar endereço no ViaCEP"
+                severity="secondary"
+              />
             </div>
-            @if (form.controls.postalCode.errors?.['invalidCep'] && form.controls.postalCode.touched) {
+            @if (
+              form.controls.postalCode.errors?.['invalidCep'] && form.controls.postalCode.touched
+            ) {
               <small class="field-error-text">CEP deve conter exatamente 8 dígitos</small>
             }
           </label>
 
-          <label>Inscrição Estadual (IE) <small class="text-muted">opcional / PJ</small>
-            <input pInputText formControlName="stateRegistration" placeholder="Isento ou inscrição estadual" />
+          <label
+            >Inscrição Estadual (IE) <small class="text-muted">opcional / PJ</small>
+            <input
+              pInputText
+              formControlName="stateRegistration"
+              placeholder="Isento ou inscrição estadual"
+            />
           </label>
         </div>
 
         <div class="two-columns">
-          <label>Logradouro / Rua
+          <label
+            >Logradouro / Rua
             <input pInputText formControlName="street" placeholder="Ex: Av. Brasil" />
           </label>
-          <label>Número
+          <label
+            >Número
             <input pInputText formControlName="number" placeholder="Ex: 123 ou S/N" />
           </label>
         </div>
 
         <div class="two-columns">
-          <label>Bairro
+          <label
+            >Bairro
             <input pInputText formControlName="district" placeholder="Ex: Centro" />
           </label>
-          <label>Cidade
+          <label
+            >Cidade
             <input pInputText formControlName="city" placeholder="Ex: São Paulo" />
           </label>
         </div>
 
         <div class="two-columns">
-          <label>UF (Estado) <small class="text-muted">2 letras</small>
-            <input pInputText formControlName="state" maxlength="2" placeholder="Ex: SP" class="uppercase" />
+          <label
+            >UF (Estado) <small class="text-muted">2 letras</small>
+            <input
+              pInputText
+              formControlName="state"
+              maxlength="2"
+              placeholder="Ex: SP"
+              class="uppercase"
+            />
             @if (form.controls.state.errors?.['invalidState'] && form.controls.state.touched) {
               <small class="field-error-text">UF deve ter 2 letras (ex: SP, MG, RJ)</small>
             }
           </label>
-          <label>Cód. IBGE Município <small class="text-muted">7 dígitos</small>
-            <input pInputText formControlName="cityCode" inputmode="numeric" maxlength="7" placeholder="Ex: 3550308 (automático via CEP)" />
-            @if (form.controls.cityCode.errors?.['invalidCityCode'] && form.controls.cityCode.touched) {
+          <label
+            >Cód. IBGE Município <small class="text-muted">7 dígitos</small>
+            <input
+              pInputText
+              formControlName="cityCode"
+              inputmode="numeric"
+              maxlength="7"
+              placeholder="Ex: 3550308 (automático via CEP)"
+            />
+            @if (
+              form.controls.cityCode.errors?.['invalidCityCode'] && form.controls.cityCode.touched
+            ) {
               <small class="field-error-text">Código IBGE deve conter 7 dígitos</small>
             }
           </label>
@@ -300,15 +449,37 @@
       </div>
     </div>
 
-    <label>Complemento / Ponto de Referência <small class="text-muted">opcional</small>
-      <input pInputText formControlName="address" placeholder="Apto, bloco ou ponto de referência..." />
+    <label
+      >Complemento / Ponto de Referência <small class="text-muted">opcional</small>
+      <input
+        pInputText
+        formControlName="address"
+        placeholder="Apto, bloco ou ponto de referência..."
+      />
     </label>
-    <label>Observações Adicionais <small class="text-muted">opcional</small>
-      <textarea pTextarea formControlName="notes" rows="3" placeholder="Informações de preferência, faturamento ou restrições..."></textarea>
+    <label
+      >Observações Adicionais <small class="text-muted">opcional</small>
+      <textarea
+        pTextarea
+        formControlName="notes"
+        rows="3"
+        placeholder="Informações de preferência, faturamento ou restrições..."
+      ></textarea>
     </label>
     <div class="dialog-actions">
-      <p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="dialog.set(false)" />
-      <p-button type="submit" [label]="editing() ? 'Salvar Alterações' : 'Cadastrar Cliente'" icon="pi pi-check" [loading]="saving()" />
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (onClick)="dialog.set(false)"
+      />
+      <p-button
+        type="submit"
+        [label]="editing() ? 'Salvar Alterações' : 'Cadastrar Cliente'"
+        icon="pi pi-check"
+        [loading]="saving()"
+      />
     </div>
   </form>
 </p-dialog>

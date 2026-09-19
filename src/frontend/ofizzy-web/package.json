@@ -6,6 +6,8 @@
     "start": "ng serve --configuration development --proxy-config proxy.conf.json",
     "build": "ng build",
     "lint": "eslint src --max-warnings=0",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css,json}\"",
     "e2e": "playwright test",
     "e2e:update": "playwright test --update-snapshots",
     "watch": "ng build --watch --configuration development",

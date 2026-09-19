@@ -76,10 +76,7 @@ export class ViewPreferenceService {
     this.preferences[key] = mode;
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(
-          VIEW_PREFERENCES_STORAGE_KEY,
-          JSON.stringify(this.preferences)
-        );
+        window.localStorage.setItem(VIEW_PREFERENCES_STORAGE_KEY, JSON.stringify(this.preferences));
       }
     } catch {
       // Ignore storage errors

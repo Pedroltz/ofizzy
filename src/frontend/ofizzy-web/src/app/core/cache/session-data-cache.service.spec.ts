@@ -22,7 +22,13 @@ describe('SessionDataCacheService', () => {
     vi.advanceTimersByTime(30_001);
 
     let resolve!: (value: string) => void;
-    const refresh = cache.load('dashboard:summary', () => new Promise((done) => { resolve = done; }));
+    const refresh = cache.load(
+      'dashboard:summary',
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
 
     expect(cache.peek('dashboard:summary')).toBe('old');
     resolve('new');
@@ -34,7 +40,13 @@ describe('SessionDataCacheService', () => {
   it('invalidates matching resources without caching an obsolete in-flight result', async () => {
     const cache = new SessionDataCacheService();
     let resolve!: (value: string) => void;
-    const pending = cache.load('work-orders::1:12:', () => new Promise((done) => { resolve = done; }));
+    const pending = cache.load(
+      'work-orders::1:12:',
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
 
     cache.invalidate('work-orders:');
     resolve('obsolete');

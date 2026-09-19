@@ -96,11 +96,11 @@ export class WorkOrdersPage {
   readonly editing = signal<WorkOrder | null>(null);
   readonly total = signal(0);
   readonly page = signal(1);
-  readonly pageSize = 12;
+  readonly pageSize = 18;
   readonly search = this.fb.nonNullable.control('');
   readonly viewMode = this.viewPreferences.getSignal('work-orders', 'table');
   readonly effectiveViewMode = computed(() =>
-    this.responsive.isTabletOrSmaller() ? 'cards' : this.viewMode()
+    this.responsive.isTabletOrSmaller() ? 'cards' : this.viewMode(),
   );
 
   readonly selectedStatus = signal<WorkOrderStatus | 'All'>('All');
@@ -126,11 +126,11 @@ export class WorkOrdersPage {
   });
 
   readonly servicesSubtotal = computed(() =>
-    this.services().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0)
+    this.services().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0),
   );
 
   readonly partsSubtotal = computed(() =>
-    this.parts().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0)
+    this.parts().reduce((sum, x) => sum + (x.quantity || 0) * (x.unitPrice || 0), 0),
   );
 
   readonly orderTotal = computed(() => this.servicesSubtotal() + this.partsSubtotal());
@@ -198,7 +198,7 @@ export class WorkOrdersPage {
         this.search.value,
         this.page(),
         this.pageSize,
-        statusParam
+        statusParam,
       );
       if (current === this.loadVersion) {
         this.items.set(result.items);
@@ -249,7 +249,7 @@ export class WorkOrdersPage {
           description: s.description,
           quantity: s.quantity,
           unitPrice: s.unitPrice,
-        }))
+        })),
       );
       this.parts.set(
         order.parts.map((p) => ({
@@ -258,7 +258,7 @@ export class WorkOrdersPage {
           code: p.code,
           quantity: p.quantity,
           unitPrice: p.unitPrice,
-        }))
+        })),
       );
     } else {
       this.editing.set(null);
@@ -332,15 +332,10 @@ export class WorkOrdersPage {
     ]);
   }
 
-  updateLine(
-    kind: 'services' | 'parts',
-    index: number,
-    field: string,
-    value: unknown
-  ): void {
+  updateLine(kind: 'services' | 'parts', index: number, field: string, value: unknown): void {
     const target = kind === 'services' ? this.services : this.parts;
     target.update((lines) =>
-      lines.map((line, i) => (i === index ? { ...line, [field]: value } : line))
+      lines.map((line, i) => (i === index ? { ...line, [field]: value } : line)),
     );
   }
 
@@ -382,9 +377,7 @@ export class WorkOrdersPage {
     }
 
     // Validação de linhas
-    const emptyServices = this.services().filter(
-      (s) => !s.description || !s.description.trim()
-    );
+    const emptyServices = this.services().filter((s) => !s.description || !s.description.trim());
     if (emptyServices.length > 0) {
       this.messages.add({
         severity: 'warn',
@@ -419,7 +412,7 @@ export class WorkOrdersPage {
           services: this.services(),
           parts: this.parts(),
         },
-        id
+        id,
       );
       this.dialog.set(false);
       this.messages.add({
@@ -470,7 +463,7 @@ export class WorkOrdersPage {
   private async executeStatusChange(
     id: string,
     number: number,
-    status: WorkOrderStatus
+    status: WorkOrderStatus,
   ): Promise<void> {
     try {
       await this.api.changeStatus(id, status);

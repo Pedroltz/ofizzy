@@ -8,121 +8,405 @@
   <p-tabs [value]="catalogEnabled() ? 'services' : 'workshop'">
     <p-tablist>
       @if (catalogEnabled()) {
-      <p-tab value="services"><i class="pi pi-wrench mr-2" aria-hidden="true"></i> Mão de Obra e Serviços</p-tab>
-      <p-tab value="parts"><i class="pi pi-box mr-2" aria-hidden="true"></i> Peças e Insumos</p-tab>
+        <p-tab value="services"
+          ><i class="pi pi-wrench mr-2" aria-hidden="true"></i> Mão de Obra e Serviços</p-tab
+        >
+        <p-tab value="parts"
+          ><i class="pi pi-box mr-2" aria-hidden="true"></i> Peças e Insumos</p-tab
+        >
       }
-      <p-tab value="workshop"><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Empresa</p-tab>
-      @if (tenantContext.admin()) { <p-tab value="fiscal"><i class="pi pi-file-check mr-2" aria-hidden="true"></i> Fiscal</p-tab> }
+      <p-tab value="workshop"
+        ><i class="pi pi-building mr-2" aria-hidden="true"></i> Dados da Empresa</p-tab
+      >
+      @if (tenantContext.admin()) {
+        <p-tab value="fiscal"
+          ><i class="pi pi-file-check mr-2" aria-hidden="true"></i> Fiscal</p-tab
+        >
+      }
     </p-tablist>
 
     <p-tabpanels>
       <!-- Aba: Mão de Obra e Serviços -->
       @if (catalogEnabled()) {
-      <p-tabpanel value="services">
-        <div class="catalog-toolbar">
-          <div>
-            <h2>Serviços Cadastrados</h2>
-            <p>Valores sugeridos como base operacional para agilizar a abertura de novas ordens de serviço.</p>
-          </div>
-          <p-button label="Novo Serviço" icon="pi pi-plus" (onClick)="openService()" />
-        </div>
+        <p-tabpanel value="services">
+          <app-data-toolbar
+            [itemCount]="servicesTotal()"
+            itemLabelSingular="serviço encontrado"
+            itemLabelPlural="serviços encontrados"
+            [(viewMode)]="servicesViewMode"
+          >
+            <div toolbar-search>
+              <app-search-field
+                [formControl]="servicesSearch"
+                placeholder="Pesquisar por nome do serviço ou descrição..."
+              />
+            </div>
+            <div toolbar-actions>
+              <p-button label="Novo Serviço" icon="pi pi-plus" (onClick)="openService()" />
+            </div>
+          </app-data-toolbar>
 
-        <div class="catalog-list">
-          @for (item of services(); track item.id) {
-            <article class="surface-card catalog-row">
-              <div class="grow min-w-0">
-                <h3>{{ item.name }}</h3>
-                <p>{{ item.description || 'Sem descrição complementar cadastrada' }}</p>
-              </div>
-              <div class="catalog-price-box">
-                <small>Preço Padrão</small>
-                <strong>{{ money(item.defaultPrice) }}</strong>
-              </div>
-              <div class="card-actions">
-                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar serviço" (onClick)="openService(item)" />
-                <p-button icon="pi pi-folder-open" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar serviço" (onClick)="archiveService(item)" />
-              </div>
-            </article>
-          } @empty {
+          @if (loadingServices()) {
+            <app-loading-state
+              [mode]="effectiveServicesViewMode() === 'cards' ? 'cards' : 'table'"
+              [count]="6"
+            />
+          } @else if (services().length === 0) {
             <app-empty-state
               icon="pi pi-wrench"
-              title="Nenhum serviço cadastrado"
-              description="Cadastre os serviços prestados pela empresa e seus valores de referência."
+              [title]="servicesSearch.value ? 'Nenhum serviço encontrado' : 'Nenhum serviço cadastrado'"
+              [description]="
+                servicesSearch.value
+                  ? 'Nenhum resultado corresponde aos termos pesquisados.'
+                  : 'Cadastre os serviços prestados pela empresa e seus valores de referência.'
+              "
               actionLabel="Cadastrar Serviço"
               actionIcon="pi pi-plus"
               (action)="openService()"
             />
+          } @else if (effectiveServicesViewMode() === 'cards') {
+            <div class="catalog-list">
+              @for (item of services(); track item.id) {
+                <article class="surface-card catalog-row">
+                  <div class="grow min-w-0">
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.description || 'Sem descrição complementar cadastrada' }}</p>
+                  </div>
+                  <div class="catalog-price-box">
+                    <small>Preço Padrão</small>
+                    <strong>{{ money(item.defaultPrice) }}</strong>
+                  </div>
+                  <div class="card-actions">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [text]="true"
+                      [rounded]="true"
+                      severity="secondary"
+                      ariaLabel="Editar serviço"
+                      (onClick)="openService(item)"
+                    />
+                    <p-button
+                      icon="pi pi-folder-open"
+                      [text]="true"
+                      [rounded]="true"
+                      severity="danger"
+                      ariaLabel="Arquivar serviço"
+                      (onClick)="archiveService(item)"
+                    />
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-wrapper>
+              <table class="data-table table-fixed catalog-list-table" aria-label="Lista de serviços">
+                <colgroup>
+                  <col style="width: auto" />
+                  <col style="width: auto" />
+                  <col style="width: 11rem" />
+                  <col style="width: 6.5rem" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Serviço</th>
+                    <th>Descrição</th>
+                    <th class="text-right">Preço Padrão</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of services(); track item.id) {
+                    <tr
+                      class="entity-list-row cursor-pointer"
+                      tabindex="0"
+                      [attr.aria-label]="'Editar serviço ' + item.name"
+                      (click)="openService(item)"
+                      (keydown.enter)="openService(item)"
+                      (keydown.space)="$event.preventDefault(); openService(item)"
+                    >
+                      <td>
+                        <div class="flex items-center gap-2.5">
+                          <i class="pi pi-wrench text-muted" aria-hidden="true"></i>
+                          <strong class="font-semibold">{{ item.name }}</strong>
+                        </div>
+                      </td>
+                      <td class="text-secondary text-sm">
+                        <span class="truncate block max-w-md" [title]="item.description || ''">
+                          {{ item.description || '—' }}
+                        </span>
+                      </td>
+                      <td class="text-right font-mono font-bold">
+                        {{ money(item.defaultPrice) }}
+                      </td>
+                      <td class="text-right">
+                        <div
+                          class="flex items-center justify-end gap-1"
+                          (click)="$event.stopPropagation()"
+                          (keydown)="$event.stopPropagation()"
+                        >
+                          <p-button
+                            icon="pi pi-pencil"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="secondary"
+                            ariaLabel="Editar serviço"
+                            (onClick)="openService(item)"
+                          />
+                          <p-button
+                            icon="pi pi-folder-open"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="danger"
+                            ariaLabel="Arquivar serviço"
+                            (onClick)="archiveService(item)"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </app-data-table-wrapper>
           }
-        </div>
-      </p-tabpanel>
 
-      <!-- Aba: Peças e Insumos -->
-      <p-tabpanel value="parts">
-        <div class="catalog-toolbar">
-          <div>
-            <h2>Peças e Insumos Cadastrados</h2>
-            <p>Controle códigos de referência, preços de custo e margens para agilizar o lançamento na empresa.</p>
-          </div>
-          <p-button label="Nova Peça" icon="pi pi-plus" (onClick)="openPart()" />
-        </div>
+          @if (servicesTotal() > pageSize) {
+            <p-paginator
+              [first]="(servicesPage() - 1) * pageSize"
+              [rows]="pageSize"
+              [totalRecords]="servicesTotal()"
+              (onPageChange)="onServicesPageChange($event)"
+              styleClass="mt-4"
+            />
+          }
+        </p-tabpanel>
 
-        <div class="catalog-list">
-          @for (item of parts(); track item.id) {
-            <article class="surface-card catalog-row">
-              <div class="grow min-w-0">
-                <h3>{{ item.name }}</h3>
-                <p>
-                  @if (item.code) {
-                    <span class="font-mono text-xs font-semibold text-muted bg-surface-secondary px-1.5 py-0.5 rounded border border-subtle">SKU: {{ item.code }}</span>
-                  }
-                  <span class="text-muted">Custo: {{ money(item.costPrice) }}</span>
-                  @if (marginPercent(item)) {
-                    <span class="margin-pill">{{ marginPercent(item) }}</span>
-                  }
-                </p>
-              </div>
-              <div class="catalog-price-box">
-                <small>Preço de Venda</small>
-                <strong>{{ money(item.salePrice) }}</strong>
-              </div>
-              <div class="card-actions">
-                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" ariaLabel="Editar peça" (onClick)="openPart(item)" />
-                <p-button icon="pi pi-folder-open" [text]="true" [rounded]="true" severity="danger" ariaLabel="Arquivar peça" (onClick)="archivePart(item)" />
-              </div>
-            </article>
-          } @empty {
+        <!-- Aba: Peças e Insumos -->
+        <p-tabpanel value="parts">
+          <app-data-toolbar
+            [itemCount]="partsTotal()"
+            itemLabelSingular="peça encontrada"
+            itemLabelPlural="peças encontradas"
+            [(viewMode)]="partsViewMode"
+          >
+            <div toolbar-search>
+              <app-search-field
+                [formControl]="partsSearch"
+                placeholder="Pesquisar por código SKU ou nome da peça..."
+              />
+            </div>
+            <div toolbar-actions>
+              <p-button label="Nova Peça" icon="pi pi-plus" (onClick)="openPart()" />
+            </div>
+          </app-data-toolbar>
+
+          @if (loadingParts()) {
+            <app-loading-state
+              [mode]="effectivePartsViewMode() === 'cards' ? 'cards' : 'table'"
+              [count]="6"
+            />
+          } @else if (parts().length === 0) {
             <app-empty-state
               icon="pi pi-box"
-              title="Nenhuma peça cadastrada"
-              description="Cadastre as peças e insumos frequentes (válvulas, pneus, pastilhas de freio, filtros, óleos)."
+              [title]="partsSearch.value ? 'Nenhuma peça encontrada' : 'Nenhuma peça cadastrada'"
+              [description]="
+                partsSearch.value
+                  ? 'Nenhum resultado corresponde aos termos pesquisados.'
+                  : 'Cadastre as peças e insumos frequentes (válvulas, pneus, pastilhas de freio, filtros, óleos).'
+              "
               actionLabel="Cadastrar Peça"
               actionIcon="pi pi-plus"
               (action)="openPart()"
             />
+          } @else if (effectivePartsViewMode() === 'cards') {
+            <div class="catalog-list">
+              @for (item of parts(); track item.id) {
+                <article class="surface-card catalog-row">
+                  <div class="grow min-w-0">
+                    <h3>{{ item.name }}</h3>
+                    <p>
+                      @if (item.code) {
+                        <span
+                          class="font-mono text-xs font-semibold text-muted bg-surface-secondary px-1.5 py-0.5 rounded border border-subtle"
+                          >SKU: {{ item.code }}</span
+                        >
+                      }
+                      <span class="text-muted">Custo: {{ money(item.costPrice) }}</span>
+                      @if (marginPercent(item)) {
+                        <span class="margin-pill">{{ marginPercent(item) }}</span>
+                      }
+                    </p>
+                  </div>
+                  <div class="catalog-price-box">
+                    <small>Preço de Venda</small>
+                    <strong>{{ money(item.salePrice) }}</strong>
+                  </div>
+                  <div class="card-actions">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [text]="true"
+                      [rounded]="true"
+                      severity="secondary"
+                      ariaLabel="Editar peça"
+                      (onClick)="openPart(item)"
+                    />
+                    <p-button
+                      icon="pi pi-folder-open"
+                      [text]="true"
+                      [rounded]="true"
+                      severity="danger"
+                      ariaLabel="Arquivar peça"
+                      (onClick)="archivePart(item)"
+                    />
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-wrapper>
+              <table class="data-table table-fixed catalog-list-table" aria-label="Lista de peças">
+                <colgroup>
+                  <col style="width: 10rem" />
+                  <col style="width: auto" />
+                  <col style="width: 9rem" />
+                  <col style="width: 9.5rem" />
+                  <col style="width: 8.5rem" />
+                  <col style="width: 6.5rem" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Código / SKU</th>
+                    <th>Nome da Peça / Insumo</th>
+                    <th class="text-right">Preço de Custo</th>
+                    <th class="text-right">Preço de Venda</th>
+                    <th class="text-center">Margem</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of parts(); track item.id) {
+                    <tr
+                      class="entity-list-row cursor-pointer"
+                      tabindex="0"
+                      [attr.aria-label]="'Editar peça ' + item.name"
+                      (click)="openPart(item)"
+                      (keydown.enter)="openPart(item)"
+                      (keydown.space)="$event.preventDefault(); openPart(item)"
+                    >
+                      <td>
+                        <span
+                          class="font-mono text-xs font-semibold text-muted bg-surface-secondary px-1.5 py-0.5 rounded border border-subtle"
+                        >
+                          {{ item.code }}
+                        </span>
+                      </td>
+                      <td>
+                        <strong class="font-semibold">{{ item.name }}</strong>
+                      </td>
+                      <td class="text-right font-mono text-muted text-sm">
+                        {{ money(item.costPrice) }}
+                      </td>
+                      <td class="text-right font-mono font-bold text-success">
+                        {{ money(item.salePrice) }}
+                      </td>
+                      <td class="text-center">
+                        @if (marginPercent(item)) {
+                          <span class="margin-pill">{{ marginPercent(item) }}</span>
+                        } @else {
+                          <span class="text-xs text-muted">—</span>
+                        }
+                      </td>
+                      <td class="text-right">
+                        <div
+                          class="flex items-center justify-end gap-1"
+                          (click)="$event.stopPropagation()"
+                          (keydown)="$event.stopPropagation()"
+                        >
+                          <p-button
+                            icon="pi pi-pencil"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="secondary"
+                            ariaLabel="Editar peça"
+                            (onClick)="openPart(item)"
+                          />
+                          <p-button
+                            icon="pi pi-folder-open"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="danger"
+                            ariaLabel="Arquivar peça"
+                            (onClick)="archivePart(item)"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </app-data-table-wrapper>
           }
-        </div>
-      </p-tabpanel>
 
+          @if (partsTotal() > pageSize) {
+            <p-paginator
+              [first]="(partsPage() - 1) * pageSize"
+              [rows]="pageSize"
+              [totalRecords]="partsTotal()"
+              (onPageChange)="onPartsPageChange($event)"
+              styleClass="mt-4"
+            />
+          }
+        </p-tabpanel>
       }
       <!-- Aba: Dados da Empresa & Impressão -->
       <p-tabpanel value="workshop">
         <app-company-settings-form />
       </p-tabpanel>
-      @if (tenantContext.admin()) { <p-tabpanel value="fiscal"><ng-template #content><app-fiscal-settings /></ng-template></p-tabpanel> }
+      @if (tenantContext.admin()) {
+        <p-tabpanel value="fiscal"
+          ><ng-template #content><app-fiscal-settings /></ng-template
+        ></p-tabpanel>
+      }
     </p-tabpanels>
   </p-tabs>
 </section>
 
-<p-dialog [header]="editingService() ? 'Editar Serviço' : 'Novo Serviço'" [modal]="true" [visible]="serviceDialog()" (visibleChange)="serviceDialog.set($event)" [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }" styleClass="catalog-item-dialog">
+<p-dialog
+  [header]="editingService() ? 'Editar Serviço' : 'Novo Serviço'"
+  [modal]="true"
+  [visible]="serviceDialog()"
+  (visibleChange)="serviceDialog.set($event)"
+  [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }"
+  styleClass="catalog-item-dialog"
+>
   <form [formGroup]="serviceForm" class="dialog-form" (ngSubmit)="saveService()">
-    <label>Nome do Serviço
-      <input pInputText formControlName="name" placeholder="Ex: Alinhamento 3D Dianteiro / Traseiro" />
+    <label
+      >Nome do Serviço
+      <input
+        pInputText
+        formControlName="name"
+        placeholder="Ex: Alinhamento 3D Dianteiro / Traseiro"
+      />
     </label>
-    <label>Descrição do Serviço <small class="text-muted">opcional</small>
-      <textarea pTextarea formControlName="description" rows="3" placeholder="Detalhes do que inclui o serviço, garantias, etc."></textarea>
+    <label
+      >Descrição do Serviço <small class="text-muted">opcional</small>
+      <textarea
+        pTextarea
+        formControlName="description"
+        rows="3"
+        placeholder="Detalhes do que inclui o serviço, garantias, etc."
+      ></textarea>
     </label>
-    <label>Preço Padrão Sugerido
-      <p-inputnumber formControlName="defaultPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+    <label
+      >Preço Padrão Sugerido
+      <p-inputnumber
+        formControlName="defaultPrice"
+        mode="currency"
+        currency="BRL"
+        locale="pt-BR"
+        [min]="0"
+        placeholder="R$ 0,00"
+        styleClass="full-control"
+      />
     </label>
 
     @if (tenantContext.admin()) {
@@ -139,7 +423,9 @@
                   <i class="pi pi-spin pi-spinner text-xs text-muted" aria-hidden="true"></i>
                 }
               </div>
-              <p class="text-xs text-secondary m-0">Vincule código de tributação para emissão automática de serviços</p>
+              <p class="text-xs text-secondary m-0">
+                Vincule código de tributação para emissão automática de serviços
+              </p>
             </div>
           </label>
           <p-toggleswitch [formControl]="serviceFiscalEnabled" inputId="service-fiscal-toggle" />
@@ -148,38 +434,87 @@
         @if (serviceFiscalEnabled.value) {
           <div class="fiscal-fields-body">
             <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-subtle">
-              <span class="text-xs font-semibold text-muted uppercase tracking-wider">Parâmetros de Serviço (NFS-e Nacional)</span>
+              <span class="text-xs font-semibold text-muted uppercase tracking-wider"
+                >Parâmetros de Serviço (NFS-e Nacional)</span
+              >
               <span class="text-xs text-secondary">Ex: 140101 (Reparação/Manutenção)</span>
             </div>
-            <app-fiscal-fields [fields]="serviceFields" [form]="serviceFiscalForm" prefix="dialog-srv-" />
+            <app-fiscal-fields
+              [fields]="serviceFields"
+              [form]="serviceFiscalForm"
+              prefix="dialog-srv-"
+            />
           </div>
         }
       </div>
     }
 
     <div class="dialog-actions">
-      <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="serviceDialog.set(false)" />
-      <p-button type="submit" [label]="editingService() ? 'Salvar Alterações' : 'Cadastrar Serviço'" icon="pi pi-check" [loading]="saving()" />
+      <p-button
+        type="button"
+        label="Cancelar"
+        [text]="true"
+        severity="secondary"
+        (onClick)="serviceDialog.set(false)"
+      />
+      <p-button
+        type="submit"
+        [label]="editingService() ? 'Salvar Alterações' : 'Cadastrar Serviço'"
+        icon="pi pi-check"
+        [loading]="saving()"
+      />
     </div>
   </form>
 </p-dialog>
 
-<p-dialog [header]="editingPart() ? 'Editar Peça' : 'Nova Peça'" [modal]="true" [visible]="partDialog()" (visibleChange)="partDialog.set($event)" [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }" styleClass="catalog-item-dialog">
+<p-dialog
+  [header]="editingPart() ? 'Editar Peça' : 'Nova Peça'"
+  [modal]="true"
+  [visible]="partDialog()"
+  (visibleChange)="partDialog.set($event)"
+  [style]="{ width: 'min(44rem, 95vw)', maxHeight: '90vh' }"
+  styleClass="catalog-item-dialog"
+>
   <form [formGroup]="partForm" class="dialog-form" (ngSubmit)="savePart()">
     <div class="two-columns">
-      <label>Nome / Descrição da Peça
+      <label
+        >Nome / Descrição da Peça
         <input pInputText formControlName="name" placeholder="Ex: Pneu 185/65 R15" />
       </label>
-      <label>Código de Referência / SKU
-        <input pInputText formControlName="code" placeholder="Ex: PN-185-65" style="text-transform: uppercase" />
+      <label
+        >Código de Referência / SKU
+        <input
+          pInputText
+          formControlName="code"
+          placeholder="Ex: PN-185-65"
+          style="text-transform: uppercase"
+        />
       </label>
     </div>
     <div class="two-columns">
-      <label>Preço de Custo
-        <p-inputnumber formControlName="costPrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+      <label
+        >Preço de Custo
+        <p-inputnumber
+          formControlName="costPrice"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          [min]="0"
+          placeholder="R$ 0,00"
+          styleClass="full-control"
+        />
       </label>
-      <label>Preço de Venda Sugerido
-        <p-inputnumber formControlName="salePrice" mode="currency" currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00" styleClass="full-control" />
+      <label
+        >Preço de Venda Sugerido
+        <p-inputnumber
+          formControlName="salePrice"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          [min]="0"
+          placeholder="R$ 0,00"
+          styleClass="full-control"
+        />
       </label>
     </div>
 
@@ -197,7 +532,9 @@
                   <i class="pi pi-spin pi-spinner text-xs text-muted" aria-hidden="true"></i>
                 }
               </div>
-              <p class="text-xs text-secondary m-0">Vincule NCM, CFOP e tributação para permitir emissão fiscal direta da OS</p>
+              <p class="text-xs text-secondary m-0">
+                Vincule NCM, CFOP e tributação para permitir emissão fiscal direta da OS
+              </p>
             </div>
           </label>
           <p-toggleswitch [formControl]="partFiscalEnabled" inputId="part-fiscal-toggle" />
@@ -206,18 +543,35 @@
         @if (partFiscalEnabled.value) {
           <div class="fiscal-fields-body">
             <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-subtle">
-              <span class="text-xs font-semibold text-muted uppercase tracking-wider">Parâmetros Fiscais do Produto</span>
+              <span class="text-xs font-semibold text-muted uppercase tracking-wider"
+                >Parâmetros Fiscais do Produto</span
+              >
               <span class="text-xs text-secondary">Padrão sugerido: Revenda 5102 / CSOSN 102</span>
             </div>
-            <app-fiscal-fields [fields]="productFields" [form]="partFiscalForm" prefix="dialog-part-" />
+            <app-fiscal-fields
+              [fields]="productFields"
+              [form]="partFiscalForm"
+              prefix="dialog-part-"
+            />
           </div>
         }
       </div>
     }
 
     <div class="dialog-actions">
-      <p-button type="button" label="Cancelar" [text]="true" severity="secondary" (onClick)="partDialog.set(false)" />
-      <p-button type="submit" [label]="editingPart() ? 'Salvar Alterações' : 'Cadastrar Peça'" icon="pi pi-check" [loading]="saving()" />
+      <p-button
+        type="button"
+        label="Cancelar"
+        [text]="true"
+        severity="secondary"
+        (onClick)="partDialog.set(false)"
+      />
+      <p-button
+        type="submit"
+        [label]="editingPart() ? 'Salvar Alterações' : 'Cadastrar Peça'"
+        icon="pi pi-check"
+        [loading]="saving()"
+      />
     </div>
   </form>
 </p-dialog>

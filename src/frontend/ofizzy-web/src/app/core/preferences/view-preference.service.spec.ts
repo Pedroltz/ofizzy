@@ -1,9 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  VIEW_PREFERENCES_STORAGE_KEY,
-  ViewPreferenceService,
-} from './view-preference.service';
+import { VIEW_PREFERENCES_STORAGE_KEY, ViewPreferenceService } from './view-preference.service';
 
 describe('ViewPreferenceService', () => {
   let service: ViewPreferenceService;

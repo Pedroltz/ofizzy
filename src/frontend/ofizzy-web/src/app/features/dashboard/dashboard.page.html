@@ -67,7 +67,10 @@
           <!-- Visualização em Tabela para Desktop -->
           <div class="dashboard-table-desktop">
             <app-data-table-wrapper>
-              <table class="dashboard-table table-fixed dashboard-work-orders-table" aria-label="Ordens ativas na oficina">
+              <table
+                class="dashboard-table table-fixed dashboard-work-orders-table"
+                aria-label="Ordens ativas na oficina"
+              >
                 <colgroup>
                   <col style="width: 6rem" />
                   <col style="width: auto" />
@@ -94,10 +97,14 @@
                       </td>
                       <td>
                         <div class="customer-vehicle-cell">
-                          <strong class="cell-title" [title]="item.customerName">{{ item.customerName }}</strong>
+                          <strong class="cell-title" [title]="item.customerName">{{
+                            item.customerName
+                          }}</strong>
                           <div class="vehicle-subline">
                             <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                            <span class="vehicle-desc" [title]="item.vehicleDescription">{{ item.vehicleDescription }}</span>
+                            <span class="vehicle-desc" [title]="item.vehicleDescription">{{
+                              item.vehicleDescription
+                            }}</span>
                           </div>
                         </div>
                       </td>
@@ -142,7 +149,9 @@
                   </div>
                 </div>
                 <div class="dashboard-order-card__footer">
-                  <span class="entry-time"><i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}</span>
+                  <span class="entry-time"
+                    ><i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}</span
+                  >
                   <strong class="order-val font-mono">{{ money(item.total) }}</strong>
                 </div>
                 <div class="dashboard-order-card__action">

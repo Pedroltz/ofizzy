@@ -41,12 +41,21 @@ export class CompanyApiService {
   private readonly cache = inject(SessionDataCacheService);
 
   get(): Promise<CompanyResponse> {
-    return this.cache.load(cacheKey.company, () => firstValueFrom(this.http.get<CompanyResponse>('/api/company')));
+    return this.cache.load(cacheKey.company, () =>
+      firstValueFrom(this.http.get<CompanyResponse>('/api/company')),
+    );
   }
 
-  peek(): CompanyResponse | undefined { return this.cache.peek(cacheKey.company); }
+  peek(): CompanyResponse | undefined {
+    return this.cache.peek(cacheKey.company);
+  }
 
   update(request: UpdateCompanyRequest): Promise<CompanyResponse> {
-    return firstValueFrom(this.http.put<CompanyResponse>('/api/company', request)).then((result) => { this.cache.invalidate('company:'); return result; });
+    return firstValueFrom(this.http.put<CompanyResponse>('/api/company', request)).then(
+      (result) => {
+        this.cache.invalidate('company:');
+        return result;
+      },
+    );
   }
 }

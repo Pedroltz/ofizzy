@@ -47,21 +47,17 @@ export class DashboardPage implements OnInit {
   readonly totalActiveOrders = signal(0);
   readonly totalCompletedOrders = signal(0);
 
-  readonly openOrders = computed(() =>
-    this.activeOrders().filter((o) => o.status === 'Open')
-  );
+  readonly openOrders = computed(() => this.activeOrders().filter((o) => o.status === 'Open'));
 
   readonly inProgressOrders = computed(() =>
-    this.activeOrders().filter((o) => o.status === 'InProgress')
+    this.activeOrders().filter((o) => o.status === 'InProgress'),
   );
 
   readonly totalActiveValue = computed(() =>
-    this.activeOrders().reduce((acc, order) => acc + (order.total || 0), 0)
+    this.activeOrders().reduce((acc, order) => acc + (order.total || 0), 0),
   );
 
-  readonly totalAllOrders = computed(() =>
-    this.totalActiveOrders() + this.totalCompletedOrders()
-  );
+  readonly totalAllOrders = computed(() => this.totalActiveOrders() + this.totalCompletedOrders());
 
   readonly openPercentage = computed(() => {
     const total = this.totalAllOrders();
@@ -104,7 +100,9 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  private applySummary(summary: Awaited<ReturnType<WorkOrderApiService['dashboardSummary']>>): void {
+  private applySummary(
+    summary: Awaited<ReturnType<WorkOrderApiService['dashboardSummary']>>,
+  ): void {
     this.activeOrders.set(summary.activeOrders);
     this.totalActiveOrders.set(summary.totalActiveOrders);
     this.totalCompletedOrders.set(summary.totalCompletedOrders);
@@ -118,7 +116,7 @@ export class DashboardPage implements OnInit {
 
   money(value: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-      value ?? 0
+      value ?? 0,
     );
   }
 

@@ -61,12 +61,6 @@
       </div>
       <div class="desktop-header__right">
         <app-theme-toggle mode="switch" />
-        @if (!platformArea && tenantContext.has('WorkOrders')) {
-        <a routerLink="/ordens" class="header-action-link">
-          <i class="pi pi-plus"></i>
-          <span>Nova OS</span>
-        </a>
-        }
       </div>
     </header>
 
@@ -98,7 +92,12 @@
         >
           <div class="drawer-header">
             <div class="sidebar-logo-container drawer-logo">
-              <a [routerLink]="home" class="sidebar-logo-link" (click)="mobileMenu.set(false)" title="Ofizzy">
+              <a
+                [routerLink]="home"
+                class="sidebar-logo-link"
+                (click)="mobileMenu.set(false)"
+                title="Ofizzy"
+              >
                 <img src="assets/logo.png" alt="Ofizzy" class="sidebar-logo-image logo-light" />
                 <img src="assets/logo-dark.png" alt="Ofizzy" class="sidebar-logo-image logo-dark" />
               </a>

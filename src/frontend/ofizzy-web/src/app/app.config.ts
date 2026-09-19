@@ -14,7 +14,10 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideAnimationsAsync(),
-    provideHttpClient(withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }), withInterceptors([authRefreshInterceptor, apiErrorInterceptor])),
+    provideHttpClient(
+      withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+      withInterceptors([authRefreshInterceptor, apiErrorInterceptor]),
+    ),
     providePrimeNG({
       theme: {
         preset: Aura,

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -26,23 +27,39 @@ describe('SettingsPage - Fiscal Catalog Integration', () => {
   });
 
   const mockParts: Part[] = [
-    { id: 'part-1', name: 'Pneu Aro 15', code: 'PN-15', costPrice: 200, salePrice: 350, isActive: true },
+    {
+      id: 'part-1',
+      name: 'Pneu Aro 15',
+      code: 'PN-15',
+      costPrice: 200,
+      salePrice: 350,
+      isActive: true,
+    },
   ];
 
   const mockServices: ServiceItem[] = [
-    { id: 'srv-1', name: 'Alinhamento 3D', description: 'Dianteiro', defaultPrice: 120, isActive: true },
+    {
+      id: 'srv-1',
+      name: 'Alinhamento 3D',
+      description: 'Dianteiro',
+      defaultPrice: 120,
+      isActive: true,
+    },
   ];
 
   let savedPartData: PartRequest | null = null;
   let savedServiceData: ServiceRequest | null = null;
-  let savedFiscalProfile: { kind: string; id: string; data: Record<string, FiscalValue> } | null = null;
+  let savedFiscalProfile: { kind: string; id: string; data: Record<string, FiscalValue> } | null =
+    null;
   let messagesAdded: ToastMessageOptions[] = [];
 
   const mockCatalogApi = {
-    peekServices: () => ({ items: mockServices }),
-    peekParts: () => ({ items: mockParts }),
-    services: () => Promise.resolve({ items: mockServices }),
-    parts: () => Promise.resolve({ items: mockParts }),
+    peekServices: () => ({ items: mockServices, total: mockServices.length, page: 1, pageSize: 12 }),
+    peekParts: () => ({ items: mockParts, total: mockParts.length, page: 1, pageSize: 12 }),
+    services: () =>
+      Promise.resolve({ items: mockServices, total: mockServices.length, page: 1, pageSize: 12 }),
+    parts: () =>
+      Promise.resolve({ items: mockParts, total: mockParts.length, page: 1, pageSize: 12 }),
     savePart: (data: PartRequest, id?: string) => {
       savedPartData = data;
       return Promise.resolve({ id: id || 'new-part-id', ...data, isActive: true });
@@ -80,13 +97,26 @@ describe('SettingsPage - Fiscal Catalog Integration', () => {
       savedFiscalProfile = { kind, id, data };
       return Promise.resolve();
     },
-    settings: () => Promise.resolve({
-      settings: { cnpj: '11222333000181', legalName: 'Oficina Teste', stateRegistration: 'ISENTO', municipalRegistration: '', regime: 'SimplesNacional', address: null, nfeEnabled: true, nfseEnabled: true, environment: 'Homologation', nfeSeries: 1, dpsSeries: 1 },
-      certificate: null,
-      encryptionConfigured: true,
-      productionAllowed: false,
-      devToolsAvailable: false,
-    }),
+    settings: () =>
+      Promise.resolve({
+        settings: {
+          cnpj: '11222333000181',
+          legalName: 'Oficina Teste',
+          stateRegistration: 'ISENTO',
+          municipalRegistration: '',
+          regime: 'SimplesNacional',
+          address: null,
+          nfeEnabled: true,
+          nfseEnabled: true,
+          environment: 'Homologation',
+          nfeSeries: 1,
+          dpsSeries: 1,
+        },
+        certificate: null,
+        encryptionConfigured: true,
+        productionAllowed: false,
+        devToolsAvailable: false,
+      }),
   };
 
   const mockTenantContext = {
@@ -100,6 +130,17 @@ describe('SettingsPage - Fiscal Catalog Integration', () => {
   };
 
   beforeEach(() => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
     savedPartData = null;
     savedServiceData = null;
     savedFiscalProfile = null;
@@ -166,7 +207,9 @@ describe('SettingsPage - Fiscal Catalog Integration', () => {
     expect(savedFiscalProfile).toBeNull();
     expect(component.partFiscalForm.get('ncm')?.invalid).toBe(true);
     expect(component.partFiscalForm.get('ncm')?.touched).toBe(true);
-    expect(messagesAdded.some((m) => m.severity === 'error' && m.summary === 'NCM inválido')).toBe(true);
+    expect(messagesAdded.some((m) => m.severity === 'error' && m.summary === 'NCM inválido')).toBe(
+      true,
+    );
   });
 
   it('deve salvar peça e perfil fiscal juntos quando o slider estiver ativado com dados válidos', async () => {

@@ -24,14 +24,16 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       </div>
     </header>
   `,
-  styles: [`
-    .page-header-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      flex-wrap: wrap;
-    }
-  `],
+  styles: [
+    `
+      .page-header-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageHeaderComponent {

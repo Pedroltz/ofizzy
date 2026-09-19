@@ -14,14 +14,17 @@ import { ThemeService } from '../../core/theme/theme.service';
 
 describe('Shared Design System Components', () => {
   beforeEach(() => {
-    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
   });
 
   describe('PageHeaderComponent', () => {
@@ -75,7 +78,9 @@ describe('Shared Design System Components', () => {
 
       const el = fixture.nativeElement as HTMLElement;
       expect(el.querySelector('.section-card__title')?.textContent).toContain('Informações Gerais');
-      expect(el.querySelector('.section-card__subtitle')?.textContent).toContain('Dados do cliente');
+      expect(el.querySelector('.section-card__subtitle')?.textContent).toContain(
+        'Dados do cliente',
+      );
       expect(el.querySelector('.section-card')?.classList.contains('p-lg')).toBe(true);
     });
   });
@@ -145,7 +150,9 @@ describe('Shared Design System Components', () => {
       expect(fixture.componentInstance.value()).toBe('Honda Civic');
       expect(emitted).toBe('Honda Civic');
 
-      const clearBtn = fixture.nativeElement.querySelector('.search-field__clear') as HTMLButtonElement;
+      const clearBtn = fixture.nativeElement.querySelector(
+        '.search-field__clear',
+      ) as HTMLButtonElement;
       expect(clearBtn).not.toBeNull();
       clearBtn.click();
       fixture.detectChanges();
@@ -167,7 +174,9 @@ describe('Shared Design System Components', () => {
       fixture.detectChanges();
 
       const el = fixture.nativeElement as HTMLElement;
-      expect(el.querySelector('.data-toolbar__counter')?.textContent).toContain('15 clientes cadastrados');
+      expect(el.querySelector('.data-toolbar__counter')?.textContent).toContain(
+        '15 clientes cadastrados',
+      );
 
       const buttons = el.querySelectorAll('.data-toolbar__toggle-btn');
       expect(buttons.length).toBe(2);
@@ -197,7 +206,9 @@ describe('Shared Design System Components', () => {
 
       const el = fixture.nativeElement as HTMLElement;
       expect(el.querySelector('.empty-state__title')?.textContent).toContain('Nenhum registro');
-      expect(el.querySelector('.empty-state__description')?.textContent).toContain('Cadastre o primeiro item');
+      expect(el.querySelector('.empty-state__description')?.textContent).toContain(
+        'Cadastre o primeiro item',
+      );
 
       const btn = el.querySelector('button.primary-button') as HTMLButtonElement;
       btn.click();
@@ -282,7 +293,9 @@ describe('Shared Design System Components', () => {
       const themeService = TestBed.inject(ThemeService);
       fixture.detectChanges();
 
-      const switchBtn = fixture.nativeElement.querySelector('button.theme-switch') as HTMLButtonElement;
+      const switchBtn = fixture.nativeElement.querySelector(
+        'button.theme-switch',
+      ) as HTMLButtonElement;
       expect(switchBtn).not.toBeNull();
 
       const initial = themeService.activeTheme();

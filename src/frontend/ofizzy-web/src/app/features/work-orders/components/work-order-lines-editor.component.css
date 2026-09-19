@@ -83,8 +83,13 @@
 .line-card__total > span {
   display: none;
 }
-.center { text-align: center; }
-.right, .line-card__total { text-align: right; }
+.center {
+  text-align: center;
+}
+.right,
+.line-card__total {
+  text-align: right;
+}
 .line-editor__subtotal {
   display: flex;
   align-items: center;
@@ -98,12 +103,17 @@
   color: var(--text-secondary);
   font-size: var(--text-sm);
 }
-.line-editor__subtotal strong, .line-card__total strong {
+.line-editor__subtotal strong,
+.line-card__total strong {
   color: var(--text-primary);
   font-family: var(--font-mono);
 }
-.line-editor__subtotal strong { font-size: var(--text-base); }
-.line-card__total strong { font-size: var(--text-sm); }
+.line-editor__subtotal strong {
+  font-size: var(--text-base);
+}
+.line-card__total strong {
+  font-size: var(--text-sm);
+}
 .line-editor__empty {
   display: grid;
   justify-items: center;

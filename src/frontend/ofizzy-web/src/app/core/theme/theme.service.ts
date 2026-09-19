@@ -1,10 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import {
-  ActiveTheme,
-  THEME_STORAGE_KEY,
-  ThemePreference,
-} from './theme.models';
+import { ActiveTheme, THEME_STORAGE_KEY, ThemePreference } from './theme.models';
 
 @Injectable({
   providedIn: 'root',
@@ -91,7 +87,9 @@ export class ThemeService {
         this.mediaQueryList.addEventListener('change', this.mediaListener);
       } else if ('addListener' in this.mediaQueryList) {
         // Fallback for older browsers
-        (this.mediaQueryList as { addListener: (cb: (e: MediaQueryListEvent) => void) => void }).addListener(this.mediaListener);
+        (
+          this.mediaQueryList as { addListener: (cb: (e: MediaQueryListEvent) => void) => void }
+        ).addListener(this.mediaListener);
       }
     }
   }

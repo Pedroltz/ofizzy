@@ -3,7 +3,7 @@
    ========================================================================== */
 
 :root,
-[data-theme="light"] {
+[data-theme='light'] {
   color-scheme: light;
 
   /* App Background & Surfaces */
@@ -75,7 +75,7 @@
   --app-radius-sm: var(--radius-sm);
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   color-scheme: dark;
 
   /* App Background & Surfaces */

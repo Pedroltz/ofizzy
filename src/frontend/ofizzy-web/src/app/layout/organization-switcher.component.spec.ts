@@ -131,7 +131,11 @@ describe('OrganizationSwitcherComponent', () => {
     fixture.detectChanges();
 
     let hideCalled = false;
-    const mockPopover = { hide: () => { hideCalled = true; } } as unknown as Popover;
+    const mockPopover = {
+      hide: () => {
+        hideCalled = true;
+      },
+    } as unknown as Popover;
     await component.switchTenant(tenant1, mockPopover);
 
     expect(selectTenantCalledWith).toBeNull();

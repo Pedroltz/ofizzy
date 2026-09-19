@@ -9,7 +9,10 @@
     </div>
     <p class="eyebrow">PRIMEIRO ACESSO</p>
     <h1>Inicialização da plataforma.</h1>
-    <p>Crie o administrador global do Ofizzy. As empresas serão provisionadas separadamente no painel da plataforma.</p>
+    <p>
+      Crie o administrador global do Ofizzy. As empresas serão provisionadas separadamente no painel
+      da plataforma.
+    </p>
   </section>
 
   <section class="auth-card surface-card">
@@ -19,23 +22,58 @@
           <span class="step-number"><i class="pi pi-user text-xs"></i></span>
           <h2>Acesso do Administrador</h2>
         </div>
-        <label>Nome completo
-          <input pInputText formControlName="adminName" autocomplete="name" placeholder="Ex: Carlos Silva" />
+        <label
+          >Nome completo
+          <input
+            pInputText
+            formControlName="adminName"
+            autocomplete="name"
+            placeholder="Ex: Carlos Silva"
+          />
         </label>
-        @if (form.controls.adminName.touched && form.controls.adminName.invalid) { <p-message severity="error" size="small">Informe o nome do administrador, com até 120 caracteres.</p-message> }
-        <label>E-mail corporativo
-        <input pInputText formControlName="email" type="email" autocomplete="email" placeholder="admin@ofizzy.local" />
+        @if (form.controls.adminName.touched && form.controls.adminName.invalid) {
+          <p-message severity="error" size="small"
+            >Informe o nome do administrador, com até 120 caracteres.</p-message
+          >
+        }
+        <label
+          >E-mail corporativo
+          <input
+            pInputText
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            placeholder="admin@ofizzy.local"
+          />
         </label>
-        @if (form.controls.email.touched && form.controls.email.invalid) { <p-message severity="error" size="small">Informe um e-mail válido.</p-message> }
-        <label>Senha de acesso
-          <input pInputText formControlName="password" type="password" autocomplete="new-password" placeholder="Mínimo 10 caracteres com maiúscula, minúscula e número" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p-message severity="error" size="small">Informe um e-mail válido.</p-message>
+        }
+        <label
+          >Senha de acesso
+          <input
+            pInputText
+            formControlName="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Mínimo 10 caracteres com maiúscula, minúscula e número"
+          />
         </label>
         @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="field-error"><i class="pi pi-exclamation-circle mr-1.5"></i> A senha deve ter ao menos 10 caracteres, com maiúscula, minúscula e número.</p>
+          <p class="field-error">
+            <i class="pi pi-exclamation-circle mr-1.5"></i> A senha deve ter ao menos 10 caracteres,
+            com maiúscula, minúscula e número.
+          </p>
         }
       </div>
 
-      <p-button type="submit" label="Concluir configuração" [fluid]="true" [loading]="saving()" [disabled]="saving()" />
+      <p-button
+        type="submit"
+        label="Concluir configuração"
+        [fluid]="true"
+        [loading]="saving()"
+        [disabled]="saving()"
+      />
     </form>
   </section>
 </main>

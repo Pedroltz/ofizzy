@@ -1,76 +1,352 @@
 <section class="page-container saas-page">
- <app-page-header eyebrow="PLATAFORMA" title="Administração da plataforma" description="Gerencie empresas, acessos iniciais e módulos do Ofizzy." actionLabel="Nova empresa" actionIcon="pi pi-plus" (action)="open()" />
- <app-data-toolbar [itemCount]="filtered().length" itemLabelSingular="empresa" itemLabelPlural="empresas" [(viewMode)]="viewMode" [showViewToggle]="!responsive.isTabletOrSmaller()">
-  <app-search-field toolbar-search [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Pesquisar empresa ou identificador..." />
-  <p-select toolbar-filters [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" [options]="filterStatuses" optionLabel="label" optionValue="value" ariaLabel="Filtrar por estado" />
- </app-data-toolbar>
- @if (loading()) { <app-loading-state mode="cards" [count]="3" /> }
- @else if (loadError()) { <app-empty-state icon="pi pi-exclamation-circle" title="Não foi possível carregar as empresas" description="Verifique sua conexão e tente novamente." actionLabel="Tentar novamente" (action)="load()" /> }
- @else if (!filtered().length) { <app-empty-state icon="pi pi-building" [title]="tenants().length ? 'Nenhuma empresa encontrada' : 'Cadastre sua primeira empresa'" [description]="tenants().length ? 'Altere a busca ou o filtro de estado.' : 'Crie uma empresa e defina quem será responsável pela configuração inicial.'" actionLabel="Nova empresa" (action)="open()" /> }
- @else if (responsive.isTabletOrSmaller() || viewMode() === 'cards') {
-  <div class="catalog-grid">@for (tenant of filtered(); track tenant.id) {
-   <article class="surface-card saas-company-card">
-    <div class="saas-card-heading"><i class="pi pi-building" aria-hidden="true"></i><app-status-badge [status]="statusVariant(tenant.status)" [label]="statusLabel(tenant.status)" /></div>
-    <h2>{{ tenant.name }}</h2><p class="text-muted">{{ tenant.slug }} · Automotive</p>
-    <p>{{ tenant.onboardingCompletedAt ? 'Configuração concluída' : 'Configuração pendente' }}</p>
-    <div class="mt-1 mb-3"><app-status-badge [status]="tenant.fiscalProductionReleased ? 'success' : 'neutral'" [label]="tenant.fiscalProductionReleased ? 'Produção fiscal liberada' : 'Fiscal em homologação'" /></div>
-    <p-button label="Gerenciar empresa" severity="secondary" [outlined]="true" [fluid]="true" (onClick)="open(tenant)" />
-   </article>
-  }</div>
+  <app-page-header
+    eyebrow="PLATAFORMA"
+    title="Administração da plataforma"
+    description="Gerencie empresas, acessos iniciais e módulos do Ofizzy."
+    actionLabel="Nova empresa"
+    actionIcon="pi pi-plus"
+    (action)="open()"
+  />
+  <app-data-toolbar
+    [itemCount]="filtered().length"
+    itemLabelSingular="empresa"
+    itemLabelPlural="empresas"
+    [(viewMode)]="viewMode"
+    [showViewToggle]="!responsive.isTabletOrSmaller()"
+  >
+    <app-search-field
+      toolbar-search
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      placeholder="Pesquisar empresa ou identificador..."
+    />
+    <p-select
+      toolbar-filters
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event)"
+      [options]="filterStatuses"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabel="Filtrar por estado"
+    />
+  </app-data-toolbar>
+  @if (loading()) {
+    <app-loading-state mode="cards" [count]="3" />
+  } @else if (loadError()) {
+    <app-empty-state
+      icon="pi pi-exclamation-circle"
+      title="Não foi possível carregar as empresas"
+      description="Verifique sua conexão e tente novamente."
+      actionLabel="Tentar novamente"
+      (action)="load()"
+    />
+  } @else if (!filtered().length) {
+    <app-empty-state
+      icon="pi pi-building"
+      [title]="tenants().length ? 'Nenhuma empresa encontrada' : 'Cadastre sua primeira empresa'"
+      [description]="
+        tenants().length
+          ? 'Altere a busca ou o filtro de estado.'
+          : 'Crie uma empresa e defina quem será responsável pela configuração inicial.'
+      "
+      actionLabel="Nova empresa"
+      (action)="open()"
+    />
+  } @else if (responsive.isTabletOrSmaller() || viewMode() === 'cards') {
+    <div class="catalog-grid">
+      @for (tenant of filtered(); track tenant.id) {
+        <article class="surface-card saas-company-card">
+          <div class="saas-card-heading">
+            <i class="pi pi-building" aria-hidden="true"></i
+            ><app-status-badge
+              [status]="statusVariant(tenant.status)"
+              [label]="statusLabel(tenant.status)"
+            />
+          </div>
+          <h2>{{ tenant.name }}</h2>
+          <p class="text-muted">{{ tenant.slug }} · Automotive</p>
+          <p>
+            {{ tenant.onboardingCompletedAt ? 'Configuração concluída' : 'Configuração pendente' }}
+          </p>
+          <div class="mt-1 mb-3">
+            <app-status-badge
+              [status]="tenant.fiscalProductionReleased ? 'success' : 'neutral'"
+              [label]="
+                tenant.fiscalProductionReleased
+                  ? 'Produção fiscal liberada'
+                  : 'Fiscal em homologação'
+              "
+            />
+          </div>
+          <p-button
+            label="Gerenciar empresa"
+            severity="secondary"
+            [outlined]="true"
+            [fluid]="true"
+            (onClick)="open(tenant)"
+          />
+        </article>
+      }
+    </div>
   } @else {
-  <app-data-table-wrapper><p-table [value]="filtered()" styleClass="saas-table">
-   <ng-template #header><tr><th>Empresa</th><th>Estado</th><th>Configuração inicial</th><th>Fiscal</th><th><span class="sr-only">Ações</span></th></tr></ng-template>
-   <ng-template #body let-tenant><tr><td><strong>{{ tenant.name }}</strong><p class="text-muted">{{ tenant.slug }} · Automotive</p></td><td><app-status-badge [status]="statusVariant(tenant.status)" [label]="statusLabel(tenant.status)" /></td><td>{{ tenant.onboardingCompletedAt ? 'Concluída' : 'Pendente' }}</td><td><app-status-badge [status]="tenant.fiscalProductionReleased ? 'success' : 'neutral'" [label]="tenant.fiscalProductionReleased ? 'Produção liberada' : 'Homologação'" /></td><td><p-button label="Gerenciar" severity="secondary" [text]="true" [ariaLabel]="'Gerenciar ' + tenant.name" (onClick)="open(tenant)" /></td></tr></ng-template>
-  </p-table></app-data-table-wrapper>
+    <app-data-table-wrapper
+      ><p-table [value]="filtered()" styleClass="saas-table">
+        <ng-template #header
+          ><tr>
+            <th>Empresa</th>
+            <th>Estado</th>
+            <th>Configuração inicial</th>
+            <th>Fiscal</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr></ng-template
+        >
+        <ng-template #body let-tenant
+          ><tr>
+            <td>
+              <strong>{{ tenant.name }}</strong>
+              <p class="text-muted">{{ tenant.slug }} · Automotive</p>
+            </td>
+            <td>
+              <app-status-badge
+                [status]="statusVariant(tenant.status)"
+                [label]="statusLabel(tenant.status)"
+              />
+            </td>
+            <td>{{ tenant.onboardingCompletedAt ? 'Concluída' : 'Pendente' }}</td>
+            <td>
+              <app-status-badge
+                [status]="tenant.fiscalProductionReleased ? 'success' : 'neutral'"
+                [label]="tenant.fiscalProductionReleased ? 'Produção liberada' : 'Homologação'"
+              />
+            </td>
+            <td>
+              <p-button
+                label="Gerenciar"
+                severity="secondary"
+                [text]="true"
+                [ariaLabel]="'Gerenciar ' + tenant.name"
+                (onClick)="open(tenant)"
+              />
+            </td></tr
+        ></ng-template> </p-table
+    ></app-data-table-wrapper>
   }
 </section>
-<p-dialog [header]="editing() ? 'Gerenciar empresa' : 'Nova empresa'" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true" [draggable]="false" [resizable]="false" [closable]="!busy()" [closeOnEscape]="!busy()" [style]="{width: '52rem', maxWidth: '96vw'}" styleClass="saas-dialog">
- @if (dialog()) {
- <form id="tenant-editor" #form="ngForm" (ngSubmit)="submit(form)" class="saas-form" novalidate>
- @if (!editing()) {
- <p-fieldset legend="Nova empresa"><div class="fields">
- <div class="field"><label for="tenant-name">Nome da empresa</label><input id="tenant-name" pInputText name="name" [(ngModel)]="draft.name" #name="ngModel" required maxlength="160" />
- @if (name.invalid && (name.touched || form.submitted)) { <p-message severity="error" size="small">Informe o nome da empresa.</p-message> }</div>
- <div class="field"><label for="tenant-slug">Identificador</label><input id="tenant-slug" pInputText name="slug" [ngModel]="draft.slug" (ngModelChange)="draft.slug = $event.toLowerCase()" #slug="ngModel" required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" aria-describedby="slug-help" />
- <small id="slug-help" class="hint">Use letras minúsculas, números e hífens. Exemplo: the-new-tent.</small>
- @if (slug.invalid && (slug.touched || form.submitted)) { <p-message severity="error" size="small">Informe um identificador válido, sem espaços ou acentos.</p-message> }</div>
- <div class="field"><label for="tenant-vertical">Vertical</label><p-select inputId="tenant-vertical" name="vertical" [(ngModel)]="draft.vertical" [options]="['Automotive']" [fluid]="true" /></div>
- </div></p-fieldset>
- <p-fieldset legend="Administrador"><div class="fields">
- <div class="field"><label for="admin-name">Nome do administrador</label><input id="admin-name" pInputText name="adminName" [(ngModel)]="draft.adminName" #adminName="ngModel" required maxlength="120" />
- @if (adminName.invalid && (adminName.touched || form.submitted)) { <p-message severity="error" size="small">Informe o nome do administrador.</p-message> }</div>
- <div class="field"><label for="admin-email">E-mail do administrador</label><input id="admin-email" pInputText name="email" type="email" [(ngModel)]="draft.email" #email="ngModel" required email />
- @if (email.invalid && (email.touched || form.submitted)) { <p-message severity="error" size="small">Informe um e-mail válido.</p-message> }</div>
- <div class="field"><label for="admin-password">Senha inicial</label><input id="admin-password" pInputText name="password" type="password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+" [(ngModel)]="draft.password" #password="ngModel" autocomplete="new-password" minlength="10" maxlength="200" aria-describedby="password-help" />
- <small id="password-help" class="hint">Novo usuário: use ao menos 10 caracteres, com maiúscula, minúscula e número e compartilhe a senha por canal privado. Usuário existente: deixe em branco.</small>
- @if (password.invalid && (password.touched || form.submitted)) { <p-message severity="error" size="small">Use entre 10 e 200 caracteres, com maiúscula, minúscula e número.</p-message> }</div>
- </div></p-fieldset>
- }
- @else {
- <app-section-card [title]="editing()!.name" [subtitle]="editing()!.slug + ' · Automotive'">
- <div class="field"><label for="tenant-status">Estado</label><p-select inputId="tenant-status" name="status" [(ngModel)]="editStatus" [options]="editStatuses()" optionLabel="label" optionValue="value" optionDisabled="disabled" [fluid]="true" appendTo="body" /></div>
- @if (!editing()!.onboardingCompletedAt) { <p-message severity="info">A empresa precisa concluir a configuração inicial antes de ser ativada. Use Pendente para permitir o acesso do administrador.</p-message> }
- </app-section-card>
- <p-fieldset legend="Emissão Fiscal"><div class="fields">
- <label class="module-option flex items-center gap-3 py-2 cursor-pointer" for="fiscal-production">
-   <p-checkbox name="fiscalProduction" [binary]="true" [(ngModel)]="editFiscalProduction" inputId="fiscal-production" />
-   <div>
-     <strong>Liberar ambiente de produção fiscal</strong>
-     <p class="text-muted text-xs mt-1">Autoriza a emissão oficial de NF-e e NFS-e com validade jurídica perante a SEFAZ e prefeituras. Habilite após homologação dos dados e do certificado A1.</p>
-   </div>
- </label>
- @if (editing()?.fiscalProductionReleasedAt) {
-   <small class="hint flex items-center gap-1 text-xs text-muted mt-2">
-     <i class="pi pi-check-circle text-emerald-600" aria-hidden="true"></i>
-     Liberado em {{ editing()!.fiscalProductionReleasedAt | date:'dd/MM/yyyy HH:mm' }}.
-   </small>
- }
- </div></p-fieldset>
- }
- <p-fieldset legend="Módulos disponíveis"><div class="module-options">@for (module of availableModules; track module) { <label class="module-option" [for]="'new-' + module"><p-checkbox name="modules" [value]="module" [(ngModel)]="draft.modules" (ngModelChange)="validation.set('')" [inputId]="'new-' + module" /><span>{{ moduleLabels[module] }}</span></label> }</div>
- <p class="hint">Ordens de serviço exige Clientes, Catálogo e Automotive. Automotive exige Clientes.</p></p-fieldset>
- @if (validation()) { <p-message severity="error">{{ validation() }}</p-message> }
- </form>
- }
- <ng-template #footer><p-button label="Cancelar" severity="secondary" [text]="true" [disabled]="busy()" (onClick)="dialog.set(false)" /><button pButton type="submit" form="tenant-editor" [disabled]="busy()">@if (busy()) { <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> }<span>{{ editing() ? 'Salvar alterações' : 'Criar empresa' }}</span></button></ng-template>
+<p-dialog
+  [header]="editing() ? 'Gerenciar empresa' : 'Nova empresa'"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="!busy()"
+  [closeOnEscape]="!busy()"
+  [style]="{ width: '52rem', maxWidth: '96vw' }"
+  styleClass="saas-dialog"
+>
+  @if (dialog()) {
+    <form id="tenant-editor" #form="ngForm" (ngSubmit)="submit(form)" class="saas-form" novalidate>
+      @if (!editing()) {
+        <p-fieldset legend="Nova empresa"
+          ><div class="fields">
+            <div class="field">
+              <label for="tenant-name">Nome da empresa</label
+              ><input
+                id="tenant-name"
+                pInputText
+                name="name"
+                [(ngModel)]="draft.name"
+                #name="ngModel"
+                required
+                maxlength="160"
+              />
+              @if (name.invalid && (name.touched || form.submitted)) {
+                <p-message severity="error" size="small">Informe o nome da empresa.</p-message>
+              }
+            </div>
+            <div class="field">
+              <label for="tenant-slug">Identificador</label
+              ><input
+                id="tenant-slug"
+                pInputText
+                name="slug"
+                [ngModel]="draft.slug"
+                (ngModelChange)="draft.slug = $event.toLowerCase()"
+                #slug="ngModel"
+                required
+                pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                maxlength="80"
+                aria-describedby="slug-help"
+              />
+              <small id="slug-help" class="hint"
+                >Use letras minúsculas, números e hífens. Exemplo: the-new-tent.</small
+              >
+              @if (slug.invalid && (slug.touched || form.submitted)) {
+                <p-message severity="error" size="small"
+                  >Informe um identificador válido, sem espaços ou acentos.</p-message
+                >
+              }
+            </div>
+            <div class="field">
+              <label for="tenant-vertical">Vertical</label
+              ><p-select
+                inputId="tenant-vertical"
+                name="vertical"
+                [(ngModel)]="draft.vertical"
+                [options]="['Automotive']"
+                [fluid]="true"
+              />
+            </div></div
+        ></p-fieldset>
+        <p-fieldset legend="Administrador"
+          ><div class="fields">
+            <div class="field">
+              <label for="admin-name">Nome do administrador</label
+              ><input
+                id="admin-name"
+                pInputText
+                name="adminName"
+                [(ngModel)]="draft.adminName"
+                #adminName="ngModel"
+                required
+                maxlength="120"
+              />
+              @if (adminName.invalid && (adminName.touched || form.submitted)) {
+                <p-message severity="error" size="small"
+                  >Informe o nome do administrador.</p-message
+                >
+              }
+            </div>
+            <div class="field">
+              <label for="admin-email">E-mail do administrador</label
+              ><input
+                id="admin-email"
+                pInputText
+                name="email"
+                type="email"
+                [(ngModel)]="draft.email"
+                #email="ngModel"
+                required
+                email
+              />
+              @if (email.invalid && (email.touched || form.submitted)) {
+                <p-message severity="error" size="small">Informe um e-mail válido.</p-message>
+              }
+            </div>
+            <div class="field">
+              <label for="admin-password">Senha inicial</label
+              ><input
+                id="admin-password"
+                pInputText
+                name="password"
+                type="password"
+                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+"
+                [(ngModel)]="draft.password"
+                #password="ngModel"
+                autocomplete="new-password"
+                minlength="10"
+                maxlength="200"
+                aria-describedby="password-help"
+              />
+              <small id="password-help" class="hint"
+                >Novo usuário: use ao menos 10 caracteres, com maiúscula, minúscula e número e
+                compartilhe a senha por canal privado. Usuário existente: deixe em branco.</small
+              >
+              @if (password.invalid && (password.touched || form.submitted)) {
+                <p-message severity="error" size="small"
+                  >Use entre 10 e 200 caracteres, com maiúscula, minúscula e número.</p-message
+                >
+              }
+            </div>
+          </div></p-fieldset
+        >
+      } @else {
+        <app-section-card [title]="editing()!.name" [subtitle]="editing()!.slug + ' · Automotive'">
+          <div class="field">
+            <label for="tenant-status">Estado</label
+            ><p-select
+              inputId="tenant-status"
+              name="status"
+              [(ngModel)]="editStatus"
+              [options]="editStatuses()"
+              optionLabel="label"
+              optionValue="value"
+              optionDisabled="disabled"
+              [fluid]="true"
+              appendTo="body"
+            />
+          </div>
+          @if (!editing()!.onboardingCompletedAt) {
+            <p-message severity="info"
+              >A empresa precisa concluir a configuração inicial antes de ser ativada. Use Pendente
+              para permitir o acesso do administrador.</p-message
+            >
+          }
+        </app-section-card>
+        <p-fieldset legend="Emissão Fiscal"
+          ><div class="fields">
+            <label
+              class="module-option flex items-center gap-3 py-2 cursor-pointer"
+              for="fiscal-production"
+            >
+              <p-checkbox
+                name="fiscalProduction"
+                [binary]="true"
+                [(ngModel)]="editFiscalProduction"
+                inputId="fiscal-production"
+              />
+              <div>
+                <strong>Liberar ambiente de produção fiscal</strong>
+                <p class="text-muted text-xs mt-1">
+                  Autoriza a emissão oficial de NF-e e NFS-e com validade jurídica perante a SEFAZ e
+                  prefeituras. Habilite após homologação dos dados e do certificado A1.
+                </p>
+              </div>
+            </label>
+            @if (editing()?.fiscalProductionReleasedAt) {
+              <small class="hint flex items-center gap-1 text-xs text-muted mt-2">
+                <i class="pi pi-check-circle text-emerald-600" aria-hidden="true"></i>
+                Liberado em {{ editing()!.fiscalProductionReleasedAt | date: 'dd/MM/yyyy HH:mm' }}.
+              </small>
+            }
+          </div></p-fieldset
+        >
+      }
+      <p-fieldset legend="Módulos disponíveis"
+        ><div class="module-options">
+          @for (module of availableModules; track module) {
+            <label class="module-option" [for]="'new-' + module"
+              ><p-checkbox
+                name="modules"
+                [value]="module"
+                [(ngModel)]="draft.modules"
+                (ngModelChange)="validation.set('')"
+                [inputId]="'new-' + module"
+              /><span>{{ moduleLabels[module] }}</span></label
+            >
+          }
+        </div>
+        <p class="hint">
+          Ordens de serviço exige Clientes, Catálogo e Automotive. Automotive exige Clientes.
+        </p></p-fieldset
+      >
+      @if (validation()) {
+        <p-message severity="error">{{ validation() }}</p-message>
+      }
+    </form>
+  }
+  <ng-template #footer
+    ><p-button
+      label="Cancelar"
+      severity="secondary"
+      [text]="true"
+      [disabled]="busy()"
+      (onClick)="dialog.set(false)"
+    /><button pButton type="submit" form="tenant-editor" [disabled]="busy()">
+      @if (busy()) {
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      }
+      <span>{{ editing() ? 'Salvar alterações' : 'Criar empresa' }}</span>
+    </button></ng-template
+  >
 </p-dialog>

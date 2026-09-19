@@ -16,22 +16,48 @@
         <p>Entre para acessar suas empresas ou administrar a plataforma.</p>
       </header>
 
-      <label>E-mail corporativo
-        <input pInputText formControlName="email" type="email" autocomplete="email" placeholder="seu.email@empresa.com" />
+      <label
+        >E-mail corporativo
+        <input
+          pInputText
+          formControlName="email"
+          type="email"
+          autocomplete="email"
+          placeholder="seu.email@empresa.com"
+        />
       </label>
 
-      <label>Senha de acesso
-        <input pInputText formControlName="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+      <label
+        >Senha de acesso
+        <input
+          pInputText
+          formControlName="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        />
       </label>
 
-      @if (form.controls.email.touched && form.controls.email.invalid) { <p-message severity="error" size="small">Informe um e-mail válido.</p-message> }
-      @if (form.controls.password.touched && form.controls.password.invalid) { <p-message severity="error" size="small">Informe sua senha.</p-message> }
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p-message severity="error" size="small">Informe um e-mail válido.</p-message>
+      }
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <p-message severity="error" size="small">Informe sua senha.</p-message>
+      }
       @if (invalidCredentials()) {
-        <p class="field-error"><i class="pi pi-exclamation-triangle mr-1.5"></i> E-mail ou senha incorretos. Verifique suas credenciais.</p>
+        <p class="field-error">
+          <i class="pi pi-exclamation-triangle mr-1.5"></i> E-mail ou senha incorretos. Verifique
+          suas credenciais.
+        </p>
       }
 
-      <p-button type="submit" label="Entrar no sistema" [fluid]="true" [loading]="saving()" [disabled]="saving()" />
-
+      <p-button
+        type="submit"
+        label="Entrar no sistema"
+        [fluid]="true"
+        [loading]="saving()"
+        [disabled]="saving()"
+      />
     </form>
   </section>
 </main>

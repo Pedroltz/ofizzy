@@ -68,20 +68,12 @@ import { AuthService } from '../core/auth/auth.service';
           <div class="org-menu-divider"></div>
 
           <div class="org-menu-footer">
-            <a
-              routerLink="/organizacoes"
-              class="org-menu-action"
-              (click)="op.hide()"
-            >
+            <a routerLink="/organizacoes" class="org-menu-action" (click)="op.hide()">
               <i class="pi pi-th-large"></i>
               <span>Minhas organizações</span>
             </a>
             @if (user()?.isPlatformAdmin) {
-              <a
-                routerLink="/plataforma"
-                class="org-menu-action"
-                (click)="op.hide()"
-              >
+              <a routerLink="/plataforma" class="org-menu-action" (click)="op.hide()">
                 <i class="pi pi-shield"></i>
                 <span>Plataforma</span>
               </a>

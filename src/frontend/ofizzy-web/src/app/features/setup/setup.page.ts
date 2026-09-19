@@ -9,25 +9,52 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle.compo
 
 @Component({
   selector: 'app-setup-page',
-  imports: [MessageModule, ButtonModule, InputTextModule, ReactiveFormsModule, ThemeToggleComponent],
+  imports: [
+    MessageModule,
+    ButtonModule,
+    InputTextModule,
+    ReactiveFormsModule,
+    ThemeToggleComponent,
+  ],
   templateUrl: './setup.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SetupPage {
-  private readonly fb = inject(FormBuilder); private readonly auth = inject(AuthService); private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   readonly saving = signal(false);
   readonly form = this.fb.nonNullable.group({
-    companyName: ['Ofizzy Platform', [Validators.required, Validators.maxLength(160)]], cnpj: [''], phone: [''],
-    adminName: ['', [Validators.required, Validators.maxLength(120)]], email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)]],
+    companyName: ['Ofizzy Platform', [Validators.required, Validators.maxLength(160)]],
+    cnpj: [''],
+    phone: [''],
+    adminName: ['', [Validators.required, Validators.maxLength(120)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
+      ],
+    ],
   });
   async submit(): Promise<void> {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.saving.set(true);
     try {
       const value = this.form.getRawValue();
-      await this.auth.setup({ ...value, cnpj: value.cnpj.replace(/\D/g, '') || null, phone: value.phone.trim() || null });
+      await this.auth.setup({
+        ...value,
+        cnpj: value.cnpj.replace(/\D/g, '') || null,
+        phone: value.phone.trim() || null,
+      });
       await this.router.navigateByUrl('/plataforma');
-    } finally { this.saving.set(false); }
+    } finally {
+      this.saving.set(false);
+    }
   }
 }

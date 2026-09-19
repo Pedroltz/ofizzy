@@ -43,18 +43,21 @@ describe('ThemeService', () => {
     matchesDark = false;
 
     // Mock matchMedia
-    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query: string) => ({
-      matches: matchesDark,
-      media: query,
-      onchange: null,
-      addEventListener: vi.fn((event: string, listener: (e: MediaQueryListEvent) => void) => {
-        if (event === 'change') {
-          matchMediaListeners.push(listener);
-        }
-      }),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: matchesDark,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn((event: string, listener: (e: MediaQueryListEvent) => void) => {
+          if (event === 'change') {
+            matchMediaListeners.push(listener);
+          }
+        }),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
 
     TestBed.configureTestingModule({
       providers: [ThemeService],
@@ -113,17 +116,13 @@ describe('ThemeService', () => {
     expect(service.activeTheme()).toBe('light');
 
     // Simulate OS switching to dark theme
-    matchMediaListeners.forEach((listener) =>
-      listener({ matches: true } as MediaQueryListEvent)
-    );
+    matchMediaListeners.forEach((listener) => listener({ matches: true } as MediaQueryListEvent));
 
     expect(service.activeTheme()).toBe('dark');
     expect(service.isDark()).toBe(true);
 
     // Simulate OS switching back to light theme
-    matchMediaListeners.forEach((listener) =>
-      listener({ matches: false } as MediaQueryListEvent)
-    );
+    matchMediaListeners.forEach((listener) => listener({ matches: false } as MediaQueryListEvent));
 
     expect(service.activeTheme()).toBe('light');
     expect(service.isDark()).toBe(false);
@@ -134,9 +133,7 @@ describe('ThemeService', () => {
     expect(service.activeTheme()).toBe('light');
 
     // OS changes to dark
-    matchMediaListeners.forEach((listener) =>
-      listener({ matches: true } as MediaQueryListEvent)
-    );
+    matchMediaListeners.forEach((listener) => listener({ matches: true } as MediaQueryListEvent));
 
     expect(service.activeTheme()).toBe('light');
   });

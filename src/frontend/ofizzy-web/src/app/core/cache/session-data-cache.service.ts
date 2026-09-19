@@ -52,7 +52,11 @@ export class SessionDataCacheService {
   }
 
   clear(): void {
-    const keys = new Set([...this.entries.keys(), ...this.inFlight.keys(), ...this.versions.keys()]);
+    const keys = new Set([
+      ...this.entries.keys(),
+      ...this.inFlight.keys(),
+      ...this.versions.keys(),
+    ]);
     this.entries.clear();
     this.inFlight.clear();
     for (const key of keys) {
@@ -66,10 +70,10 @@ export const cacheKey = {
     `customers:${q.trim().toLocaleLowerCase('pt-BR')}:${page}:${pageSize}`,
   vehicles: (q: string, page: number, pageSize: number, customerId?: string) =>
     `vehicles:${q.trim().toLocaleLowerCase('pt-BR')}:${page}:${pageSize}:${customerId ?? ''}`,
-  services: (q: string, pageSize: number) =>
-    `services:${q.trim().toLocaleLowerCase('pt-BR')}:${pageSize}`,
-  parts: (q: string, pageSize: number) =>
-    `parts:${q.trim().toLocaleLowerCase('pt-BR')}:${pageSize}`,
+  services: (q: string, page: number, pageSize: number) =>
+    `services:${q.trim().toLocaleLowerCase('pt-BR')}:${page}:${pageSize}`,
+  parts: (q: string, page: number, pageSize: number) =>
+    `parts:${q.trim().toLocaleLowerCase('pt-BR')}:${page}:${pageSize}`,
   workOrders: (q: string, page: number, pageSize: number, status?: string | null) =>
     `work-orders:${q.trim().toLocaleLowerCase('pt-BR')}:${page}:${pageSize}:${status ?? ''}`,
   workOrder: (id: string) => `work-order:${id}`,

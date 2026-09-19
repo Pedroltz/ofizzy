@@ -33,12 +33,16 @@ export const authRefreshInterceptor: HttpInterceptorFn = (req, next) => {
         switchMap((success) => {
           if (success) {
             const token = xsrf.getToken();
-            const retry = token && req.headers.has('X-XSRF-TOKEN')
-              ? req.clone({ setHeaders: { 'X-XSRF-TOKEN': token } }) : req;
-            return next(retry).pipe(catchError((retryError: HttpErrorResponse) => {
-              if (retryError.status === 401) expire();
-              return throwError(() => retryError);
-            }));
+            const retry =
+              token && req.headers.has('X-XSRF-TOKEN')
+                ? req.clone({ setHeaders: { 'X-XSRF-TOKEN': token } })
+                : req;
+            return next(retry).pipe(
+              catchError((retryError: HttpErrorResponse) => {
+                if (retryError.status === 401) expire();
+                return throwError(() => retryError);
+              }),
+            );
           }
           expire();
           return throwError(() => error);

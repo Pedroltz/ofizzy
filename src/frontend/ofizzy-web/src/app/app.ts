@@ -14,4 +14,3 @@ export class App {
   // Ensure ThemeService is initialized eagerly on app bootstrap
   protected readonly themeService = inject(ThemeService);
 }
-

@@ -7,14 +7,26 @@ import { FiscalFieldsComponent, FiscalField, fiscalForm } from './fiscal-fields.
 @Component({
   standalone: true,
   imports: [FiscalFieldsComponent],
-  template: `
-    <app-fiscal-fields [fields]="testFields" [form]="testForm" prefix="test-" />
-  `,
+  template: ` <app-fiscal-fields [fields]="testFields" [form]="testForm" prefix="test-" /> `,
 })
 class TestHostComponent {
   testFields: FiscalField[] = [
-    { key: 'ncm', label: 'NCM', required: true, pattern: /^\d{8}$/, patternMessage: 'NCM deve conter 8 dígitos numéricos' },
-    { key: 'origin', label: 'Origem', required: true, options: [{ label: '0 - Nacional', value: '0' }, { label: '1 - Estrangeira', value: '1' }] },
+    {
+      key: 'ncm',
+      label: 'NCM',
+      required: true,
+      pattern: /^\d{8}$/,
+      patternMessage: 'NCM deve conter 8 dígitos numéricos',
+    },
+    {
+      key: 'origin',
+      label: 'Origem',
+      required: true,
+      options: [
+        { label: '0 - Nacional', value: '0' },
+        { label: '1 - Estrangeira', value: '1' },
+      ],
+    },
     { key: 'rate', label: 'Alíquota', type: 'number' },
     { key: 'amount', label: 'Valor', type: 'currency', required: true },
   ];

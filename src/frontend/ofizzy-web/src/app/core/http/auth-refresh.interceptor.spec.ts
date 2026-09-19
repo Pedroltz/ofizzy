@@ -1,5 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HttpXsrfTokenExtractor, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpXsrfTokenExtractor,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -128,7 +133,11 @@ describe('authRefreshInterceptor', () => {
       await restoring;
       const messages = vi.spyOn(TestBed.inject(MessageService), 'add');
       let errorStatus: number | undefined;
-      http.get('/api/customers').subscribe({ error: error => { errorStatus = error.status; } });
+      http.get('/api/customers').subscribe({
+        error: (error) => {
+          errorStatus = error.status;
+        },
+      });
       httpMock.expectOne('/api/customers').flush(null, { status: 401, statusText: 'Unauthorized' });
       await prepareRefresh();
       const refresh = httpMock.expectOne('/api/auth/refresh');
@@ -149,7 +158,9 @@ describe('authRefreshInterceptor', () => {
       httpMock.expectOne(path).flush(null, { status: 401, statusText: 'Unauthorized' });
     }
     await prepareRefresh();
-    httpMock.expectOne('/api/auth/refresh').flush(null, { status: 401, statusText: 'Unauthorized' });
+    httpMock
+      .expectOne('/api/auth/refresh')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
     await settle();
     expect(router.navigateByUrl).toHaveBeenCalledTimes(1);
     expect(messages).toHaveBeenCalledTimes(1);
@@ -157,7 +168,8 @@ describe('authRefreshInterceptor', () => {
 
   it('usa o novo token XSRF ao repetir uma escrita e encerra a sessão se receber outro 401', async () => {
     vi.spyOn(TestBed.inject(HttpXsrfTokenExtractor), 'getToken').mockReturnValue('renewed-token');
-    http.post('/api/customers', { name: 'Test' }, { headers: { 'X-XSRF-TOKEN': 'old-token' } })
+    http
+      .post('/api/customers', { name: 'Test' }, { headers: { 'X-XSRF-TOKEN': 'old-token' } })
       .subscribe({ error: () => undefined });
     httpMock.expectOne('/api/customers').flush(null, { status: 401, statusText: 'Unauthorized' });
     await prepareRefresh();
@@ -177,7 +189,9 @@ describe('authRefreshInterceptor', () => {
     const restoring = authService.restore();
     httpMock.expectOne('/api/auth/me').flush(null, { status: 401, statusText: 'Unauthorized' });
     await prepareRefresh();
-    httpMock.expectOne('/api/auth/refresh').flush(null, { status: 401, statusText: 'Unauthorized' });
+    httpMock
+      .expectOne('/api/auth/refresh')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
     expect(await restoring).toBe(false);
     expect(await authService.restore()).toBe(false);
     const login = authService.login('test@example.test', 'test-password');
