@@ -1,7 +1,7 @@
-using QuestPDF.Fluent;
 using Ofizzy.Api.Infrastructure.Persistence;
 using Ofizzy.Api.Modules.WorkOrders;
-using Xunit;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 
 namespace Ofizzy.UnitTests;
 
@@ -9,12 +9,13 @@ public class WorkOrderPdfTests
 {
     static WorkOrderPdfTests()
     {
-        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+        QuestPDF.Settings.License = LicenseType.Community;
     }
 
     [Fact]
     public void Generates_Pdf_Successfully_For_WorkOrder()
     {
+        // Arrange
         var company = new TenantSettings
         {
             Name = "Ofizzy",
@@ -25,6 +26,40 @@ public class WorkOrderPdfTests
             City = "São Paulo",
             State = "SP",
             WarrantyTerms = "Garantia legal de 90 dias conforme CDC."
+        };
+
+        var services = new List<WorkOrderService>
+        {
+            new()
+            {
+                Description = "Substituição dos amortecedores dianteiros",
+                Quantity = 2,
+                UnitPrice = 120
+            },
+            new()
+            {
+                Description = "Alinhamento computadorizado e balanceamento",
+                Quantity = 1,
+                UnitPrice = 90
+            }
+        };
+
+        var parts = new List<WorkOrderPart>
+        {
+            new()
+            {
+                Code = "AM-802",
+                Description = "Amortecedor Dianteiro Cofap",
+                Quantity = 2,
+                UnitPrice = 320
+            },
+            new()
+            {
+                Code = "KIT-01",
+                Description = "Kit Batente e Coifa Dianteira",
+                Quantity = 2,
+                UnitPrice = 65
+            }
         };
 
         var order = new WorkOrder
@@ -41,21 +76,16 @@ public class WorkOrderPdfTests
             Notes = "Veículo liberado e testado em rodagem.",
             Status = WorkOrderStatus.Completed,
             CompletedAt = DateTimeOffset.UtcNow,
-            Services =
-            [
-                new WorkOrderService { Description = "Substituição dos amortecedores dianteiros", Quantity = 2, UnitPrice = 120 },
-                new WorkOrderService { Description = "Alinhamento computadorizado e balanceamento", Quantity = 1, UnitPrice = 90 }
-            ],
-            Parts =
-            [
-                new WorkOrderPart { Code = "AM-802", Description = "Amortecedor Dianteiro Cofap", Quantity = 2, UnitPrice = 320 },
-                new WorkOrderPart { Code = "KIT-01", Description = "Kit Batente e Coifa Dianteira", Quantity = 2, UnitPrice = 65 }
-            ]
+            Services = services,
+            Parts = parts
         };
 
         var doc = new WorkOrderPdfDocument(order, company);
+
+        // Act
         var bytes = doc.GeneratePdf();
 
+        // Assert
         Assert.NotNull(bytes);
         Assert.NotEmpty(bytes);
         Assert.True(bytes.Length > 1000);

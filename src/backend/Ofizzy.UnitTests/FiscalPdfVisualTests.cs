@@ -13,11 +13,21 @@ internal static class FiscalPdfFixtures
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
         using var cert = FiscalTests.Certificate();
         var s = FiscalTests.Snapshot(kind);
-        s = s with { Issuer = s.Issuer with { LegalName = "EMITENTE DO XML", Address = s.Issuer.Address! with { Street = "Rua do Emitente" } },
+        s = s with
+        {
+            Issuer = s.Issuer with { LegalName = "EMITENTE DO XML", Address = s.Issuer.Address! with { Street = "Rua do Emitente" } },
             Recipient = s.Recipient with { Name = "TOMADOR DO XML", Address = s.Recipient.Address! with { Street = "Rua do Tomador" }, PaymentAmount = lines * 100 },
-            Lines = Enumerable.Range(1, lines).Select(i => s.Lines[0] with { Id = Guid.NewGuid(), Code = $"P-{i:D3}", Description = $"Produto {i:D3} revisao e alinhamento" }).ToList() };
-        var doc = new FiscalDocument { Kind = kind, Environment = FiscalEnvironment.Homologation, Series = 1, Number = 101,
-            Snapshot = FiscalJson.Write(s), Total = lines * 100 };
+            Lines = Enumerable.Range(1, lines).Select(i => s.Lines[0] with { Id = Guid.NewGuid(), Code = $"P-{i:D3}", Description = $"Produto {i:D3} revisao e alinhamento" }).ToList()
+        };
+        var doc = new FiscalDocument
+        {
+            Kind = kind,
+            Environment = FiscalEnvironment.Homologation,
+            Series = 1,
+            Number = 101,
+            Snapshot = FiscalJson.Write(s),
+            Total = lines * 100
+        };
         doc.Identity = kind == FiscalKind.Nfe ? FiscalXml.NfeKey(s, 1, doc.Number, 12345678) : "DPS355030821122233300018100001000000000000101";
         doc.SubmittedXml = FiscalXml.Sign(kind == FiscalKind.Nfe ? FiscalXml.Invoice(doc, s) : FiscalXml.Dps(doc, s), kind == FiscalKind.Nfe ? "infNFe" : "infDPS", cert);
         FiscalXml.Validate(doc.SubmittedXml, kind);

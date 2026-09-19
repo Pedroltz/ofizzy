@@ -23,8 +23,13 @@ public sealed class FiscalIsolationTests(OfizzyFactory factory) : IClassFixture<
         await b.Login("fiscal-b@example.test"); await b.Select(beta, true);
         var customer = (await a.Json(HttpMethod.Post, "/api/customers", new { name = "Cliente Fiscal", document = "12345678909" })).GetProperty("id");
         var vehicle = (await a.Json(HttpMethod.Post, "/api/vehicles", new { customerId = customer, plate = "FIS1A23", model = "Teste" })).GetProperty("id");
-        var order = (await a.Json(HttpMethod.Post, "/api/work-orders", new { customerId = customer, vehicleId = vehicle,
-            services = new[] { new { description = "Revisão", quantity = 1, unitPrice = 100 } }, parts = Array.Empty<object>() })).GetProperty("id").GetGuid();
+        var order = (await a.Json(HttpMethod.Post, "/api/work-orders", new
+        {
+            customerId = customer,
+            vehicleId = vehicle,
+            services = new[] { new { description = "Revisão", quantity = 1, unitPrice = 100 } },
+            parts = Array.Empty<object>()
+        })).GetProperty("id").GetGuid();
         var route = $"/api/work-orders/{order}/fiscal";
         Assert.Equal(HttpStatusCode.NoContent, (await a.Send(HttpMethod.Put, route, new { name = "Tomador preservado", document = "12345678909" })).StatusCode);
         // A new request uses a new DbContext and reads the PostgreSQL record.

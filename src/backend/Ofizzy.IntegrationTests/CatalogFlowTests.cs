@@ -9,13 +9,15 @@ public sealed class CatalogFlowTests(OfizzyFactory factory) : IClassFixture<Ofiz
     [Fact]
     public async Task AuthenticatedUserCanManageCatalogsAndArchiveCustomerVehicles()
     {
+        // Arrange
         using var client = factory.CreateClient(new()
         {
             HandleCookies = false
         });
         await Setup(client);
 
-        var customerResponse = await client.PostAsJsonAsync("/api/customers", new
+        // Act - Create Customer
+        var customerPayload = new
         {
             name = "João da Silva",
             document = "12345678909",
@@ -24,22 +26,65 @@ public sealed class CatalogFlowTests(OfizzyFactory factory) : IClassFixture<Ofiz
             email = "joao@example.com",
             address = "Rua das Oficinas, 10",
             notes = "Cliente recorrente"
-        });
+        };
+        var customerResponse = await client.PostAsJsonAsync("/api/customers", customerPayload);
+
+        // Assert - Customer Created
         Assert.True(customerResponse.StatusCode == HttpStatusCode.Created, await customerResponse.Content.ReadAsStringAsync());
-        var customer = await customerResponse.Content.ReadFromJsonAsync<JsonElement>(); var customerId = customer.GetProperty("id").GetGuid();
+        var customer = await customerResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var customerId = customer.GetProperty("id").GetGuid();
 
-        var vehicleResponse = await client.PostAsJsonAsync("/api/vehicles", new { customerId, plate = "abc1d23", brand = "Chevrolet", model = "Corsa", year = 2020, color = "Prata", mileage = 100000, chassis = (string?)null, notes = (string?)null });
+        // Act - Create Vehicle
+        var vehiclePayload = new
+        {
+            customerId,
+            plate = "abc1d23",
+            brand = "Chevrolet",
+            model = "Corsa",
+            year = 2020,
+            color = "Prata",
+            mileage = 100000,
+            chassis = (string?)null,
+            notes = (string?)null
+        };
+        var vehicleResponse = await client.PostAsJsonAsync("/api/vehicles", vehiclePayload);
+
+        // Assert - Vehicle Created
         Assert.Equal(HttpStatusCode.Created, vehicleResponse.StatusCode);
-        Assert.Equal("ABC1D23", (await vehicleResponse.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("plate").GetString());
+        var createdVehicle = await vehicleResponse.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("ABC1D23", createdVehicle.GetProperty("plate").GetString());
 
-        Assert.Equal(HttpStatusCode.Created, (await client.PostAsJsonAsync("/api/services", new { name = "Troca de óleo", description = "Óleo e filtro", defaultPrice = 120m })).StatusCode);
-        var part = new { name = "Filtro de óleo", code = "flt-001", costPrice = 20m, salePrice = 40m };
-        Assert.Equal(HttpStatusCode.Created, (await client.PostAsJsonAsync("/api/parts", part)).StatusCode);
-        Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsJsonAsync("/api/parts", part)).StatusCode);
+        // Act & Assert - Services & Parts
+        var serviceResponse = await client.PostAsJsonAsync("/api/services", new
+        {
+            name = "Troca de óleo",
+            description = "Óleo e filtro",
+            defaultPrice = 120m
+        });
+        Assert.Equal(HttpStatusCode.Created, serviceResponse.StatusCode);
 
+        var part = new
+        {
+            name = "Filtro de óleo",
+            code = "flt-001",
+            costPrice = 20m,
+            salePrice = 40m
+        };
+        var partResponse = await client.PostAsJsonAsync("/api/parts", part);
+        Assert.Equal(HttpStatusCode.Created, partResponse.StatusCode);
+
+        var duplicatePartResponse = await client.PostAsJsonAsync("/api/parts", part);
+        Assert.Equal(HttpStatusCode.Conflict, duplicatePartResponse.StatusCode);
+
+        // Query Vehicles
         var vehicles = await client.GetFromJsonAsync<JsonElement>("/api/vehicles?q=ABC");
         Assert.Equal(1, vehicles.GetProperty("total").GetInt32());
-        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/customers/{customerId}")).StatusCode);
+
+        // Act - Archive Customer
+        var deleteResponse = await client.DeleteAsync($"/api/customers/{customerId}");
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        // Assert - Cascading Vehicles Inactive
         vehicles = await client.GetFromJsonAsync<JsonElement>("/api/vehicles");
         Assert.Equal(0, vehicles.GetProperty("total").GetInt32());
     }

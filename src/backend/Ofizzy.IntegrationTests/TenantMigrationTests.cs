@@ -6,6 +6,7 @@ using Ofizzy.Api.Infrastructure.Persistence;
 using Testcontainers.PostgreSql;
 
 namespace Ofizzy.IntegrationTests;
+
 public sealed class TenantMigrationTests : IAsyncLifetime
 {
     private readonly PostgreSqlContainer postgres = new PostgreSqlBuilder("postgres:18-alpine").WithDatabase("legacy_tenancy_test").Build();
@@ -37,10 +38,10 @@ public sealed class TenantMigrationTests : IAsyncLifetime
         // Raw SQL is restricted to this migration verification, not exposed to request handlers.
         Assert.Equal(42, await db.Database.SqlQueryRaw<long>("SELECT \"LastWorkOrderNumber\" AS \"Value\" FROM ofizzy.companies").SingleAsync());
         Assert.Equal("Historical snapshot", await db.Database.SqlQueryRaw<string>("SELECT \"CustomerName\" AS \"Value\" FROM ofizzy.work_orders WHERE \"Id\" = '00000000-0000-0000-0000-000000000007'").SingleAsync());
-        #pragma warning disable EF1002 // Table identifiers are a fixed test-only allowlist, never input.
+#pragma warning disable EF1002 // Table identifiers are a fixed test-only allowlist, never input.
         foreach (var table in new[] { "companies", "customers", "vehicles", "services", "parts", "work_orders", "work_order_services", "work_order_parts" })
             Assert.Equal(tenant.Id, await db.Database.SqlQueryRaw<Guid>($"SELECT \"TenantId\" AS \"Value\" FROM ofizzy.{table}").SingleAsync());
-        #pragma warning restore EF1002
+#pragma warning restore EF1002
         var other = new Ofizzy.Api.Modules.Tenancy.Tenant { Name = "Other", Slug = "other" }; db.Tenants.Add(other); await db.SaveChangesAsync();
         var error = await Assert.ThrowsAsync<PostgresException>(() => db.Database.ExecuteSqlInterpolatedAsync($"UPDATE ofizzy.vehicles SET \"TenantId\" = {other.Id}"));
         Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, error.SqlState);

@@ -10,25 +10,37 @@ namespace Ofizzy.Api.Modules.Company;
 
 [ApiController]
 [Route("api/company")]
+[Route("api/tenant/settings")]
 [Authorize]
 [TenantAccess(AllowPending = true)]
-[Route("api/tenant/settings")]
-public sealed class CompanyController(ApplicationDbContext db, IValidator<UpdateCompanyRequest> validator) : ControllerBase
+public sealed class CompanyController(
+    ApplicationDbContext db,
+    IValidator<UpdateCompanyRequest> validator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<CompanyResponse>> Get(CancellationToken cancellationToken)
     {
         var company = await db.TenantSettings.FirstOrDefaultAsync(cancellationToken);
-        if (company is null) return NotFound();
+        if (company is null)
+        {
+            return NotFound();
+        }
 
         return Ok(ToResponse(company));
     }
 
-    [HttpPut, TenantAccess(Admin = true, AllowPending = true)]
-    public async Task<ActionResult<CompanyResponse>> Update([FromBody] UpdateCompanyRequest request, CancellationToken cancellationToken)
+    [HttpPut]
+    [TenantAccess(Admin = true, AllowPending = true)]
+    public async Task<ActionResult<CompanyResponse>> Update(
+        [FromBody] UpdateCompanyRequest request,
+        CancellationToken cancellationToken)
     {
         var validation = await validator.ValidateAsync(request, cancellationToken);
-        if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
+        }
+
         var company = await db.TenantSettings.SingleAsync(cancellationToken);
 
         company.Name = request.Name.Trim();

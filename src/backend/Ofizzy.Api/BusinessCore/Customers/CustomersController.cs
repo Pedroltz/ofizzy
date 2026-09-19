@@ -20,23 +20,40 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         page = Math.Max(page, 1); pageSize = Math.Clamp(pageSize, 1, 100); var query = db.Customers.AsNoTracking().Where(x => includeArchived || x.IsActive);
         if (!string.IsNullOrWhiteSpace(q))
         {
-            var term = $"%{q.Trim()}%"; var digits = TextNormalization.Digits(q);
+            var term = $"%{q.Trim()}%";
+            var digits = TextNormalization.Digits(q);
             query = digits is null
-                ? query.Where(x => EF.Functions.ILike(x.Name, term))
-                : query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Phone != null && x.Phone.Contains(digits)) || (x.Document != null && x.Document.Contains(digits)));
+                ? query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)))
+                : query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)) || (x.Phone != null && x.Phone.Contains(digits)) || (x.WhatsApp != null && x.WhatsApp.Contains(digits)) || (x.Document != null && x.Document.Contains(digits)));
         }
         var total = await query.CountAsync(ct); var items = await query.OrderBy(x => x.Name).Skip((page - 1) * pageSize).Take(pageSize).Select(Map()).ToListAsync(ct);
         return Ok(new PagedResponse<CustomerResponse>(items, page, pageSize, total));
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<CustomerResponse>> Get(Guid id, CancellationToken ct) => await db.Customers.AsNoTracking().Where(x => x.Id == id).Select(Map()).SingleOrDefaultAsync(ct) is { } item ? Ok(item) : NotFound();
+    public async Task<ActionResult<CustomerResponse>> Get(Guid id, CancellationToken ct)
+    {
+        var item = await db.Customers
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(Map())
+            .SingleOrDefaultAsync(ct);
+
+        return item is not null ? Ok(item) : NotFound();
+    }
 
     [HttpPost]
     public async Task<ActionResult<CustomerResponse>> Create(CustomerRequest request, CancellationToken ct)
     {
-        var validation = await validator.ValidateAsync(request, ct); if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
-        var document = TextNormalization.Digits(request.Document); await EnsureDocumentAvailable(document, null, ct);
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
+        }
+
+        var document = TextNormalization.Digits(request.Document);
+        await EnsureDocumentAvailable(document, null, ct);
+
         var street = TextNormalization.Optional(request.Street);
         var number = TextNormalization.Optional(request.Number);
         var district = TextNormalization.Optional(request.District);
@@ -46,11 +63,14 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         var cityCode = TextNormalization.Digits(request.CityCode);
         var stateRegistration = TextNormalization.Digits(request.StateRegistration);
         var address = TextNormalization.Optional(request.Address);
+
         if (string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(street))
         {
-            var parts = new[] { street, number, district, city, state }.Where(p => !string.IsNullOrWhiteSpace(p));
+            var parts = new[] { street, number, district, city, state }
+                .Where(p => !string.IsNullOrWhiteSpace(p));
             address = string.Join(", ", parts);
         }
+
         var item = new Customer
         {
             Name = TextNormalization.Required(request.Name),
@@ -69,15 +89,31 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
             CityCode = cityCode,
             StateRegistration = stateRegistration
         };
-        db.Customers.Add(item); await db.SaveChangesAsync(ct); return CreatedAtAction(nameof(Get), new { item.Id }, ToResponse(item));
+
+        db.Customers.Add(item);
+        await db.SaveChangesAsync(ct);
+
+        return CreatedAtAction(nameof(Get), new { item.Id }, ToResponse(item));
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<CustomerResponse>> Update(Guid id, CustomerRequest request, CancellationToken ct)
     {
-        var validation = await validator.ValidateAsync(request, ct); if (!validation.IsValid) return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
-        var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound();
-        var document = TextNormalization.Digits(request.Document); await EnsureDocumentAvailable(document, id, ct);
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
+        }
+
+        var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct);
+        if (item is null)
+        {
+            return NotFound();
+        }
+
+        var document = TextNormalization.Digits(request.Document);
+        await EnsureDocumentAvailable(document, id, ct);
+
         var street = TextNormalization.Optional(request.Street);
         var number = TextNormalization.Optional(request.Number);
         var district = TextNormalization.Optional(request.District);
@@ -87,34 +123,124 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         var cityCode = TextNormalization.Digits(request.CityCode);
         var stateRegistration = TextNormalization.Digits(request.StateRegistration);
         var address = TextNormalization.Optional(request.Address);
+
         if (string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(street))
         {
-            var parts = new[] { street, number, district, city, state }.Where(p => !string.IsNullOrWhiteSpace(p));
+            var parts = new[] { street, number, district, city, state }
+                .Where(p => !string.IsNullOrWhiteSpace(p));
             address = string.Join(", ", parts);
         }
-        item.Name = TextNormalization.Required(request.Name); item.Document = document; item.Phone = TextNormalization.Optional(request.Phone); item.WhatsApp = TextNormalization.Optional(request.WhatsApp);
-        item.Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(); item.Address = address; item.Notes = TextNormalization.Optional(request.Notes);
-        item.PostalCode = postalCode; item.Street = street; item.Number = number; item.District = district; item.City = city; item.State = state; item.CityCode = cityCode; item.StateRegistration = stateRegistration;
+
+        item.Name = TextNormalization.Required(request.Name);
+        item.Document = document;
+        item.Phone = TextNormalization.Optional(request.Phone);
+        item.WhatsApp = TextNormalization.Optional(request.WhatsApp);
+        item.Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant();
+        item.Address = address;
+        item.Notes = TextNormalization.Optional(request.Notes);
+        item.PostalCode = postalCode;
+        item.Street = street;
+        item.Number = number;
+        item.District = district;
+        item.City = city;
+        item.State = state;
+        item.CityCode = cityCode;
+        item.StateRegistration = stateRegistration;
         item.UpdatedAt = DateTimeOffset.UtcNow;
-        await db.SaveChangesAsync(ct); return Ok(ToResponse(item));
+
+        await db.SaveChangesAsync(ct);
+
+        return Ok(ToResponse(item));
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Archive(Guid id, CancellationToken ct)
     {
-        var item = await db.Customers.Include(x => x.Vehicles).SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound();
-        item.IsActive = false; item.UpdatedAt = DateTimeOffset.UtcNow; foreach (var vehicle in item.Vehicles) { vehicle.IsActive = false; vehicle.UpdatedAt = DateTimeOffset.UtcNow; }
-        await db.SaveChangesAsync(ct); return NoContent();
+        var item = await db.Customers
+            .Include(x => x.Vehicles)
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
+
+        if (item is null)
+        {
+            return NotFound();
+        }
+
+        item.IsActive = false;
+        item.UpdatedAt = DateTimeOffset.UtcNow;
+
+        foreach (var vehicle in item.Vehicles)
+        {
+            vehicle.IsActive = false;
+            vehicle.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        return NoContent();
     }
 
     [HttpPatch("{id:guid}/restore")]
-    public async Task<IActionResult> Restore(Guid id, CancellationToken ct) { var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound(); item.IsActive = true; item.UpdatedAt = DateTimeOffset.UtcNow; await db.SaveChangesAsync(ct); return NoContent(); }
+    public async Task<IActionResult> Restore(Guid id, CancellationToken ct)
+    {
+        var item = await db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct);
+        if (item is null)
+        {
+            return NotFound();
+        }
 
-    private async Task EnsureDocumentAvailable(string? document, Guid? currentId, CancellationToken ct) { if (document is not null && await db.Customers.AnyAsync(x => x.Document == document && x.Id != currentId, ct)) throw new ConflictException("Já existe um cliente com este CPF/CNPJ."); }
+        item.IsActive = true;
+        item.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await db.SaveChangesAsync(ct);
+
+        return NoContent();
+    }
+
+    private async Task EnsureDocumentAvailable(string? document, Guid? currentId, CancellationToken ct)
+    {
+        if (document is not null && await db.Customers.AnyAsync(x => x.Document == document && x.Id != currentId, ct))
+        {
+            throw new ConflictException("Já existe um cliente com este CPF/CNPJ.");
+        }
+    }
+
     private static System.Linq.Expressions.Expression<Func<Customer, CustomerResponse>> Map() => x => new(
-        x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt,
-        x.PostalCode, x.Street, x.Number, x.District, x.City, x.State, x.CityCode, x.StateRegistration);
+        x.Id,
+        x.Name,
+        x.Document,
+        x.Phone,
+        x.WhatsApp,
+        x.Email,
+        x.Address,
+        x.Notes,
+        x.IsActive,
+        x.CreatedAt,
+        x.PostalCode,
+        x.Street,
+        x.Number,
+        x.District,
+        x.City,
+        x.State,
+        x.CityCode,
+        x.StateRegistration);
+
     private static CustomerResponse ToResponse(Customer x) => new(
-        x.Id, x.Name, x.Document, x.Phone, x.WhatsApp, x.Email, x.Address, x.Notes, x.IsActive, x.CreatedAt,
-        x.PostalCode, x.Street, x.Number, x.District, x.City, x.State, x.CityCode, x.StateRegistration);
+        x.Id,
+        x.Name,
+        x.Document,
+        x.Phone,
+        x.WhatsApp,
+        x.Email,
+        x.Address,
+        x.Notes,
+        x.IsActive,
+        x.CreatedAt,
+        x.PostalCode,
+        x.Street,
+        x.Number,
+        x.District,
+        x.City,
+        x.State,
+        x.CityCode,
+        x.StateRegistration);
 }

@@ -1,6 +1,7 @@
 using FluentValidation.Results;
 
 namespace Ofizzy.Api.Shared.Validation;
+
 public static class ValidationExtensions
 {
     public static Dictionary<string, string[]> ToDictionary(this ValidationResult result) => result.Errors

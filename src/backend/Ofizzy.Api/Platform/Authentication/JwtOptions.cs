@@ -1,4 +1,5 @@
 namespace Ofizzy.Api.Authentication;
+
 public sealed class JwtOptions
 {
     public const string SectionName = "Jwt";

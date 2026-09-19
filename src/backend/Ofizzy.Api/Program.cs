@@ -103,11 +103,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? jwt;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true, ValidIssuer = jwtOptions.Issuer,
-        ValidateAudience = true, ValidAudience = jwtOptions.Audience,
+        ValidateIssuer = true,
+        ValidIssuer = jwtOptions.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtOptions.Audience,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
-        ValidateLifetime = true, ClockSkew = TimeSpan.FromSeconds(30)
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromSeconds(30)
     };
     options.Events = new JwtBearerEvents
     {
@@ -127,7 +130,17 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
-builder.Services.AddControllersWithViews(options => { options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()); options.Filters.AddService<TenantAccessFilter>(); }).AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services
+    .AddControllersWithViews(options =>
+    {
+        options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+        options.Filters.AddService<TenantAccessFilter>();
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -144,19 +157,27 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+
 if (args.Contains("--grant-platform-admin", StringComparer.OrdinalIgnoreCase))
 {
     var index = Array.FindIndex(args, x => x == "--grant-platform-admin");
     if (index + 1 >= args.Length || !Guid.TryParse(args[index + 1], out var id))
+    {
         throw new InvalidOperationException("Provide the existing operator user UUID.");
+    }
+
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var user = await db.Users.SingleAsync(x => x.Id == id && x.IsActive);
-    user.IsPlatformAdmin = true; user.PlatformAdminGrantedAt = DateTimeOffset.UtcNow;
+
+    user.IsPlatformAdmin = true;
+    user.PlatformAdminGrantedAt = DateTimeOffset.UtcNow;
+
     await db.SaveChangesAsync();
     app.Logger.LogInformation("Platform administrator explicitly granted by server operator to {UserId}", id);
     return;
 }
+
 if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
 {
     await ReconcileMigrationHistoryAsync(connectionString);
@@ -165,6 +186,7 @@ if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
     await ReconcileMigrationHistoryAsync(connectionString);
     return;
 }
+
 if (app.Environment.IsDevelopment())
 {
     await ReconcileMigrationHistoryAsync(connectionString);
@@ -172,24 +194,44 @@ if (app.Environment.IsDevelopment())
     await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
     await ReconcileMigrationHistoryAsync(connectionString);
 }
+
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<TenantContextMiddleware>();
 app.UseAuthorization();
+
 app.Use(async (context, next) =>
 {
     if (HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/health"))
     {
         var antiforgery = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
         var tokens = antiforgery.GetAndStoreTokens(context);
+
         if (tokens.RequestToken is not null)
-            context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken, new CookieOptions { HttpOnly = false, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Path = "/" });
+        {
+            context.Response.Cookies.Append(
+                "XSRF-TOKEN",
+                tokens.RequestToken,
+                new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = !app.Environment.IsDevelopment(),
+                    SameSite = SameSiteMode.Strict,
+                    Path = "/"
+                });
+        }
     }
+
     await next();
 });
-if (app.Environment.IsDevelopment()) app.MapOpenApi();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
 app.MapHealthChecks("/health/live", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
 app.MapControllers();

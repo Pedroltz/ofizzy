@@ -9,7 +9,19 @@ public sealed class SetupRequestValidatorTests
     [Fact]
     public void AcceptsValidInitialSetup()
     {
-        var result = _validator.Validate(new SetupRequest("Ofizzy", null, null, "Administrador", "admin@ofizzy.local", "Oficina2026"));
+        // Arrange
+        var request = new SetupRequest(
+            CompanyName: "Ofizzy",
+            Cnpj: null,
+            Phone: null,
+            AdminName: "Administrador",
+            Email: "admin@ofizzy.local",
+            Password: "Oficina2026");
+
+        // Act
+        var result = _validator.Validate(request);
+
+        // Assert
         Assert.True(result.IsValid);
     }
 
@@ -18,8 +30,19 @@ public sealed class SetupRequestValidatorTests
     [InlineData("12.345.678/0001-90")]
     public void AcceptsCnpjWithOrWithoutFormatting(string cnpj)
     {
-        var result = _validator.Validate(new SetupRequest("Ofizzy", cnpj, null, "Administrador", "admin@ofizzy.local", "Oficina2026"));
+        // Arrange
+        var request = new SetupRequest(
+            CompanyName: "Ofizzy",
+            Cnpj: cnpj,
+            Phone: null,
+            AdminName: "Administrador",
+            Email: "admin@ofizzy.local",
+            Password: "Oficina2026");
 
+        // Act
+        var result = _validator.Validate(request);
+
+        // Assert
         Assert.True(result.IsValid);
     }
 
@@ -28,8 +51,19 @@ public sealed class SetupRequestValidatorTests
     [InlineData("123456780001900")]
     public void RejectsCnpjWithoutFourteenDigits(string cnpj)
     {
-        var result = _validator.Validate(new SetupRequest("Ofizzy", cnpj, null, "Administrador", "admin@ofizzy.local", "Oficina2026"));
+        // Arrange
+        var request = new SetupRequest(
+            CompanyName: "Ofizzy",
+            Cnpj: cnpj,
+            Phone: null,
+            AdminName: "Administrador",
+            Email: "admin@ofizzy.local",
+            Password: "Oficina2026");
 
+        // Act
+        var result = _validator.Validate(request);
+
+        // Assert
         Assert.Contains(result.Errors, error => error.PropertyName == nameof(SetupRequest.Cnpj));
     }
 
@@ -40,7 +74,19 @@ public sealed class SetupRequestValidatorTests
     [InlineData("SemNumeroAqui")]
     public void RejectsWeakPassword(string password)
     {
-        var result = _validator.Validate(new SetupRequest("Ofizzy", null, null, "Administrador", "admin@ofizzy.local", password));
+        // Arrange
+        var request = new SetupRequest(
+            CompanyName: "Ofizzy",
+            Cnpj: null,
+            Phone: null,
+            AdminName: "Administrador",
+            Email: "admin@ofizzy.local",
+            Password: password);
+
+        // Act
+        var result = _validator.Validate(request);
+
+        // Assert
         Assert.False(result.IsValid);
     }
 }

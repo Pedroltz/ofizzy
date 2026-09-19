@@ -36,8 +36,13 @@ public sealed class FiscalDevFlowTests(OfizzyFactory factory) : IClassFixture<Of
         Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync("/api/fiscal/certificate", upload)).StatusCode);
         var customer = (await session.Json(HttpMethod.Post, "/api/customers", new { name = "Cliente Fictício", document = "12345678909" })).GetProperty("id");
         var vehicle = (await session.Json(HttpMethod.Post, "/api/vehicles", new { customerId = customer, plate = "DEV1A23", model = "Teste" })).GetProperty("id");
-        var order = await session.Json(HttpMethod.Post, "/api/work-orders", new { customerId = customer, vehicleId = vehicle,
-            services = new[] { new { description = "Revisão", quantity = 1, unitPrice = 100 } }, parts = new[] { new { description = "Pneu", code = "PN-01", quantity = 1, unitPrice = 300 } } });
+        var order = await session.Json(HttpMethod.Post, "/api/work-orders", new
+        {
+            customerId = customer,
+            vehicleId = vehicle,
+            services = new[] { new { description = "Revisão", quantity = 1, unitPrice = 100 } },
+            parts = new[] { new { description = "Pneu", code = "PN-01", quantity = 1, unitPrice = 300 } }
+        });
         var id = order.GetProperty("id").GetGuid();
         foreach (var status in new[] { "InProgress", "Completed" })
             Assert.True((await session.Send(HttpMethod.Patch, $"/api/work-orders/{id}/status", new { status })).IsSuccessStatusCode);
