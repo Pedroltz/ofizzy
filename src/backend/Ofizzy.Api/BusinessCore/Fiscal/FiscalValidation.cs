@@ -156,6 +156,7 @@ public sealed class ServiceFiscalValidator : AbstractValidator<ServiceFiscalData
 
         RuleFor(x => x.ApproximateTaxRate)
             .InclusiveBetween(0, 100);
+
     }
 }
 

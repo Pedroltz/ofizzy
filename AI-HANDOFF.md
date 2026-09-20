@@ -226,6 +226,16 @@ necessário para NF-e. Evidências: backend 72/72, lint, frontend 69/69 e build
 aprovados; migration e smoke pelo Nginx passaram em Compose descartável na porta
 18085, cuja stack e volume foram removidos ao final.
 
+Em seguida, classificações de produtos e serviços passaram a ser versionadas por
+`EffectiveFrom`. A migration `20260920180236_AddFiscalProfileEffectiveDate` converte
+os perfis existentes para 01/01/2000 e permite uma revisão por item/data; a preparação
+escolhe a maior vigência que já começou. A tela fiscal mostra o campo de vigência
+somente no editor do catálogo, nunca na OS. Isso preserva snapshots emitidos e permite
+parametrização futura, mas não substitui a migração XML/schema PL_010f.
+Validação: script EF idempotente, backend 72/72, lint, frontend 69/69, build e
+migration/smoke Nginx em Compose descartável na porta 18087 aprovados; stack e volume
+removidos ao final.
+
 O usuário priorizou emissão oficial de serviços e produtos a partir da OS, sem intermediário pago. Piloto já informado: **Igaraçu do Tietê/SP, Simples Nacional, IBGE 3520004**. Não perguntar novamente município/regime. O certificado A1 é uma dependência de homologação; não foi fornecido nem usado certificado real nos testes.
 
 Fundação SaaS e fases 1–4 têm aceite local. Fiscal está implementado localmente com leiautes regulamentares concluídos (DANFE com canhoto e barcode, DANFSe com QR Code e detalhamento tributário, regras obrigatórias do Simples Nacional em infAdic/infCpl e infoCompl/xInfComp). Homologação externa pendente. Financeiro não começou; pagamentos declarados na NF-e não registram recebimentos.

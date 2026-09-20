@@ -1,5 +1,20 @@
 # Status do projeto
 
+## Regras fiscais com vigência por item — 20/09/2026
+
+- Produtos e serviços agora podem ter revisões de classificação com uma data de início
+  de vigência. A preparação da OS seleciona a revisão mais recente aplicável à data de
+  emissão; XMLs e documentos já emitidos mantêm o snapshot original.
+- A migration `20260920180236_AddFiscalProfileEffectiveDate` preserva os perfis
+  existentes com vigência histórica em 01/01/2000 e substitui a unicidade de um perfil
+  por item por unicidade de item + vigência. A tela de Configurações Fiscais permite
+  criar a próxima revisão sem sobrescrever a regra corrente.
+- Isto torna os valores configuráveis por tenant e data, mas não ativa tags RTC nem
+  PL_010f sem modelo/XML/schema homologados.
+- Evidências: script EF idempotente conferido; backend 72/72, lint, 69/69 testes e
+  build frontend aprovados. Migration e smoke Nginx passaram em Compose descartável
+  na porta 18087; stack e volume removidos ao final.
+
 ## Painel de prontidão para homologação — 20/09/2026
 
 - Adicionado `GET /api/fiscal/homologation-readiness` e o painel **Prontidão para

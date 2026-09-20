@@ -118,6 +118,21 @@
   18085, removido ao final. O build mantém aviso conhecido de bundle inicial
   794,07 kB / 500 kB.
 
+## 2026-09-20 — Revisões de classificação fiscal por vigência
+
+- Criado o campo persistido `EffectiveFrom` para perfis fiscais de produtos e
+  serviços. O índice passou de item único para item + vigência, permitindo configurar
+  a próxima classificação sem apagar a anterior.
+- A preparação carrega apenas perfis já vigentes e escolhe a maior data aplicável.
+  O editor do catálogo recebe o campo de data; a preparação da OS não pede essa data,
+  porque ela resolve automaticamente a regra vigente. Snapshots emitidos permanecem
+  imutáveis.
+- Migration `20260920180236_AddFiscalProfileEffectiveDate` validada por script EF
+  idempotente; perfis existentes recebem a data histórica 01/01/2000. A mudança não
+  ativa PL_010f ou campos RTC sem as regras aprovadas e schemas instalados.
+- Evidências: backend 72/72, lint, 69/69 testes frontend, build e migration/smoke
+  pelo Nginx em Compose descartável na porta 18087 aprovados; stack e volume removidos.
+
 ## 2026-09-01 — Fase 1 concluída
 
 - Criados repositório, solução, API, frontend, documentos e estrutura de deploy.

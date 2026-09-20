@@ -62,13 +62,15 @@ public sealed record ProductFiscalData(
     decimal? RetainedStBase = null,
     decimal? RetainedStAmount = null,
     decimal? SubstituteAmount = null,
-    decimal? StRate = null);
+    decimal? StRate = null,
+    DateOnly EffectiveFrom = default);
 
 public sealed record ServiceFiscalData(
     string NationalCode = "",
     string? MunicipalCode = null,
     string? Nbs = null,
-    decimal? ApproximateTaxRate = null);
+    decimal? ApproximateTaxRate = null,
+    DateOnly EffectiveFrom = default);
 
 public sealed record FiscalPreparationData(
     FiscalAddress? Address = null,
@@ -192,6 +194,7 @@ public sealed class ProductFiscalProfile : ITenantScoped
     public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid PartId { get; set; }
+    public DateOnly EffectiveFrom { get; set; }
     public string Data { get; set; } = "{}";
 }
 
@@ -200,6 +203,7 @@ public sealed class ServiceFiscalProfile : ITenantScoped
     public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid ServiceId { get; set; }
+    public DateOnly EffectiveFrom { get; set; }
     public string Data { get; set; } = "{}";
 }
 

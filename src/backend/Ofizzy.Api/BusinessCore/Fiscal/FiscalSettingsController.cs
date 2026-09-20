@@ -220,9 +220,13 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
 
         var profile = await db.ProductFiscalProfileEntries
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.PartId == id, ct);
+            .Where(x => x.PartId == id && x.EffectiveFrom <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .OrderByDescending(x => x.EffectiveFrom)
+            .FirstOrDefaultAsync(ct);
 
-        return profile == null ? new ProductFiscalData() : FiscalJson.Required<ProductFiscalData>(profile.Data);
+        return profile == null
+            ? new ProductFiscalData(EffectiveFrom: DateOnly.FromDateTime(DateTime.UtcNow))
+            : FiscalJson.Required<ProductFiscalData>(profile.Data) with { EffectiveFrom = profile.EffectiveFrom };
     }
 
     [HttpPut("api/parts/{id:guid}/fiscal")]
@@ -234,20 +238,22 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
             return NotFound();
         }
 
-        var validation = new ProductFiscalValidator().Validate(request);
+        var effectiveFrom = request.EffectiveFrom == default ? DateOnly.FromDateTime(DateTime.UtcNow) : request.EffectiveFrom;
+        var sanitized = request with { EffectiveFrom = effectiveFrom };
+        var validation = new ProductFiscalValidator().Validate(sanitized);
         if (!validation.IsValid)
         {
             return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         }
 
-        var entity = await db.ProductFiscalProfileEntries.SingleOrDefaultAsync(x => x.PartId == id, ct);
+        var entity = await db.ProductFiscalProfileEntries.SingleOrDefaultAsync(x => x.PartId == id && x.EffectiveFrom == effectiveFrom, ct);
         if (entity == null)
         {
-            entity = new ProductFiscalProfile { PartId = id };
+            entity = new ProductFiscalProfile { PartId = id, EffectiveFrom = effectiveFrom };
             db.ProductFiscalProfileEntries.Add(entity);
         }
 
-        entity.Data = FiscalJson.Write(request);
+        entity.Data = FiscalJson.Write(sanitized);
         await db.SaveChangesAsync(ct);
         return NoContent();
     }
@@ -262,9 +268,13 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
 
         var profile = await db.ServiceFiscalProfileEntries
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.ServiceId == id, ct);
+            .Where(x => x.ServiceId == id && x.EffectiveFrom <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .OrderByDescending(x => x.EffectiveFrom)
+            .FirstOrDefaultAsync(ct);
 
-        return profile == null ? new ServiceFiscalData() : FiscalJson.Required<ServiceFiscalData>(profile.Data);
+        return profile == null
+            ? new ServiceFiscalData(EffectiveFrom: DateOnly.FromDateTime(DateTime.UtcNow))
+            : FiscalJson.Required<ServiceFiscalData>(profile.Data) with { EffectiveFrom = profile.EffectiveFrom };
     }
 
     [HttpPut("api/services/{id:guid}/fiscal")]
@@ -280,7 +290,8 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
         {
             NationalCode = request.NationalCode?.Trim() ?? string.Empty,
             MunicipalCode = string.IsNullOrWhiteSpace(request.MunicipalCode) ? null : request.MunicipalCode.Trim(),
-            Nbs = string.IsNullOrWhiteSpace(request.Nbs) ? null : request.Nbs.Trim()
+            Nbs = string.IsNullOrWhiteSpace(request.Nbs) ? null : request.Nbs.Trim(),
+            EffectiveFrom = request.EffectiveFrom == default ? DateOnly.FromDateTime(DateTime.UtcNow) : request.EffectiveFrom
         };
 
         var validation = new ServiceFiscalValidator().Validate(sanitized);
@@ -289,10 +300,10 @@ public sealed class FiscalCatalogController(ApplicationDbContext db) : Controlle
             return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         }
 
-        var entity = await db.ServiceFiscalProfileEntries.SingleOrDefaultAsync(x => x.ServiceId == id, ct);
+        var entity = await db.ServiceFiscalProfileEntries.SingleOrDefaultAsync(x => x.ServiceId == id && x.EffectiveFrom == sanitized.EffectiveFrom, ct);
         if (entity == null)
         {
-            entity = new ServiceFiscalProfile { ServiceId = id };
+            entity = new ServiceFiscalProfile { ServiceId = id, EffectiveFrom = sanitized.EffectiveFrom };
             db.ServiceFiscalProfileEntries.Add(entity);
         }
 

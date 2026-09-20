@@ -61,6 +61,14 @@
   verificados, pendências externas e o bloqueio de NF-e enquanto PL_010c estiver ativo.
   Validação: backend 72/72, lint frontend, 69/69 testes frontend e build; migration e
   smoke pelo Nginx passaram em Compose descartável na porta 18085, removido ao final.
+- Em 20/09/2026, perfis de produtos e serviços passaram a aceitar revisões por data
+  de vigência (`EffectiveFrom`). A preparação seleciona a versão vigente e o snapshot
+  fiscal conserva a classificação aplicada. A migration
+  `20260920180236_AddFiscalProfileEffectiveDate` mantém os dados anteriores em
+  01/01/2000. Esse mecanismo torna dados fiscais configuráveis, mas não permite emitir
+  tags RTC/PL_010f sem a implementação e validação específicas.
+  Evidências: script EF idempotente, backend 72/72, lint, 69/69 testes frontend,
+  build e migration/smoke Nginx em Compose descartável na porta 18087 aprovados.
 
 ## Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal — 18/09/2026
 

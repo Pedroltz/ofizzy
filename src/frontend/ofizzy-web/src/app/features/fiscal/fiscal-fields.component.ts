@@ -131,6 +131,17 @@ export const serviceFields: FiscalField[] = [
   },
 ];
 
+const effectiveFromField: FiscalField = {
+  key: 'effectiveFrom',
+  label: 'Vigência a partir de',
+  type: 'date',
+  required: true,
+  colSpan: 2,
+};
+
+export const productProfileFields: FiscalField[] = [effectiveFromField, ...productFields];
+export const serviceProfileFields: FiscalField[] = [effectiveFromField, ...serviceFields];
+
 @Component({
   selector: 'app-fiscal-fields',
   standalone: true,

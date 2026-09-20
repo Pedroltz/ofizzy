@@ -127,13 +127,23 @@ public sealed class FiscalPreparationService(
             }
         }
 
-        var products = await db.ProductFiscalProfileEntries
+        var effectiveOn = DateOnly.FromDateTime(DateTime.UtcNow);
+        var productProfiles = await db.ProductFiscalProfileEntries
             .AsNoTracking()
-            .ToDictionaryAsync(x => x.PartId, x => x.Data, ct);
+            .Where(x => x.EffectiveFrom <= effectiveOn)
+            .ToListAsync(ct);
 
-        var services = await db.ServiceFiscalProfileEntries
+        var serviceProfiles = await db.ServiceFiscalProfileEntries
             .AsNoTracking()
-            .ToDictionaryAsync(x => x.ServiceId, x => x.Data, ct);
+            .Where(x => x.EffectiveFrom <= effectiveOn)
+            .ToListAsync(ct);
+
+        var products = productProfiles
+            .GroupBy(x => x.PartId)
+            .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.EffectiveFrom).First());
+        var services = serviceProfiles
+            .GroupBy(x => x.ServiceId)
+            .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.EffectiveFrom).First());
 
         var lines = new List<FiscalLine>();
 
@@ -142,7 +152,7 @@ public sealed class FiscalPreparationService(
             var profile = recipient.Products?.GetValueOrDefault(p.Id);
             if (profile == null && p.PartId is { } pid && products.TryGetValue(pid, out var data))
             {
-                profile = FiscalJson.Required<ProductFiscalData>(data);
+                profile = FiscalJson.Required<ProductFiscalData>(data.Data) with { EffectiveFrom = data.EffectiveFrom };
             }
 
             lines.Add(new FiscalLine(
@@ -160,7 +170,7 @@ public sealed class FiscalPreparationService(
             var profile = recipient.Services?.GetValueOrDefault(s.Id);
             if (profile == null && s.ServiceId is { } sid && services.TryGetValue(sid, out var data))
             {
-                profile = FiscalJson.Required<ServiceFiscalData>(data);
+                profile = FiscalJson.Required<ServiceFiscalData>(data.Data) with { EffectiveFrom = data.EffectiveFrom };
             }
 
             if (profile != null)

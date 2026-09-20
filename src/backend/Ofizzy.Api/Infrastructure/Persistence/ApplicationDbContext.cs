@@ -285,7 +285,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.Entity<ProductFiscalProfile>(e =>
         {
             e.ToTable("fiscal_products");
-            e.HasIndex(x => x.PartId).IsUnique();
+            e.HasIndex(x => new { x.PartId, x.EffectiveFrom }).IsUnique();
             e.HasOne<Part>()
                 .WithMany()
                 .HasForeignKey(x => new { x.TenantId, x.PartId })
@@ -296,7 +296,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.Entity<ServiceFiscalProfile>(e =>
         {
             e.ToTable("fiscal_services");
-            e.HasIndex(x => x.ServiceId).IsUnique();
+            e.HasIndex(x => new { x.ServiceId, x.EffectiveFrom }).IsUnique();
             e.HasOne<ServiceItem>()
                 .WithMany()
                 .HasForeignKey(x => new { x.TenantId, x.ServiceId })

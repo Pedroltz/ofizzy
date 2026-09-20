@@ -24,8 +24,8 @@ import {
   FiscalField,
   fiscalForm,
   addressFields,
-  productFields,
-  serviceFields,
+  productProfileFields,
+  serviceProfileFields,
 } from './fiscal-fields.component';
 @Component({
   selector: 'app-fiscal-settings',
@@ -250,8 +250,12 @@ import {
                 <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
                   Parâmetros Fiscais do Item
                 </h4>
+                <p class="text-sm text-muted mb-3">
+                  Salve uma nova data de vigência para criar uma revisão futura. Documentos já emitidos
+                  preservam a classificação registrada no próprio snapshot.
+                </p>
                 <app-fiscal-fields
-                  [fields]="profileKind() === 'parts' ? productFields : serviceFields"
+                  [fields]="profileKind() === 'parts' ? productProfileFields : serviceProfileFields"
                   [form]="form"
                   prefix="profile-"
                 />
@@ -382,8 +386,8 @@ export class FiscalSettingsComponent {
   readonly busy = signal(false);
   readonly loadError = signal(false);
   readonly addressFields = addressFields;
-  readonly productFields = productFields;
-  readonly serviceFields = serviceFields;
+  readonly productProfileFields = productProfileFields;
+  readonly serviceProfileFields = serviceProfileFields;
   readonly settingsFields: FiscalField[] = [
     {
       key: 'cnpj',
@@ -585,7 +589,9 @@ export class FiscalSettingsComponent {
       const data = await this.api.profile(kind, id);
       if (!this.valid() || this.selected.value !== selected) return;
       this.profileKind.set(kind);
-      this.profileForm.set(fiscalForm(kind === 'parts' ? productFields : serviceFields, data));
+      this.profileForm.set(
+        fiscalForm(kind === 'parts' ? productProfileFields : serviceProfileFields, data),
+      );
     } catch {
       if (this.valid()) this.actionError.set('Não foi possível carregar a classificação.');
     }
