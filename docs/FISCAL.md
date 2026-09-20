@@ -48,12 +48,22 @@ históricos. Escrever sempre por contexto validado, filtros e FKs compostas por 
 
 ## Schemas e fontes
 
+Auditoria normativa em 19/09/2026: [matriz regulatória](fiscal/FISCAL-REGULATORY-AUDIT-2026.md).
+Ela identificou o pacote NF-e `010e_v1.02` como referência vigente no Portal NF-e e
+o baseline incorporado `010c` como defasado. A migração NF-e está deliberadamente
+pendente da obtenção direta do pacote oficial, comparação e adaptação conjunta de
+modelo/XML/testes; não trocar somente XSD nem liberar produção por essa auditoria.
+
 Arquivos oficiais são distribuídos junto à API em `BusinessCore/Fiscal/Schemas`.
 O resolver admite somente arquivos desse diretório; XMLs recebidos proíbem DTD.
 O schema W3C de assinatura da NFS-e contém DOCTYPE legado: seu carregamento ignora
 essa declaração sem resolver recursos externos.
 
 - NFS-e: [pacote 1.01 de 09/02/2026](https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual/nfse-esquemas_xsd-v1-01-20260209.zip).
+  Em 19/09/2026, os dez XSDs ativos foram comparados byte a byte com esse ZIP oficial
+  (SHA-256 `e7935cbd9470527c6cc32984c1b2263e614183bf0139ce2733eaaed2de9a8072`);
+  origem e hashes estão em `Schemas/Nfse/README.md`. O ZIP de produção restrita RTC
+  20260727 é diferente e não foi ativado sem modelagem dos grupos IBS/CBS.
 - NF-e: [pacote 010c/NT2022.002v1.30 da SVRS](https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=2&nomeArquivo=PL_010c_NT2022_002v1.30.zip).
   Este é o baseline incorporado, **não o pacote mais recente**. Atualização/revalidação
   das NTs vigentes permanece impeditivo de liberação em produção.
@@ -99,6 +109,17 @@ OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.fiscal.config.ts
 O teste real exige banco isolado e bootstrap habilitado. Credenciais fictícias do teste
 não devem ser usadas em produção. HTTP local usa Development; produção exige HTTPS.
 Os testes reais têm trace desligado e persistem somente IDs em `/tmp/ofizzy-fiscal-live.json`.
+
+Em 19/09/2026, a reprodução foi corrigida para usar as imagens **runtime** de
+`compose.yaml` com `ASPNETCORE_ENVIRONMENT=Development`, porta `18082` e projeto
+`ofizzy-fiscal-smoke`; `compose.dev.yaml` não deve ser combinado ao Nginx nesse smoke,
+pois expõe Angular em 4200 enquanto o proxy espera o frontend runtime em 8080. A suíte
+passou 2/2 antes e 2/2 após o restart, somente com banco/volumes desse projeto isolado.
+
+Em 20/09/2026, o DANFE passou a extrair chave de acesso e série exclusivamente do
+`AuthorizedXml`; valores divergentes no registro local não podem alterar o documento
+auxiliar. O teste visual fiscal cobre essa regressão. A marcação local de cancelamento
+continua apenas como situação operacional até confirmação do evento no autorizador.
 
 ## Recuperação de inutilização — 13/09/2026
 

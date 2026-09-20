@@ -361,6 +361,7 @@ public sealed class FiscalPreparationService(
             d.Environment,
             d.State,
             d.Number,
+            d.SchemaPackage,
             d.AccessKey,
             d.Total,
             d.Message,

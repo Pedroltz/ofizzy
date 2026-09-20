@@ -16,9 +16,17 @@ public static class FiscalPdf
     {
         if (document.AuthorizedXml == null) throw new InvalidOperationException("Documento não autorizado.");
         var xml = FiscalXml.Parse(document.AuthorizedXml);
-        return document.Kind == FiscalKind.Nfe
-            ? GenerateDanfe(document, xml)
-            : GenerateDanfse(document, xml);
+
+        if (document.Kind == FiscalKind.Nfe)
+        {
+            if (xml.Root?.Name != FiscalXml.Nfe + "nfeProc")
+                throw new ConflictException("O XML autorizado não corresponde a uma NF-e para gerar o DANFE.");
+            return GenerateDanfe(document, xml);
+        }
+
+        if (xml.Root?.Name != FiscalXml.Nfse + "NFSe")
+            throw new ConflictException("O XML autorizado não corresponde a uma NFS-e para gerar o DANFSe.");
+        return GenerateDanfse(document, xml);
     }
 
     private static byte[] GenerateDanfe(FiscalDocument document, XDocument xml)
@@ -34,16 +42,32 @@ public static class FiscalPdf
         var nfe = xml.Descendants(ns + "infNFe").FirstOrDefault() ?? xml.Root!;
         var emit = nfe.Element(ns + "emit");
         var dest = nfe.Element(ns + "dest");
+        var environment = nfe.Element(ns + "ide")?.Element(ns + "tpAmb")?.Value;
         var enderEmit = emit?.Element(ns + "enderEmit");
         var enderDest = dest?.Element(ns + "enderDest");
         var total = xml.Descendants(ns + "ICMSTot").FirstOrDefault();
         var prot = xml.Descendants(ns + "infProt").FirstOrDefault();
 
-        var key = document.AccessKey ?? document.Identity;
+        var key = prot?.Element(ns + "chNFe")?.Value
+            ?? nfe.Attribute("Id")?.Value?.Replace("NFe", string.Empty, StringComparison.Ordinal);
+
+        if (string.IsNullOrWhiteSpace(key) || !key.AsSpan().ToArray().All(char.IsAsciiDigit) || key.Length != 44)
+        {
+            throw new ConflictException("O XML autorizado não contém uma chave NF-e válida para gerar o DANFE.");
+        }
+
         var formattedKey = FormatAccessKey(key);
         var nNf = Value("nNF");
         var formattedNumber = long.TryParse(nNf, out var num) ? num.ToString("N0", new CultureInfo("pt-BR")).Replace(",", ".") : nNf;
-        var serie = document.Series.ToString();
+        var serie = nfe.Element(ns + "ide")?.Element(ns + "serie")?.Value;
+        if (string.IsNullOrWhiteSpace(serie))
+        {
+            throw new ConflictException("O XML autorizado não contém a série da NF-e para gerar o DANFE.");
+        }
+        if (environment is not ("1" or "2"))
+        {
+            throw new ConflictException("O XML autorizado não contém o ambiente da NF-e para gerar o DANFE.");
+        }
         var nProt = prot?.Element(ns + "nProt")?.Value ?? Value("nProt");
         var dhRecbto = prot?.Element(ns + "dhRecbto")?.Value ?? Value("dhRecbto");
 
@@ -57,7 +81,7 @@ public static class FiscalPdf
             {
                 if (xml.Descendants().Any(x => x.Name.LocalName == "verAplic" && x.Value == "Ofizzy_SIMULACAO") || xml.Descendants().Any(x => x.Name.LocalName == "xMotivo" && x.Value.Contains("Simulação de Desenvolvimento", StringComparison.Ordinal)))
                     header.Item().AlignCenter().Text("SIMULAÇÃO LOCAL — SEM AUTORIZAÇÃO FISCAL").Bold().FontSize(9);
-                if (document.Environment == FiscalEnvironment.Homologation)
+                if (environment == "2")
                     header.Item().PaddingBottom(2).AlignCenter().Text("SEM VALOR FISCAL — EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO").Bold().FontSize(9).FontColor(Colors.Red.Medium);
                 if (document.State == FiscalState.Cancelled)
                     header.Item().PaddingBottom(2).AlignCenter().Text("DOCUMENTO CANCELADO").Bold().FontSize(10).FontColor(Colors.Red.Darken2);
@@ -422,13 +446,13 @@ public static class FiscalPdf
             _ => service?.Element(ns + "cServ")?.Element(ns + name)?.Value ?? ""
         };
         string ValueOrDash(string name) => string.IsNullOrWhiteSpace(Value(name)) ? "—" : Value(name);
-        FiscalSnapshot? snapshot = null;
-        try { if (!string.IsNullOrWhiteSpace(document.Snapshot)) snapshot = FiscalJson.Required<FiscalSnapshot>(document.Snapshot); }
-        catch (System.Text.Json.JsonException) { /* Optional metadata must not override the authorized XML. */ }
-        var issuer = snapshot?.Issuer;
         var prestName = prest?.Element(ns + "xNome")?.Value;
-        if (string.IsNullOrWhiteSpace(prestName) || endPrest == null || valores?.Element(ns + "vLiq") == null)
+        var prestCnpj = prest?.Element(ns + "CNPJ")?.Value;
+        var environment = dps.Element(ns + "tpAmb")?.Value;
+        if (string.IsNullOrWhiteSpace(prestName) || string.IsNullOrWhiteSpace(prestCnpj) || endPrest == null || valores?.Element(ns + "vLiq") == null)
             throw new ConflictException("O XML da NFS-e não contém emitente, endereço ou valores autorizados. Consulte a situação do documento.");
+        if (environment is not ("1" or "2"))
+            throw new ConflictException("O XML da NFS-e não contém o ambiente autorizado. Consulte a situação do documento.");
         var prestAddress = FormatAddress(endPrest);
         var issuerCity = nfse.Element(ns + "xLocEmi")?.Value;
         if (!string.IsNullOrWhiteSpace(issuerCity)) prestAddress += " - " + issuerCity;
@@ -452,7 +476,7 @@ public static class FiscalPdf
             {
                 if (xml.Descendants().Any(x => x.Name.LocalName == "verAplic" && x.Value == "Ofizzy_SIMULACAO") || xml.Descendants().Any(x => x.Name.LocalName == "xMotivo" && x.Value.Contains("Simulação de Desenvolvimento", StringComparison.Ordinal)))
                     header.Item().Text("SIMULAÇÃO LOCAL — SEM AUTORIZAÇÃO FISCAL").AlignCenter().Bold().FontSize(9);
-                if (document.Environment == FiscalEnvironment.Homologation)
+                if (environment == "2")
                     header.Item().PaddingBottom(2).Text("SEM VALOR FISCAL — EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO").AlignCenter().Bold().FontSize(9).FontColor(Colors.Red.Medium);
                 if (document.State == FiscalState.Cancelled)
                     header.Item().PaddingBottom(2).Text("DOCUMENTO CANCELADO").AlignCenter().Bold().FontSize(10).FontColor(Colors.Red.Darken2);
@@ -528,10 +552,10 @@ public static class FiscalPdf
                     });
 
                     t.Cell().Text(prestName).Bold().FontSize(8.5f);
-                    t.Cell().Text($"CNPJ: {FormatCnpj(prest?.Element(ns + "CNPJ")?.Value ?? issuer?.Cnpj)}").AlignRight().Bold().FontSize(7.5f);
+                    t.Cell().Text($"CNPJ: {FormatCnpj(prestCnpj)}").AlignRight().Bold().FontSize(7.5f);
 
                     t.Cell().Text(prestAddress).FontSize(7f);
-                    t.Cell().Text($"Inscrição Municipal: {prest?.Element(ns + "IM")?.Value ?? issuer?.MunicipalRegistration ?? "—"}").AlignRight().FontSize(7f);
+                    t.Cell().Text($"Inscrição Municipal: {prest?.Element(ns + "IM")?.Value ?? "—"}").AlignRight().FontSize(7f);
 
                     t.Cell().ColumnSpan(2).PaddingTop(2).Text($"Opção pelo Simples Nacional: {simples switch { "2" => "Sim (MEI)", "3" => "Sim (ME/EPP)", _ => "Não optante" }}").FontSize(6.5f).FontColor(Colors.Grey.Darken2);
                 });

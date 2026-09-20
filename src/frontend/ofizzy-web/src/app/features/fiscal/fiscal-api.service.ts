@@ -31,6 +31,17 @@ export interface FiscalSettingsResponse {
   productionAllowed: boolean;
   devToolsAvailable: boolean;
 }
+export interface FiscalHomologationCheck {
+  code: string;
+  label: string;
+  passed: boolean;
+  detail: string;
+  requiresExternalConfirmation: boolean;
+}
+export interface FiscalHomologationReadiness {
+  readyForExternalHomologation: boolean;
+  checks: FiscalHomologationCheck[];
+}
 export interface FiscalPreparation {
   address: FiscalAddress | null;
   document: string | null;
@@ -49,6 +60,7 @@ export interface FiscalDocument {
   environment: string;
   state: string;
   number: number;
+  schemaPackage: string;
   accessKey: string | null;
   total: number;
   message: string | null;
@@ -88,6 +100,11 @@ export class FiscalApiService {
   }
   settings() {
     return firstValueFrom(this.http.get<FiscalSettingsResponse>('/api/fiscal/settings'));
+  }
+  homologationReadiness() {
+    return firstValueFrom(
+      this.http.get<FiscalHomologationReadiness>('/api/fiscal/homologation-readiness'),
+    );
   }
   saveSettings(data: FiscalSettings) {
     return firstValueFrom(this.http.put('/api/fiscal/settings', data));

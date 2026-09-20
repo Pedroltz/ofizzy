@@ -125,6 +125,7 @@ public sealed class FiscalEmissionService(
                     Environment = snapshot.Issuer.Environment,
                     Series = series,
                     Number = sequence.LastNumber,
+                    SchemaPackage = FiscalSchemaCatalog.Document(kind).Package,
                     CreatedBy = tenant.UserId!.Value,
                     Snapshot = FiscalJson.Write(specific),
                     Total = kind == FiscalKind.Nfe

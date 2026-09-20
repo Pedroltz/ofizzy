@@ -52,6 +52,16 @@ public sealed class NationalFiscalGateway : IFiscalGateway
             : "https://sefin.producaorestrita.nfse.gov.br/SefinNacional";
     }
 
+    public static string NfseAdnBase(FiscalEnvironment environment)
+    {
+        if (environment == FiscalEnvironment.Production)
+        {
+            throw new ConflictException("Endpoint ADN de produção não registrado. Confirme a fonte oficial antes da liberação fiscal.");
+        }
+
+        return "https://adn.producaorestrita.nfse.gov.br/contribuintes";
+    }
+
     public static string NfeEndpoint(FiscalSnapshot snapshot, string operation)
     {
         var state = snapshot.Issuer.Address!.State;
@@ -159,7 +169,9 @@ public sealed class NationalFiscalGateway : IFiscalGateway
                 return result;
             }
 
-            var eventsUrl = $"{NfseBase(d.Environment)}/nfse/{Uri.EscapeDataString(key)}/eventos/101101";
+            // The ADN API is the official source for all events bound to a NFS-e key.
+            // Do not filter by a guessed event code: inspect the complete official history.
+            var eventsUrl = $"{NfseAdnBase(d.Environment)}/NFSe/{Uri.EscapeDataString(key)}/Eventos";
             using var events = await client.GetAsync(eventsUrl, ct);
             if (events.IsSuccessStatusCode)
             {

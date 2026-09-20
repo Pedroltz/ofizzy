@@ -1,5 +1,36 @@
 # Continuidade do Ofizzy
 
+## Continuidade fiscal — 20/09/2026
+
+- A auditoria oficial está em `docs/fiscal/FISCAL-REGULATORY-AUDIT-2026.md`; o
+  baseline NF-e local 010c permanece deliberadamente sem migração até obter e validar
+  o pacote oficial 010e. Os XSDs NFS-e produtivos locais correspondem byte a byte ao
+  pacote oficial 1.01-20260209; produção restrita RTC não foi ativada. Em nova tentativa
+  em 20/09, o cookie exigido pelo Portal permitiu baixar os ZIPs oficiais 010e e 010f.
+  O 010f é o atual; hashes e diferenças estão em `Schemas/Nfe/README.md`. Não migrar
+  para o 010e histórico nem trocar somente XSDs.
+- O DANFE agora obtém chave e série exclusivamente do XML autorizado. O teste de
+  regressão altera os campos locais de propósito e confirma que o PDF conserva o XML.
+- Evidência desta continuidade: 6 testes visuais fiscais, 58 testes unitários backend
+  e build Release aprovados sem avisos/erros; `git diff --check` limpo. O smoke
+  Nginx/Development anterior continua sendo simulado, sem transmissão externa e sem
+  mudança de `Fiscal:ProductionEnabled`, allow-list ou `FiscalProductionReleased`.
+- Continuidade posterior: o catálogo central tornou explícitos os baselines ativos
+  (NF-e 010c e NFS-e 1.01); PDFs usam ambiente/identidade do XML autorizado e o A1 é
+  revalidado a cada uso. A suíte unitária backend passou com 64 testes e o build
+  Release sem avisos/erros. Ainda não há ativação do 010f, homologação externa ou
+  liberação de produção.
+- O cálculo de DV do CNPJ alfanumérico está disponível e coberto por casos oficiais,
+  mas não foi ligado aos fluxos ativos. A última validação local foi 69 testes
+  unitários backend e build Release sem avisos/erros.
+- Eventos NFS-e: a consulta pós-timeout/autorização usa o ADN oficial de produção
+  restrita e o histórico completo por chave. Sem endpoint produtivo oficial confirmado,
+  esse caminho falha de modo explícito em produção. A última validação local foi 70
+  testes unitários backend e build Release sem avisos/erros.
+- A matriz `docs/fiscal/RTC-DOMAIN-MATRIX.md` é a referência obrigatória antes de
+  modelar IBS/CBS: sem classificação e cenários da contabilidade, não adicionar tags
+  ou cálculo ao XML.
+
 ## Refatoração abrangente de legibilidade, enriquecimento fiscal e dados de teste — 19/09/2026
 
 - **Refatoração de Legibilidade, Organização e Padronização de Código**:
@@ -152,6 +183,48 @@ Evidências: backend build/56 unitários/10 integrações; frontend lint/51 unit
 Atualizado em 13/09/2026. Trabalhar em `develop`; `main` é exclusiva de releases. Ler `docs/PROJECT.md`, `docs/STATUS.md`, este arquivo, `docs/ARCHITECTURE.md` e a [fase ativa](docs/phases/PHASE-08-FISCAL.md) antes de alterar código.
 
 ## Ponto de retomada
+
+Atualização fiscal de 19/09/2026: consultar primeiro
+`docs/fiscal/FISCAL-REGULATORY-AUDIT-2026.md`. O pacote NFS-e produtivo 1.01 local
+foi conferido byte a byte com o ZIP oficial 20260209; o pacote RTC de produção
+restrita diverge e não está ativo. O baseline NF-e 010c está defasado ante 010e;
+obter o pacote direto do Portal NF-e e migrar schema, domínio, XML e testes juntos.
+Os XSD atuais fixam SHA-1 em XMLDSIG; não trocar para SHA-256 isoladamente. Há testes
+de adulteração de assinatura e de hashes do pacote NFS-e, runbook de homologação e
+checklist de produção. A URL oficial consultada da SVRS devolveu ZIP NF-e vazio neste
+ambiente, por isso nenhum XSD NF-e foi alterado. Nenhum órgão fiscal foi chamado e
+todos os gates de produção permanecem inalterados.
+
+Smoke fiscal atualizado em 19/09/2026: usar `compose.yaml` runtime em Development
+isolado, projeto `ofizzy-fiscal-smoke`, porta 18082; não combinar `compose.dev.yaml`
+com o Nginx desse smoke. O E2E fiscal passou 2/2 antes e 2/2 após restart, com dados
+fictícios, XML/PDF e cancelamento simulados. A suíte unitária backend passou 57/57.
+
+Em 20/09/2026, `FiscalPdf` deixou de usar `FiscalDocument.AccessKey` e `Series` para
+o conteúdo do DANFE: ambos são extraídos do XML autorizado, com teste que força valores
+locais divergentes. Próxima pendência técnica continua sendo obter o ZIP NF-e oficial
+010e de forma verificável antes de migrar schemas/RTC.
+
+Ainda em 20/09/2026, a migration
+`20260920070200_AddFiscalDocumentSchemaPackage` passou a preservar em cada
+`FiscalDocument` o pacote de schemas efetivamente utilizado. Emissões novas usam
+`FiscalSchemaCatalog`; o backfill identifica NF-e existentes como `NF-e PL_010c` e
+NFS-e existentes como `NFS-e Nacional 1.01`. O DTO expõe `schemaPackage` ao frontend.
+Não mudar o rótulo de documentos históricos ao ativar um pacote novo. Evidências:
+EF gerou a migration em Release, backend 71/71, lint frontend, frontend 69/69 e build
+passaram. A migration foi aplicada e conferida em Compose descartável; backend,
+frontend e Nginx ficaram saudáveis na porta temporária 18084. A stack e o volume foram
+removidos. Nenhum segredo do usuário foi lido e nenhuma transmissão externa ocorreu.
+
+Também em 20/09/2026 foi entregue o endpoint autenticado
+`GET /api/fiscal/homologation-readiness` e seu painel nas Configurações Fiscais.
+Ele mostra dados fiscais, ambiente, proteção/validade do A1, schema NFS-e e o
+bloqueio objetivo da NF-e em PL_010c, além das confirmações externas que dependem
+da oficina/contabilidade/órgãos. Não usar esse painel como liberação de produção:
+credenciamento e classificação permanecem pendências externas e o PL_010f continua
+necessário para NF-e. Evidências: backend 72/72, lint, frontend 69/69 e build
+aprovados; migration e smoke pelo Nginx passaram em Compose descartável na porta
+18085, cuja stack e volume foram removidos ao final.
 
 O usuário priorizou emissão oficial de serviços e produtos a partir da OS, sem intermediário pago. Piloto já informado: **Igaraçu do Tietê/SP, Simples Nacional, IBGE 3520004**. Não perguntar novamente município/regime. O certificado A1 é uma dependência de homologação; não foi fornecido nem usado certificado real nos testes.
 

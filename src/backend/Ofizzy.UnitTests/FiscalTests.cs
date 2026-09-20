@@ -14,6 +14,85 @@ namespace Ofizzy.UnitTests;
 
 public sealed class FiscalTests
 {
+    [Fact]
+    public void Schema_catalog_keeps_active_documents_on_explicit_baselines()
+    {
+        var nfe = FiscalSchemaCatalog.Document(FiscalKind.Nfe);
+        var nfse = FiscalSchemaCatalog.Document(FiscalKind.Nfse);
+
+        Assert.Equal(("NF-e PL_010c", "Nfe", "nfe_v4.00.xsd"), (nfe.Package, nfe.Folder, nfe.EntryPoint));
+        Assert.Equal(("NFS-e Nacional 1.01", "Nfse", "DPS_v1.01.xsd"), (nfse.Package, nfse.Folder, nfse.EntryPoint));
+        Assert.True(nfse.HasDedicatedSignatureSchema);
+    }
+
+    [Fact]
+    public void Fiscal_document_response_preserves_the_schema_package_used_for_emission()
+    {
+        var document = new FiscalDocument
+        {
+            Kind = FiscalKind.Nfe,
+            SchemaPackage = "NF-e PL_010c"
+        };
+
+        var response = FiscalPreparationService.Map(document);
+
+        Assert.Equal("NF-e PL_010c", response.SchemaPackage);
+    }
+
+    [Fact]
+    public void Homologation_readiness_exposes_schema_and_external_blockers_without_releasing_production()
+    {
+        var settings = Snapshot(FiscalKind.Nfe).Issuer with
+        {
+            Environment = FiscalEnvironment.Homologation,
+            NfeEnabled = true,
+            NfseEnabled = true
+        };
+
+        var result = FiscalHomologationReadiness.Evaluate(
+            settings,
+            encryptionConfigured: true,
+            new CertificateInfo("Oficina de teste", DateTimeOffset.UtcNow.AddDays(30), "thumbprint"),
+            DateTimeOffset.UtcNow);
+
+        Assert.False(result.ReadyForExternalHomologation);
+        Assert.False(result.Checks.Single(x => x.Code == "nfe-schema").Passed);
+        Assert.True(result.Checks.Single(x => x.Code == "nfse-schema").Passed);
+        Assert.All(result.Checks.Where(x => x.RequiresExternalConfirmation), x => Assert.False(x.Passed));
+    }
+
+    [Fact]
+    public void Nfse_event_queries_use_the_official_restricted_adn_base()
+    {
+        Assert.Equal("https://adn.producaorestrita.nfse.gov.br/contribuintes", NationalFiscalGateway.NfseAdnBase(FiscalEnvironment.Homologation));
+        Assert.Throws<ConflictException>(() => NationalFiscalGateway.NfseAdnBase(FiscalEnvironment.Production));
+    }
+
+    [Fact]
+    public void Nfse_production_schema_package_matches_official_20260209_release()
+    {
+        var expectedHashes = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["CNC_v1.00.xsd"] = "7032188bb6f137d52b16512583b739a361e6b1434c42cb539a29b8efa32f8321",
+            ["DPS_v1.01.xsd"] = "fe45e5250a48e519aba89fc6a472863b8e602ed957778fb64692804933a00d0c",
+            ["NFSe_v1.01.xsd"] = "af0bd2d8c50acba3d9c3f3f515426eca083b3f66e3211ce8dd48a7cf101818b8",
+            ["evento_v1.01.xsd"] = "986d0a1c4d27454f712169849aa7c2380aaa4560bd9c920e0ff03ba6599ae28b",
+            ["pedRegEvento_v1.01.xsd"] = "e90b6816d29cca0bd5ed8f86ad98d3b7b0d8bbfc11a7583e6ff8f98170fd4009",
+            ["tiposCnc_v1.00.xsd"] = "af606b7317824fa8fa7ad8e44bac2ad8530cd5d162ebcdec647205473c41d525",
+            ["tiposComplexos_v1.01.xsd"] = "e8e09d525574cc224ca6d1f8d8eb0366043ab2a3aa8d0d234058e6244d60e371",
+            ["tiposEventos_v1.01.xsd"] = "1b32bea21089dc232d78b62d805e9c07382f440d4e0ea2cb3fb6b82ebde68c11",
+            ["tiposSimples_v1.01.xsd"] = "830ea116c34d7310699e34b214b7214a65f7e5d3b1f09aeaa702f7e3f4283b17",
+            ["xmldsig-core-schema.xsd"] = "49848f732663aecb618d72ad6130c5c3240f0a10f3a1a8544b7d48a6c726046f"
+        };
+        var directory = Path.Combine(AppContext.BaseDirectory, "BusinessCore", "Fiscal", "Schemas", "Nfse");
+
+        foreach (var (file, expectedHash) in expectedHashes)
+        {
+            var actualHash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(directory, file)))).ToLowerInvariant();
+            Assert.Equal(expectedHash, actualHash);
+        }
+    }
+
     [Theory]
     [InlineData(FiscalKind.Nfe)]
     [InlineData(FiscalKind.Nfse)]
@@ -182,6 +261,14 @@ public sealed class FiscalTests
         var verifier = new SignedXml(dom);
         verifier.LoadXml((XmlElement)dom.GetElementsByTagName("Signature", SignedXml.XmlDsigNamespaceUrl)[0]!);
         Assert.True(verifier.CheckSignature(cert, true));
+
+        var protectedElement = dom.GetElementsByTagName(rootTag).OfType<XmlElement>().Single();
+        var text = protectedElement.SelectSingleNode(".//*[text()]")!;
+        text.InnerText = $"{text.InnerText}-altered";
+
+        var alteredVerifier = new SignedXml(dom);
+        alteredVerifier.LoadXml((XmlElement)dom.GetElementsByTagName("Signature", SignedXml.XmlDsigNamespaceUrl)[0]!);
+        Assert.False(alteredVerifier.CheckSignature(cert, true));
     }
 
     [Fact]
@@ -222,6 +309,31 @@ public sealed class FiscalTests
         Assert.False(FiscalCertificateVault.MatchesCnpj(cert, "12345678000195"));
     }
 
+    [Fact]
+    public void Vault_rechecks_certificate_cnpj_before_each_fiscal_use()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Fiscal:ActiveKeyId", "v1" },
+                { "Fiscal:Keys:v1", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)) }
+            })
+            .Build();
+        var vault = new FiscalCertificateVault(config);
+        using var certificate = Certificate();
+        var settings = new FiscalSettings
+        {
+            TenantId = Guid.NewGuid(),
+            KeyId = "v1",
+            Data = FiscalJson.Write(new FiscalSettingsData(Cnpj: "12345678000195"))
+        };
+        var exported = certificate.Export(X509ContentType.Pkcs12);
+        settings.Certificate = vault.Protect(settings.TenantId, exported);
+        CryptographicOperations.ZeroMemory(exported);
+
+        Assert.Throws<ConflictException>(() => vault.Load(settings));
+    }
+
     [Theory]
     [InlineData("11222333000181", true)]
     [InlineData("12345678909", true)]
@@ -230,6 +342,17 @@ public sealed class FiscalTests
     public void Fiscal_documents_require_valid_check_digits(string value, bool valid)
     {
         Assert.Equal(valid, FiscalValidation.IsDocument(value));
+    }
+
+    [Theory]
+    [InlineData("12ABC34501DE35", true)]
+    [InlineData("12ABC34501DE36", false)]
+    [InlineData("12abc34501DE35", false)]
+    [InlineData("11222333000181", true)]
+    [InlineData("11111111111111", false)]
+    public void Alphanumeric_cnpj_uses_the_official_modulo_11_algorithm(string value, bool valid)
+    {
+        Assert.Equal(valid, FiscalValidation.IsAlphanumericCnpj(value));
     }
 
     [Fact]

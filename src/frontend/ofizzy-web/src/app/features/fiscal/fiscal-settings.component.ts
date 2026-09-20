@@ -13,6 +13,7 @@ import {
   FiscalApiService,
   FiscalSettings,
   FiscalSettingsResponse,
+  FiscalHomologationReadiness,
   FiscalAddress,
   FiscalValue,
   saveFiscalBlob,
@@ -88,6 +89,34 @@ import {
               />
             </div>
           </p-fieldset>
+          @if (readiness(); as readiness) {
+            <p-fieldset legend="Prontidão para homologação" styleClass="fiscal-fieldset">
+              <p-message [severity]="readiness.readyForExternalHomologation ? 'success' : 'warn'" class="mb-4 block">
+                @if (readiness.readyForExternalHomologation) {
+                  Os requisitos técnicos locais foram conferidos. Registre as confirmações externas antes de transmitir.
+                } @else {
+                  Existem bloqueios técnicos que precisam ser resolvidos antes da homologação oficial.
+                }
+              </p-message>
+              <div class="homologation-checks">
+                @for (check of readiness.checks; track check.code) {
+                  <div class="homologation-check">
+                    <i
+                      [class]="check.passed ? 'pi pi-check-circle text-success' : 'pi pi-exclamation-triangle text-warning'"
+                      aria-hidden="true"
+                    ></i>
+                    <div>
+                      <strong>{{ check.label }}</strong>
+                      <p>{{ check.detail }}</p>
+                    </div>
+                    <span class="homologation-check__status" [class.homologation-check__status--ok]="check.passed">
+                      {{ check.passed ? 'Conferido' : check.requiresExternalConfirmation ? 'Pendente externo' : 'Bloqueado' }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </p-fieldset>
+          }
           <p-fieldset legend="Certificado digital A1" styleClass="fiscal-fieldset">
             @if (value.certificate; as certificate) {
               <div class="fiscal-cert-badge mb-4">
@@ -272,6 +301,41 @@ import {
       gap: 0.75rem;
       flex-wrap: wrap;
     }
+    .homologation-checks {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .homologation-check {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 0.65rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-secondary);
+    }
+    .homologation-check > i {
+      margin-top: 0.15rem;
+    }
+    .homologation-check p {
+      margin: 0.2rem 0 0;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+    .homologation-check__status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--warning);
+      background: var(--warning-soft);
+      border-radius: 999px;
+      padding: 0.2rem 0.5rem;
+      white-space: nowrap;
+    }
+    .homologation-check__status--ok {
+      color: var(--success);
+      background: var(--success-soft);
+    }
     .dev-cert-subtle-hint {
       margin-top: 0.4rem;
       font-size: 0.75rem;
@@ -292,6 +356,13 @@ import {
       min-height: 44px;
     }
     @media (max-width: 640px) {
+      .homologation-check {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+      .homologation-check__status {
+        grid-column: 2;
+        justify-self: start;
+      }
       input {
         font-size: 16px;
       }
@@ -307,6 +378,7 @@ export class FiscalSettingsComponent {
   private readonly tenantId = this.tenant.tenant()?.id;
   readonly actionError = signal('');
   readonly data = signal<FiscalSettingsResponse | null>(null);
+  readonly readiness = signal<FiscalHomologationReadiness | null>(null);
   readonly busy = signal(false);
   readonly loadError = signal(false);
   readonly addressFields = addressFields;
@@ -387,6 +459,12 @@ export class FiscalSettingsComponent {
       this.data.set(data);
       this.settingsForm.patchValue(data.settings as unknown as Record<string, FiscalValue>);
       this.addressForm.patchValue({ ...data.settings.address });
+      try {
+        const readiness = await this.api.homologationReadiness();
+        if (this.valid()) this.readiness.set(readiness);
+      } catch {
+        if (this.valid()) this.readiness.set(null);
+      }
       if (this.tenant.has('Catalog')) {
         const [parts, services] = await Promise.all([
           this.catalogs.parts(this.search.value),

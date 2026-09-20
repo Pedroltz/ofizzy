@@ -46,6 +46,9 @@ public static class FiscalXml
 
         var signer = new SignedXml(doc) { SigningKey = rsa };
         signer.SignedInfo!.CanonicalizationMethod = SignedXml.XmlDsigC14NTransformUrl;
+        // The installed official baseline (PL_010c) fixes XMLDSIG to SHA-1. Do not
+        // switch algorithms until the successor package and its transition rules
+        // have been installed and validated together.
         signer.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
 
         var reference = new Reference($"#{element.GetAttribute("Id")}")
@@ -66,36 +69,28 @@ public static class FiscalXml
 
     public static void Validate(string xml, FiscalKind kind)
     {
-        ValidateSchema(
-            xml,
-            kind,
-            kind.ToString(),
-            kind == FiscalKind.Nfse ? "DPS_v1.01.xsd" : "nfe_v4.00.xsd");
+        ValidateSchema(xml, kind, FiscalSchemaCatalog.Document(kind));
     }
 
     public static void ValidateAuthorizedNfse(string xml)
     {
-        ValidateSchema(xml, FiscalKind.Nfse, "Nfse", "NFSe_v1.01.xsd");
+        ValidateSchema(xml, FiscalKind.Nfse, FiscalSchemaCatalog.AuthorizedNfse());
     }
 
     public static void ValidateCancellation(string xml, FiscalKind kind)
     {
-        ValidateSchema(
-            xml,
-            kind,
-            kind == FiscalKind.Nfse ? "Nfse" : "NfeEvents",
-            kind == FiscalKind.Nfse ? "pedRegEvento_v1.01.xsd" : "envEventoCancNFe_v1.00.xsd");
+        ValidateSchema(xml, kind, FiscalSchemaCatalog.Cancellation(kind));
     }
 
     public static void ValidateInutilization(string xml)
     {
-        ValidateSchema(xml, FiscalKind.Nfe, "Nfe", "inutNFe_v4.00.xsd");
+        ValidateSchema(xml, FiscalKind.Nfe, FiscalSchemaCatalog.Inutilization());
     }
 
-    private static void ValidateSchema(string xml, FiscalKind kind, string folder, string file)
+    private static void ValidateSchema(string xml, FiscalKind kind, FiscalSchemaReference schema)
     {
-        var directory = Path.Combine(AppContext.BaseDirectory, "BusinessCore", "Fiscal", "Schemas", folder);
-        var path = Path.Combine(directory, file);
+        var directory = Path.Combine(AppContext.BaseDirectory, "BusinessCore", "Fiscal", "Schemas", schema.Folder);
+        var path = Path.Combine(directory, schema.EntryPoint);
 
         if (!File.Exists(path))
         {
@@ -107,7 +102,7 @@ public static class FiscalXml
             XmlResolver = new LocalSchemaResolver(directory)
         };
 
-        if (kind == FiscalKind.Nfse)
+        if (schema.HasDedicatedSignatureSchema)
         {
             // The bundled W3C schema has a legacy DOCTYPE; ignore it without resolving external resources.
             using var signatureSchema = XmlReader.Create(

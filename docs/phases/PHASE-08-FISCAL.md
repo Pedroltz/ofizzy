@@ -1,5 +1,67 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Auditoria regulatória e preparação de homologação — 19/09/2026
+
+- Criada a [matriz regulatória](../fiscal/FISCAL-REGULATORY-AUDIT-2026.md) somente
+  com fontes oficiais. Ela identifica o NF-e `PL_010f_v1.04` como vigente e NTs
+  RTC/CNPJ alfanumérico; o baseline local NF-e `010c` segue pendente de migração
+  conjunta com XML, domínio e testes.
+- Os XSDs NFS-e ativos 1.01 foram confrontados byte a byte com o pacote oficial de
+  produção `NFSe-ESQUEMAS_XSD-v1.01-20260209` (SHA-256 registrado em
+  `Schemas/Nfse/README.md`). O pacote RTC de produção restrita 20260727 diverge e
+  não foi ativado sem regras de IBS/CBS.
+- Adicionados runbook de homologação e checklist de produção em `docs/fiscal/`.
+  Nenhum deles representa homologação externa ou liberação de produção. O teste
+  fiscal agora demonstra que alteração posterior ao XML invalida a assinatura.
+- Validação local relacionada: 28 testes fiscais unitários aprovados, incluindo a
+  integridade dos dez XSDs NFS-e ativos. A tentativa de
+  migrar SHA-1 para SHA-256 isoladamente foi recusada pelo XSD NF-e/eventos atual;
+  a troca fica bloqueada até o pacote sucessor oficial e regras de transição serem
+  instalados e testados.
+- O smoke fiscal runtime isolado (`ofizzy-fiscal-smoke`, porta 18082) passou 2/2
+  testes E2E antes e depois do restart: persistência de configuração/preparação,
+  emissão simulada de XML/PDF e cancelamento de NFS-e via Nginx. Foram usados dados
+  fictícios e `Development`; a evidência não equivale a homologação externa.
+- Em 20/09/2026, o DANFE foi reforçado para usar chave e série do XML autorizado,
+  nunca campos locais divergentes. Se o XML não contém esses campos, a geração falha
+  com erro compreensível em vez de inventar dados.
+- Evidência adicional em 20/09/2026: 6 testes visuais de PDF e 58 testes unitários
+  backend aprovados; build Release sem avisos/erros e `git diff --check` limpo.
+- Em 20/09/2026, nova consulta com o cookie requerido pelo Portal permitiu obter os
+  ZIPs NF-e 010e e 010f diretamente da fonte oficial. O 010f é a versão atual; os
+  hashes e a comparação foram registrados. A migração continua pendente da adaptação
+  conjunta, sem ativar nem substituir schemas prematuramente.
+- Em 20/09/2026, a seleção dos schemas ativos passou a ser explícita por pacote e
+  finalidade. DANFE/DANFSe passam a derivar ambiente e identidade do XML autorizado;
+  o A1 é revalidado em cada uso (validade, RSA, key usage aplicável e CNPJ). Validação:
+  64 unitários backend e build Release aprovados sem avisos/erros.
+- Em 20/09/2026, foi implementado o cálculo oficial do DV de CNPJ alfanumérico em
+  capacidade isolada para o futuro 010f. O fluxo ativo permanece numérico e a migração
+  só será ativada junto com XML, chave, schemas e regras fiscais. Validação: 69
+  unitários backend e build Release aprovados sem avisos/erros.
+- Em 20/09/2026, a consulta de eventos NFS-e foi corrigida para o ADN oficial de
+  produção restrita, consultando todo o histórico por chave de acesso. O endpoint ADN
+  produtivo permanece bloqueado sem fonte oficial direta. Validação: 70 unitários
+  backend e build Release aprovados sem avisos/erros.
+- Em 20/09/2026, foi criada a matriz de domínio RTC com fontes, condições e critérios
+  de entrada para IBS/CBS, CNPJ alfanumérico, IS e NFS-e. A contabilidade ainda deve
+  fornecer classificações e cenários antes da implementação de cálculo/XML.
+- Em 20/09/2026, cada `FiscalDocument` passou a preservar o pacote de schema usado
+  na emissão. A migration `20260920070200_AddFiscalDocumentSchemaPackage` classifica
+  o acervo atual como `NF-e PL_010c` ou `NFS-e Nacional 1.01`, e novas emissões usam
+  `FiscalSchemaCatalog`. Esse registro é pré-requisito para não reinterpretar XMLs
+  históricos numa futura adoção do PL_010f; não ativa o novo leiaute.
+- Evidências: migration gerada por EF Core em Release, backend 71/71, lint frontend,
+  69/69 testes frontend e build aprovados. A migration foi aplicada e conferida em
+  PostgreSQL de Compose descartável; backend, frontend e Nginx ficaram saudáveis na
+  porta temporária 18084 antes da remoção da stack e do volume.
+- Em 20/09/2026, foi incluído o painel de prontidão para homologação, alimentado pelo
+  endpoint autenticado `GET /api/fiscal/homologation-readiness`. Ele não libera
+  produção e não presume credenciamento: apresenta, separadamente, dados locais
+  verificados, pendências externas e o bloqueio de NF-e enquanto PL_010c estiver ativo.
+  Validação: backend 72/72, lint frontend, 69/69 testes frontend e build; migration e
+  smoke pelo Nginx passaram em Compose descartável na porta 18085, removido ao final.
+
 ## Endereço estruturado do cliente com busca ViaCEP e hidratação automática na emissão fiscal — 18/09/2026
 
 O cadastro de clientes foi expandido para suportar endereço estruturado e dados fiscais:
@@ -139,4 +201,3 @@ Após a revisão independente e a aplicação das correções pendentes, foram r
 - **QuestPDF DANFE**: corrigida a proporção de aspecto do código de barras Code 128 (altura ajustada para 28 px), eliminando `DocumentLayoutException`.
 - **Acessibilidade mobile**: aplicada altura mínima de 44 px nos botões de `fiscal-settings.component.ts`, sanando a falha no teste de responsividade.
 - **Validação final da fase**: 55 testes unitários backend, 10 testes de integração, lint e 39 testes unitários frontend, e 58 testes E2E (11 skips) 100% aprovados.
-

@@ -4,7 +4,15 @@ Planejamento consolidado em 13/09/2026. Referência do estado entregue: [STATUS]
 
 ## 1. Atualizar e validar os leiautes fiscais
 
-**Pode avançar no repositório.** Conferir fontes oficiais de NF-e/SP e NFS-e Nacional, identificar versões e notas técnicas aplicáveis ao piloto Simples Nacional, incluindo RTC. Substituir o baseline antigo da NF-e em `BusinessCore/Fiscal/Schemas`, revisar geração/validação e registrar origem, versão e data dos arquivos em FISCAL.md. Não atualizar apenas o XSD sem adaptar o XML.
+**Pode avançar no repositório.** A auditoria de 19/09/2026 está em
+`fiscal/FISCAL-REGULATORY-AUDIT-2026.md`: os XSD NFS-e produtivos 1.01 já conferem
+byte a byte com o pacote oficial 20260209; o baseline NF-e `010c` continua antigo.
+Em 20/09/2026, o Portal serviu os ZIPs oficiais e revelou que o `010e_v1.02` foi
+substituído pelo `PL_010f_v1.04`. A referência, origem e hashes estão em
+`BusinessCore/Fiscal/Schemas/Nfe/README.md`. Migrar a partir do 010f, revisando
+geração/validação e eventos/inutilização; não atualizar somente o XSD sem adaptar o XML.
+Usar `fiscal/RTC-DOMAIN-MATRIX.md` como critério de entrada: IBS/CBS e CNPJ
+alfanumérico só avançam para domínio/XML após regras e exemplos da contabilidade.
 
 Aceite: fixtures de NF-e normal/ST, DPS, cancelamentos e inutilização validadas; casos incompatíveis recusados com erro compreensível; fontes oficiais e diferenças documentadas. Validar XSD local não encerra homologação.
 

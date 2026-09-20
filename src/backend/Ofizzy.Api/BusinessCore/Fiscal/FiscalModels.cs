@@ -98,12 +98,24 @@ public sealed record FiscalSettingsResponse(
     bool ProductionAllowed,
     bool DevToolsAvailable = false);
 
+public sealed record FiscalHomologationCheck(
+    string Code,
+    string Label,
+    bool Passed,
+    string Detail,
+    bool RequiresExternalConfirmation = false);
+
+public sealed record FiscalHomologationReadinessResponse(
+    bool ReadyForExternalHomologation,
+    IReadOnlyList<FiscalHomologationCheck> Checks);
+
 public sealed record FiscalDocumentResponse(
     Guid Id,
     FiscalKind Kind,
     FiscalEnvironment Environment,
     FiscalState State,
     long Number,
+    string SchemaPackage,
     string? AccessKey,
     decimal Total,
     string? Message,
@@ -221,6 +233,7 @@ public sealed class FiscalDocument : ITenantScoped
     public FiscalState State { get; set; }
     public int Series { get; set; }
     public long Number { get; set; }
+    public string SchemaPackage { get; set; } = "Legado sem pacote identificado";
     public string Identity { get; set; } = "";
     public string? AccessKey { get; set; }
     public string? Protocol { get; set; }

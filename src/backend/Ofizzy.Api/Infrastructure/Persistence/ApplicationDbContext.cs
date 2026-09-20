@@ -328,6 +328,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             e.ToTable("fiscal_documents");
             e.Property(x => x.Version).IsConcurrencyToken();
             e.Property(x => x.Total).HasPrecision(18, 2);
+            e.Property(x => x.SchemaPackage).HasMaxLength(80).IsRequired();
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.Kind, x.Environment, x.Series, x.Number }).IsUnique();
             e.HasIndex(x => new { x.WorkOrderId, x.Kind, x.Environment })

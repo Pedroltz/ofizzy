@@ -91,14 +91,22 @@ public sealed class FiscalCertificateVault(IConfiguration configuration)
         }
 
         byte[]? plain = null;
+        X509Certificate2? certificate = null;
         try
         {
             plain = Unprotect(settings.TenantId, settings.KeyId, settings.Certificate);
-            return X509CertificateLoader.LoadPkcs12(plain, null, X509KeyStorageFlags.EphemeralKeySet);
+            certificate = X509CertificateLoader.LoadPkcs12(plain, null, X509KeyStorageFlags.EphemeralKeySet);
+            ValidateForUse(settings, certificate);
+            return certificate;
         }
         catch (CryptographicException)
         {
             throw new ConflictException("Não foi possível abrir o certificado. Verifique a chave de proteção e o certificado cadastrado.");
+        }
+        catch
+        {
+            certificate?.Dispose();
+            throw;
         }
         finally
         {
@@ -106,6 +114,32 @@ public sealed class FiscalCertificateVault(IConfiguration configuration)
             {
                 CryptographicOperations.ZeroMemory(plain);
             }
+        }
+    }
+
+    private static void ValidateForUse(FiscalSettings settings, X509Certificate2 certificate)
+    {
+        if (certificate.NotAfter.ToUniversalTime() <= DateTime.UtcNow || certificate.NotBefore.ToUniversalTime() > DateTime.UtcNow)
+        {
+            throw new ConflictException("O certificado A1 está fora da validade e não pode ser usado para emissão.");
+        }
+
+        using var rsa = certificate.GetRSAPrivateKey();
+        if (!certificate.HasPrivateKey || rsa is null)
+        {
+            throw new ConflictException("O certificado A1 não contém chave privada RSA para assinatura fiscal.");
+        }
+
+        var keyUsage = certificate.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault();
+        if (keyUsage is not null && !keyUsage.KeyUsages.HasFlag(X509KeyUsageFlags.DigitalSignature))
+        {
+            throw new ConflictException("O certificado A1 não está habilitado para assinatura digital.");
+        }
+
+        var data = FiscalJson.Required<FiscalSettingsData>(settings.Data);
+        if (!MatchesCnpj(certificate, data.Cnpj))
+        {
+            throw new ConflictException("O CNPJ do certificado não corresponde à configuração fiscal da empresa.");
         }
     }
 

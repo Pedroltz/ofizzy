@@ -196,6 +196,24 @@ public static class FiscalValidation
 
     public static bool IsCnpj(string? x) => CheckDocument(x, 14);
 
+    // PL_010f's RTC types allow an alphanumeric base. The active 010c/NFS-e schemas
+    // remain numeric, so callers must opt in only as part of that package migration.
+    public static bool IsAlphanumericCnpj(string? value)
+    {
+        if (value?.Length != 14 || !value[..12].All(c => c is >= '0' and <= '9' or >= 'A' and <= 'Z') || !value[12..].All(char.IsAsciiDigit))
+        {
+            return false;
+        }
+
+        if (value.All(char.IsAsciiDigit))
+        {
+            return IsCnpj(value);
+        }
+
+        return CheckAlphanumericCnpjDigit(value[..12], value[12])
+            && CheckAlphanumericCnpjDigit(value[..13], value[13]);
+    }
+
     public static bool IsDocument(string? x) => CheckDocument(x, x?.Length ?? 0);
 
     private static bool CheckDocument(string? value, int length)
@@ -224,5 +242,19 @@ public static class FiscalValidation
         }
 
         return true;
+    }
+
+    private static bool CheckAlphanumericCnpjDigit(string body, char digit)
+    {
+        var sum = 0;
+        for (var i = 0; i < body.Length; i++)
+        {
+            var value = body[i] - '0';
+            var weight = 2 + (body.Length - 1 - i) % 8;
+            sum += value * weight;
+        }
+
+        var expected = sum % 11 is 0 or 1 ? 0 : 11 - sum % 11;
+        return digit - '0' == expected;
     }
 }

@@ -1,5 +1,90 @@
 # Status do projeto
 
+## Painel de prontidão para homologação — 20/09/2026
+
+- Adicionado `GET /api/fiscal/homologation-readiness` e o painel **Prontidão para
+  homologação** nas Configurações Fiscais. Ele confere dados fiscais, ambiente,
+  proteção do A1, validade registrada do certificado e os pacotes de schemas ativos.
+- O painel separa explicitamente pendências externas (credenciamento, IE/IM/série e
+  classificações da contabilidade) de bloqueios técnicos. Ele bloqueia NF-e habilitada
+  enquanto o leiaute ativo for PL_010c, sem confundir a preparação local com aprovação
+  do órgão fiscal; NFS-e Nacional 1.01 segue marcada como pacote conferido.
+- Evidências: 72 testes unitários backend, lint frontend, 69 testes frontend e build
+  aprovados. A versão atual passou migration e smoke pelo Nginx em Compose descartável
+  na porta 18085; a stack e o volume foram removidos. Produção não foi habilitada nem
+  houve chamada a autorizadores.
+
+## Auditoria regulatória fiscal e segurança de assinatura — 19/09/2026
+
+- Produzida matriz de fontes oficiais em `docs/fiscal/FISCAL-REGULATORY-AUDIT-2026.md`.
+  Ela documenta a defasagem do baseline NF-e 010c frente ao 010e vigente, RTC,
+  CNPJ alfanumérico, IBS/CBS, NFS-e, eventos, inutilização e endpoints SP.
+- Conferido o pacote oficial NFS-e produtivo `v1.01-20260209`: os dez XSDs locais são
+  idênticos ao pacote (SHA-256 do ZIP registrado). O pacote de produção restrita RTC
+  20260727 é diferente e não foi ativado sem modelagem e validação.
+- Adicionado teste de integridade de assinatura: alterar XML após assinar faz a
+  verificação falhar. A auditoria identificou que os schemas NF-e/eventos atuais
+  fixam SHA-1; não foi feita troca incompatível para SHA-256 sem pacote sucessor.
+- Criados `HOMOLOGATION-RUNBOOK.md` e `PRODUCTION-READINESS.md`. Não houve chamada
+  a autorizadores, alteração de `Fiscal:ProductionEnabled`, allow-list ou
+  `FiscalProductionReleased`.
+- Validação executada: 58 testes unitários backend aprovados, incluindo 28 testes
+  fiscais (integridade dos XSDs NFS-e e adulteração de assinatura), e 69 testes
+  frontend aprovados. O smoke fiscal pelo Nginx passou antes e depois do restart:
+  configuração/preparação persistidas, emissão simulada XML/PDF e cancelamento NFS-e.
+  O ambiente foi `Development` isolado, com dados fictícios; não é homologação externa.
+  Produção continua pendente.
+
+## Pacotes NF-e 010e/010f — obtenção e comparação oficial — 20/09/2026
+
+- Com o cookie exigido pelo Portal, foram obtidos diretamente os ZIPs 010e e 010f e
+  conferidos seus SHA-256. O Portal passou a indicar `PL_010f_v1.04` como atual e o
+  010e como histórico; os dois diferem do baseline 010c e entre si em XSDs RTC/IBS-CBS.
+  Nenhum XSD ativo foi alterado: a migração parte do 010f e exige adaptação completa.
+
+## Defesa do documento auxiliar e A1 em uso — 20/09/2026
+
+- DANFE e DANFSe agora derivam o ambiente do XML autorizado e recusam XML de espécie
+  diferente da persistida. O DANFSe não usa mais fallback de CNPJ ou IM do snapshot.
+- A abertura do A1 revalida validade, RSA privado, key usage quando informado e CNPJ
+  da configuração fiscal antes de emissão, cancelamento ou inutilização. Isso mantém
+  a criptografia AES-GCM existente e evita o uso de certificado substituído/expirado.
+- Validação local: 64 testes unitários backend aprovados; build Release sem avisos ou
+  erros e `git diff --check` limpo. Nenhum endpoint externo ou gate de produção mudou.
+
+## CNPJ alfanumérico preparado para migração 010f — 20/09/2026
+
+- Implementado o cálculo oficial de DV do CNPJ alfanumérico em capacidade isolada,
+  com o exemplo da Receita Federal e casos inválidos cobertos. Os validadores, XML e
+  chave de acesso ativos permanecem numéricos sob o pacote NF-e 010c.
+- Validação local: 69 testes unitários backend aprovados; build Release sem avisos ou
+  erros e `git diff --check` limpo. Produção permanece bloqueada.
+
+## Consulta oficial de eventos NFS-e — 20/09/2026
+
+- A recuperação de uma NFS-e passou a consultar o histórico completo no ADN pela rota
+  oficial de produção restrita `GET /NFSe/{ChaveAcesso}/Eventos`, sem supor um código
+  de cancelamento na URL. A rota ADN de produção foi bloqueada até ser obtida fonte
+  oficial específica; a emissão produtiva não foi liberada.
+- Validação local: 70 testes unitários backend aprovados; build Release sem avisos ou
+  erros e `git diff --check` limpo.
+
+## Matriz de domínio RTC — 20/09/2026
+
+- Documentada a aplicabilidade de CNPJ alfanumérico, IBS/CBS, monofásico, crédito,
+  estorno, IS e NFS-e para o perfil piloto. Campos condicionais dependem de
+  classificação e cálculos fornecidos pela contabilidade; não serão inferidos por NCM
+  nem emitidos vazios.
+
+## DANFE derivado do XML autorizado — 20/09/2026
+
+- A geração de DANFE passou a obter chave de acesso e série exclusivamente do XML
+  autorizado. Um `AccessKey` ou uma série divergente no registro local não consegue
+  alterar o PDF; ausência desses campos no XML bloqueia a geração com mensagem clara.
+- Teste visual específico aprovado: 6 testes fiscais de PDF. A suíte unitária completa
+  passou com 58 testes e o build Release terminou sem avisos ou erros. Nenhuma emissão
+  externa ou configuração de produção foi alterada.
+
 ## Refatoração abrangente de legibilidade, enriquecimento fiscal e dados de teste — 19/09/2026
 
 - **Refatoração de Legibilidade, Organização e Padronização de Código**:
@@ -157,7 +242,7 @@ Corrigida a renovação após expirar o cookie de acesso: o frontend atualiza o 
 
 Validação desta correção: backend Release sem avisos/erros, 56 unitários e 10 integrações; frontend lint, 51 unitários, build; 61 E2E existentes aprovados/11 skips e 9 regressões de sessão aprovadas em desktop/mobile/tablet. Smoke real pelo Nginx na porta 18083 aprovado antes e depois do reinício dos quatro containers, incluindo escrita persistida, reprodução do XSRF antigo com 400, renovação com 200 e permanência no login após refresh inválido. Migration runner confirmou banco atualizado; nenhuma migration nova. Bundle inicial mantém aviso de 783,12 kB / budget 500 kB. Detalhes no log de implementação. Sem publicação em produção.
 
-Atualizado em 13/09/2026. Branch de trabalho: `develop`.
+Atualizado em 20/09/2026. Branch de trabalho: `develop`.
 
 A fase ativa é a [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md). A implementação local inclui emissão, consulta, cancelamento, downloads e recuperação administrativa de inutilização. **Não há homologação externa nem liberação de emissão em produção.**
 
@@ -174,7 +259,14 @@ A fase ativa é a [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md). A implementaç
 
 Piloto confirmado: **Igaraçu do Tietê/SP, IBGE 3520004, Simples Nacional**. Integração direta com NFS-e Nacional para serviços e NF-e SP modelo 55 para peças/pneus, sem intermediário pago. A OS mista gera documentos separados e mostra autorização parcial.
 
-Configurações, perfis, preparação, certificado A1 cifrado, sequências, documentos e eventos persistem por tenant. A interface usa PrimeNG 21 nas configurações e na OS concluída. Inutilização tem histórico, confirmação, recuperação com XML original, validação do protocolo e lease persistido de dois minutos. Cancelamentos e inutilizações passam por XSD antes do envio.
+Configurações, perfis, preparação, certificado A1 cifrado, sequências, documentos e eventos persistem por tenant. Cada documento novo também grava o pacote de schemas que o validou (`NF-e PL_010c` ou `NFS-e Nacional 1.01`); a migration identifica documentos legados pelo respectivo leiaute histórico. A interface usa PrimeNG 21 nas configurações e na OS concluída. Inutilização tem histórico, confirmação, recuperação com XML original, validação do protocolo e lease persistido de dois minutos. Cancelamentos e inutilizações passam por XSD antes do envio.
+
+## Rastreabilidade de schemas fiscais — 20/09/2026
+
+- Criada a migration `20260920070200_AddFiscalDocumentSchemaPackage`: registra o pacote de schemas em `fiscal_documents`, com backfill determinístico (`NF-e PL_010c` para NF-e e `NFS-e Nacional 1.01` para NFS-e existentes).
+- A API expõe `schemaPackage` no resumo do documento e novas emissões preenchem o valor pelo catálogo central de schemas. Assim, uma migração futura para o PL_010f não reinterpreta XMLs já emitidos sob o baseline 010c.
+- Evidências locais: migration gerada pelo EF Core em Release; `dotnet test` backend 71/71; lint frontend sem erros; testes frontend 69/69; build frontend aprovado. O bundle inicial continua em 794,07 kB, acima do budget de 500 kB (aviso preexistente, sem bloqueio de build).
+- A migration foi aplicada em Compose isolado com PostgreSQL descartável, verificada no histórico EF e na coluna criada; backend, frontend e Nginx responderam `Healthy` na porta temporária 18084. A stack e o volume foram removidos ao final. Não foram lidas nem alteradas credenciais do usuário e não houve transmissão externa.
 
 Documentos auxiliares finalizados conforme manuais regulamentares: DANFE oficial com canhoto destacável de recebimento, chave de 44 dígitos formatada em blocos, código de barras Code 128C, grade padrão SEFAZ e cláusulas obrigatórias do Simples Nacional (`infAdic`/`infCpl`). DANFSe oficial com QR Code do padrão nacional, identificação da DPS de origem, competência e detalhamento de ISSQN e tributos federais aproximados. Ambiente de desenvolvimento local conta com `DevSimulatedFiscalGateway` e download de certificado A1 autoassinado para testes manuais no navegador sem emissor pago.
 

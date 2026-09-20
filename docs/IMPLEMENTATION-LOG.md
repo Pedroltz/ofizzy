@@ -1,5 +1,123 @@
 # Histórico de implementação
 
+## 2026-09-19 — Auditoria regulatória fiscal incremental
+
+- Criada matriz normativa com fontes oficiais para schemas, RTC, CNPJ alfanumérico,
+  NFS-e, eventos, inutilização, DANFE/DANFSe e endpoints SP.
+- Comparado o ZIP oficial produtivo NFS-e 1.01-20260209 aos XSDs locais: igualdade
+  byte a byte; origem e SHA-256 documentados junto aos schemas. O ZIP de produção
+  restrita RTC 20260727 foi apenas analisado, pois diverge e não pode substituir o
+  pacote produtivo sem adaptação de domínio/XML.
+- Incluído teste que prova invalidação de XMLDSIG após adulteração. A tentativa de
+  atualizar SHA-1 para SHA-256 isoladamente falhou na validação do XSD NF-e/eventos
+  incorporado e foi revertida; a lacuna está registrada para a migração de pacote.
+- Criados runbook de homologação e checklist de produção. Nenhum endpoint oficial
+  foi chamado e nenhum gate de produção foi modificado.
+- Evidências: 28 testes fiscais aprovados, incluindo a verificação dos hashes dos dez
+  XSDs NFS-e; suíte unitária backend completa com 57 aprovados. Lint, 69 unitários e
+  build frontend passaram (warning preexistente de bundle: 794,07 kB vs. 500 kB).
+  E2E fiscal na stack runtime isolada `ofizzy-fiscal-smoke`/18082: 2/2 aprovados
+  antes e 2/2 depois de `docker compose restart`; persistência, XML/PDF e cancelamento
+  NFS-e foram exercitados pelo Nginx com dados fictícios e simulador Development.
+
+## 2026-09-20 — Autoridade do XML autorizado no DANFE
+
+- Corrigido `FiscalPdf.GenerateDanfe`: chave de acesso e série passam a ser lidas do
+  XML autorizado (`infProt/chNFe` ou `infNFe/@Id`, e `ide/serie`), sem fallback aos
+  campos mutáveis da entidade persistida.
+- Novo teste altera deliberadamente `AccessKey` e `Series` no registro local e comprova
+  que o PDF mantém os valores do XML autorizado.
+- Evidência: 6 testes visuais fiscais aprovados; suíte unitária completa com 58
+  aprovados; build Release sem avisos ou erros; e `git diff --check` sem problemas.
+  Não houve transmissão externa nem alteração de gates de produção.
+
+## 2026-09-20 — Obtenção e comparação dos pacotes oficiais NF-e 010e/010f
+
+- A consulta com o cookie requerido pelo Portal Nacional permitiu baixar diretamente
+  o 010e histórico e o 010f atual. Foram registrados os SHA-256 dos ZIPs e comparadas
+  as árvores XSD: há mudanças RTC/IBS-CBS e CNPJ alfanumérico, e o 010f modifica de
+  novo dois XSDs do 010e. Nenhum arquivo de terceiro foi aceito e nenhum schema ativo
+  local foi trocado.
+- A origem, hashes e decisão de migrar a partir do 010f foram documentadas em
+  `BusinessCore/Fiscal/Schemas/Nfe/README.md` e na auditoria fiscal.
+
+## 2026-09-20 — Proteções de XML autorizado, catálogo de schemas e A1 em uso
+
+- Centralizada a escolha de schemas em `FiscalSchemaCatalog`: NF-e 010c e NFS-e 1.01
+  permanecem explicitamente ativos por finalidade, sem ativar o 010f antes da migração
+  de domínio/XML. Teste impede troca silenciosa desses baselines.
+- DANFE/DANFSe passam a obter ambiente do XML autorizado; o DANFSe deixou de consultar
+  CNPJ/IM no snapshot e ambos recusam XML autorizado que não corresponde ao tipo do
+  documento persistido. O cancelamento continua indicado pelo histórico fiscal local.
+- `FiscalCertificateVault.Load` revalida validade, chave privada RSA, uso de assinatura
+  quando a extensão existe e CNPJ ICP-Brasil a cada uso. Teste cobre certificado A1
+  criptografado cujo CNPJ diverge da empresa.
+- Evidência: 64 testes unitários backend aprovados, build Release sem avisos/erros e
+  `git diff --check` limpo. Sem transmissão externa ou mudança de produção.
+
+## 2026-09-20 — CNPJ alfanumérico preparado sem ativação prematura
+
+- A partir do manual oficial da Receita Federal, implementado
+  `FiscalValidation.IsAlphanumericCnpj`: base de 12 caracteres em maiúsculas/números,
+  valor ASCII menos 48 e dois DVs por módulo 11 com pesos 2–9.
+- O validador numérico existente continua sendo usado pelo 010c e NFS-e 1.01. Nenhum
+  campo de configuração, XML, chave de acesso ou certificado passou a aceitar CNPJ
+  alfanumérico fora da migração integral para o 010f.
+- Evidência: 69 testes unitários backend aprovados; build Release sem avisos/erros e
+  `git diff --check` limpo.
+
+## 2026-09-20 — Consulta de eventos NFS-e pelo ADN oficial
+
+- Corrigida a consulta de eventos pós-autorização: a API usada passa a ser o ADN na
+  rota oficial `GET /NFSe/{ChaveAcesso}/Eventos`, retornando todo o histórico a ser
+  examinado pelo gateway em vez de uma rota Sefin com código de evento fixo.
+- Como o manual oficial só publica a base de produção restrita, a seleção de base ADN
+  recusa explicitamente produção até que haja URL oficial verificável. Não houve
+  alteração de `Fiscal:ProductionEnabled`, allow-list ou tenant liberado.
+- Evidência: 70 testes unitários backend aprovados; build Release sem avisos/erros e
+  `git diff --check` limpo.
+
+## 2026-09-20 — Matriz de domínio para a Reforma Tributária
+
+- Criada `docs/fiscal/RTC-DOMAIN-MATRIX.md`, vinculando cada grupo RTC à fonte,
+  documento, condição, origem de dados, representação de domínio/XML e decisão atual.
+  O documento impede que campos IBS/CBS, IS, monofásico e CNPJ alfanumérico sejam
+  ativados sem cenários e cálculos aprovados pela contabilidade.
+
+## 2026-09-20 — Pacote de schema persistido por documento fiscal
+
+- Incluídos `FiscalDocument.SchemaPackage`, a configuração EF obrigatória (80
+  caracteres) e o campo `schemaPackage` no contrato de leitura do frontend.
+- `FiscalEmissionService` persiste o pacote retornado por `FiscalSchemaCatalog` antes
+  de gerar e assinar o XML. A migration
+  `20260920070200_AddFiscalDocumentSchemaPackage` faz backfill explícito dos registros
+  existentes para `NF-e PL_010c` ou `NFS-e Nacional 1.01`.
+- Esse registro preserva a evidência do leiaute de cada XML histórico e impede que a
+  adoção futura do PL_010f seja confundida com uma revalidação retroativa.
+- Validação: migration gerada por `dotnet-ef` em configuração Release; 71 testes
+  unitários backend, lint frontend sem erros, 69 testes frontend e build aprovados.
+  O build reporta o aviso preexistente de bundle inicial 794,07 kB / budget 500 kB.
+- Aplicada e conferida em PostgreSQL de Compose descartável: coluna e histórico EF
+  presentes, seguido de backend, frontend e Nginx saudáveis em `localhost:18084`.
+  A stack e seu volume foram removidos ao final. Não houve uso de segredo do usuário
+  nem chamada a órgão fiscal.
+
+## 2026-09-20 — Prontidão verificável para homologação
+
+- Criado `FiscalHomologationReadiness`, exposto em
+  `GET /api/fiscal/homologation-readiness` para administradores do tenant. A resposta
+  não inclui segredo, XML ou certificado: somente estado de configuração, validade
+  registrada do A1, pacote de schema e pendências compreensíveis.
+- O painel de Configurações Fiscais apresenta cada requisito como conferido, bloqueado
+  ou pendente externo. NF-e habilitada recebe bloqueio explícito enquanto o pacote
+  ativo for `PL_010c`; NFS-e Nacional 1.01 é reconhecida como pacote local conferido.
+  Credenciamento e classificação contábil nunca são aprovados automaticamente.
+- Novo teste prova que os bloqueios de schema e pendências externas permanecem
+  visíveis. Evidências: backend 72/72, lint frontend, 69/69 testes frontend e build
+  aprovados; migration e smoke pelo Nginx passaram em Compose descartável na porta
+  18085, removido ao final. O build mantém aviso conhecido de bundle inicial
+  794,07 kB / 500 kB.
+
 ## 2026-09-01 — Fase 1 concluída
 
 - Criados repositório, solução, API, frontend, documentos e estrutura de deploy.
@@ -1003,6 +1121,3 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
   - Frontend Testes: `npm test` aprovado com 69/69 testes unitários em 12 arquivos.
   - Frontend Build: `npm run build` aprovado.
   - Backend Testes: `dotnet test` aprovado com 56 unitários + 10 de integração (100%).
-
-
-

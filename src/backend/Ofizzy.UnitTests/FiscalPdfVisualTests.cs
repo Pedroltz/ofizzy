@@ -86,6 +86,46 @@ public sealed class FiscalPdfVisualTests
         Assert.Throws<ConflictException>(() => FiscalPdf.Generate(doc));
     }
 
+    [Fact]
+    public async Task Danfe_uses_key_and_series_from_authorized_xml_not_document_fields()
+    {
+        var doc = await FiscalPdfFixtures.Authorized(FiscalKind.Nfe);
+        var expectedKey = doc.AccessKey!;
+        doc.AccessKey = new string('9', 44);
+        doc.Series = 999;
+
+        using var pdf = PdfDocument.Open(Generate(doc));
+        var textWithoutWhitespace = string.Concat(Text(pdf).Where(c => !char.IsWhiteSpace(c)));
+
+        Assert.Contains(expectedKey, textWithoutWhitespace);
+        Assert.DoesNotContain(new string('9', 44), textWithoutWhitespace);
+        Assert.Contains("SÉRIE 1", Text(pdf));
+    }
+
+    [Theory]
+    [InlineData(FiscalKind.Nfe)]
+    [InlineData(FiscalKind.Nfse)]
+    public async Task Fiscal_pdf_uses_environment_from_authorized_xml_not_document_fields(FiscalKind kind)
+    {
+        var doc = await FiscalPdfFixtures.Authorized(kind);
+        doc.Environment = FiscalEnvironment.Production;
+
+        using var pdf = PdfDocument.Open(Generate(doc));
+
+        Assert.Contains("HOMOLOGAÇÃO", Text(pdf));
+    }
+
+    [Theory]
+    [InlineData(FiscalKind.Nfe, FiscalKind.Nfse)]
+    [InlineData(FiscalKind.Nfse, FiscalKind.Nfe)]
+    public async Task Fiscal_pdf_rejects_authorized_xml_of_another_document_kind(FiscalKind sourceKind, FiscalKind claimedKind)
+    {
+        var doc = await FiscalPdfFixtures.Authorized(sourceKind);
+        doc.Kind = claimedKind;
+
+        Assert.Throws<ConflictException>(() => FiscalPdf.Generate(doc));
+    }
+
     [Theory]
     [InlineData(FiscalKind.Nfe, 1)]
     [InlineData(FiscalKind.Nfe, 80)]
