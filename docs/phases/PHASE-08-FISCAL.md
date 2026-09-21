@@ -1,5 +1,17 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Editor de OS pesquisável e compacto — 21/09/2026
+
+- O formulário de OS usa autocomplete para cliente e veículo em lugar dos seletores
+  nativos. A pesquisa de cliente cobre nome, CPF/CNPJ e telefone; a de veículo cobre
+  placa, marca e modelo dentro do cliente escolhido. O backend continua recebendo IDs
+  e aplicando regras/cálculos ao salvar.
+- A identificação foi condensada em duas faixas e o diálogo ganhou área útil no
+  desktop, com grade responsiva em tablet/mobile. O fluxo suporta muitas linhas por
+  meio de rolagem interna somente quando necessário; não há overflow horizontal.
+- Evidências: lint, 69 testes, build e 40 E2E responsivos aprovados, incluindo busca
+  e seleção de cliente/veículo no modal mobile.
+
 ## Revisão dos PDFs fiscais — 21/09/2026
 
 - DANFE/DANFSe foram revisados para usar um padrão único em homologação e produção.

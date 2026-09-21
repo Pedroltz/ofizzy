@@ -1,5 +1,18 @@
 # Histórico de implementação
 
+## 2026-09-21 — Editor de OS com pesquisa e grade compacta
+
+- Substituídos os dois `select` nativos de cliente e veículo por autocomplete
+  PrimeNG. O formulário agora mantém `Customer`/`Vehicle` durante a interação e só
+  extrai as IDs ao salvar, evitando seleção truncada ou quebra visual por texto longo.
+  A busca é normalizada por nome/documento/telefone para cliente e
+  placa/marca/modelo para veículo.
+- Reorganizados os campos em duas faixas de grade e ampliada a área útil do diálogo.
+  As colunas se adaptam para tablet e celular sem rolagem horizontal; o E2E acrescenta
+  busca e seleção dos dois controles no cenário móvel.
+- Validação: lint, 69 testes unitários, build e E2E responsivo (40 aprovados, 11
+  skips não aplicáveis ao viewport) do frontend aprovados.
+
 ## 2026-09-21 — Revisão de DANFE e DANFSe para homologação e produção
 
 - Revisado o gerador `FiscalPdf` para manter um leiaute único nos dois ambientes. A

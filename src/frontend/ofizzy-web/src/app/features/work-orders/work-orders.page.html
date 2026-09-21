@@ -852,7 +852,7 @@
   (visibleChange)="dialog.set($event)"
   [modal]="true"
   [dismissableMask]="true"
-  [style]="{ width: 'min(1120px, 95vw)', maxHeight: '94vh' }"
+  [style]="{ width: 'min(1280px, 98vw)', maxHeight: '98vh' }"
   styleClass="wo-center-dialog"
   [draggable]="false"
   [resizable]="false"
@@ -874,47 +874,65 @@
 
   <form [formGroup]="form" id="workOrderForm" class="wo-dialog-form" (ngSubmit)="save()">
     <div class="wo-dialog-content">
-      <div class="two-columns">
-        <label
-          >Cliente (Proprietário)
-          <select formControlName="customerId">
-            <option value="">Selecione o cliente cadastrado</option>
-            @for (item of customers(); track item.id) {
-              <option [value]="item.id">{{ item.name }}</option>
-            }
-          </select>
-          @if (form.controls.customerId.errors?.['required'] && form.controls.customerId.touched) {
+      <section
+        class="wo-editor-section wo-editor-section--identity"
+        aria-label="Identificação da ordem"
+      >
+        <label>
+          <span>Cliente (proprietário)</span>
+          <p-autocomplete
+            formControlName="customer"
+            [suggestions]="customerSuggestions()"
+            optionLabel="name"
+            [dropdown]="true"
+            [forceSelection]="true"
+            [showClear]="true"
+            [emptyMessage]="'Nenhum cliente encontrado.'"
+            placeholder="Digite nome, CPF/CNPJ ou telefone"
+            styleClass="wo-editor-autocomplete"
+            (completeMethod)="filterCustomers($event)"
+          >
+            <ng-template #item let-customer>
+              <div class="wo-autocomplete-option">
+                <strong>{{ customer.name }}</strong
+                ><small>{{
+                  customer.document || customer.phone || 'Sem documento ou telefone'
+                }}</small>
+              </div>
+            </ng-template>
+          </p-autocomplete>
+          @if (form.controls.customer.errors?.['required'] && form.controls.customer.touched) {
             <small class="field-error-text">Selecione o cliente</small>
           }
         </label>
-
-        <label
-          >Veículo Atendido
-          <select formControlName="vehicleId">
-            <option value="">Selecione o veículo</option>
-            @for (item of vehicles(); track item.id) {
-              <option [value]="item.id">
-                {{ item.plate }} · {{ item.brand }} {{ item.model }}
-              </option>
-            }
-          </select>
-          @if (form.controls.vehicleId.errors?.['required'] && form.controls.vehicleId.touched) {
+        <label>
+          <span>Veículo atendido</span>
+          <p-autocomplete
+            formControlName="vehicle"
+            [suggestions]="vehicleSuggestions()"
+            optionLabel="plate"
+            [dropdown]="true"
+            [forceSelection]="true"
+            [showClear]="true"
+            [disabled]="!form.controls.customer.value"
+            [emptyMessage]="'Nenhum veículo encontrado para este cliente.'"
+            placeholder="Busque placa, marca ou modelo"
+            styleClass="wo-editor-autocomplete"
+            (completeMethod)="filterVehicles($event)"
+          >
+            <ng-template #item let-vehicle>
+              <div class="wo-autocomplete-option">
+                <strong>{{ vehicle.plate }}</strong
+                ><small>{{ vehicleLabel(vehicle) }}</small>
+              </div>
+            </ng-template>
+          </p-autocomplete>
+          @if (form.controls.vehicle.errors?.['required'] && form.controls.vehicle.touched) {
             <small class="field-error-text">Selecione o veículo</small>
           }
         </label>
-      </div>
-
-      @if (form.controls.customerId.value && vehicles().length === 0) {
-        <div class="alert-warning">
-          <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos
-          cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a
-          OS.
-        </div>
-      }
-
-      <div class="two-columns">
-        <label
-          >Quilometragem do Veículo (KM)
+        <label>
+          <span>Quilometragem atual</span>
           <p-inputnumber
             formControlName="mileage"
             [min]="0"
@@ -924,20 +942,20 @@
             styleClass="full-control"
           />
         </label>
-        <label
-          >Observações Internas <small class="text-muted">opcional</small>
-          <input
-            pInputText
-            formControlName="notes"
-            placeholder="Ex: Aprovado orçamento complementar por telefone"
-          />
-        </label>
-      </div>
+      </section>
 
-      <div class="two-columns">
+      @if (form.controls.customer.value && vehicles().length === 0) {
+        <div class="alert-warning">
+          <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos
+          cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a
+          OS.
+        </div>
+      }
+
+      <section class="wo-editor-section wo-editor-section--notes" aria-label="Relato e diagnóstico">
         <label
-          >Queixa Relatada pelo Cliente
-          <textarea
+          ><span>Queixa relatada pelo cliente</span
+          ><textarea
             pTextarea
             formControlName="complaint"
             rows="2"
@@ -945,15 +963,22 @@
           ></textarea>
         </label>
         <label
-          >Diagnóstico Técnico da Oficina
-          <textarea
+          ><span>Diagnóstico técnico</span
+          ><textarea
             pTextarea
             formControlName="diagnosis"
             rows="2"
             placeholder="Ex: Pastilhas dianteiras no limite; alinhamento necessário"
           ></textarea>
         </label>
-      </div>
+        <label
+          ><span>Observações internas <small class="text-muted">opcional</small></span
+          ><input
+            pInputText
+            formControlName="notes"
+            placeholder="Ex: Aprovado orçamento complementar por telefone"
+        /></label>
+      </section>
 
       <app-work-order-lines-editor
         kind="services"

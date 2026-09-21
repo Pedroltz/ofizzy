@@ -1,5 +1,18 @@
 # Status do projeto
 
+## Editor de OS pesquisável e compacto — 21/09/2026
+
+- Cliente e veículo deixaram de usar seletores nativos no editor de OS. Ambos usam
+  autocomplete com seleção de objeto e persistência pela ID: cliente pesquisa por
+  nome, CPF/CNPJ ou telefone; veículo do cliente selecionado pesquisa por placa,
+  marca ou modelo. Isso elimina quebras causadas por valores de texto longos.
+- O cabeçalho do formulário foi reorganizado em uma grade compacta: cliente, veículo
+  e quilometragem na primeira faixa; queixa, diagnóstico e observações na segunda.
+  Em tablet e celular a grade se reduz sem overflow; itens continuam em cartões no
+  mobile. O diálogo ganhou mais largura e altura útil no desktop.
+- Evidências: lint, 69 testes, build e 40 E2E responsivos aprovados; o E2E cobre a
+  pesquisa/seleção de cliente e veículo na abertura da OS em celular.
+
 ## Revisão dos documentos auxiliares fiscais em PDF — 21/09/2026
 
 - DANFE e DANFSe passaram a usar o mesmo leiaute em homologação e produção. O único

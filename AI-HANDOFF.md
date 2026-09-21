@@ -1,5 +1,17 @@
 # Continuidade do Ofizzy
 
+## Editor de ordem de serviço — 21/09/2026
+
+- Cliente e veículo usam autocomplete PrimeNG no formulário da OS, em vez de
+  `select` nativo. A seleção preserva objetos no formulário e envia somente suas IDs
+  ao backend; cliente encontra nome/documento/telefone e veículo encontra
+  placa/marca/modelo. Ao mudar o cliente, a lista de veículos é recarregada e a
+  seleção anterior é invalidada corretamente.
+- A identificação foi condensada em duas faixas e o diálogo ganhou área útil. A
+  grade recua para duas e uma coluna em tablet/mobile, sem overflow horizontal.
+- Evidência: lint, 69 testes, build e 40 E2E responsivos aprovados; o cenário mobile
+  pesquisa e escolhe cliente/veículo antes de lançar um serviço avulso.
+
 ## Documentos auxiliares em PDF — 21/09/2026
 
 - `FiscalPdf` agora usa um único padrão visual para DANFE/DANFSe. Homologação é

@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DrawerModule } from 'primeng/drawer';
@@ -49,6 +50,7 @@ import {
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AutoCompleteModule,
     ButtonModule,
     DialogModule,
     DrawerModule,
@@ -84,6 +86,8 @@ export class WorkOrdersPage {
   readonly vehicles = signal<Vehicle[]>([]);
   readonly servicesCatalog = signal<ServiceItem[]>([]);
   readonly partsCatalog = signal<Part[]>([]);
+  readonly customerSuggestions = signal<Customer[]>([]);
+  readonly vehicleSuggestions = signal<Vehicle[]>([]);
   readonly services = signal<WorkOrderLineRequest[]>([]);
   readonly parts = signal<WorkOrderLineRequest[]>([]);
   readonly company = signal<CompanyResponse | null>(null);
@@ -117,8 +121,8 @@ export class WorkOrdersPage {
   }
 
   readonly form = this.fb.group({
-    customerId: ['', Validators.required],
-    vehicleId: ['', Validators.required],
+    customer: this.fb.control<Customer | null>(null, Validators.required),
+    vehicle: this.fb.control<Vehicle | null>(null, Validators.required),
     mileage: [null as number | null, Validators.min(0)],
     complaint: [''],
     diagnosis: [''],
@@ -153,18 +157,20 @@ export class WorkOrdersPage {
         void this.load();
       });
 
-    this.form.controls.customerId.valueChanges
+    this.form.controls.customer.valueChanges
       .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe(async (customerId) => {
+      .subscribe(async (customer) => {
         if (!this.dialog()) return;
-        if (!this.editing() || this.form.controls.vehicleId.value !== this.editing()?.vehicleId) {
-          this.form.controls.vehicleId.setValue('');
+        if (!this.editing() || customer?.id !== this.editing()?.customerId) {
+          this.form.controls.vehicle.setValue(null);
         }
-        if (customerId) {
-          const res = await this.catalogs.vehicles('', 1, 100, customerId);
+        if (customer) {
+          const res = await this.catalogs.vehicles('', 1, 100, customer.id);
           this.vehicles.set(res.items);
+          this.vehicleSuggestions.set(res.items);
         } else {
           this.vehicles.set([]);
+          this.vehicleSuggestions.set([]);
         }
       });
 
@@ -219,6 +225,7 @@ export class WorkOrdersPage {
       this.catalogs.parts('', 1, 100),
     ]);
     this.customers.set(customers.items);
+    this.customerSuggestions.set(customers.items);
     this.servicesCatalog.set(services.items);
     this.partsCatalog.set(parts.items);
 
@@ -235,9 +242,10 @@ export class WorkOrdersPage {
       this.editing.set(order);
       const vehiclesRes = await this.catalogs.vehicles('', 1, 100, order.customerId);
       this.vehicles.set(vehiclesRes.items);
+      this.vehicleSuggestions.set(vehiclesRes.items);
       this.form.reset({
-        customerId: order.customerId,
-        vehicleId: order.vehicleId,
+        customer: customers.items.find((customer) => customer.id === order.customerId) ?? null,
+        vehicle: vehiclesRes.items.find((vehicle) => vehicle.id === order.vehicleId) ?? null,
         mileage: order.mileage,
         complaint: order.complaint ?? '',
         diagnosis: order.diagnosis ?? '',
@@ -263,11 +271,12 @@ export class WorkOrdersPage {
     } else {
       this.editing.set(null);
       this.vehicles.set([]);
+      this.vehicleSuggestions.set([]);
       this.services.set([]);
       this.parts.set([]);
       this.form.reset({
-        customerId: '',
-        vehicleId: '',
+        customer: null,
+        vehicle: null,
         mileage: null,
         complaint: '',
         diagnosis: '',
@@ -348,13 +357,13 @@ export class WorkOrdersPage {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       const controls = this.form.controls;
-      if (!controls.customerId.value) {
+      if (!controls.customer.value) {
         this.messages.add({
           severity: 'warn',
           summary: 'Cliente não selecionado',
           detail: 'Selecione o cliente proprietário antes de emitir a OS.',
         });
-      } else if (!controls.vehicleId.value) {
+      } else if (!controls.vehicle.value) {
         this.messages.add({
           severity: 'warn',
           summary: 'Veículo não selecionado',
@@ -403,8 +412,8 @@ export class WorkOrdersPage {
       const id = this.editing()?.id;
       await this.api.save(
         {
-          customerId: value.customerId!,
-          vehicleId: value.vehicleId!,
+          customerId: value.customer!.id,
+          vehicleId: value.vehicle!.id,
           mileage: value.mileage,
           complaint: value.complaint || null,
           diagnosis: value.diagnosis || null,
@@ -483,6 +492,44 @@ export class WorkOrdersPage {
   changePage(event: PaginatorState): void {
     this.page.set((event.page ?? 0) + 1);
     void this.load();
+  }
+
+  filterCustomers(event: AutoCompleteCompleteEvent): void {
+    const query = this.normalized(event.query);
+    this.customerSuggestions.set(
+      this.customers()
+        .filter((customer) =>
+          this.normalized(
+            `${customer.name} ${customer.document ?? ''} ${customer.phone ?? ''}`,
+          ).includes(query),
+        )
+        .slice(0, 50),
+    );
+  }
+
+  filterVehicles(event: AutoCompleteCompleteEvent): void {
+    const query = this.normalized(event.query);
+    this.vehicleSuggestions.set(
+      this.vehicles()
+        .filter((vehicle) =>
+          this.normalized(`${vehicle.plate} ${vehicle.brand ?? ''} ${vehicle.model}`).includes(
+            query,
+          ),
+        )
+        .slice(0, 50),
+    );
+  }
+
+  vehicleLabel(vehicle: Vehicle): string {
+    return `${vehicle.plate} · ${[vehicle.brand, vehicle.model].filter(Boolean).join(' ')}`;
+  }
+
+  private normalized(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLocaleLowerCase('pt-BR')
+      .trim();
   }
 
   money(value: number): string {
