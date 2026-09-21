@@ -1,5 +1,14 @@
 # Histórico de implementação
 
+## 2026-09-21 — Remoção da prontidão e auditoria do banco local
+
+- Removidos o painel frontend, contratos, endpoint e teste de `homologation-readiness`.
+  A remoção não altera a configuração fiscal nem as travas de produção.
+- Revisão somente de leitura no PostgreSQL local: duas organizações de
+  desenvolvimento; em cada uma, 20 perfis de produto, 15 perfis de serviço e 21
+  clientes têm os campos fiscais estruturados necessários ao cenário suportado.
+  Os CNPJs/A1 são de teste e não foram alterados para simular credenciais reais.
+
 ## 2026-09-21 — Migração do baseline de novas NF-e para PL_010f v1.04
 
 - Recuperado diretamente do Portal Nacional o ZIP `PL_010f_v1.04` e conferido o

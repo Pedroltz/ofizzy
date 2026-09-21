@@ -73,26 +73,6 @@ public sealed class FiscalSettingsController(
             devToolsAvailable);
     }
 
-    [HttpGet("homologation-readiness")]
-    public async Task<ActionResult<FiscalHomologationReadinessResponse>> HomologationReadiness(CancellationToken ct)
-    {
-        Response.Headers.CacheControl = "no-store";
-
-        var entity = await db.FiscalSettingsEntries
-            .AsNoTracking()
-            .SingleOrDefaultAsync(ct);
-
-        var settings = entity == null
-            ? new FiscalSettingsData()
-            : FiscalJson.Required<FiscalSettingsData>(entity.Data);
-
-        var certificate = entity?.CertificateExpiresAt is { } expires
-            ? new CertificateInfo(entity.CertificateSubject!, expires, entity.CertificateThumbprint!)
-            : null;
-
-        return FiscalHomologationReadiness.Evaluate(settings, vault.Configured, certificate, DateTimeOffset.UtcNow);
-    }
-
     [HttpPut("settings")]
     public async Task<IActionResult> Save(FiscalSettingsData request, CancellationToken ct)
     {

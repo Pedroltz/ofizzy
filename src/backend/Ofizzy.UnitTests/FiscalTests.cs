@@ -40,28 +40,6 @@ public sealed class FiscalTests
     }
 
     [Fact]
-    public void Homologation_readiness_marks_current_schema_and_external_confirmations_without_releasing_production()
-    {
-        var settings = Snapshot(FiscalKind.Nfe).Issuer with
-        {
-            Environment = FiscalEnvironment.Homologation,
-            NfeEnabled = true,
-            NfseEnabled = true
-        };
-
-        var result = FiscalHomologationReadiness.Evaluate(
-            settings,
-            encryptionConfigured: true,
-            new CertificateInfo("Oficina de teste", DateTimeOffset.UtcNow.AddDays(30), "thumbprint"),
-            DateTimeOffset.UtcNow);
-
-        Assert.True(result.ReadyForExternalHomologation);
-        Assert.True(result.Checks.Single(x => x.Code == "nfe-schema").Passed);
-        Assert.True(result.Checks.Single(x => x.Code == "nfse-schema").Passed);
-        Assert.All(result.Checks.Where(x => x.RequiresExternalConfirmation), x => Assert.False(x.Passed));
-    }
-
-    [Fact]
     public void Nfe_production_schema_package_matches_official_010f_v104_release()
     {
         var expectedHashes = new Dictionary<string, string>(StringComparer.Ordinal)

@@ -1,5 +1,13 @@
 # Continuidade do Ofizzy
 
+## Configuração fiscal — 21/09/2026
+
+- O painel/endpoint de prontidão para homologação foi removido a pedido do usuário.
+  A auditoria somente de leitura do banco local confirmou que as duas organizações
+  têm perfis completos de produtos e serviços e clientes com documento/endereço. Os
+  CNPJs e certificados existentes são de desenvolvimento; não substituí-los por
+  valores inventados para homologação oficial.
+
 ## Migração fiscal — 21/09/2026
 
 - A emissão nova de NF-e passou a usar o `PL_010f_v1.04` oficial, instalado em

@@ -100,17 +100,6 @@ public sealed record FiscalSettingsResponse(
     bool ProductionAllowed,
     bool DevToolsAvailable = false);
 
-public sealed record FiscalHomologationCheck(
-    string Code,
-    string Label,
-    bool Passed,
-    string Detail,
-    bool RequiresExternalConfirmation = false);
-
-public sealed record FiscalHomologationReadinessResponse(
-    bool ReadyForExternalHomologation,
-    IReadOnlyList<FiscalHomologationCheck> Checks);
-
 public sealed record FiscalDocumentResponse(
     Guid Id,
     FiscalKind Kind,

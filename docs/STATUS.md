@@ -1,5 +1,17 @@
 # Status do projeto
 
+## Remoção da prontidão e auditoria do banco local — 21/09/2026
+
+- Removidos o painel **Prontidão para homologação**, sua chamada no frontend e o
+  endpoint `GET /api/fiscal/homologation-readiness`. A configuração fiscal, o A1 e
+  as classificações de catálogo permanecem disponíveis.
+- Auditoria somente de leitura do PostgreSQL local: as duas organizações de
+  desenvolvimento têm dados fiscais, certificado de teste, 20/20 perfis de produtos,
+  15/15 perfis de serviços e 21/21 clientes com documento e endereço estruturado.
+- Os CNPJs e certificados instalados são explicitamente de desenvolvimento; não foram
+  trocados por dados fictícios apresentados como reais. Homologação oficial exige os
+  dados e o A1 verdadeiros de cada empresa, além do credenciamento externo.
+
 ## Migração do XML NF-e para PL_010f v1.04 — 21/09/2026
 
 - Os cinco XSDs oficiais do `PL_010f_v1.04` foram instalados lado a lado em

@@ -1,5 +1,13 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Remoção do painel e revisão local de cadastros — 21/09/2026
+
+- O painel e o endpoint de prontidão para homologação foram removidos a pedido do
+  usuário. Dados fiscais, A1 e classificação por item continuam nas Configurações.
+- A revisão de leitura do banco local encontrou cobertura completa de perfis fiscais
+  e destinatários para as duas organizações de desenvolvimento. Os identificadores e
+  A1 são de teste e não podem substituir os dados reais para homologação externa.
+
 ## Migração PL_010f v1.04 — 21/09/2026
 
 - O catálogo passou a selecionar `NF-e PL_010f v1.04` para novas emissões e os cinco
