@@ -1,5 +1,17 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Catálogo pesquisável na OS — 21/09/2026
+
+- Corrigida a paginação usada ao abrir o editor: serviços e peças eram buscados na
+  página 100 e não apareciam no catálogo. O editor passa a buscar a página inicial
+  com até 100 registros.
+- A inclusão de item usa autocomplete PrimeNG por nome, com normalização de acentos e
+  capitalização, e por código de peça. A seleção envia a ID do catálogo ao fluxo de
+  OS já existente, mantendo preços e regras críticos no backend.
+- Evidências: 72 testes unitários e build Release do backend; lint, 69 testes
+  unitários, build do frontend e 40 E2E responsivos em desktop, mobile e tablet
+  aprovados; 11 skips são cenários não aplicáveis ao viewport.
+
 ## Correção de pesquisa de clientes — 21/09/2026
 
 - A pesquisa de clientes agora encontra contatos mesmo quando o usuário digita

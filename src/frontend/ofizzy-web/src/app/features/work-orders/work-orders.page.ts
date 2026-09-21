@@ -215,8 +215,8 @@ export class WorkOrdersPage {
   async open(item?: WorkOrderSummary | WorkOrder): Promise<void> {
     const [customers, services, parts] = await Promise.all([
       this.catalogs.customers('', 1, 100),
-      this.catalogs.services('', 100),
-      this.catalogs.parts('', 100),
+      this.catalogs.services('', 1, 100),
+      this.catalogs.parts('', 1, 100),
     ]);
     this.customers.set(customers.items);
     this.servicesCatalog.set(services.items);

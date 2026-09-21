@@ -1,5 +1,16 @@
 # Continuidade do Ofizzy
 
+## Catálogo em ordem de serviço — 21/09/2026
+
+- O editor de OS volta a carregar serviços e peças: a chamada de catálogo agora usa
+  explicitamente página 1 e tamanho 100, em vez de pular para a página 100 vazia.
+- O campo de inclusão é um autocomplete PrimeNG pesquisável por nome, sem acentos e
+  sem diferença entre maiúsculas/minúsculas; para peças também encontra pelo código.
+  Ao selecionar, ele inclui o item existente pela ID e preserva os cálculos no backend.
+- Evidência: 72 testes unitários e build Release do backend, lint, 69 testes
+  unitários, build e 40 cenários E2E responsivos aprovados (11 skips previstos por
+  viewport).
+
 ## Pesquisa de clientes — 21/09/2026
 
 - Telefones e WhatsApp agora são persistidos em formato canônico de dígitos e a busca

@@ -1,5 +1,17 @@
 # Histórico de implementação
 
+## 2026-09-21 — Catálogo pesquisável no editor de OS
+
+- Corrigido o erro de paginação que carregava serviços e peças da página 100 na
+  abertura da OS, retornando um catálogo visualmente vazio. As duas consultas agora
+  usam página 1 com limite de 100 registros.
+- Substituído o `select` nativo por autocomplete PrimeNG. A busca normaliza acentos e
+  capitalização; serviços são encontrados por nome e peças por nome ou código. A
+  seleção continua emitindo apenas a ID para o fluxo já persistido de inclusão da OS.
+- Validação: 72 testes unitários e build Release do backend; `npm run lint`, 69
+  testes unitários, build de produção e E2E responsivo (40 aprovados em
+  desktop/mobile/tablet; 11 skips esperados) aprovados.
+
 ## 2026-09-21 — Pesquisa de clientes por nome e telefone
 
 - Corrigido o filtro de clientes para distinguir pesquisa textual de pesquisa

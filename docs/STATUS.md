@@ -1,5 +1,18 @@
 # Status do projeto
 
+## Catálogo pesquisável na edição de OS — 21/09/2026
+
+- Corrigido o carregamento de serviços e peças no editor de ordem de serviço: a
+  tela enviava `100` como número de página, em vez de tamanho da página, e por isso
+  recebia um catálogo vazio. Agora solicita a primeira página com até 100 itens.
+- O seletor nativo foi substituído por autocomplete PrimeNG. É possível digitar o
+  nome (sem depender de maiúsculas ou acentos) e, para peças, também o código; o
+  resultado mostra descrição, código quando aplicável e preço antes da inclusão.
+- Evidências: 72 testes unitários e build Release do backend, lint, 69 testes
+  unitários e build do frontend aprovados; E2E de responsividade aprovado com 40
+  cenários em desktop, mobile e tablet (11 cenários deliberadamente não aplicáveis
+  ficaram ignorados).
+
 ## Busca de clientes por nome e telefone — 21/09/2026
 
 - Telefones e WhatsApp passam a ser gravados somente com dígitos. A busca trata o

@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
@@ -16,7 +17,7 @@ export interface WorkOrderLineChange {
 
 @Component({
   selector: 'app-work-order-lines-editor',
-  imports: [FormsModule, ButtonModule, InputNumberModule, InputTextModule],
+  imports: [FormsModule, AutoCompleteModule, ButtonModule, InputNumberModule, InputTextModule],
   template: `
     <section class="line-editor">
       <header class="line-editor__header">
@@ -34,16 +35,33 @@ export interface WorkOrderLineChange {
             type="button"
             (onClick)="addManual.emit()"
           />
-          <select
-            #picker
-            (change)="addCatalog.emit(picker.value); picker.value = ''"
-            [attr.aria-label]="catalogLabel()"
+          <p-autocomplete
+            [(ngModel)]="catalogSelection"
+            [ngModelOptions]="{ standalone: true }"
+            [suggestions]="catalogSuggestions()"
+            optionLabel="name"
+            [dropdown]="true"
+            [forceSelection]="true"
+            [showClear]="true"
+            [emptyMessage]="'Nenhum item encontrado no catálogo.'"
+            [placeholder]="catalogPlaceholder()"
+            [ariaLabel]="catalogLabel()"
+            styleClass="line-editor__catalog-search"
+            (completeMethod)="filterCatalog($event)"
+            (onSelect)="addSelectedCatalog($event.value)"
           >
-            <option value="">+ Do catálogo...</option>
-            @for (item of catalog(); track item.id) {
-              <option [value]="item.id">{{ item.name }} ({{ money(price(item)) }})</option>
-            }
-          </select>
+            <ng-template #item let-item>
+              <div class="line-editor__catalog-option">
+                <strong>{{ item.name }}</strong>
+                <small>
+                  @if (isPart(item)) {
+                    {{ item.code }} ·
+                  }
+                  {{ money(price(item)) }}
+                </small>
+              </div>
+            </ng-template>
+          </p-autocomplete>
         </div>
       </header>
 
@@ -168,6 +186,8 @@ export class WorkOrderLinesEditorComponent {
   readonly addCatalog = output<string>();
   readonly change = output<WorkOrderLineChange>();
   readonly remove = output<number>();
+  readonly catalogSuggestions = signal<(ServiceItem | Part)[]>([]);
+  catalogSelection: ServiceItem | Part | string | null = null;
 
   readonly title = computed(() =>
     this.kind() === 'services' ? 'Serviços e Mão de Obra' : 'Peças e Insumos',
@@ -178,9 +198,42 @@ export class WorkOrderLinesEditorComponent {
   );
   readonly catalogLabel = computed(() => `Adicionar ${this.itemName()} do catálogo`);
   readonly itemName = computed(() => (this.kind() === 'services' ? 'serviço' : 'peça'));
+  readonly catalogPlaceholder = computed(() => `Buscar ${this.itemName()} no catálogo`);
+
+  filterCatalog(event: AutoCompleteCompleteEvent): void {
+    const query = this.normalized(event.query);
+    const suggestions = this.catalog()
+      .filter((item) => {
+        const searchable = this.normalized(
+          `${item.name} ${this.isPart(item) ? item.code : ''}`,
+        );
+        return !query || searchable.includes(query);
+      })
+      .slice(0, 50);
+
+    this.catalogSuggestions.set(suggestions);
+  }
+
+  addSelectedCatalog(item: ServiceItem | Part): void {
+    this.addCatalog.emit(item.id);
+    this.catalogSelection = null;
+    this.catalogSuggestions.set([]);
+  }
+
+  isPart(item: ServiceItem | Part): item is Part {
+    return 'code' in item;
+  }
 
   price(item: ServiceItem | Part): number {
     return 'defaultPrice' in item ? item.defaultPrice : item.salePrice;
+  }
+
+  private normalized(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLocaleLowerCase('pt-BR')
+      .trim();
   }
 
   money(value: number): string {
