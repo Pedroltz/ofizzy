@@ -1,5 +1,12 @@
 # Continuidade do Ofizzy
 
+## Pesquisa de clientes — 21/09/2026
+
+- Telefones e WhatsApp agora são persistidos em formato canônico de dígitos e a busca
+  aceita termo por nome/e-mail ou números com máscara. A migration
+  `20260921100000_NormalizeCustomerContactNumbers` foi aplicada ao PostgreSQL local;
+  42 contatos foram revisados e nenhum manteve caracteres de formatação.
+
 ## Configuração fiscal — 21/09/2026
 
 - O painel/endpoint de prontidão para homologação foi removido a pedido do usuário.

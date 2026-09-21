@@ -22,7 +22,7 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         {
             var term = $"%{q.Trim()}%";
             var digits = TextNormalization.Digits(q);
-            query = digits is null
+            query = string.IsNullOrEmpty(digits)
                 ? query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)))
                 : query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)) || (x.Phone != null && x.Phone.Contains(digits)) || (x.WhatsApp != null && x.WhatsApp.Contains(digits)) || (x.Document != null && x.Document.Contains(digits)));
         }
@@ -75,8 +75,8 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         {
             Name = TextNormalization.Required(request.Name),
             Document = document,
-            Phone = TextNormalization.Optional(request.Phone),
-            WhatsApp = TextNormalization.Optional(request.WhatsApp),
+            Phone = TextNormalization.Digits(request.Phone),
+            WhatsApp = TextNormalization.Digits(request.WhatsApp),
             Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant(),
             Address = address,
             Notes = TextNormalization.Optional(request.Notes),
@@ -133,8 +133,8 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
 
         item.Name = TextNormalization.Required(request.Name);
         item.Document = document;
-        item.Phone = TextNormalization.Optional(request.Phone);
-        item.WhatsApp = TextNormalization.Optional(request.WhatsApp);
+        item.Phone = TextNormalization.Digits(request.Phone);
+        item.WhatsApp = TextNormalization.Digits(request.WhatsApp);
         item.Email = TextNormalization.Optional(request.Email)?.ToLowerInvariant();
         item.Address = address;
         item.Notes = TextNormalization.Optional(request.Notes);

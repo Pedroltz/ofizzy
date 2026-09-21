@@ -1,5 +1,18 @@
 # Histórico de implementação
 
+## 2026-09-21 — Pesquisa de clientes por nome e telefone
+
+- Corrigido o filtro de clientes para distinguir pesquisa textual de pesquisa
+  numérica. Telefone, WhatsApp e documento são pesquisados por dígitos, aceitando
+  entrada com máscara; nome e e-mail continuam com busca sem distinção de maiúsculas.
+- Novos cadastros e edições persistem telefone/WhatsApp somente com dígitos. A
+  migration `20260921100000_NormalizeCustomerContactNumbers` corrigiu os contatos
+  existentes no PostgreSQL local: 42 revisados, zero com caracteres de máscara.
+- Incluído teste de integração para nome e telefone mascarado. Ele passou isolado;
+  a execução concorrente completa das integrações encontrou conflito preexistente no
+  bootstrap compartilhado antes de exercitar a busca. Também passaram 72 unitários e
+  o build Release do backend.
+
 ## 2026-09-21 — Remoção da prontidão e auditoria do banco local
 
 - Removidos o painel frontend, contratos, endpoint e teste de `homologation-readiness`.

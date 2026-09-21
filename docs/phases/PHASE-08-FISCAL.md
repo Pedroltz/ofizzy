@@ -1,5 +1,12 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Correção de pesquisa de clientes — 21/09/2026
+
+- A pesquisa de clientes agora encontra contatos mesmo quando o usuário digita
+  telefone com espaços, parênteses ou hífen. Números existentes foram normalizados
+  pela migration `20260921100000_NormalizeCustomerContactNumbers`; a UI preserva a
+  formatação para leitura.
+
 ## Remoção do painel e revisão local de cadastros — 21/09/2026
 
 - O painel e o endpoint de prontidão para homologação foram removidos a pedido do

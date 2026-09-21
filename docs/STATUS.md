@@ -1,5 +1,16 @@
 # Status do projeto
 
+## Busca de clientes por nome e telefone — 21/09/2026
+
+- Telefones e WhatsApp passam a ser gravados somente com dígitos. A busca trata o
+  texto sem dígitos como nome/e-mail e números com ou sem máscara como contato,
+  documento ou WhatsApp.
+- A migration `20260921100000_NormalizeCustomerContactNumbers` foi aplicada no
+  PostgreSQL local: 42 contatos revisados e nenhum telefone/WhatsApp permaneceu com
+  máscara no armazenamento. A interface continua exibindo o telefone formatado.
+- Evidências: teste de integração específico de nome e telefone mascarado aprovado,
+  72 testes unitários e build Release do backend aprovados.
+
 ## Remoção da prontidão e auditoria do banco local — 21/09/2026
 
 - Removidos o painel **Prontidão para homologação**, sua chamada no frontend e o

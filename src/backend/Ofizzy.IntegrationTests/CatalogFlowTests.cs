@@ -89,5 +89,31 @@ public sealed class CatalogFlowTests(OfizzyFactory factory) : IClassFixture<Ofiz
         Assert.Equal(0, vehicles.GetProperty("total").GetInt32());
     }
 
+    [Fact]
+    public async Task CustomerSearchFindsNameAndMaskedPhoneUsingNormalizedContact()
+    {
+        using var client = factory.CreateClient(new()
+        {
+            HandleCookies = false
+        });
+        await Setup(client);
+
+        var create = await client.PostAsJsonAsync("/api/customers", new
+        {
+            name = "João da Silva",
+            phone = "(11) 99999-9999"
+        });
+
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var created = await create.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("11999999999", created.GetProperty("phone").GetString());
+
+        var byName = await client.GetFromJsonAsync<JsonElement>("/api/customers?q=Jo%C3%A3o");
+        var byPhone = await client.GetFromJsonAsync<JsonElement>("/api/customers?q=11%2099999-9999");
+
+        Assert.Equal(1, byName.GetProperty("total").GetInt32());
+        Assert.Equal(1, byPhone.GetProperty("total").GetInt32());
+    }
+
     private static Task Setup(HttpClient client) => TenantTestSession.BootstrapOperationalTenant(client);
 }
