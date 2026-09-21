@@ -9,6 +9,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
+import { TenantContextService } from '../../core/tenancy/tenant-context.service';
 import { WorkOrderSummary, WorkOrderStatus } from '../../core/api/work-order.models';
 import {
   DataTableWrapperComponent,
@@ -39,6 +40,7 @@ import {
 export class DashboardPage implements OnInit {
   private readonly workOrdersApi = inject(WorkOrderApiService);
   private readonly router = inject(Router);
+  private readonly tenantContext = inject(TenantContextService);
 
   readonly loading = signal(true);
   readonly activeOrders = signal<WorkOrderSummary[]>([]);
@@ -46,6 +48,7 @@ export class DashboardPage implements OnInit {
   readonly totalVehicles = signal(0);
   readonly totalActiveOrders = signal(0);
   readonly totalCompletedOrders = signal(0);
+  readonly automotiveEnabled = computed(() => this.tenantContext.has('Automotive'));
 
   readonly openOrders = computed(() => this.activeOrders().filter((o) => o.status === 'Open'));
 

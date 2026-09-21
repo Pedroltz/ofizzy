@@ -11,7 +11,7 @@ public sealed record WorkOrderLineRequest(
 
 public sealed record WorkOrderRequest(
     Guid CustomerId,
-    Guid VehicleId,
+    Guid? VehicleId,
     int? Mileage,
     string? Complaint,
     string? Diagnosis,
@@ -34,12 +34,12 @@ public sealed record WorkOrderResponse(
     Guid Id,
     long Number,
     Guid CustomerId,
-    Guid VehicleId,
+    Guid? VehicleId,
     string CustomerName,
     string? CustomerDocument,
     string? CustomerPhone,
-    string VehiclePlate,
-    string VehicleDescription,
+    string? VehiclePlate,
+    string? VehicleDescription,
     int? Mileage,
     string? Complaint,
     string? Diagnosis,
@@ -57,8 +57,8 @@ public sealed record WorkOrderSummaryResponse(
     Guid Id,
     long Number,
     string CustomerName,
-    string VehiclePlate,
-    string VehicleDescription,
+    string? VehiclePlate,
+    string? VehicleDescription,
     WorkOrderStatus Status,
     decimal Total,
     DateTimeOffset CreatedAt);
@@ -68,7 +68,6 @@ public sealed class WorkOrderRequestValidator : AbstractValidator<WorkOrderReque
     public WorkOrderRequestValidator()
     {
         RuleFor(x => x.CustomerId).NotEmpty();
-        RuleFor(x => x.VehicleId).NotEmpty();
         RuleFor(x => x.Mileage).GreaterThanOrEqualTo(0).When(x => x.Mileage.HasValue);
         RuleFor(x => x.Complaint).MaximumLength(3000);
         RuleFor(x => x.Diagnosis).MaximumLength(5000);

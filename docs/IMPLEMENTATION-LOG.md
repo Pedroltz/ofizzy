@@ -1161,6 +1161,13 @@ Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e
 
 ## 2026-09-18 — Favicons oficiais em alta resolução e multi-resolução
 
+## 2026-09-21 — Módulo de Veículos opcional por organização
+
+- Atualizada a dependência de módulos: Clientes + Catálogo + Ordens de Serviço podem operar sem Automotive; Automotive permanece dependente de Clientes.
+- A autorização de API, as rotas e o menu removem Veículos quando o tenant o desativa. O formulário de OS omite veículo e quilometragem nesse modo; com Automotive ativo, a seleção continua obrigatória no backend.
+- `WorkOrder.VehicleId`, placa e descrição foram tornados opcionais no modelo, contratos e migration `20260921113000_MakeWorkOrderVehicleOptional`. OS existentes mantêm seus snapshots; uma edição sem Automotive não apaga o veículo histórico.
+- Adicionados testes unitários de dependência de módulos. A migration foi aplicada no PostgreSQL local. Validações: backend build sem avisos e 76 unitários aprovados; frontend lint, 69 testes e build aprovados. O aviso de budget inicial do frontend (795,36 kB para limite de 500 kB) permanece preexistente.
+
 - **Processamento e Geração de Favicons**:
   - Imagem do ícone com engrenagem e checkmark (`ChatGPT Image 17 de set. de 2026, 15_40_02.png`) tratada e exportada para os assets de cabeçalho do navegador em `src/frontend/ofizzy-web/public/`.
   - Criado `favicon.ico` com múltiplas camadas (16×16, 32×32, 48×48, 64×64 px) para compatibilidade universal com navegadores desktop legados e modernos.

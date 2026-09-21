@@ -11,9 +11,12 @@ using Ofizzy.Api.Shared;
 
 namespace Ofizzy.Api.Modules.WorkOrders;
 
-[TenantAccess(Modules = new[] { ProductModule.WorkOrders, ProductModule.Customers, ProductModule.Catalog, ProductModule.Automotive })]
+[TenantAccess(Modules = new[] { ProductModule.WorkOrders, ProductModule.Customers, ProductModule.Catalog })]
 [Authorize, ApiController, Route("api/work-orders")]
-public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<WorkOrderRequest> validator) : ControllerBase
+public sealed class WorkOrdersController(
+    ApplicationDbContext db,
+    CurrentTenant current,
+    IValidator<WorkOrderRequest> validator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<PagedResponse<WorkOrderSummaryResponse>>> List(
@@ -38,7 +41,7 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
             var term = $"%{q.Trim()}%";
             query = query.Where(x =>
                 EF.Functions.ILike(x.CustomerName, term) ||
-                EF.Functions.ILike(x.VehiclePlate, term) ||
+                (x.VehiclePlate != null && EF.Functions.ILike(x.VehiclePlate, term)) ||
                 x.Number.ToString().Contains(q.Trim()));
         }
 
@@ -77,19 +80,18 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
             return ValidationProblem(ModelState);
         }
 
-        var (customer, vehicle) = await GetReferences(request, ct);
-        var vehicleDescription = string.Join(' ', new[] { vehicle.Brand, vehicle.Model, vehicle.Year?.ToString() }
-            .Where(x => !string.IsNullOrWhiteSpace(x)));
+        var automotiveEnabled = current.HasModule(ProductModule.Automotive);
+        var (customer, vehicle) = await GetReferences(request, automotiveEnabled, ct);
 
         var item = new WorkOrder
         {
             CustomerId = customer.Id,
-            VehicleId = vehicle.Id,
+            VehicleId = vehicle?.Id,
             CustomerName = customer.Name,
             CustomerDocument = customer.Document,
             CustomerPhone = customer.Phone ?? customer.WhatsApp,
-            VehiclePlate = vehicle.Plate,
-            VehicleDescription = vehicleDescription,
+            VehiclePlate = vehicle?.Plate,
+            VehicleDescription = VehicleDescription(vehicle),
             Mileage = request.Mileage,
             Complaint = Clean(request.Complaint),
             Diagnosis = Clean(request.Diagnosis),
@@ -138,14 +140,18 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
 
         EnsureEditable(item);
 
-        var (customer, vehicle) = await GetReferences(request, ct);
+        var automotiveEnabled = current.HasModule(ProductModule.Automotive);
+        var (customer, vehicle) = await GetReferences(request, automotiveEnabled, ct);
         item.CustomerId = customer.Id;
-        item.VehicleId = vehicle.Id;
         item.CustomerName = customer.Name;
         item.CustomerDocument = customer.Document;
         item.CustomerPhone = customer.Phone ?? customer.WhatsApp;
-        item.VehiclePlate = vehicle.Plate;
-        item.VehicleDescription = string.Join(' ', new[] { vehicle.Brand, vehicle.Model, vehicle.Year?.ToString() }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        if (automotiveEnabled)
+        {
+            item.VehicleId = vehicle!.Id;
+            item.VehiclePlate = vehicle.Plate;
+            item.VehicleDescription = VehicleDescription(vehicle);
+        }
         item.Mileage = request.Mileage;
         item.Complaint = Clean(request.Complaint);
         item.Diagnosis = Clean(request.Diagnosis);
@@ -233,11 +239,29 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
         return false;
     }
 
-    private async Task<(Customer Customer, Vehicle Vehicle)> GetReferences(WorkOrderRequest request, CancellationToken ct)
+    private async Task<(Customer Customer, Vehicle? Vehicle)> GetReferences(
+        WorkOrderRequest request,
+        bool automotiveEnabled,
+        CancellationToken ct)
     {
         var customer = await db.Customers
             .SingleOrDefaultAsync(x => x.Id == request.CustomerId && x.IsActive, ct)
             ?? throw new ConflictException("O cliente informado não está disponível.");
+
+        if (!automotiveEnabled)
+        {
+            if (request.VehicleId.HasValue)
+            {
+                throw new ConflictException("O módulo de Veículos está desativado para esta organização.");
+            }
+
+            return (customer, null);
+        }
+
+        if (!request.VehicleId.HasValue)
+        {
+            throw new ConflictException("Selecione o veículo atendido antes de abrir a OS.");
+        }
 
         var vehicle = await db.Vehicles
             .SingleOrDefaultAsync(x => x.Id == request.VehicleId && x.CustomerId == customer.Id && x.IsActive, ct)
@@ -245,6 +269,11 @@ public sealed class WorkOrdersController(ApplicationDbContext db, IValidator<Wor
 
         return (customer, vehicle);
     }
+
+    private static string? VehicleDescription(Vehicle? vehicle) => vehicle is null
+        ? null
+        : string.Join(' ', new[] { vehicle.Brand, vehicle.Model, vehicle.Year?.ToString() }
+            .Where(x => !string.IsNullOrWhiteSpace(x)));
 
     private static void EnsureEditable(WorkOrder item)
     {

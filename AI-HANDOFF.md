@@ -309,6 +309,10 @@ Fundação SaaS e fases 1–4 têm aceite local. Fiscal está implementado local
 
 ## Implementação para localizar
 
+### Modularização de Veículos — 21/09/2026
+
+`Automotive` é opcional por tenant. A regra de dependências está em `Platform/Tenancy/TenantProvisioningService.cs`: Ordens de Serviço exigem somente `Customers` e `Catalog`; `Automotive` exige `Customers`. O `TenantAccess` de OS e dashboard não exige Automotive. `WorkOrder.VehicleId`, placa e descrição são opcionais pela migration `20260921113000_MakeWorkOrderVehicleOptional`; com Automotive desligado, o backend rejeita `vehicleId` em novas OS e preserva o vínculo histórico ao editar uma OS antiga. A UI em `/plataforma` permite desligar Veículos, esconde a rota/menu correspondente e adapta o editor/painel para operação sem veículo. A migration foi aplicada no PostgreSQL local; aplicá-la antes de deploy. Validação local: backend build + 76 unitários, lint + 69 testes + build frontend aprovados.
+
 - Backend: `src/backend/Ofizzy.Api/BusinessCore/Fiscal/`. Serviços concretos, DTOs e regras; um `ApplicationDbContext`.
 - `FiscalEmissionService`: preparação, reserva, assinatura, envio/consulta e cancelamento; mantém identidade e XML em resultado inconclusivo.
 - `FiscalGateway`: comunicação oficial direta e correlação de resposta; `DevSimulatedFiscalGateway`: gateway simulado local ativo exclusivamente em `Development` (`Fiscal:SimulateGateway: true`); `FiscalDevController`: gerador de certificado A1 autoassinado para testes locais; `FiscalXml`: assinatura, XSD local, regras do Simples Nacional (`infAdic`/`infCpl`) e DPS (`infoCompl`); `FiscalPdf`: DANFE oficial com canhoto destacável e DANFSe nacional com QR Code; `FiscalCertificateVault`: A1 cifrado com chave externa versionada.

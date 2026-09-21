@@ -903,15 +903,13 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("VehicleDescription")
-                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
-                    b.Property<Guid>("VehicleId")
+                    b.Property<Guid?>("VehicleId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("VehiclePlate")
-                        .IsRequired()
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
 
@@ -1286,8 +1284,7 @@ namespace Ofizzy.Api.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId", "VehicleId")
                         .HasPrincipalKey("TenantId", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
 

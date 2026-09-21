@@ -108,7 +108,7 @@ export class AppShellComponent {
                 string,
                 ('Customers' | 'WorkOrders' | 'Catalog' | 'Automotive')[]
               > = {
-                '/': ['Customers', 'WorkOrders', 'Automotive'],
+                '/': ['Customers', 'WorkOrders'],
                 '/ordens': ['WorkOrders'],
                 '/clientes': ['Customers'],
                 '/veiculos': ['Automotive'],

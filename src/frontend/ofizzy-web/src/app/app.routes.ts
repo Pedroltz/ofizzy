@@ -56,7 +56,7 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         canActivate: [tenantGuard],
-        data: { modules: ['Customers', 'WorkOrders', 'Automotive'] },
+        data: { modules: ['Customers', 'WorkOrders'] },
         loadComponent: () =>
           import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
       },
@@ -79,7 +79,7 @@ export const routes: Routes = [
       {
         path: 'ordens',
         canActivate: [tenantGuard],
-        data: { modules: ['WorkOrders', 'Catalog', 'Automotive', 'Customers'] },
+        data: { modules: ['WorkOrders', 'Catalog', 'Customers'] },
         loadComponent: () =>
           import('./features/work-orders/work-orders.page').then((m) => m.WorkOrdersPage),
       },

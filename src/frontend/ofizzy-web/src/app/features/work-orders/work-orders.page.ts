@@ -23,6 +23,7 @@ import { CatalogApiService } from '../../core/api/catalog-api.service';
 import { Customer, Part, ServiceItem, Vehicle } from '../../core/api/catalog.models';
 import { CompanyApiService, CompanyResponse } from '../../core/api/company-api.service';
 import { WorkOrderApiService } from '../../core/api/work-order-api.service';
+import { TenantContextService } from '../../core/tenancy/tenant-context.service';
 import { ViewPreferenceService } from '../../core/preferences/view-preference.service';
 import {
   WorkOrder,
@@ -80,6 +81,7 @@ export class WorkOrdersPage {
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
+  private readonly tenantContext = inject(TenantContextService);
 
   readonly items = signal<WorkOrderSummary[]>([]);
   readonly customers = signal<Customer[]>([]);
@@ -106,6 +108,7 @@ export class WorkOrdersPage {
   readonly effectiveViewMode = computed(() =>
     this.responsive.isTabletOrSmaller() ? 'cards' : this.viewMode(),
   );
+  readonly automotiveEnabled = computed(() => this.tenantContext.has('Automotive'));
 
   readonly selectedStatus = signal<WorkOrderStatus | 'All'>('All');
   readonly statusFilterOptions: { label: string; value: WorkOrderStatus | 'All' }[] = [
@@ -122,7 +125,7 @@ export class WorkOrdersPage {
 
   readonly form = this.fb.group({
     customer: this.fb.control<Customer | null>(null, Validators.required),
-    vehicle: this.fb.control<Vehicle | null>(null, Validators.required),
+    vehicle: this.fb.control<Vehicle | null>(null),
     mileage: [null as number | null, Validators.min(0)],
     complaint: [''],
     diagnosis: [''],
@@ -160,7 +163,7 @@ export class WorkOrdersPage {
     this.form.controls.customer.valueChanges
       .pipe(takeUntilDestroyed(destroyRef))
       .subscribe(async (customer) => {
-        if (!this.dialog()) return;
+        if (!this.dialog() || !this.automotiveEnabled()) return;
         if (!this.editing() || customer?.id !== this.editing()?.customerId) {
           this.form.controls.vehicle.setValue(null);
         }
@@ -240,7 +243,9 @@ export class WorkOrdersPage {
         return;
       }
       this.editing.set(order);
-      const vehiclesRes = await this.catalogs.vehicles('', 1, 100, order.customerId);
+      const vehiclesRes = this.automotiveEnabled()
+        ? await this.catalogs.vehicles('', 1, 100, order.customerId)
+        : { items: [] as Vehicle[] };
       this.vehicles.set(vehiclesRes.items);
       this.vehicleSuggestions.set(vehiclesRes.items);
       this.form.reset({
@@ -363,7 +368,7 @@ export class WorkOrdersPage {
           summary: 'Cliente não selecionado',
           detail: 'Selecione o cliente proprietário antes de emitir a OS.',
         });
-      } else if (!controls.vehicle.value) {
+      } else if (this.automotiveEnabled() && !controls.vehicle.value) {
         this.messages.add({
           severity: 'warn',
           summary: 'Veículo não selecionado',
@@ -413,7 +418,7 @@ export class WorkOrdersPage {
       await this.api.save(
         {
           customerId: value.customer!.id,
-          vehicleId: value.vehicle!.id,
+          vehicleId: value.vehicle?.id ?? null,
           mileage: value.mileage,
           complaint: value.complaint || null,
           diagnosis: value.diagnosis || null,

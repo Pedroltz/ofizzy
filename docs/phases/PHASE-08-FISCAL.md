@@ -237,6 +237,10 @@ Veja [FISCAL.md](../FISCAL.md) para configuração, contratos, fontes e evidênc
 
 ## Continuidade — 13/09/2026
 
+## Modularização de operação — 21/09/2026
+
+Veículos/Automotive agora é opcional por organização, sem alterar os requisitos fiscais. OS sem veículo são suportadas pelo domínio e pela migration `20260921113000_MakeWorkOrderVehicleOptional`, mas emissão fiscal continua dependente dos módulos e campos exigidos pelo fluxo fiscal. Não interpretar a capacidade de operar OS genérica como autorização de transmissão fiscal.
+
 Cancelamento NF-e/NFS-e e inutilização passam por XSD antes do envio. Recuperação
 administrativa em `POST /api/fiscal/nfe/inutilizations/{id}/sync` reaproveita o pedido
 assinado e confirma retornos 102/563 somente com protocolo e identificação compatíveis.

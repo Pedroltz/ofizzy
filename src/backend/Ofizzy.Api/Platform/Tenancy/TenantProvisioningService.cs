@@ -69,9 +69,10 @@ public static class AutomotiveTenantTemplate
         var set = modules.ToHashSet();
         var allDefined = set.All(Enum.IsDefined);
         var automotiveRequiresCustomers = !set.Contains(ProductModule.Automotive) || set.Contains(ProductModule.Customers);
-        var workOrdersRequireAll = !set.Contains(ProductModule.WorkOrders) || Modules.All(set.Contains);
+        var workOrdersRequireBaseModules = !set.Contains(ProductModule.WorkOrders) ||
+            (set.Contains(ProductModule.Customers) && set.Contains(ProductModule.Catalog));
 
-        return allDefined && automotiveRequiresCustomers && workOrdersRequireAll;
+        return allDefined && automotiveRequiresCustomers && workOrdersRequireBaseModules;
     }
 }
 
@@ -88,7 +89,7 @@ public sealed class TenantProvisioningService(
         var modules = request.Modules ?? AutomotiveTenantTemplate.Modules;
         if (!AutomotiveTenantTemplate.ValidModules(modules))
         {
-            throw new ConflictException("Ordens automotivas exigem Clientes, Catálogo e Automotive.");
+            throw new ConflictException("Ordens de serviço exigem Clientes e Catálogo. Automotive é opcional.");
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);

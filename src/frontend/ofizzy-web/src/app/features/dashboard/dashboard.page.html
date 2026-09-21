@@ -1,8 +1,12 @@
 <section class="page-container dashboard-page-container">
   <app-page-header
     eyebrow="Painel Operacional"
-    title="Visão Geral da Oficina"
-    description="Controle em tempo real de veículos no pátio, ordens em andamento e produtividade"
+    [title]="automotiveEnabled() ? 'Visão Geral da Oficina' : 'Visão Geral da Operação'"
+    [description]="
+      automotiveEnabled()
+        ? 'Controle em tempo real de veículos no pátio, ordens em andamento e produtividade'
+        : 'Controle em tempo real das ordens em andamento e produtividade'
+    "
   />
 
   <!-- Linha 1: KPIs Operacionais -->
@@ -42,9 +46,11 @@
     <!-- Coluna Principal (8 colunas no desktop) -->
     <div class="dashboard-main-col">
       <app-section-card
-        title="Veículos na Oficina"
-        subtitle="Ordens de serviço ativas no pátio"
-        icon="pi pi-car"
+        [title]="automotiveEnabled() ? 'Veículos na Oficina' : 'Ordens em andamento'"
+        [subtitle]="
+          automotiveEnabled() ? 'Ordens de serviço ativas no pátio' : 'Ordens de serviço ativas'
+        "
+        [icon]="automotiveEnabled() ? 'pi pi-car' : 'pi pi-file-edit'"
       >
         <div card-actions>
           <a routerLink="/ordens" class="section-link">
@@ -58,8 +64,14 @@
         } @else if (activeOrders().length === 0) {
           <app-empty-state
             icon="pi pi-check-circle"
-            title="Pátio Livre de Pendências"
-            description="Não há ordens abertas ou em execução neste momento. Todos os veículos foram liberados."
+            [title]="
+              automotiveEnabled() ? 'Pátio Livre de Pendências' : 'Nenhuma pendência operacional'
+            "
+            [description]="
+              automotiveEnabled()
+                ? 'Não há ordens abertas ou em execução neste momento. Todos os veículos foram liberados.'
+                : 'Não há ordens abertas ou em execução neste momento.'
+            "
             actionLabel="+ Nova Ordem de Serviço"
             (action)="navigateToNewOrder()"
           />
@@ -82,7 +94,7 @@
                 <thead>
                   <tr>
                     <th>OS</th>
-                    <th>Cliente / Veículo</th>
+                    <th>{{ automotiveEnabled() ? 'Cliente / Veículo' : 'Cliente' }}</th>
                     <th>Status</th>
                     <th>Entrada</th>
                     <th class="text-right">Valor</th>
@@ -100,12 +112,14 @@
                           <strong class="cell-title" [title]="item.customerName">{{
                             item.customerName
                           }}</strong>
-                          <div class="vehicle-subline">
-                            <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                            <span class="vehicle-desc" [title]="item.vehicleDescription">{{
-                              item.vehicleDescription
-                            }}</span>
-                          </div>
+                          @if (automotiveEnabled() && item.vehiclePlate) {
+                            <div class="vehicle-subline">
+                              <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                              <span class="vehicle-desc" [title]="item.vehicleDescription">{{
+                                item.vehicleDescription
+                              }}</span>
+                            </div>
+                          }
                         </div>
                       </td>
                       <td>
@@ -143,10 +157,12 @@
                 </div>
                 <div class="dashboard-order-card__body">
                   <strong class="customer-name">{{ item.customerName }}</strong>
-                  <div class="vehicle-row">
-                    <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
-                    <span>{{ item.vehicleDescription }}</span>
-                  </div>
+                  @if (automotiveEnabled() && item.vehiclePlate) {
+                    <div class="vehicle-row">
+                      <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                      <span>{{ item.vehicleDescription }}</span>
+                    </div>
+                  }
                 </div>
                 <div class="dashboard-order-card__footer">
                   <span class="entry-time"
@@ -254,18 +270,20 @@
             </a>
           </div>
 
-          <div class="operational-base-item">
-            <div class="operational-base-icon">
-              <i class="pi pi-car" aria-hidden="true"></i>
+          @if (automotiveEnabled()) {
+            <div class="operational-base-item">
+              <div class="operational-base-icon">
+                <i class="pi pi-car" aria-hidden="true"></i>
+              </div>
+              <div class="operational-base-info">
+                <span class="operational-base-label">Veículos Cadastrados</span>
+                <strong class="operational-base-value font-mono">{{ totalVehicles() }}</strong>
+              </div>
+              <a routerLink="/veiculos" class="operational-base-link" title="Consultar veículos">
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              </a>
             </div>
-            <div class="operational-base-info">
-              <span class="operational-base-label">Veículos Cadastrados</span>
-              <strong class="operational-base-value font-mono">{{ totalVehicles() }}</strong>
-            </div>
-            <a routerLink="/veiculos" class="operational-base-link" title="Consultar veículos">
-              <i class="pi pi-arrow-right" aria-hidden="true"></i>
-            </a>
-          </div>
+          }
         </div>
       </app-section-card>
     </div>

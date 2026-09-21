@@ -178,10 +178,11 @@ export class PlatformPage {
     const modules = this.draft.modules;
     if (
       (modules.includes('Automotive') && !modules.includes('Customers')) ||
-      (modules.includes('WorkOrders') && !this.availableModules.every((m) => modules.includes(m)))
+      (modules.includes('WorkOrders') &&
+        (!modules.includes('Customers') || !modules.includes('Catalog')))
     ) {
       this.validation.set(
-        'Automotive exige Clientes. Ordens de serviço exige Clientes, Catálogo e Automotive.',
+        'Automotive exige Clientes. Ordens de serviço exigem Clientes e Catálogo; Veículos é opcional.',
       );
       return;
     }

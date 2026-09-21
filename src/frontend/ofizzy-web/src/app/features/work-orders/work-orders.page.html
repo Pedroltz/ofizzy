@@ -905,46 +905,45 @@
             <small class="field-error-text">Selecione o cliente</small>
           }
         </label>
-        <label>
-          <span>Veículo atendido</span>
-          <p-autocomplete
-            formControlName="vehicle"
-            [suggestions]="vehicleSuggestions()"
-            optionLabel="plate"
-            [dropdown]="true"
-            [forceSelection]="true"
-            [showClear]="true"
-            [disabled]="!form.controls.customer.value"
-            [emptyMessage]="'Nenhum veículo encontrado para este cliente.'"
-            placeholder="Busque placa, marca ou modelo"
-            styleClass="wo-editor-autocomplete"
-            (completeMethod)="filterVehicles($event)"
-          >
-            <ng-template #item let-vehicle>
-              <div class="wo-autocomplete-option">
-                <strong>{{ vehicle.plate }}</strong
-                ><small>{{ vehicleLabel(vehicle) }}</small>
-              </div>
-            </ng-template>
-          </p-autocomplete>
-          @if (form.controls.vehicle.errors?.['required'] && form.controls.vehicle.touched) {
-            <small class="field-error-text">Selecione o veículo</small>
-          }
-        </label>
-        <label>
-          <span>Quilometragem atual</span>
-          <p-inputnumber
-            formControlName="mileage"
-            [min]="0"
-            [useGrouping]="false"
-            placeholder="Ex: 85000"
-            suffix=" km"
-            styleClass="full-control"
-          />
-        </label>
+        @if (automotiveEnabled()) {
+          <label>
+            <span>Veículo atendido</span>
+            <p-autocomplete
+              formControlName="vehicle"
+              [suggestions]="vehicleSuggestions()"
+              optionLabel="plate"
+              [dropdown]="true"
+              [forceSelection]="true"
+              [showClear]="true"
+              [disabled]="!form.controls.customer.value"
+              [emptyMessage]="'Nenhum veículo encontrado para este cliente.'"
+              placeholder="Busque placa, marca ou modelo"
+              styleClass="wo-editor-autocomplete"
+              (completeMethod)="filterVehicles($event)"
+            >
+              <ng-template #item let-vehicle>
+                <div class="wo-autocomplete-option">
+                  <strong>{{ vehicle.plate }}</strong
+                  ><small>{{ vehicleLabel(vehicle) }}</small>
+                </div>
+              </ng-template>
+            </p-autocomplete>
+          </label>
+          <label>
+            <span>Quilometragem atual</span>
+            <p-inputnumber
+              formControlName="mileage"
+              [min]="0"
+              [useGrouping]="false"
+              placeholder="Ex: 85000"
+              suffix=" km"
+              styleClass="full-control"
+            />
+          </label>
+        }
       </section>
 
-      @if (form.controls.customer.value && vehicles().length === 0) {
+      @if (automotiveEnabled() && form.controls.customer.value && vehicles().length === 0) {
         <div class="alert-warning">
           <i class="pi pi-exclamation-circle mr-1"></i> Este cliente não possui veículos
           cadastrados. Cadastre um veículo na página de <strong>Veículos</strong> antes de abrir a

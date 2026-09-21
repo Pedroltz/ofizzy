@@ -224,6 +224,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .WithMany()
                 .HasForeignKey(x => new { x.TenantId, x.VehicleId })
                 .HasPrincipalKey(x => new { x.TenantId, x.Id })
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

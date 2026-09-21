@@ -14,13 +14,13 @@ public sealed class WorkOrder : Ofizzy.Api.Modules.Tenancy.ITenantScoped
     public long Number { get; set; }
     public Guid CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
-    public Guid VehicleId { get; set; }
-    public Vehicle Vehicle { get; set; } = null!;
+    public Guid? VehicleId { get; set; }
+    public Vehicle? Vehicle { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public string? CustomerDocument { get; set; }
     public string? CustomerPhone { get; set; }
-    public string VehiclePlate { get; set; } = string.Empty;
-    public string VehicleDescription { get; set; } = string.Empty;
+    public string? VehiclePlate { get; set; }
+    public string? VehicleDescription { get; set; }
     public int? Mileage { get; set; }
     public string? Complaint { get; set; }
     public string? Diagnosis { get; set; }

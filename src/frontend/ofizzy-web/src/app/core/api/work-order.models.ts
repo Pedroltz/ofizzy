@@ -9,7 +9,7 @@ export interface WorkOrderLineRequest {
 }
 export interface WorkOrderRequest {
   customerId: string;
-  vehicleId: string;
+  vehicleId: string | null;
   mileage: number | null;
   complaint: string | null;
   diagnosis: string | null;
@@ -21,8 +21,8 @@ export interface WorkOrderSummary {
   id: string;
   number: number;
   customerName: string;
-  vehiclePlate: string;
-  vehicleDescription: string;
+  vehiclePlate: string | null;
+  vehicleDescription: string | null;
   status: WorkOrderStatus;
   total: number;
   createdAt: string;

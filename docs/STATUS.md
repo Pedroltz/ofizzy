@@ -345,6 +345,12 @@ Validação desta correção: backend Release sem avisos/erros, 56 unitários e 
 
 Atualizado em 20/09/2026. Branch de trabalho: `develop`.
 
+## Modularização de Veículos — 21/09/2026
+
+O módulo `Automotive` passou a ser opcional por organização. Uma empresa pode operar com apenas Clientes, Catálogo e Ordens de Serviço: o menu e a rota de Veículos ficam indisponíveis, a API também bloqueia esse acesso e novas OS não exigem veículo. A migration `20260921113000_MakeWorkOrderVehicleOptional` preserva OS históricas e permite novos registros sem vínculo automotivo. Ordens de Serviço continuam exigindo Clientes e Catálogo; Automotive, quando ativo, continua exigindo Clientes. Fiscal permanece condicionado aos módulos fiscais vigentes e não foi alterado por esta entrega.
+
+Evidências locais: migration aplicada no PostgreSQL de desenvolvimento, backend build sem avisos/erros e 76 testes unitários aprovados; frontend lint, 69 testes e build aprovados. O bundle inicial ficou em 795,36 kB, acima do budget configurado de 500 kB (aviso preexistente de build). Aplicar a migration em cada ambiente adicional antes de utilizar OS sem veículo.
+
 A fase ativa é a [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md). A implementação local inclui emissão, consulta, cancelamento, downloads e recuperação administrativa de inutilização. **Não há homologação externa nem liberação de emissão em produção.**
 
 | Frente | Estado |

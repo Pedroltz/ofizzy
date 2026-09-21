@@ -7,7 +7,7 @@ using Ofizzy.Api.Modules.WorkOrders;
 
 namespace Ofizzy.Api.Modules.Dashboard;
 
-[TenantAccess(Modules = new[] { ProductModule.Customers, ProductModule.WorkOrders, ProductModule.Automotive })]
+[TenantAccess(Modules = new[] { ProductModule.Customers, ProductModule.WorkOrders })]
 [Authorize, ApiController, Route("api/dashboard")]
 public sealed class DashboardController(ApplicationDbContext db) : ControllerBase
 {
