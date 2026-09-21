@@ -1,5 +1,21 @@
 # Status do projeto
 
+## Revisão dos documentos auxiliares fiscais em PDF — 21/09/2026
+
+- DANFE e DANFSe passaram a usar o mesmo leiaute em homologação e produção. O único
+  elemento condicional é a marca-d’água diagonal **HOMOLOGAÇÃO**, inserida somente
+  quando o ambiente do XML autorizado é `2`; faixas de simulação local e a marca do
+  sistema foram removidas do documento fiscal.
+- O DANFSe foi alinhado à NT SE/CGNFS-e nº 008/2026: título `DANFSe v2.0`, subtítulo
+  `Documento Auxiliar da NFS-e`, município, gerador/ambiente, identificação da NFS-e
+  e DPS, QR Code/chave, prestador, tomador, discriminação, tributação e valor líquido.
+  DANFE preserva canhoto, chave e código de barras, protocolo, destinatário, impostos,
+  produtos, totais e informações adicionais, sempre extraídos do XML autorizado.
+- Evidências: inspeção visual renderizada de DANFE e DANFSe, 74 testes unitários e
+  build Release do backend, lint, 69 testes, build e 40 E2E responsivos aprovados;
+  `docker compose config` passou com variáveis fictícias. A produção continua
+  desabilitada e a conferência externa com autorizadores permanece pendente.
+
 ## Catálogo pesquisável na edição de OS — 21/09/2026
 
 - Corrigido o carregamento de serviços e peças no editor de ordem de serviço: a

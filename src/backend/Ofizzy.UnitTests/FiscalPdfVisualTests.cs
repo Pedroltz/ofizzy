@@ -67,7 +67,7 @@ public sealed class FiscalPdfVisualTests
         using var pdf = PdfDocument.Open(Generate(doc));
         var text = Text(pdf);
         Assert.Equal(1, pdf.NumberOfPages);
-        foreach (var expected in new[] { "EMITENTE DO XML", "Rua do Emitente", "TOMADOR DO XML", "Rua do Tomador", "987654321", "3,25%", "100,00", "SIMULAÇÃO LOCAL", "HOMOLOGAÇÃO" }) Assert.Contains(expected, text);
+        foreach (var expected in new[] { "DANFSe v2.0", "Documento Auxiliar da NFS-e", "EMITENTE DO XML", "Rua do Emitente", "TOMADOR DO XML", "Rua do Tomador", "987654321", "3,25%", "100,00", "HOMOLOGAÇÃO" }) Assert.Contains(expected, text);
         Assert.Contains("R$ 100,00", text);
         Assert.All(pdf.GetPages().SelectMany(page => page.Letters), letter => Assert.InRange(letter.GlyphRectangle.Right, 0, 581));
         Assert.DoesNotContain("OBSOLETO", text); Assert.DoesNotContain("OBSOLETA", text);
@@ -113,6 +113,27 @@ public sealed class FiscalPdfVisualTests
         using var pdf = PdfDocument.Open(Generate(doc));
 
         Assert.Contains("HOMOLOGAÇÃO", Text(pdf));
+        Assert.DoesNotContain("SIMULAÇÃO LOCAL", Text(pdf));
+    }
+
+    [Theory]
+    [InlineData(FiscalKind.Nfe)]
+    [InlineData(FiscalKind.Nfse)]
+    public async Task Production_pdf_uses_the_same_layout_without_homologation_watermark(FiscalKind kind)
+    {
+        var doc = await FiscalPdfFixtures.Authorized(kind);
+        var xml = FiscalXml.Parse(doc.AuthorizedXml!);
+        var environment = kind == FiscalKind.Nfe
+            ? xml.Descendants(FiscalXml.Nfe + "tpAmb").First()
+            : xml.Descendants(FiscalXml.Nfse + "tpAmb").First();
+        environment.Value = "1";
+        doc.AuthorizedXml = xml.ToString(SaveOptions.DisableFormatting);
+
+        using var pdf = PdfDocument.Open(Generate(doc));
+        var text = Text(pdf);
+
+        Assert.DoesNotContain("HOMOLOGAÇÃO", text);
+        Assert.DoesNotContain("SIMULAÇÃO LOCAL", text);
     }
 
     [Theory]
@@ -137,7 +158,7 @@ public sealed class FiscalPdfVisualTests
         using var pdf = PdfDocument.Open(Generate(doc));
         var text = Text(pdf);
         Assert.Contains("DOCUMENTO CANCELADO", text);
-        Assert.Contains("SIMULAÇÃO LOCAL", text);
+        Assert.DoesNotContain("SIMULAÇÃO LOCAL", text);
         Assert.Contains("Produto001", string.Concat(text.Where(c => !char.IsWhiteSpace(c))));
         Assert.Contains($"Produto{lines:D3}", string.Concat(text.Where(c => !char.IsWhiteSpace(c))));
         Assert.Contains((lines * 100).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")), text);

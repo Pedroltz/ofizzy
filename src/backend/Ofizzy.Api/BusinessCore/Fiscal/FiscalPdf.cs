@@ -76,13 +76,10 @@ public static class FiscalPdf
             page.Size(PageSizes.A4);
             page.Margin(15);
             page.DefaultTextStyle(x => x.FontSize(7).FontFamily(Fonts.Arial));
+            AddHomologationWatermark(page, environment);
 
             page.Header().Column(header =>
             {
-                if (xml.Descendants().Any(x => x.Name.LocalName == "verAplic" && x.Value == "Ofizzy_SIMULACAO") || xml.Descendants().Any(x => x.Name.LocalName == "xMotivo" && x.Value.Contains("Simulação de Desenvolvimento", StringComparison.Ordinal)))
-                    header.Item().AlignCenter().Text("SIMULAÇÃO LOCAL — SEM AUTORIZAÇÃO FISCAL").Bold().FontSize(9);
-                if (environment == "2")
-                    header.Item().PaddingBottom(2).AlignCenter().Text("SEM VALOR FISCAL — EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO").Bold().FontSize(9).FontColor(Colors.Red.Medium);
                 if (document.State == FiscalState.Cancelled)
                     header.Item().PaddingBottom(2).AlignCenter().Text("DOCUMENTO CANCELADO").Bold().FontSize(10).FontColor(Colors.Red.Darken2);
 
@@ -402,7 +399,6 @@ public static class FiscalPdf
 
             page.Footer().Row(r =>
             {
-                r.RelativeItem().Text("Ofizzy · Sistema de Gestão para Oficinas").FontSize(6f).FontColor(Colors.Grey.Darken1);
                 r.RelativeItem().Text(t =>
                 {
                     t.DefaultTextStyle(s => s.FontSize(6f));
@@ -471,39 +467,37 @@ public static class FiscalPdf
             page.Size(PageSizes.A4);
             page.Margin(15);
             page.DefaultTextStyle(x => x.FontSize(7.5f).FontFamily(Fonts.Arial));
+            AddHomologationWatermark(page, environment);
 
             page.Header().Column(header =>
             {
-                if (xml.Descendants().Any(x => x.Name.LocalName == "verAplic" && x.Value == "Ofizzy_SIMULACAO") || xml.Descendants().Any(x => x.Name.LocalName == "xMotivo" && x.Value.Contains("Simulação de Desenvolvimento", StringComparison.Ordinal)))
-                    header.Item().Text("SIMULAÇÃO LOCAL — SEM AUTORIZAÇÃO FISCAL").AlignCenter().Bold().FontSize(9);
-                if (environment == "2")
-                    header.Item().PaddingBottom(2).Text("SEM VALOR FISCAL — EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO").AlignCenter().Bold().FontSize(9).FontColor(Colors.Red.Medium);
                 if (document.State == FiscalState.Cancelled)
                     header.Item().PaddingBottom(2).Text("DOCUMENTO CANCELADO").AlignCenter().Bold().FontSize(10).FontColor(Colors.Red.Darken2);
 
-                // Cabeçalho Oficial do Padrão Nacional
                 header.Item().Border(0.5f).BorderColor(Colors.Black).Row(row =>
                 {
                     row.RelativeItem(6).Padding(4).Column(col =>
                     {
-                        col.Item().Text("NFS-e - NOTA FISCAL DE SERVIÇOS ELETRÔNICA").Bold().FontSize(11);
-                        col.Item().Text("Documento Auxiliar da NFS-e (DANFSe)").FontSize(8).Bold().FontColor(Colors.Grey.Darken2);
-                        col.Item().Text("Emitida nos termos da Resolução CGSN nº 169/2022 e do Convênio Nacional da NFS-e").FontSize(6).Italic();
+                        col.Item().AlignCenter().Text("DANFSe v2.0").Bold().FontSize(9);
+                        col.Item().AlignCenter().Text("Documento Auxiliar da NFS-e").Bold().FontSize(9);
+                        col.Item().PaddingTop(2).Text($"Município do emitente: {issuerCity ?? "—"}").FontSize(6);
+                        col.Item().Text("Gerador: Sistema Nacional NFS-e").FontSize(6);
+                        col.Item().Text($"Ambiente: {(environment == "1" ? "Produção" : "Homologação")}").FontSize(6);
                         col.Item().PaddingTop(4).Row(r =>
                         {
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("NÚMERO DA NFS-e").FontSize(5.5f).Bold();
+                                c.Item().Text("NÚMERO DA NFS-e").FontSize(7).Bold();
                                 c.Item().Text(nNfse).Bold().FontSize(9);
                             });
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("DATA / HORA EMISSÃO").FontSize(5.5f).Bold();
+                                c.Item().Text("DATA / HORA DE EMISSÃO").FontSize(7).Bold();
                                 c.Item().Text(FormatDateTime(dhEmi)).FontSize(7.5f);
                             });
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("COMPETÊNCIA").FontSize(5.5f).Bold();
+                                c.Item().Text("COMPETÊNCIA").FontSize(7).Bold();
                                 c.Item().Text(FormatDate(dCompet)).FontSize(7.5f);
                             });
                         });
@@ -511,17 +505,17 @@ public static class FiscalPdf
                         {
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("NÚMERO DA DPS").FontSize(5.5f).Bold();
+                                c.Item().Text("NÚMERO DA DPS").FontSize(7).Bold();
                                 c.Item().Text(nDps).FontSize(7.5f);
                             });
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("SÉRIE DA DPS").FontSize(5.5f).Bold();
+                                c.Item().Text("SÉRIE DA DPS").FontSize(7).Bold();
                                 c.Item().Text(serieDps).FontSize(7.5f);
                             });
                             r.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("CÓDIGO MUNICÍPIO").FontSize(5.5f).Bold();
+                                c.Item().Text("CÓDIGO DO MUNICÍPIO").FontSize(7).Bold();
                                 c.Item().Text(dps?.Element(ns + "cLocEmi")?.Value ?? "—").FontSize(7.5f);
                             });
                         });
@@ -653,7 +647,6 @@ public static class FiscalPdf
 
             page.Footer().Row(r =>
             {
-                r.RelativeItem().Text("Ofizzy · Sistema de Gestão para Oficinas").FontSize(6f).FontColor(Colors.Grey.Darken1);
                 r.RelativeItem().Text(t =>
                 {
                     t.DefaultTextStyle(s => s.FontSize(6f));
@@ -664,6 +657,20 @@ public static class FiscalPdf
                 });
             });
         })).GeneratePdf();
+    }
+
+    private static void AddHomologationWatermark(PageDescriptor page, string environment)
+    {
+        if (environment != "2") return;
+
+        page.Background()
+            .AlignCenter()
+            .AlignMiddle()
+            .Rotate(-35)
+            .Text("HOMOLOGAÇÃO")
+            .Bold()
+            .FontSize(52)
+            .FontColor("#FECACA");
     }
 
     private static void TaxField(RowDescriptor row, string label, string? value, bool highlight = false)

@@ -1,5 +1,20 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Revisão dos PDFs fiscais — 21/09/2026
+
+- DANFE/DANFSe foram revisados para usar um padrão único em homologação e produção.
+  A marca-d’água diagonal `HOMOLOGAÇÃO` é a única diferença visual e é lida de
+  `tpAmb` no XML autorizado. Não há faixa de simulação nem marca do sistema no
+  documento auxiliar fiscal.
+- O DANFSe foi ajustado à NT SE/CGNFS-e nº 008/2026, incluindo título `DANFSe v2.0`,
+  subtítulo, identificação de município/gerador/ambiente, dados NFS-e/DPS, QR Code e
+  chave. Os demais blocos preservam as informações autorizadas de emitente/prestador,
+  tomador/destinatário, itens, tributação, totais, protocolo e situação.
+- Evidências: renderização e inspeção visual de exemplos DANFE/DANFSe, 74 testes
+  unitários e build Release do backend, lint, 69 testes, build e 40 E2E do frontend
+  aprovados; Compose validado com variáveis fictícias. Aderência externa ao
+  autorizador continua requisito de homologação oficial.
+
 ## Catálogo pesquisável na OS — 21/09/2026
 
 - Corrigida a paginação usada ao abrir o editor: serviços e peças eram buscados na

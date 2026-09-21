@@ -1,5 +1,20 @@
 # Continuidade do Ofizzy
 
+## Documentos auxiliares em PDF — 21/09/2026
+
+- `FiscalPdf` agora usa um único padrão visual para DANFE/DANFSe. Homologação é
+  identificada exclusivamente pela marca-d’água diagonal `HOMOLOGAÇÃO`, determinada
+  pelo ambiente no XML autorizado; produção reutiliza o leiaute sem marca-d’água.
+  Rótulos de simulação local e marca do produto não fazem parte do PDF fiscal.
+- O cabeçalho DANFSe segue a NT SE/CGNFS-e nº 008/2026 (`DANFSe v2.0`, Documento
+  Auxiliar da NFS-e, município, ambiente, dados da NFS-e/DPS e QR Code). Testes cobrem
+  identificação autorizada, cancelamento, múltiplas páginas, ambiente e ausência de
+  marca-d’água em produção.
+- Evidências: PDFs renderizados e revisados visualmente; 74 unitários/backend e build
+  Release, lint, 69 testes, build e 40 E2E/frontend aprovados; Compose configurado
+  com variáveis fictícias. Não houve transmissão externa nem alteração da trava de
+  produção.
+
 ## Catálogo em ordem de serviço — 21/09/2026
 
 - O editor de OS volta a carregar serviços e peças: a chamada de catálogo agora usa

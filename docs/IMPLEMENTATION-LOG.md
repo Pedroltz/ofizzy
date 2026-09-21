@@ -1,5 +1,20 @@
 # Histórico de implementação
 
+## 2026-09-21 — Revisão de DANFE e DANFSe para homologação e produção
+
+- Revisado o gerador `FiscalPdf` para manter um leiaute único nos dois ambientes. A
+  condição de homologação agora é somente a marca-d’água diagonal `HOMOLOGAÇÃO`,
+  baseada em `tpAmb` do XML autorizado; foram removidas a faixa de simulação local e
+  a marca comercial do rodapé do documento fiscal.
+- O DANFSe adota os títulos e a organização exigidos pela NT SE/CGNFS-e nº 008/2026:
+  `DANFSe v2.0`, `Documento Auxiliar da NFS-e`, município/gerador/ambiente, NFS-e,
+  DPS, QR Code e chave. DANFE conserva os blocos do MOC para canhoto, emitente,
+  protocolo, destinatário, pagamento, impostos, itens, totais e dados adicionais.
+- Incluídos testes para garantir que a marca-d’água responde ao XML autorizado e não
+  aparece em produção. PDFs de DANFE/DANFSe foram renderizados e inspecionados; 74
+  testes unitários, build Release, lint, 69 testes, build e 40 E2E responsivos do
+  frontend passaram; `docker compose config` foi validado com variáveis fictícias.
+
 ## 2026-09-21 — Catálogo pesquisável no editor de OS
 
 - Corrigido o erro de paginação que carregava serviços e peças da página 100 na
