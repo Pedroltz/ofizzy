@@ -1,0 +1,4 @@
+# Official fiscal schemas are vendored byte-for-byte. Their line endings and
+# whitespace are part of the source artifact verified by SHA-256 tests.
+src/backend/Ofizzy.Api/BusinessCore/Fiscal/Schemas/Nfe010f/*.xsd -whitespace
+src/backend/Ofizzy.Api/BusinessCore/Fiscal/Schemas/NfeEventsRtc/*.xsd -whitespace

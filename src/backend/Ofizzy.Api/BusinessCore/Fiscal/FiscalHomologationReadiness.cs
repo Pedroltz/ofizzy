@@ -43,9 +43,9 @@ public static class FiscalHomologationReadiness
             new(
                 "nfe-schema",
                 "Leiaute NF-e vigente",
-                !settings.NfeEnabled,
+                !settings.NfeEnabled || FiscalSchemaCatalog.Document(FiscalKind.Nfe).Package == "NF-e PL_010f v1.04",
                 settings.NfeEnabled
-                    ? "Bloqueado: a NF-e ativa usa PL_010c. Migrar XML, eventos e domínio para o PL_010f antes do teste oficial."
+                    ? "O XML de NF-e usa o pacote oficial PL_010f v1.04. Eventos e inutilização mantêm schemas oficiais próprios e as classificações RTC continuam dependentes de validação contábil por operação."
                     : "NF-e não está habilitada para esta organização; este requisito só se aplica quando houver produtos."),
             new(
                 "nfse-schema",

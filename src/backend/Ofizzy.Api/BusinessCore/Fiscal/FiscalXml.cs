@@ -46,9 +46,9 @@ public static class FiscalXml
 
         var signer = new SignedXml(doc) { SigningKey = rsa };
         signer.SignedInfo!.CanonicalizationMethod = SignedXml.XmlDsigC14NTransformUrl;
-        // The installed official baseline (PL_010c) fixes XMLDSIG to SHA-1. Do not
-        // switch algorithms until the successor package and its transition rules
-        // have been installed and validated together.
+        // PL_010f v1.04 retains the W3C XMLDSIG definition used by the official
+        // NF-e package. Keep SHA-1 for this envelope; switching only the algorithm
+        // would invalidate the deployed official schemas and event envelopes.
         signer.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
 
         var reference = new Reference($"#{element.GetAttribute("Id")}")

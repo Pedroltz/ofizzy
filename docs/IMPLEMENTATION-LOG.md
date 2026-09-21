@@ -1,5 +1,26 @@
 # Histórico de implementação
 
+## 2026-09-21 — Migração do baseline de novas NF-e para PL_010f v1.04
+
+- Recuperado diretamente do Portal Nacional o ZIP `PL_010f_v1.04` e conferido o
+  SHA-256 `b8589490a58a09a993a80e6ac4d7ed10f20892061ecfc56719337098d4b95998`.
+  Os cinco XSDs foram instalados sem modificação em `Schemas/Nfe010f`; teste unitário
+  confere o hash de cada arquivo.
+- `FiscalSchemaCatalog` agora seleciona `NF-e PL_010f v1.04` para documentos novos,
+  preservando o 010c histórico e os schemas separados de cancelamento e inutilização.
+  O XML fiscal já suportado será validado e assinado contra o pacote novo pela suíte.
+- Baixada também a distribuição oficial de eventos RTC v1.40 (SHA-256
+  `a4c57ce95b225cd8852f90bd6c39ca28ae551636ff3f67eb2602b9fa847129b2`) para diretório
+  próprio. Ela não contém os envelopes de cancelamento/inutilização, portanto não
+  substitui fluxos existentes. Nenhum cálculo ou tag IBS/CBS foi inferido sem
+  classificação contábil por operação.
+- Evidências executadas: 73 testes unitários e 10 de integração do backend, build
+  Release sem avisos; lint, 69 testes e build do frontend; 24 E2E de plataforma em
+  desktop/mobile/tablet. O E2E revelou e corrigiu um seletor de teste que ainda usava
+  classes de marca removidas. Não há migration neste incremento. Compose foi validado
+  sintaticamente com credenciais fictícias; não foi iniciado e não houve transmissão
+  a autorizadores.
+
 ## 2026-09-19 — Auditoria regulatória fiscal incremental
 
 - Criada matriz normativa com fontes oficiais para schemas, RTC, CNPJ alfanumérico,

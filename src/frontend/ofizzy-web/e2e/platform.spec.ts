@@ -149,15 +149,15 @@ test('organizações permite tentar novamente e selecionar entre múltiplos vín
 
 test('seletor da marca na barra superior exibe dropdown apenas quando houver múltiplas empresas', async ({ page }, testInfo) => {
   const isDesktop = testInfo.project.name === 'desktop';
-  const container = isDesktop ? page.locator('.desktop-sidebar') : page.locator('.mobile-header');
-  const brandLink = isDesktop ? container.locator('a.sidebar-brand') : container.locator('a.mobile-brand');
+  const container = isDesktop ? page.locator('.desktop-header') : page.locator('.mobile-header');
+  const organizationBadge = container.locator('.header-org-badge');
   const trigger = container.locator('button.org-switcher-trigger');
 
   // Caso 1: Usuário com apenas 1 empresa vinculada
   await base(page, { ...operator, isPlatformAdmin: false });
   await page.route('**/api/auth/tenants', route => route.fulfill({ json: [{ ...tenant, role: 'Owner', onboardingCompleted: true }] }));
   await page.goto('/');
-  await expect(brandLink).toBeVisible();
+  await expect(organizationBadge).toBeVisible();
   await expect(trigger).toHaveCount(0);
 
   // Caso 2: Usuário com 2 empresas vinculadas
@@ -193,4 +193,3 @@ test('seletor da marca na barra superior exibe dropdown apenas quando houver mú
   await popover.getByRole('option', { name: /Oficina Beta/ }).click();
   expect(selectedTenant).toEqual({ tenantId: 'tenant-beta' });
 });
-

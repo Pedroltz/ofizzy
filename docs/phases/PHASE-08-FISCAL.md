@@ -1,5 +1,21 @@
 # Fase 8 — Documentos fiscais de serviços e produtos
 
+## Migração PL_010f v1.04 — 21/09/2026
+
+- O catálogo passou a selecionar `NF-e PL_010f v1.04` para novas emissões e os cinco
+  XSDs oficiais foram instalados em pasta dedicada, com teste de integridade. XML de
+  NF-e do cenário já suportado foi assinado e validado contra o novo pacote.
+- O pacote RTC de eventos v1.40 foi versionado separadamente. Ele não contém os
+  envelopes de cancelamento ou inutilização; esses fluxos conservam seus schemas
+  oficiais atuais até que haja evento aplicável ao domínio suportado.
+- A prontidão local de schema deixou de bloquear NF-e, sem liberar produção, ignorar
+  credenciamento ou inventar classificação IBS/CBS. Esses requisitos continuam
+  externos e condicionais por operação.
+- Evidências: 73 testes unitários, 10 de integração e build Release do backend;
+  lint, 69 testes e build do frontend; 24 E2E da plataforma em desktop/mobile/tablet.
+  Não há migration neste incremento. Compose foi validado apenas com variáveis
+  fictícias, sem iniciar serviços ou transmitir documento fiscal.
+
 ## Auditoria regulatória e preparação de homologação — 19/09/2026
 
 - Criada a [matriz regulatória](../fiscal/FISCAL-REGULATORY-AUDIT-2026.md) somente

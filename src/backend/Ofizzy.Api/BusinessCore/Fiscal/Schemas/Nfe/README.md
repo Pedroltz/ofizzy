@@ -1,8 +1,8 @@
 # Referência dos schemas NF-e
 
-O schema ativo nesta pasta ainda é o baseline `010c`/4.00. Ele não deve ser
-sobrescrito por um pacote mais novo sem a correspondente adaptação de domínio, XML,
-validação, assinatura, eventos, inutilização e fixtures.
+O schema histórico nesta pasta é o baseline `010c`/4.00. Ele não deve ser
+sobrescrito: documentos emitidos sob esse baseline devem continuar rastreáveis. O
+schema ativo para novas NF-e está em `../Nfe010f`.
 
 Em 20/09/2026, os pacotes foram obtidos diretamente do Portal Nacional da NF-e com
 o cookie `AspxAutoDetectCookieSupport=1` exigido pelo próprio portal:
@@ -17,11 +17,12 @@ o cookie `AspxAutoDetectCookieSupport=1` exigido pelo próprio portal:
   e SHA-256 `b8589490a58a09a993a80e6ac4d7ed10f20892061ecfc56719337098d4b95998`.
 
 O 010e contém cinco XSDs de NF-e; o 010f mantém essa árvore e altera
-`DFeTiposBasicos_v1.00.xsd` e `leiauteNFe_v4.00.xsd`. O baseline local também tem
-schemas de inutilização que não fazem parte desses ZIPs e precisam de fonte oficial
-compatível própria. A migração deve partir do 010f, não do 010e já superado.
+`DFeTiposBasicos_v1.00.xsd` e `leiauteNFe_v4.00.xsd`. Os cinco arquivos do 010f
+estão instalados sem alteração em `../Nfe010f` e são o baseline ativo de novas
+emissões. O acervo local também tem schemas de inutilização que não fazem parte
+desses ZIPs e mantêm fonte oficial compatível própria.
 
 O algoritmo do CNPJ alfanumérico foi implementado de forma isolada em
 `FiscalValidation.IsAlphanumericCnpj`, conforme o manual oficial da Receita Federal.
-Ele ainda não é usado pelos validadores, XML ou chave de acesso ativos: esses pontos
-continuam numéricos enquanto o pacote 010c estiver selecionado.
+Ele não é inferido para o perfil piloto numérico: qualquer cenário que o utilize
+precisa de classificação, certificado e teste de chave/XML próprios.

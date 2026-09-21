@@ -1,5 +1,19 @@
 # Continuidade do Ofizzy
 
+## Migração fiscal — 21/09/2026
+
+- A emissão nova de NF-e passou a usar o `PL_010f_v1.04` oficial, instalado em
+  `Schemas/Nfe010f` sem sobrescrever os XSDs 010c históricos. A suíte verifica o
+  hash de cada XSD e valida o XML assinado do cenário suportado. O pacote oficial de
+  eventos RTC v1.40 também está em `Schemas/NfeEventsRtc`, isolado dos envelopes de
+  cancelamento/inutilização que ele não substitui. A prontidão de schema não bloqueia
+  mais homologação; credenciamento e classificação contábil RTC permanecem
+  confirmações externas, e produção continua desligada.
+- Evidência: 73 unitários + 10 integrações backend, build Release sem avisos, lint +
+  69 testes + build frontend e 24 E2E de plataforma em três viewports aprovados.
+  Não houve migration, Compose em execução, transmissão externa ou liberação de
+  produção.
+
 ## Continuidade fiscal — 20/09/2026
 
 - A auditoria oficial está em `docs/fiscal/FISCAL-REGULATORY-AUDIT-2026.md`; o

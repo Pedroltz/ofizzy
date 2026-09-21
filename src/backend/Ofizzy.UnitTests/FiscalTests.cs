@@ -20,7 +20,7 @@ public sealed class FiscalTests
         var nfe = FiscalSchemaCatalog.Document(FiscalKind.Nfe);
         var nfse = FiscalSchemaCatalog.Document(FiscalKind.Nfse);
 
-        Assert.Equal(("NF-e PL_010c", "Nfe", "nfe_v4.00.xsd"), (nfe.Package, nfe.Folder, nfe.EntryPoint));
+        Assert.Equal(("NF-e PL_010f v1.04", "Nfe010f", "nfe_v4.00.xsd"), (nfe.Package, nfe.Folder, nfe.EntryPoint));
         Assert.Equal(("NFS-e Nacional 1.01", "Nfse", "DPS_v1.01.xsd"), (nfse.Package, nfse.Folder, nfse.EntryPoint));
         Assert.True(nfse.HasDedicatedSignatureSchema);
     }
@@ -31,16 +31,16 @@ public sealed class FiscalTests
         var document = new FiscalDocument
         {
             Kind = FiscalKind.Nfe,
-            SchemaPackage = "NF-e PL_010c"
+            SchemaPackage = "NF-e PL_010f v1.04"
         };
 
         var response = FiscalPreparationService.Map(document);
 
-        Assert.Equal("NF-e PL_010c", response.SchemaPackage);
+        Assert.Equal("NF-e PL_010f v1.04", response.SchemaPackage);
     }
 
     [Fact]
-    public void Homologation_readiness_exposes_schema_and_external_blockers_without_releasing_production()
+    public void Homologation_readiness_marks_current_schema_and_external_confirmations_without_releasing_production()
     {
         var settings = Snapshot(FiscalKind.Nfe).Issuer with
         {
@@ -55,10 +55,30 @@ public sealed class FiscalTests
             new CertificateInfo("Oficina de teste", DateTimeOffset.UtcNow.AddDays(30), "thumbprint"),
             DateTimeOffset.UtcNow);
 
-        Assert.False(result.ReadyForExternalHomologation);
-        Assert.False(result.Checks.Single(x => x.Code == "nfe-schema").Passed);
+        Assert.True(result.ReadyForExternalHomologation);
+        Assert.True(result.Checks.Single(x => x.Code == "nfe-schema").Passed);
         Assert.True(result.Checks.Single(x => x.Code == "nfse-schema").Passed);
         Assert.All(result.Checks.Where(x => x.RequiresExternalConfirmation), x => Assert.False(x.Passed));
+    }
+
+    [Fact]
+    public void Nfe_production_schema_package_matches_official_010f_v104_release()
+    {
+        var expectedHashes = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["DFeTiposBasicos_v1.00.xsd"] = "173577a4e3a9dc1d0deced85b89b955b6064bb5a4ae5a96f6727d2da8a694d09",
+            ["leiauteNFe_v4.00.xsd"] = "2bace939973916d54184ff3e2740041a932de5d79772f3363504504160f22542",
+            ["nfe_v4.00.xsd"] = "adce3646c13ceb54922ec3142fc1dc45bd4fb839ac35ad583e86c733c07d27df",
+            ["tiposBasico_v4.00.xsd"] = "772619c85723e598840667ca66e7298a250442df47eeb94b397d2a333ce62047",
+            ["xmldsig-core-schema_v1.01.xsd"] = "f56744a5f51c03f027de13f39f869307091781a9ef1d91b1ebe14719ce28e1ac"
+        };
+        var directory = Path.Combine(AppContext.BaseDirectory, "BusinessCore", "Fiscal", "Schemas", "Nfe010f");
+
+        foreach (var (file, expectedHash) in expectedHashes)
+        {
+            var actualHash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(directory, file)))).ToLowerInvariant();
+            Assert.Equal(expectedHash, actualHash);
+        }
     }
 
     [Fact]

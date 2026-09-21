@@ -1,5 +1,26 @@
 # Status do projeto
 
+## Migração do XML NF-e para PL_010f v1.04 — 21/09/2026
+
+- Os cinco XSDs oficiais do `PL_010f_v1.04` foram instalados lado a lado em
+  `BusinessCore/Fiscal/Schemas/Nfe010f`, com SHA-256 do ZIP e hashes individuais
+  protegidos por teste. Novas NF-e selecionam explicitamente esse pacote; o acervo
+  010c não foi alterado nem reinterpretado.
+- O XML atualmente suportado (revenda interna do Simples Nacional) foi assinado e
+  validado contra o 010f. O algoritmo XMLDSig permanece SHA-1 porque essa é a
+  definição do pacote oficial e dos envelopes de evento em uso.
+- A distribuição oficial de eventos RTC v1.40 foi instalada em diretório separado.
+  Ela não substitui cancelamento `110111` nem inutilização 4.00; ambos continuam nos
+  schemas oficiais específicos. Nenhum evento RTC sem cenário fiscal aprovado foi
+  habilitado.
+- O bloqueio técnico de leiaute NF-e no painel de prontidão foi removido. Permanecem
+  obrigatórias as confirmações externas de credenciamento e a classificação RTC por
+  operação junto à contabilidade; produção continua desligada.
+- Evidências: 73 testes unitários e 10 de integração do backend aprovados; build
+  Release sem avisos; lint, 69 testes e build do frontend aprovados; 24 E2E da
+  plataforma aprovados em desktop, mobile e tablet. `docker compose config` foi
+  validado com variáveis fictícias; nenhuma migration nova foi gerada nem aplicada.
+
 ## Regras fiscais com vigência por item — 20/09/2026
 
 - Produtos e serviços agora podem ter revisões de classificação com uma data de início
