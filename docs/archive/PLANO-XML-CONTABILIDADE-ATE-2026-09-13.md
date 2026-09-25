@@ -1,6 +1,6 @@
 # Plano de documentos fiscais para contabilidade
 
-Revisão consolidada em 13/09/2026. Este plano substitui a proposta inicial de XML próprio, preservada no [arquivo histórico](docs/archive/PLANO-XML-ORIGINAL.md).
+Revisão consolidada em 13/09/2026. Este plano substitui a proposta inicial de XML próprio, preservada no [arquivo histórico](PLANO-XML-ORIGINAL.md).
 
 ## Objetivo e decisões aceitas
 
@@ -26,4 +26,4 @@ A implementação não está homologada para produção. Schemas/NTs vigentes e 
 
 O plano continua viável como desenvolvimento direto com escopo restrito; liberação depende de conformidade e aceite externo, não apenas dos testes locais. Sem tarifa de intermediário não significa custo total garantido zero.
 
-Próximos passos, dependências e critérios de aceite: [NEXT-STEPS.md](docs/NEXT-STEPS.md). Estado e evidências: [STATUS.md](docs/STATUS.md). Operação/fontes: [FISCAL.md](docs/FISCAL.md). Fase ativa: [PHASE-08-FISCAL.md](docs/phases/PHASE-08-FISCAL.md).
+Próximos passos, dependências e critérios de aceite: [NEXT-STEPS.md](../NEXT-STEPS.md). Estado e evidências: [STATUS.md](../STATUS.md). Operação/fontes: [FISCAL.md](../FISCAL.md). Fase ativa: [PHASE-08-FISCAL.md](../phases/PHASE-08-FISCAL.md).
