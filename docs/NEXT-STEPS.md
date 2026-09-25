@@ -1,62 +1,60 @@
-# Próximos passos de desenvolvimento
+# Próximos passos — homologação fiscal
 
-Planejamento consolidado em 13/09/2026. Referência do estado entregue: [STATUS](STATUS.md). A ordem funcional é concluir a [fase fiscal](phases/PHASE-08-FISCAL.md), depois financeiro; acabamento necessário à segurança e operação acompanha a fase ativa.
+Atualizado em **24/09/2026**. Este é o plano canônico para levar a Fase 8 da validação local à **homologação externa real** do piloto de Igaraçu do Tietê/SP, Simples Nacional.
 
-## 1. Atualizar e validar os leiautes fiscais
+## Estado atual
 
-**Pode avançar no repositório.** A auditoria de 19/09/2026 está em
-`fiscal/FISCAL-REGULATORY-AUDIT-2026.md`: os XSD NFS-e produtivos 1.01 já conferem
-byte a byte com o pacote oficial 20260209; o baseline NF-e `010c` continua antigo.
-Em 20/09/2026, o Portal serviu os ZIPs oficiais e revelou que o `010e_v1.02` foi
-substituído pelo `PL_010f_v1.04`. A referência, origem e hashes estão em
-`BusinessCore/Fiscal/Schemas/Nfe/README.md`. Migrar a partir do 010f, revisando
-geração/validação e eventos/inutilização; não atualizar somente o XSD sem adaptar o XML.
-Usar `fiscal/RTC-DOMAIN-MATRIX.md` como critério de entrada: IBS/CBS e CNPJ
-alfanumérico só avançam para domínio/XML após regras e exemplos da contabilidade.
+- O gateway real existe para NF-e SEFAZ-SP e NFS-e Nacional.
+- Em `Development`, `Fiscal:SimulateGateway=true` seleciona `DevSimulatedFiscalGateway`; testes e smokes locais não provam autorização pelos órgãos fiscais.
+- Novas NF-e usam `PL_010f_v1.04`, mas o domínio/XML ainda não cobre de ponta a ponta os grupos RTC de IBS/CBS.
+- O cálculo de DV do CNPJ alfanumérico existe isoladamente; cadastro, contratos, certificado, XML e chaves ainda precisam de revisão conjunta.
+- O cronograma oficial da RTC coloca os documentos fiscais do Simples Nacional em obrigatoriedade em **01/01/2027**.
+- Split Payment já possui documentação técnica oficial. Para o Ofizzy, o impacto imediato é financeiro e de conciliação; integração direta só entra se o produto assumir papel previsto no arranjo.
+- Há um bloqueio de segurança: `FiscalProductionReleased=true` atualmente pode liberar produção antes das outras travas do servidor.
 
-Aceite: fixtures de NF-e normal/ST, DPS, cancelamentos e inutilização validadas; casos incompatíveis recusados com erro compreensível; fontes oficiais e diferenças documentadas. Validar XSD local não encerra homologação.
+## H1 — corrigir bloqueios técnicos
 
-## 2. Concluir DANFE e DANFSe
+1. Corrigir `FiscalReleaseGate` para exigir cumulativamente `Fiscal:ProductionEnabled=true`, tenant em `Fiscal:HomologatedTenants` e `Tenant.FiscalProductionReleased=true`.
+2. Atualizar o catálogo de endpoints NFS-e/ADN de produção conforme a documentação oficial vigente.
+3. Impedir que evidência do simulador seja confundida com autorização externa.
+4. Cobrir combinações de gate e seleção de endpoint com testes.
 
-**Pode avançar em paralelo à revisão de schemas, com validação final após ela.** Revisar `FiscalPdf` contra os manuais oficiais: campos obrigatórios, chave/protocolo, identificação do ambiente, código de barras/QR, totais, paginação e legibilidade. Distinguir PDF operacional da OS de documento auxiliar fiscal.
+**Aceite:** produção não pode ser liberada por uma única trava; gateway real e simulador ficam inequivocamente separados.
 
-Aceite: exemplos fictícios curtos e multipágina inspecionados, conteúdo consistente com XML autorizado, validação dos códigos e revisão do leiaute. Testar somente cabeçalho PDF não basta. Conferência externa entra no passo 5.
+## H2 — adequar RTC e CNPJ alfanumérico
 
-## 3. Completar resistência a falhas e operação
+1. Receber da contabilidade os cenários suportados, `CST`, `cClassTrib`, alíquotas, reduções, diferimentos e regras aplicáveis ao piloto.
+2. Modelar IBS/CBS por vigência em domínio e snapshot, sem inferência automática por NCM.
+3. Adaptar NF-e e NFS-e aos grupos aplicáveis ao Simples Nacional para 2027.
+4. Completar CNPJ alfanumérico de ponta a ponta: normalização, validação, DTOs, persistência, certificado, XML, consultas e chaves.
+5. Manter documentos históricos ligados ao pacote de schema usado na emissão.
 
-**Pode avançar com PostgreSQL e gateways de teste.** Ampliar cenários relevantes: rejeição e correção com preservação da identidade, numeração concorrente, queda com lease ativo/expirado, falha de persistência após resposta oficial, rotação de chave/A1 e recuperação de backup. Revisar retomada de consulta ao reabrir a OS e feedback de erros na interface.
+**Aceite:** fixtures do perfil piloto validam no pacote oficial correto e cenários não suportados são recusados claramente.
 
-Aceite: nenhuma autorização duplicada, intervalo liberado indevidamente ou acesso entre tenants; XML original preservado na incerteza; retomada auditável após restart. Verificar desktop, tablet e celular com controles de 44 px. Separar evidência de API interceptada, integração real com gateway substituído e smoke pelo Nginx.
+## H3 — resistência a falhas e documentos auxiliares
 
-## 4. Preparar a oficina piloto
+Exercitar rejeição/correção, timeout seguido de consulta, concorrência de numeração, reinício com lease, falha de persistência após resposta, cancelamento, inutilização e recuperação. DANFE/DANFSe devem ser confrontados com o XML autorizado.
 
-**Depende de dados e acesso externos.** Município e regime já confirmados: Igaraçu do Tietê/SP, Simples Nacional, IBGE 3520004. Validar CNPJ, IE/IM e endereço fiscal, credenciamento nos emissores, A1 válido, classificações e parâmetros fornecidos pela contabilidade. Usar canal protegido para segredos; nunca anexá-los ao repositório ou logs.
+**Aceite:** sem duplicidade, reutilização indevida de número ou perda de rastreabilidade.
 
-Definir série exclusiva de NF-e, numeração inicial e parâmetros de DPS antes de coexistir com outro emissor. O sistema não importa numeração legada. Configurar chaves externas versionadas e restauração segura; produção permanece desabilitada.
+## H4 — preparar credenciais reais
 
-Aceite: checklist cadastral validado pela oficina/contabilidade e acesso ao ambiente oficial de homologação disponível. Não depender de contratação de intermediário pago. Certificado, infraestrutura e manutenção continuam dependências; ausência de tarifa de API não garante custo operacional total zero.
+Validar com oficina e contabilidade CNPJ, IE/IM, endereço, regime, credenciamento, A1, série exclusiva, numeração inicial e classificações fiscais. Segredos nunca entram no Git ou em logs.
 
-## 5. Homologar os fluxos oficiais
+## H5 — homologação externa
 
-**Depende dos passos 1–4 e dos órgãos fiscais.** Executar emissão de serviços, produtos normais e ST admitidos pelo perfil, OS mista, autorização parcial, rejeição/correção, timeout/consulta, cancelamento e inutilização/recuperação. Confirmar aceitação de XML, protocolo e documentos auxiliares junto às fontes oficiais e à contabilidade.
+Executar com simulador desligado: NF-e normal; NF-e ST se aplicável; NFS-e; OS mista; rejeição/correção; timeout/consulta; cancelamento NF-e/NFS-e; inutilização/recuperação NF-e; XML/PDF/ZIP; persistência após reinício.
 
-Aceite: evidências sanitizadas, ambiente e versões registrados, protocolos compatíveis, retomada sem duplicidade e persistência pelo Nginx após reinício. Não usar dados de testes como autorização oficial. Pendências externas impedem declarar a fase homologada.
+**Aceite:** evidências sanitizadas do autorizador, protocolos coerentes e aceite da contabilidade.
 
-## 6. Liberar piloto controlado
+## H6 — piloto produtivo controlado
 
-**Somente após homologação comprovada e decisão de liberação.** Configurar `Fiscal:ProductionEnabled` e permitir apenas o tenant homologado. Confirmar HTTPS, backup restaurável, custódia das chaves, monitoramento sem XML/certificado em logs e procedimento para indisponibilidade oficial.
+Somente após H1-H5 e a checklist de produção: liberar globalmente, permitir apenas o tenant homologado, registrar responsável/série/evidências e concluir a adequação RTC antes de **01/01/2027**.
 
-Aceite: liberação registrada, fluxo acompanhado e conciliação de documentos confirmada. Restaurar banco antigo exige reconciliar documentos e sequências com os órgãos fiscais antes de voltar a emitir; não reutilizar números por terem desaparecido do backup.
+## Split Payment
 
-## Depois da prioridade fiscal
+Tratar inicialmente como frente de pagamentos/conciliação. O modelo deve vincular DF-e, transação, liquidação, valores segregados e estornos. Não acoplar o fiscal a um PSP específico sem requisito real.
 
-| Frente | Próxima entrega e aceite |
-| --- | --- |
-| [Fase 5 — Financeiro](phases/PHASE-05-FINANCIAL.md) | Recebimentos/estornos por tenant, saldo no backend e histórico; impedir recebimento acima do saldo. Pagamento informado na NF-e não equivale a lançamento financeiro. |
-| [Fase 6 — Acabamento](phases/PHASE-06-POLISH.md) | Exercício de backup/restauração, observabilidade, UX e redução/justificativa do bundle de 780,45 kB. |
-| Evolução SaaS | Convites, autosserviço e assinaturas somente com escopo próprio; provisionamento existente permanece base. |
-| Backlog | Estoque, venda avulsa, outros perfis fiscais/municípios, PWA e WhatsApp dependem de priorização. Não estão implementados nem são condição automática do piloto atual. |
+## Encerramento de cada incremento
 
-## Como encerrar cada incremento
-
-Preservar arquitetura e UI atuais; executar os checks previstos em [AGENTS.md](../AGENTS.md) e [TESTING.md](TESTING.md), incluindo migration/Compose/smoke quando aplicáveis à entrega. Registrar comandos, resultados, limitações e data em STATUS, AI-HANDOFF, IMPLEMENTATION-LOG e fase ativa. Não promover resultados anteriores a novos testes executados.
+Executar os checks de `AGENTS.md` e `docs/TESTING.md` proporcionais ao risco e registrar evidências reais em `STATUS.md`, `AI-HANDOFF.md`, `IMPLEMENTATION-LOG.md` e `phases/PHASE-08-FISCAL.md`.
