@@ -1,5 +1,15 @@
 # Status do projeto
 
+## Plano de homologação fiscal e atualização regulatória — 24/09/2026
+
+- Consolidado o plano canônico em `docs/NEXT-STEPS.md`: gates/endpoints, RTC/CNPJ alfanumérico, resiliência/PDF, credenciais reais, homologação externa e piloto produtivo.
+- Verificação do código confirmou que `Development` seleciona `DevSimulatedFiscalGateway` por padrão; nenhuma evidência local foi reclassificada como autorização externa.
+- Identificado bloqueio P0 em `FiscalReleaseGate`: `Tenant.FiscalProductionReleased=true` atualmente pode contornar `Fiscal:ProductionEnabled` e `Fiscal:HomologatedTenants`, apesar da intenção documental de três gates cumulativos.
+- Fontes oficiais vigentes confirmam: NFS-e Nacional com tratamento de CNPJ alfanumérico em produção desde 10/08/2026; NFS-e Nacional obrigatória para ME/EPP do Simples em 01/11/2026 no cronograma nacional; documentos fiscais do Simples com regras RTC/CBS/IBS em 01/01/2027. Igaraçu do Tietê já havia comunicado migração municipal de ME/EPP do Simples em 01/08/2026.
+- Em 23/09/2026 foi publicado o Ato Técnico Conjunto nº 5 sobre procedimentos/padrões da Plataforma Pública do Split Payment. No Ofizzy, isso entra primeiro como preparação de conciliação documento ↔ pagamento; integração direta depende do papel técnico assumido no arranjo.
+- Documentos datados de 13/09 que deixaram de representar o estado atual foram movidos para `docs/archive/`; ADRs, schema READMEs e trilhas de implementação foram preservados.
+- Esta alteração é documental: não houve transmissão fiscal, mudança de gates, credenciais ou liberação de produção.
+
 ## Editor de OS pesquisável e compacto — 21/09/2026
 
 - Cliente e veículo deixaram de usar seletores nativos no editor de OS. Ambos usam
@@ -399,6 +409,6 @@ A sequência, dependências e critérios de aceite estão em [NEXT-STEPS.md](NEX
 
 ## Revisão independente — 13/09/2026
 
-Revisão das alterações recentes registrada em [relatório de revisão](REVIEW-2026-09-13.md). Foram encontrados problemas na separação persistente de simulação, resposta fictícia de NFS-e, leitura de campos do DANFSe, cobertura dos testes e disponibilidade/permissões do certificado de desenvolvimento. As declarações anteriores de conformidade integral dos PDFs não constituem aceite comprovado e precisam da correção/validação descrita no relatório. Atualização de schemas/NTs e homologação externa permanecem pendentes.
+Revisão das alterações recentes registrada em [relatório de revisão](archive/REVIEW-2026-09-13.md). Foram encontrados problemas na separação persistente de simulação, resposta fictícia de NFS-e, leitura de campos do DANFSe, cobertura dos testes e disponibilidade/permissões do certificado de desenvolvimento. As declarações anteriores de conformidade integral dos PDFs não constituem aceite comprovado e precisam da correção/validação descrita no relatório. Atualização de schemas/NTs e homologação externa permanecem pendentes.
 
 Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e 9 integrações; frontend lint/39 unitários/build e 52 E2E/11 skips. Não houve alteração de código, transmissão fiscal, reconstrução Compose ou novo smoke/restart. Check EF de modelo não executou por ausência de dotnet-ef no PATH.

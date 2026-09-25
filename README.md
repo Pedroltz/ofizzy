@@ -117,6 +117,6 @@ npm test -- --watch=false`; CI e imagem frontend usam Node 24.
 
 ## Estado fiscal e continuidade
 
-A fase 8 integra documentos fiscais de serviços e produtos à OS concluída. Configuração, preparação, emissão/consulta, downloads, cancelamento e recuperação de inutilização estão implementados localmente. Ainda faltam revisão de leiautes/PDFs e homologação externa; produção permanece bloqueada por padrão.
+A fase 8 integra documentos fiscais de serviços e produtos à OS concluída. Configuração, preparação, emissão/consulta, downloads, cancelamento e recuperação de inutilização estão implementados localmente. Em 24/09/2026, os bloqueios principais são RTC/CNPJ alfanumérico, correção das travas de produção e homologação externa oficial.
 
-Consulte [Status](docs/STATUS.md), [Plano fiscal](PLANO-XML-CONTABILIDADE.md), [Operação fiscal](docs/FISCAL.md), [Testes](docs/TESTING.md) e [Próximos passos](docs/NEXT-STEPS.md).
+Consulte [Status](docs/STATUS.md), [Operação fiscal](docs/FISCAL.md), [Testes](docs/TESTING.md) e [Próximos passos](docs/NEXT-STEPS.md). O plano fiscal anterior foi preservado apenas em `docs/archive/`.

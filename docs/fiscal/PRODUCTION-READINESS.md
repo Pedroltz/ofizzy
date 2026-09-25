@@ -1,34 +1,25 @@
 # Production readiness fiscal
 
-Status atual em 19/09/2026: **não liberado**. Esta checklist não muda configuração
-nem libera tenant automaticamente.
+Status em **24/09/2026**: **não liberado**.
 
 ## Bloqueios obrigatórios
 
-- [ ] Pacotes XSD vigentes foram baixados de fonte oficial, registrados com URL, data
-      e hash, instalados/selecionados por ambiente e validados contra fixtures.
-- [ ] XML e assinatura foram aceitos em homologação externa para NF-e e NFS-e.
-- [ ] O perfil tributário, Simples Nacional, classificações, IBS/CBS e arredondamentos
-      foram aprovados pela contabilidade responsável.
-- [ ] Consulta, timeout/recuperação, rejeição/correção, cancelamento e inutilização
-      foram comprovados em homologação com evidência sanitizada.
-- [ ] DANFE e DANFSe derivados do XML autorizado foram conferidos contra os manuais
-      aplicáveis e contra a resposta do autorizador.
-- [ ] A1 válido, CNPJ correspondente, custódia da chave AES, rotação e restauração
-      foram exercitados sem expor senha, PFX ou chave em logs.
-- [ ] Isolamento por tenant, idempotência, sequência, lease e download entre tenants
-      têm testes verdes e evidência de persistência após reinício.
-- [ ] Monitoramento, backup restaurável e procedimento de indisponibilidade foram
-      aceitos pelo operador responsável.
+- [ ] `FiscalReleaseGate` corrigido para gates cumulativos e testes cobrindo combinações.
+- [ ] Catálogo de endpoints oficiais revisado, inclusive ADN NFS-e produtivo.
+- [ ] Pacotes de schema/versões usados pelo piloto registrados e protegidos.
+- [ ] XML/assinatura aceitos em homologação externa para NF-e e NFS-e.
+- [ ] Perfil tributário aprovado pela contabilidade.
+- [ ] RTC aplicável ao Simples Nacional preparada para 01/01/2027.
+- [ ] CNPJ alfanumérico suportado ponta a ponta ou explicitamente bloqueado onde não suportado.
+- [ ] Rejeição/correção, timeout/consulta, cancelamento e inutilização comprovados.
+- [ ] DANFE/DANFSe conferidos contra XML autorizado.
+- [ ] A1, custódia/rotação da chave AES e restauração exercitados.
+- [ ] Isolamento por tenant, idempotência, sequência e lease testados.
+- [ ] Backup restaurável e procedimento de indisponibilidade aceitos.
+- [ ] Evidências sanitizadas e aceite do responsável/contabilidade arquivados.
 
-## Liberação manual, cumulativa e auditável
+## Liberação cumulativa
 
-Somente após todos os itens acima, um operador autorizado pode, em mudança separada:
+Somente depois dos itens acima: `Fiscal:ProductionEnabled=true`, UUID do tenant em `Fiscal:HomologatedTenants`, `Tenant.FiscalProductionReleased=true`, série exclusiva e responsável registrados.
 
-1. definir `Fiscal:ProductionEnabled=true` no ambiente de produção;
-2. incluir explicitamente o UUID do tenant em `Fiscal:HomologatedTenants`;
-3. marcar `Tenant.FiscalProductionReleased` pela administração da plataforma;
-4. registrar responsável, data, evidências e série fiscal exclusiva.
-
-Ausência de qualquer condição bloqueia emissão em produção. Esta checklist não é uma
-autorização e não deve ser marcada por testes locais ou gateways substituídos.
+Ausência de qualquer condição deve bloquear emissão em produção.

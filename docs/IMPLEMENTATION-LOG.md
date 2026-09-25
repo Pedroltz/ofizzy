@@ -1,5 +1,14 @@
 # Histórico de implementação
 
+## 2026-09-24 — Consolidação documental para homologação fiscal
+
+- Reescritos os documentos canônicos da Fase 8 para separar evidência local/simulada de homologação externa e registrar o baseline atual de NF-e/NFS-e.
+- Criado roadmap H1-H6 cobrindo gates de produção, endpoints, RTC/CNPJ alfanumérico, resiliência, credenciais do piloto, homologação externa e produção controlada.
+- Registrado o achado de que `FiscalProductionReleased` hoje pode contornar as demais travas de produção; correção ficou marcada como P0 antes de piloto produtivo.
+- Atualizada a linha regulatória com NFS-e/CNPJ alfanumérico, marco RTC do Simples em 01/01/2027 e documentação de Split Payment publicada até 23/09/2026.
+- `REVIEW-2026-09-13.md` e o plano fiscal consolidado de 13/09 foram movidos para `docs/archive/`; conteúdo histórico permanece disponível sem competir com `NEXT-STEPS.md`.
+- Nenhum código fiscal, configuração, credencial ou banco foi alterado por este incremento documental.
+
 ## 2026-09-21 — Editor de OS com pesquisa e grade compacta
 
 - Substituídos os dois `select` nativos de cliente e veículo por autocomplete
@@ -1056,7 +1065,7 @@ Esta alteração é documental: os resultados de backend/frontend/migrations/Com
 
 ## Revisão independente — 13/09/2026
 
-Revisão das alterações recentes registrada em [relatório de revisão](REVIEW-2026-09-13.md). Foram encontrados problemas na separação persistente de simulação, resposta fictícia de NFS-e, leitura de campos do DANFSe, cobertura dos testes e disponibilidade/permissões do certificado de desenvolvimento. As declarações anteriores de conformidade integral dos PDFs não constituem aceite comprovado e precisam da correção/validação descrita no relatório. Atualização de schemas/NTs e homologação externa permanecem pendentes.
+Revisão das alterações recentes registrada em [relatório de revisão](archive/REVIEW-2026-09-13.md). Foram encontrados problemas na separação persistente de simulação, resposta fictícia de NFS-e, leitura de campos do DANFSe, cobertura dos testes e disponibilidade/permissões do certificado de desenvolvimento. As declarações anteriores de conformidade integral dos PDFs não constituem aceite comprovado e precisam da correção/validação descrita no relatório. Atualização de schemas/NTs e homologação externa permanecem pendentes.
 
 Nesta revisão: backend build sem avisos/erros, 49 unitários aprovados/1 skip e 9 integrações; frontend lint/39 unitários/build e 52 E2E/11 skips. Não houve alteração de código, transmissão fiscal, reconstrução Compose ou novo smoke/restart. Check EF de modelo não executou por ausência de dotnet-ef no PATH.
 

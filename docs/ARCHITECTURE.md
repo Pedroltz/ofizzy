@@ -64,8 +64,8 @@ SaaS Subscriptions e AI/Automation. Nenhum serviço distribuído foi criado.
 
 PWA/offline-first é backlog: service worker, manifesto, IndexedDB e fila de sincronização descritos no planejamento não constituem funcionalidade entregue. Exigirá desenho próprio de conflitos, idempotência e proteção dos dados por tenant. Emissão fiscal depende de comunicação com o órgão autorizado; não presumir autorização offline.
 
-## Módulo fiscal — 13/09/2026
+## Módulo fiscal — 24/09/2026
 
 `BusinessCore/Fiscal` integra o Business Core e usa o mesmo DbContext. `features/fiscal` fornece componentes nas configurações e na OS existente. Adaptadores concretos encapsulam NFS-e Nacional e NF-e SP/SVRS; regras, cálculos, assinatura e correlação de protocolos ficam no backend.
 
-Preparação e documentos preservam snapshots; resultados inconclusivos mantêm identidade/XML e exigem consulta. Inutilização usa lease persistido de dois minutos, XML original e confirmação da faixa/protocolo. Produção tem habilitação e lista de tenants homologados. Veja [decisão fiscal](adr/0007-direct-fiscal-integration.md) e [próximos passos](NEXT-STEPS.md).
+Preparação e documentos preservam snapshots; resultados inconclusivos mantêm identidade/XML e exigem consulta. Inutilização usa lease persistido de dois minutos, XML original e confirmação da faixa/protocolo. A arquitetura prevê três travas cumulativas para produção (`ProductionEnabled`, allow-list e liberação persistida do tenant); em 24/09/2026 foi identificado que a implementação ainda permite a liberação persistida contornar as outras duas, correção obrigatória antes de produção. Veja [decisão fiscal](adr/0007-direct-fiscal-integration.md) e [próximos passos](NEXT-STEPS.md).

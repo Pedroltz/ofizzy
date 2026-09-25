@@ -39,6 +39,6 @@ concreta. Financeiro operacional é distinto da assinatura SaaS.
 
 Documentos fiscais foram antecipados por solicitação do usuário. A [fase 8](phases/PHASE-08-FISCAL.md) registra implementação e pendências; ainda não há homologação externa ou liberação de produção.
 
-## Prioridades consolidadas — 13/09/2026
+## Prioridades consolidadas — 24/09/2026
 
-Fiscal usa integração direta, sem intermediário pago, para o piloto Igaraçu do Tietê/SP, Simples Nacional. A recuperação de inutilização já está implementada; revisão de schemas/PDFs e homologação são os próximos marcos. [Sequência e critérios](NEXT-STEPS.md).
+Fiscal usa integração direta, sem intermediário pago, para o piloto Igaraçu do Tietê/SP, Simples Nacional. Novas NF-e usam `PL_010f_v1.04`, mas ainda faltam adequação RTC/CNPJ alfanumérico de ponta a ponta, correção dos gates produtivos e homologação externa. A migração municipal para NFS-e Nacional já está em curso e o marco RTC do Simples Nacional é 01/01/2027. [Sequência e critérios](NEXT-STEPS.md).
