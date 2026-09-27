@@ -1,3 +1,4 @@
+import { WorkOrderPaymentsComponent } from '../payments/work-order-payments.component';
 import { WorkOrderFiscalComponent } from '../fiscal/work-order-fiscal.component';
 import {
   ChangeDetectionStrategy,
@@ -68,6 +69,7 @@ import {
     DataTableWrapperComponent,
     WorkOrderLinesEditorComponent,
     WorkOrderFiscalComponent,
+    WorkOrderPaymentsComponent,
   ],
   templateUrl: './work-orders.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

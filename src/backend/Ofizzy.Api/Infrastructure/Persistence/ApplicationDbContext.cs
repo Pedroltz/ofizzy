@@ -1,6 +1,7 @@
 using Ofizzy.Api.Modules.Customers;
 using Ofizzy.Api.Modules.Fiscal;
 using Ofizzy.Api.Modules.Parts;
+using Ofizzy.Api.Modules.Payments;
 using Ofizzy.Api.Modules.Services;
 using Ofizzy.Api.Modules.Tenancy;
 using Ofizzy.Api.Modules.WorkOrders;
@@ -367,6 +368,47 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         Scope<FiscalSequence>(modelBuilder);
         Scope<FiscalDocument>(modelBuilder);
         Scope<FiscalEvent>(modelBuilder);
+
+        modelBuilder.Entity<Payment>(e =>
+        {
+            e.ToTable("payments");
+            e.HasAlternateKey(x => new { x.TenantId, x.Id });
+            e.HasIndex(x => x.RequestId).IsUnique();
+            e.Property(x => x.RequestHash).HasMaxLength(64);
+            e.Property(x => x.Method).HasMaxLength(20);
+            e.Property(x => x.Amount).HasPrecision(18, 2);
+            e.HasOne<WorkOrder>().WithMany().HasForeignKey(x => new { x.TenantId, x.WorkOrderId })
+                .HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+            e.HasMany(x => x.Allocations).WithOne().HasForeignKey(x => new { x.TenantId, x.PaymentId })
+                .HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+            e.HasMany(x => x.Movements).WithOne().HasForeignKey(x => new { x.TenantId, x.PaymentId })
+                .HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<PaymentAllocation>(e =>
+        {
+            e.ToTable("payment_allocations");
+            e.Property(x => x.Amount).HasPrecision(18, 2);
+            e.HasIndex(x => new { x.PaymentId, x.DocumentId }).IsUnique();
+            e.HasOne<FiscalDocument>().WithMany().HasForeignKey(x => new { x.TenantId, x.DocumentId })
+                .HasPrincipalKey(x => new { x.TenantId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<PaymentMovement>(e =>
+        {
+            e.ToTable("payment_movements");
+            e.HasIndex(x => x.RequestId).IsUnique();
+            e.HasAlternateKey(x => new { x.TenantId, x.PaymentId, x.Id });
+            e.Property(x => x.RequestHash).HasMaxLength(64);
+            e.Property(x => x.Kind).HasMaxLength(20);
+            e.Property(x => x.Reason).HasMaxLength(255);
+            e.Property(x => x.Amount).HasPrecision(18, 2);
+            e.Property(x => x.Fees).HasPrecision(18, 2);
+            e.Property(x => x.SegregatedTax).HasPrecision(18, 2);
+            e.HasOne<PaymentMovement>().WithMany().HasForeignKey(x => new { x.TenantId, x.PaymentId, x.SettlementId })
+                .HasPrincipalKey(x => new { x.TenantId, x.PaymentId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+        });
+        Scope<Payment>(modelBuilder);
+        Scope<PaymentAllocation>(modelBuilder);
+        Scope<PaymentMovement>(modelBuilder);
 
         // Every operational index starts with TenantId, including uniqueness constraints.
         foreach (var entity in modelBuilder.Model.GetEntityTypes().Where(x => typeof(ITenantScoped).IsAssignableFrom(x.ClrType)).ToList())

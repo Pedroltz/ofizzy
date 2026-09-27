@@ -581,6 +581,7 @@
       <!-- Documentos Fiscais -->
       @if (order.status === 'Completed') {
         <app-work-order-fiscal [order]="order" />
+        <app-work-order-payments [orderId]="order.id" />
       }
     </div>
   }
