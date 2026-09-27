@@ -1,5 +1,17 @@
 # Status do projeto
 
+## 27/09/2026 — RTC configurável, origem fiscal e financeiro manual
+
+- Corrigidos gates produtivos cumulativos e endpoints ADN/Sefin conforme catálogo oficial. `Origin` persiste simulação/oficial/desconhecida; troca de gateway ou origem não comprovada bloqueia operações. Backfill só identifica simulação com evidência positiva.
+- IBS/CBS editável nos perfis por vigência: rascunhos incompletos salvos, zero distinto de vazio, CST/cClassTrib/base/três alíquotas/cIndOp. Usuário preferiu preencher posteriormente nas configurações. Backend calcula o cenário local integral `000/000001`, base 100%, sem ST anterior; snapshots e fixtures NF-e/DPS assinadas validadas nos XSDs instalados.
+- Transmissão RTC oficial e PDF RTC permanecem bloqueados até pacote/aceitação/leiaute. Outros cenários exigem implementação específica; marco Simples 01/01/2027 impede emitir pelo fluxo antigo sem configuração. Cadastro/busca/contratos/SAN preservam CNPJ alfanumérico; emitente e tomador NFS-e seguem bloqueados até finalizar suas cadeias oficiais.
+- Recebimentos/liquidações parciais/taxas/segregação opcional/estornos administrativos persistem na OS. Histórico imutável, autor/data, idempotência por tenant e transações serializáveis. Vínculos só com documento oficial produtivo autorizado da mesma OS; sem vínculo ou com alteração fiscal/estorno exige conciliação. Não há Split Payment automático nem estorno financeiro por cancelamento fiscal.
+- Migrations `20260926213104_AddFiscalOrigin` e `20260926213917_AddManualPayments` aplicadas em PostgreSQL descartável; runner repetido confirma banco atualizado. Modelo EF sem mudanças pendentes.
+- **Evidências:** backend Release sem avisos/erros, **100 unitários + 12 integrações**; frontend lint, **72 testes/13 arquivos**, build; E2E completo **73 aprovados/11 skips condicionais**. Corrigida expectativa antiga de dependência Automotive; repetição do cenário dashboard passou sem alteração de produto. Bootstrap do teste de catálogo passou a reutilizar o operador da fixture e provisionar tenant por teste.
+- Compose: imagens finais construídas, serviços saudáveis, smoke pelo Nginx em **18089**. Fiscal **2/2** antes/depois de restart (simulação XML/PDF/cancelamento). Configuração RTC + financeiro **1/1** antes e após restart (rascunho pela UI, zero vs vazio, recebimento 60, liquidação 30, estorno 10, saldo 80, IDs/histórico persistidos). Verificados **1440/768/320 px**, sem overflow e controles >=44 px; medidas aguardam animação estabilizar.
+- Aviso preexistente de bundle: **795,40 kB / budget 500 kB**. Não houve chamada a autorizador fiscal nem habilitação produtiva. Homologação externa, cadeia alfanumérica completa, cenários/PDF RTC, resiliência adicional, painel financeiro e conciliação/PSP permanecem pendentes.
+
+
 ## Plano de homologação fiscal e atualização regulatória — 24/09/2026
 
 - Consolidado o plano canônico em `docs/NEXT-STEPS.md`: gates/endpoints, RTC/CNPJ alfanumérico, resiliência/PDF, credenciais reais, homologação externa e piloto produtivo.
@@ -368,7 +380,7 @@ A fase ativa é a [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md). A implementaç
 | Fases 1–4: fundação, cadastros, OS e impressão | Concluídas localmente |
 | Fase 7: SaaS e isolamento por organização | Aceite local concluído; arquitetura vigente |
 | Fase 8: serviços e produtos fiscais | Fluxos locais implementados; revisão fiscal e homologação pendentes |
-| Fase 5: financeiro | Não iniciada; após a prioridade fiscal |
+| Fase 5: financeiro | Primeiro incremento manual implementado; painel/conciliação pendentes |
 | Fase 6: acabamento | Parcial; backup/restauração e demais critérios continuam pendentes |
 | PWA, estoque, outras verticais e cobrança SaaS | Backlog, sem implementação nesta entrega |
 

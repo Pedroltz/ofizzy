@@ -1,32 +1,27 @@
 # Continuidade do Ofizzy
 
-Atualizado em **24/09/2026**. Prioridade: levar a Fase 8 à homologação fiscal externa do piloto **Igaraçu do Tietê/SP — Simples Nacional**.
+Atualizado em **27/09/2026**, branch `develop`. Fase ativa: [Fase 8](docs/phases/PHASE-08-FISCAL.md). O piloto continua sem homologação externa.
 
-## Estado atual
+## Incremento implementado
 
-- `NationalFiscalGateway` implementa integração direta NF-e/NFS-e.
-- Em `Development`, `appsettings.Development.json` define `Fiscal:SimulateGateway=true`; o DI escolhe `DevSimulatedFiscalGateway`. Smokes locais não chegam aos órgãos fiscais.
-- NF-e novas usam `PL_010f_v1.04`; documentos antigos preservam o pacote gravado.
-- NFS-e usa o pacote nacional 1.01 versionado no projeto.
-- DANFE/DANFSe são derivados do XML autorizado, mas a conferência externa ainda faz parte da homologação.
-- Produção não está homologada.
+- Produção exige as três travas: `Fiscal:ProductionEnabled`, tenant na allow-list e `FiscalProductionReleased`. Lista vazia bloqueia; liberação no banco não contorna o servidor.
+- Documentos/inutilizações persistem `Origin` (`Unknown`, `Simulation`, `Official`). Origem desconhecida ou diferente do gateway bloqueia transmissão/consulta/recuperação. Migration classifica somente evidências positivas do simulador, nunca converte registros legados em oficiais por suposição.
+- ADN produtivo usa `/contribuintes`; Sefin de homologação usa `/API/SefinNacional`, conforme catálogo oficial. Endpoint correto não comprova acesso externo.
+- Configurações Fiscais permitem editar IBS/CBS por item/vigência: CST, cClassTrib, base, três alíquotas e cIndOp para serviços. Foi pedido pelo usuário que os valores fiquem configuráveis, sem aguardar aprovação contábil para desenvolver a estrutura. Rascunhos incompletos podem ser salvos; emissão exige configuração suportada e completa. Zero difere de valor não informado.
+- Cenário local inicial: `000/000001`, base 100%, sem ST anterior. Backend calcula/snapshot preserva valores; fixtures assinadas passam nos XSDs instalados. NF-e gera grupos e totais; DPS envia classificação IBS/CBS. **Transmissão RTC oficial bloqueada** até adequar pacote/aceitação/PDF. PDFs RTC não são oferecidos pela UI e o backend recusa geração incompleta. Outros cenários exigem implementação específica.
+- Marco do Simples em 01/01/2027 impede continuar silenciosamente com perfil sem IBS/CBS. Não há inferência tributária por NCM.
+- CNPJ alfanumérico: cadastro, busca, contratos, normalização/DV e comparação SAN preservam letras. **Não é suporte completo:** emitente alfanumérico e tomador NFS-e continuam bloqueados pelos schemas das cadeias restantes. Não editar XSD oficial manualmente.
+- Financeiro manual na OS concluída: recebimento, liquidação parcial, taxas, segregação informada ou desconhecida, estorno administrativo com justificativa e histórico imutável. PostgreSQL/tenant/FKs, transações serializáveis e chave de idempotência protegem as escritas. Vínculo fiscal só admite documentos oficiais autorizados em produção da mesma OS.
+- Não existe integração automática com PSP ou Plataforma Pública de Split Payment. Cancelamento fiscal não devolve pagamento automaticamente. Recebimentos sem vínculo, vínculos cancelados e estornos exigem conciliação; painel mensal e redistribuição de vínculos ainda pendentes.
 
-## Bloqueios encontrados em 24/09/2026
+## Migrations
 
-1. `FiscalReleaseGate.IsAllowed` retorna `true` quando `isTenantReleased=true` antes de exigir `Fiscal:ProductionEnabled` e allow-list.
-2. `NationalFiscalGateway.NfseAdnBase(Production)` ainda bloqueia o ADN produtivo; revisar com a documentação oficial vigente.
-3. O código não possui domínio/XML completo de RTC (`gIBSCBS`, `cClassTrib`, valores/totais IBS/CBS).
-4. O DV de CNPJ alfanumérico existe isoladamente, sem suporte ponta a ponta.
-5. O marco oficial dos documentos fiscais do Simples Nacional na RTC é **01/01/2027**.
+`20260926213104_AddFiscalOrigin` e `20260926213917_AddManualPayments`, aplicadas somente no banco descartável de aceite. Aplicar nos ambientes restantes antes de usar a versão. Modelo EF sem mudanças pendentes.
 
-## Split Payment
+## Evidências e continuidade
 
-Há documentação técnica oficial da Plataforma Pública e novo ato técnico publicado em 23/09/2026. O Ofizzy deve primeiro preservar vínculo DF-e ↔ transação ↔ liquidação e preparar conciliação.
+Resultados reais estão em [STATUS](docs/STATUS.md), [log](docs/IMPLEMENTATION-LOG.md) e [TESTING](docs/TESTING.md). Não usar números históricos como nova execução.
 
-## Próxima execução
+Próximo trabalho: concluir pacote NFS-e/alfanumérico, eventos/chaves do emitente alfanumérico, cenários RTC/PDF e resiliência adicional; obter A1/credenciamento/classificações reais e executar [runbook](docs/fiscal/HOMOLOGATION-RUNBOOK.md) com simulador desligado. Nenhuma produção foi habilitada. [Plano e aceite](docs/NEXT-STEPS.md).
 
-Seguir [docs/NEXT-STEPS.md](docs/NEXT-STEPS.md): H1 gates/endpoints; H2 RTC/CNPJ alfanumérico; H3 resiliência/PDF; H4 credenciais reais; H5 homologação externa; H6 piloto produtivo.
-
-Referências canônicas: [Fase 8](docs/phases/PHASE-08-FISCAL.md), [Operação fiscal](docs/FISCAL.md), [Auditoria regulatória](docs/fiscal/FISCAL-REGULATORY-AUDIT-2026.md), [Matriz RTC](docs/fiscal/RTC-DOMAIN-MATRIX.md), [Runbook](docs/fiscal/HOMOLOGATION-RUNBOOK.md) e [Checklist de produção](docs/fiscal/PRODUCTION-READINESS.md).
-
-Relatórios e planos datados anteriores ficam em `docs/archive/` apenas como histórico.
+Edições preexistentes em `GlobalExceptionHandler.cs` e `theme-toggle.component.ts` foram preservadas; não atribuí-las a este incremento.

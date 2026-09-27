@@ -29,3 +29,11 @@ Atualizado em **24/09/2026**. Nenhuma etapa deste documento, por si só, constit
 ## Encerramento
 
 Anexar evidências sanitizadas ao dossiê e obter aceite da contabilidade. Só então marcar a fase como homologada para o perfil testado. Produção segue [PRODUCTION-READINESS.md](PRODUCTION-READINESS.md).
+
+## Pré-requisitos adicionais — 27/09/2026
+
+- Aplicar migrations de origem e financeiro. Conferir `Origin=Official` apenas com evidência; registros simulados/desconhecidos não devem ser transmitidos pelo gateway oficial.
+- Conferir os três gates cumulativos sem usar a liberação visual do tenant como substituto dos gates do servidor.
+- RTC configurável é estrutura local: envio oficial continua bloqueado até pacote/resposta/PDF e classificação aprovada. Não usar fixture XSD como aceite externo.
+- Não usar tomador NFS-e ou emitente alfanumérico até concluir suas cadeias oficiais.
+- Conciliação manual não comprova Split Payment: confirmar segregação no banco/provedor e manter estornos financeiros separados de cancelamento fiscal.

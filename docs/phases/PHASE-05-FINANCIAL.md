@@ -1,26 +1,21 @@
 # Fase 5 — Financeiro
 
-Recebimentos, estornos, status derivado e painel básico. Aceite: impedir valor acima do saldo, manter histórico e calcular a receber/recebido hoje/recebido no mês.
+Estado em **27/09/2026**: primeiro incremento manual implementado para preparar conciliação; a Fase 8 permanece prioridade e sem homologação externa.
 
-Status em 13/09/2026: **não iniciada; SaaS tem aceite local e a fase 8 fiscal é a prioridade anterior a esta fase**.
+## Implementado
 
-A antecipação de responsividade e E2E da Fase 6 não altera este escopo. A implementação financeira deverá reutilizar os padrões móveis atuais, preservar os snapshots da OS e manter cálculos financeiros autoritativos no backend.
+- recebimentos na OS concluída, com valor bruto, forma, data, autor e idempotência;
+- liquidações parciais, taxas e segregação tributária opcional (nulo significa desconhecida, não zero);
+- estorno administrativo parcial com justificativa e vínculo à liquidação original;
+- histórico preservado, sem edição/exclusão dos movimentos;
+- vínculos opcionais com documentos oficiais autorizados em produção da mesma OS; simulados/homologação não entram na conciliação fiscal produtiva;
+- backend valida saldos, referências, datas e permissões; isolamento/FKs e transação serializável no PostgreSQL;
+- interface real na OS, com erro compreensível e preservação da requisição em repetição após falha.
 
-Atualização técnica em 2026-09-08: a identidade interna foi padronizada como Ofizzy antes do início funcional desta fase. Nenhum contrato ou requisito financeiro foi antecipado ou alterado.
+Recebimento sem vínculo fiscal exige conciliação. Cancelamento de nota não estorna dinheiro. Estorno ou mudança fiscal sinaliza revisão do vínculo; redistribuição ainda não implementada. O saldo da OS usa bruto liquidado menos estornado; líquido só é mostrado quando segregação foi informada.
 
-Evidências da fundação técnica: backend 14 testes unitários e 4 de integração; frontend 26 testes unitários e 27 E2E; build das imagens e smoke pelo Nginx aprovados. A fase continua não iniciada funcionalmente.
+## Pendências
 
-Atualização de ambiente em 2026-09-09: o desenvolvimento local foi simplificado para PostgreSQL isolado via `compose.local.yaml` e API via `dotnet run`, com migrations automáticas e defaults restritos ao perfil `Development`. O escopo financeiro permanece não iniciado.
+Painel a receber/hoje/mês, referências do banco/provedor, importação/conciliação, redistribuição de alocações e integração automática com Split Payment/PSP. Estes registros manuais não comprovam execução de Split Payment.
 
-Correção complementar: históricos EF existentes em `public` e `ofizzy` são reconciliados idempotentemente, permitindo reiniciar `dotnet run` sem tentativa de recriar tabelas. Validado com duas inicializações consecutivas, 14 testes unitários e 4 de integração.
-
-Correção de setup: CNPJ opcional passou a aceitar entrada com máscara, mantendo 14 dígitos como regra e persistência normalizada. O escopo financeiro não foi alterado.
-Atualização visual — 2026-09-09: removido o brand-mark do login. Seletor de tema de login/setup abre abaixo e alinhado à direita; sidebar mantém abertura acima. Controles com mínimo de 44 px. Lint e build frontend aprovados (aviso de bundle conhecido). Nenhuma alteração de API ou migration nesta tarefa.
-
-Replanejamento em 2026-09-10: futuros pagamentos devem ser tenant-scoped, com FKs compostas para OS e testes de isolamento. Financeiro operacional não é cobrança de assinatura SaaS.
-
-## Continuidade consolidada — 13/09/2026
-
-A informação de pagamento declarada na NF-e não implementa recebimento financeiro. Próximo incremento desta fase exige saldo e estornos no backend, histórico e testes de isolamento por tenant.
-
-O estado geral está em [STATUS](../STATUS.md); a ordem, dependências e critérios futuros estão em [NEXT-STEPS](../NEXT-STEPS.md). Resultados anteriores neste documento preservam a data e o escopo originais.
+Migration: `20260926213917_AddManualPayments`, aplicada no banco descartável de aceite; aplicar nos demais ambientes antes do uso. Evidências locais em [STATUS](../STATUS.md), [TESTING](../TESTING.md) e [log](../IMPLEMENTATION-LOG.md).

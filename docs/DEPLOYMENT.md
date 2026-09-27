@@ -62,3 +62,9 @@ As três migrations fiscais são AddFiscalFoundation, CompleteFiscalInutilizatio
 Configurar as chaves externas por secrets ou override privado do Compose, conforme [FISCAL.md](FISCAL.md); não assumir que variáveis do host são repassadas automaticamente. Manter ProductionEnabled=false até homologação e liberação do tenant. Smoke fiscal em 18082 usa HTTP/Development apenas em ambiente isolado; produção requer HTTPS.
 
 Imagens, migrations e restart foram validados localmente; isso não registra deploy remoto nem homologação. Antes da liberação, cumprir [próximos passos](NEXT-STEPS.md) e [restauração fiscal](BACKUP-RESTORE.md).
+
+## Incremento fiscal/financeiro — 27/09/2026
+
+Aplicar `20260926213104_AddFiscalOrigin` e `20260926213917_AddManualPayments` pelo runner antes da versão nova. Fazer backup conforme runbook. Origem legada sem evidência positiva permanece `Unknown` e bloqueia operações pelo gateway; reconciliar evidência oficial antes de liberar qualquer registro. Não preencher `Official` indiscriminadamente. Não foi criada uma API de reclassificação de origem neste incremento.
+
+Manter os três gates de produção restritos e simulador desligado na homologação oficial. O teste local usa porta 18089, dados/segredos fictícios e stack própria `ofizzy-plan-accept`; não altera a stack operacional. Configurações de simulação e chaves fictícias permanecem em `/tmp`, fora do Git.

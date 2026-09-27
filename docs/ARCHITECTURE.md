@@ -21,7 +21,7 @@ O assembly atual mantém fronteiras por responsabilidade:
 | --- | --- | --- |
 | SaaS Core | Platform/Authentication, Platform/Tenancy | identidade, sessão, vínculos, autorização, provisionamento e administração |
 | TenantSettings | entidade TenantSettings, Platform/Company | dados operacionais/branding, contrato legado `/api/company` |
-| Business Core | BusinessCore/Customers, Services, Parts, WorkOrders, Dashboard | clientes, catálogo, snapshots, cálculos e estados |
+| Business Core | BusinessCore/Customers, Services, Parts, WorkOrders, Dashboard, Payments | clientes, catálogo, snapshots, cálculos e estados |
 | Automotive (Vertical) | Verticals/Automotive (veículos) e campos automotivos da OS | veículo, placa, quilometragem e relacionamento cliente/veículo |
 | Infraestrutura | Infrastructure/Persistence, migrations, Nginx | persistência compartilhada e origem única |
 
@@ -39,9 +39,7 @@ EF não são RLS PostgreSQL nem sandbox contra código privilegiado malicioso.
 `TenantProvisioningService` cria atomicamente Tenant, TenantSettings, módulos e
 TenantUser Owner, criando um User somente se necessário. O template Automotive
 fornece módulos padrão e valida dependências; não há engine genérica. Uma empresa
-pode habilitar apenas Customers/Catalog. O contrato atual de OS ainda exige
-Automotive porque Vehicle é obrigatório. Isso é uma dependência explícita da
-primeira vertical, não uma implementação fictícia de OS genérica.
+pode habilitar apenas Customers/Catalog. OS exige Customers e Catalog; Automotive é opcional e, quando ativo, exige Customers. Veículos históricos permanecem vinculados; novas OS podem operar sem veículo quando a vertical está desabilitada.
 
 Angular centraliza contexto em TenantContextService/AuthService, filtra menu e
 protege rotas. A seleção ocorre fora do shell: páginas anteriores são destruídas,
@@ -64,8 +62,12 @@ SaaS Subscriptions e AI/Automation. Nenhum serviço distribuído foi criado.
 
 PWA/offline-first é backlog: service worker, manifesto, IndexedDB e fila de sincronização descritos no planejamento não constituem funcionalidade entregue. Exigirá desenho próprio de conflitos, idempotência e proteção dos dados por tenant. Emissão fiscal depende de comunicação com o órgão autorizado; não presumir autorização offline.
 
-## Módulo fiscal — 24/09/2026
+## Módulo fiscal — 27/09/2026
 
 `BusinessCore/Fiscal` integra o Business Core e usa o mesmo DbContext. `features/fiscal` fornece componentes nas configurações e na OS existente. Adaptadores concretos encapsulam NFS-e Nacional e NF-e SP/SVRS; regras, cálculos, assinatura e correlação de protocolos ficam no backend.
 
-Preparação e documentos preservam snapshots; resultados inconclusivos mantêm identidade/XML e exigem consulta. Inutilização usa lease persistido de dois minutos, XML original e confirmação da faixa/protocolo. A arquitetura prevê três travas cumulativas para produção (`ProductionEnabled`, allow-list e liberação persistida do tenant); em 24/09/2026 foi identificado que a implementação ainda permite a liberação persistida contornar as outras duas, correção obrigatória antes de produção. Veja [decisão fiscal](adr/0007-direct-fiscal-integration.md) e [próximos passos](NEXT-STEPS.md).
+Preparação e documentos preservam snapshots; resultados inconclusivos mantêm identidade/XML e exigem consulta. Inutilização usa lease persistido de dois minutos, XML original e confirmação da faixa/protocolo. Produção exige três travas cumulativas (`ProductionEnabled`, allow-list e liberação persistida do tenant). Origem persistida impede operar documentos simulados/desconhecidos com o gateway oficial. Perfis RTC por vigência preservam valores explícitos no snapshot; transmissão RTC oficial continua bloqueada até finalizar a adequação. Veja [decisão fiscal](adr/0007-direct-fiscal-integration.md) e [próximos passos](NEXT-STEPS.md).
+
+## Financeiro manual — 27/09/2026
+
+`BusinessCore/Payments` usa o mesmo DbContext, sem PSP ou dependência de microsserviço. Recebimentos pertencem à OS; alocações referenciam documentos oficiais produtivos da mesma OS. Liquidações e estornos são movimentos imutáveis, com autor, data e idempotência por tenant. FKs compostas e filtros protegem referências; transações serializáveis impedem exceder os saldos. Segregação nula é desconhecida e não representa zero. Cancelamento fiscal exige revisão do vínculo, sem estorno automático. A interface da OS consome APIs reais e persiste no PostgreSQL.

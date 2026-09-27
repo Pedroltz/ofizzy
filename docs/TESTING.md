@@ -43,3 +43,20 @@ FiscalEmissionTests usa HTTP, PostgreSQL, certificado fictício e assinatura/XSD
 Em src/frontend/ofizzy-web, executar `npm run e2e -- --config playwright.fiscal.config.ts` contra a stack isolada na porta 18082. Após reiniciar somente essa stack, executar `OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.fiscal.config.ts`. O smoke real usa dados fictícios, trace desligado e confirma persistência, rejeição sem A1 e bloqueio de faixa não reservada. Não transmite a órgão fiscal.
 
 Homologação oficial, conformidade integral de PDF e exercício de restauração permanecem no [plano de próximos passos](NEXT-STEPS.md).
+
+## Aceite fiscal/financeiro — 27/09/2026
+
+Backend Release: build sem avisos/erros, 100 unitários e 12 integrações. Frontend: lint, 72 testes em 13 arquivos e build aprovados; bundle inicial 795,40 kB mantém aviso para budget 500 kB. E2E completo: 73 aprovados/11 skips condicionais. Modelo EF sem alterações pendentes.
+
+Migrations `AddFiscalOrigin`/`AddManualPayments` aplicadas em Compose descartável `ofizzy-plan-accept`, Nginx em 18089; runner repetido confirma banco atualizado. Segredos/configuração fictícios ficam em `/tmp`; não usar banco do usuário ou produção.
+
+Suíte financeira (sem interceptar APIs):
+
+```bash
+OFIZZY_E2E_BASE_URL=http://127.0.0.1:18089 npm run e2e -- --config playwright.payments.config.ts
+OFIZZY_E2E_BASE_URL=http://127.0.0.1:18089 OFIZZY_VERIFY_RESTART=1 npm run e2e -- --config playwright.payments.config.ts
+```
+
+A primeira execução cria tenant/cadastro alfanumérico, salva rascunho RTC pelas configurações (zero vs vazio), conclui OS e registra recebimento/liquidação/estorno pela UI. Inspeciona saldo/histórico via API e responsividade em 1440/768/320 px. A execução após restart verifica IDs, histórico, saldo e rascunho persistidos, sem criar substitutos. IDs fictícios ficam em `/tmp/ofizzy-payments-live.json`; traces desligados.
+
+Fiscal: mesma base URL com `playwright.fiscal.config.ts`, antes/depois do restart. Dois cenários cobrem configuração/preparação, emissão simulada XML/PDF e cancelamento. Origin/gates, rascunho RTC, XSD assinado, idempotência/saldos/isolamento financeiro e indisponibilidade de PDF RTC também têm regressões backend/frontend. Testes locais não autorizam transmissão RTC oficial nem comprovam homologação externa.

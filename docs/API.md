@@ -130,3 +130,20 @@ Contratos e permissões em [FISCAL.md](FISCAL.md#rotas). APIs exigem sessão, an
 O catálogo completo de rotas está em [FISCAL.md](FISCAL.md). DTOs de preparação, configurações e perfis passam por validação no backend; TenantId não é escolhido pelo cliente. Owner/Admin gerencia configuração, certificado, perfis, cancelamento e inutilização; membros acessam preparação/emissão/download conforme permissões.
 
 `GET /api/fiscal/nfe/inutilizations` retorna até 100 pedidos recentes do tenant; `POST /api/fiscal/nfe/inutilizations/{id}/sync` recupera o protocolo usando o XML original. Concorrência retorna 409; ID de outro tenant retorna 404. Resposta de processamento não significa autorização: a UI deve ler o estado retornado. ZIP contém somente autorizados no ambiente atual, podendo ser parcial. [Pendências](NEXT-STEPS.md).
+
+## Financeiro manual e contratos RTC — 27/09/2026
+
+Todos os endpoints exigem sessão/tenant e Customers, Catalog, WorkOrders. Escritas exigem antiforgery; TenantId/autor não vêm do DTO.
+
+| Rota | Contrato / permissão |
+| --- | --- |
+| `GET /api/work-orders/{id}/payments` | totais/saldo, recebimentos, movimentos, vínculos e documentos produtivos elegíveis |
+| `POST /api/work-orders/{id}/payments` | `requestId`, `amount`, `method`, `receivedAt`, `allocations? [{documentId, amount}]`; OS concluída |
+| `POST /api/payments/{id}/settlements` | `requestId`, `amount`, `fees`, `segregatedTax?`, `settledAt`; liquidação parcial |
+| `POST /api/payments/{id}/reversals` | `requestId`, `settlementId`, `amount`, `reason`, `reversedAt`; Owner/Admin |
+
+Valores com até duas casas, datas não futuras e saldos validados no backend. Métodos: Cash, Pix, Transfer, Card, Cheque. Alocações opcionais devem somar o recebimento, sem exceder o documento oficial autorizado em produção da mesma OS. Origem Simulation/Unknown e homologação não são elegíveis. IDs de outro tenant retornam 404. Repetição com mesma chave/corpo retorna o mesmo ID; chave reutilizada com dados diferentes retorna 409. Não há rotas de edição/exclusão de movimento. Em conflito concorrente, atualizar dados e reenviar a requisição original; não gerar nova chave enquanto o resultado estiver desconhecido.
+
+`segregatedTax=null` é desconhecido; zero é informação explícita. Saldo da OS = total bruto arredondado a centavos − liquidado + estornado; taxas/segregação não redefinem quitação bruta. Estornos preservam os valores da liquidação original. `requiresReview` sinaliza alteração fiscal/estorno; redistribuição ainda não disponível.
+
+Perfis de produto/serviço aceitam `rtcEnabled`, `rtcCst`, `rtcClassTrib`, `rtcBasePercent`, `rtcIbsUfRate`, `rtcIbsMunicipalRate`, `rtcCbsRate`; serviços incluem `rtcOperationCode`. A vigência continua em `effectiveFrom`. Rascunhos incompletos podem ser salvos, mas não emitidos. Resumo fiscal inclui `productsRtc`/`servicesRtc`, e cada documento expõe `origin` e `canDownloadPdf`. XML disponível não implica PDF RTC disponível ou autorização externa.

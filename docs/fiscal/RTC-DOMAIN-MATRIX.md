@@ -1,6 +1,6 @@
 # Matriz de domínio RTC — NF-e e NFS-e
 
-Atualizada em **24/09/2026**.
+Atualizada em **27/09/2026**.
 
 ## Baseline regulatório
 
@@ -13,15 +13,15 @@ Atualizada em **24/09/2026**.
 
 | Tema | Estado no Ofizzy | Decisão |
 | --- | --- | --- |
-| `CST` / `cClassTrib` | ausente no domínio RTC | implementar por perfil e vigência |
-| `gIBSCBS` | ausente | implementar somente para cenários aprovados |
-| bases/alíquotas/totais IBS/CBS | ausentes | calcular no backend e preservar snapshot |
+| `CST` / `cClassTrib` | editável por perfil/vigência, inclusive rascunhos | valores definidos pela contabilidade |
+| `gIBSCBS` | NF-e integral local, fixture XSD aprovada | envio oficial bloqueado |
+| bases/alíquotas/totais IBS/CBS | backend/snapshot para 000/000001 e base 100% | ampliar com cenários e fixtures |
 | redução/diferimento | ausente | modelar como cenário explícito |
 | monofásico/crédito/estorno | fora do piloto | não criar flags genéricas |
 | Imposto Seletivo | fora do piloto | manter bloqueado |
-| CNPJ alfanumérico | só DV isolado | adaptar cadeia completa |
-| NFS-e IBS/CBS | schema parcial, domínio ausente | adequar conforme perfil/cronograma |
-| Split Payment | não implementado | preparar conciliação; integrar sob demanda real |
+| CNPJ alfanumérico | cadastro/busca/contratos/SAN | concluir emitente, eventos e NFS-e |
+| NFS-e IBS/CBS | classificação DPS e cálculo agregado local | concluir pacote/resposta/PDF, envio oficial bloqueado |
+| Split Payment | financeiro manual persistido | conciliação/PSP automático pendentes |
 
 ## Regras
 
@@ -31,3 +31,5 @@ Atualizada em **24/09/2026**.
 4. O snapshot fiscal deve preservar o que foi usado na emissão.
 5. Cenário novo exige fixture, XML esperado e validação no pacote oficial.
 6. Cenário não suportado deve falhar de forma explícita.
+
+Rascunhos incompletos/fora do cenário integral são salvos, mas não emitidos. Alíquotas vazias não equivalem a zero; ST anterior permanece bloqueado para RTC. PDF RTC indisponível até adequação.

@@ -32,3 +32,9 @@ Em ambientes sem Node no host, use a imagem oficial Node 24 conforme os comandos
 `features/fiscal` integra configurações e detalhes da OS finalizada com serviços HTTP tipados e persistência no backend. Preservar PrimeNG 21, tokens e permissões. Mostrar documentos separados na OS mista, erros por campo, resultados inconclusivos e autorização parcial. A tela administrativa permite confirmar intervalos, ver histórico e recuperar inutilização sem perder os campos em erro.
 
 Smoke fiscal real usa playwright.fiscal.config.ts, Nginx na porta 18082 e PostgreSQL isolado; a suíte responsiva usa API interceptada. A verificação do novo formulário cobriu 1440/768/320 px. [Testes](TESTING.md) e [próximos passos](NEXT-STEPS.md).
+
+## Configuração RTC e recebimentos — 27/09/2026
+
+Configurações Fiscais expõem campos IBS/CBS nos perfis por vigência. Formulários mantêm zero distinto de vazio e aceitam rascunhos; a API valida a classificação antes de emitir. A OS concluída inclui `features/payments/work-order-payments.component.ts`, com HTTP real, recebimento, liquidação parcial e estorno administrativo. Troca de OS/tenant descarta respostas antigas; repetição de escrita após erro preserva chave/corpo/data enquanto os dados não mudarem. Segregação desconhecida não exibe líquido presumido. A API continua autoritativa para permissões e saldos.
+
+A suíte `playwright.payments.config.ts` cobre configurações RTC e financeiro pelo Nginx, sem interceptar APIs; inclui 1440/768/320 px, sem overflow e controles >=44 px. Ela só deve usar banco descartável com dados fictícios.

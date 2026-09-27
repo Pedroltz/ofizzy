@@ -117,6 +117,6 @@ npm test -- --watch=false`; CI e imagem frontend usam Node 24.
 
 ## Estado fiscal e continuidade
 
-A fase 8 integra documentos fiscais de serviços e produtos à OS concluída. Configuração, preparação, emissão/consulta, downloads, cancelamento e recuperação de inutilização estão implementados localmente. Em 24/09/2026, os bloqueios principais são RTC/CNPJ alfanumérico, correção das travas de produção e homologação externa oficial.
+A fase 8 integra documentos fiscais de serviços e produtos à OS concluída. Configuração, preparação, emissão/consulta, downloads, cancelamento e recuperação de inutilização estão implementados localmente. Em 27/09/2026, as travas produtivas são cumulativas e a origem fiscal está persistida. IBS/CBS pode ser configurado por vigência, inclusive rascunhos; recebimentos/liquidações/estornos manuais estão disponíveis na OS. Permanecem pendentes transmissão/PDF RTC, cadeia fiscal alfanumérica completa e homologação externa oficial. O financeiro manual não executa Split Payment automático.
 
 Consulte [Status](docs/STATUS.md), [Operação fiscal](docs/FISCAL.md), [Testes](docs/TESTING.md) e [Próximos passos](docs/NEXT-STEPS.md). O plano fiscal anterior foi preservado apenas em `docs/archive/`.

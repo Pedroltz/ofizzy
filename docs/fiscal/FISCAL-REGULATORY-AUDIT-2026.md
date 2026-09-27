@@ -1,4 +1,4 @@
-# Auditoria regulatória fiscal — atualização 24/09/2026
+# Auditoria regulatória fiscal — atualização 27/09/2026
 
 Esta é a fotografia regulatória usada para planejar a homologação do Ofizzy. Não substitui homologação externa nem orientação da contabilidade.
 
@@ -25,18 +25,18 @@ Esta é a fotografia regulatória usada para planejar a homologação do Ofizzy.
 
 ## Impacto no Ofizzy
 
-- NF-e 010f está selecionado, mas o domínio/XML RTC ainda precisa ser implementado e homologado.
+- NF-e 010f está selecionado, mas há domínio/snapshot e XML local integral; faltam cenários/pacote/PDF e homologação.
 - NFS-e evoluiu para CNPJ alfanumérico e IBS/CBS; o domínio do Ofizzy precisa acompanhar as regras aplicáveis ao Simples.
-- CNPJ alfanumérico tem somente DV isolado; não declarar suporte completo.
+- CNPJ alfanumérico já preserva letras em cadastro/contratos/busca/SAN; cadeia fiscal restante está bloqueada, não declarar suporte completo.
 - Split Payment exige primeiro conciliação entre documento e liquidação; API direta não é pressuposto do emissor fiscal.
 
 ## Achados de implementação
 
 1. `Development` usa gateway simulado por padrão.
 2. Não há evidência de homologação externa.
-3. `FiscalReleaseGate` não implementa hoje as três travas como condições cumulativas.
-4. ADN NFS-e de produção ainda está bloqueado no código.
-5. RTC de IBS/CBS ainda não existe de ponta a ponta no domínio/XML.
+3. `FiscalReleaseGate` corrigido: três travas cumulativas, com testes.
+4. ADN produtivo e prefixo API da Sefin de homologação atualizados segundo catálogo oficial; uso externo ainda não comprovado.
+5. RTC configurável/local integral implementado, mas envio oficial/PDF bloqueados até finalizar adequação.
 6. CNPJ alfanumérico está incompleto.
 
 Revalidar esta auditoria antes de cada rodada oficial de homologação e sempre que NF-e, NFS-e, RFB ou CGIBS publicar nova NT, schema, ato ou cronograma.

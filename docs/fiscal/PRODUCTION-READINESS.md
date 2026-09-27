@@ -23,3 +23,7 @@ Status em **24/09/2026**: **não liberado**.
 Somente depois dos itens acima: `Fiscal:ProductionEnabled=true`, UUID do tenant em `Fiscal:HomologatedTenants`, `Tenant.FiscalProductionReleased=true`, série exclusiva e responsável registrados.
 
 Ausência de qualquer condição deve bloquear emissão em produção.
+
+## Atualização de implementação — 27/09/2026
+
+Gates cumulativos, origem persistida e endpoints estão corrigidos localmente. Isso não marca a checklist produtiva como aprovada. Permanecem pendentes homologação externa/A1/credenciamento, cadeia alfanumérica completa, cenários/pacote/resposta/PDF RTC e critérios adicionais de resiliência. Origem desconhecida exige reconciliação. Financeiro manual não executa Split Payment automático.

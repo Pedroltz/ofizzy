@@ -5,7 +5,7 @@
 Plataforma SaaS multi-tenant para gestão de empresas prestadoras de serviços,
 com módulos e verticais especializadas (estratégia detalhada em [PRODUCT-STRATEGY.md](PRODUCT-STRATEGY.md)). Automotive é a primeira vertical:
 Cliente → Veículo → Ordem de Serviço → Diagnóstico → Serviços/Peças → Finalização
-→ Impressão. A prioridade atual é concluir a emissão fiscal da fase 8; pagamentos e financeiro operacional vêm depois.
+→ Impressão. A prioridade atual é concluir a emissão fiscal da fase 8; um primeiro incremento financeiro manual prepara a conciliação.
 
 Tenant é a organização cliente do Ofizzy. Customer é o cliente atendido por essa
 organização. Uma pessoa pode participar de várias organizações por TenantUser.
@@ -39,6 +39,8 @@ concreta. Financeiro operacional é distinto da assinatura SaaS.
 
 Documentos fiscais foram antecipados por solicitação do usuário. A [fase 8](phases/PHASE-08-FISCAL.md) registra implementação e pendências; ainda não há homologação externa ou liberação de produção.
 
-## Prioridades consolidadas — 24/09/2026
+## Prioridades consolidadas — 27/09/2026
 
-Fiscal usa integração direta, sem intermediário pago, para o piloto Igaraçu do Tietê/SP, Simples Nacional. Novas NF-e usam `PL_010f_v1.04`, mas ainda faltam adequação RTC/CNPJ alfanumérico de ponta a ponta, correção dos gates produtivos e homologação externa. A migração municipal para NFS-e Nacional já está em curso e o marco RTC do Simples Nacional é 01/01/2027. [Sequência e critérios](NEXT-STEPS.md).
+Fiscal usa integração direta, sem intermediário pago, para o piloto Igaraçu do Tietê/SP, Simples Nacional. Novas NF-e usam `PL_010f_v1.04`, mas ainda faltam adequação RTC/CNPJ alfanumérico de ponta a ponta, cenários/PDF RTC e homologação externa. A migração municipal para NFS-e Nacional já está em curso e o marco RTC do Simples Nacional é 01/01/2027. [Sequência e critérios](NEXT-STEPS.md).
+
+Gates cumulativos e origem fiscal persistida foram implementados. IBS/CBS fica editável nas configurações por vigência, inclusive rascunhos. Recebimentos/liquidações/estornos manuais da OS persistem no PostgreSQL; isso não executa Split Payment automático.
