@@ -48,7 +48,7 @@ test('criação valida campos, módulos, erros da API e normaliza identificador'
   await page.getByLabel('Senha inicial', { exact: true }).fill('Test-password-123');
   await page.getByRole('checkbox', { name: 'Clientes', exact: true }).uncheck();
   await page.getByRole('button', { name: 'Criar empresa', exact: true }).click();
-  await expect(page.getByText('Automotive exige Clientes. Ordens de serviço exige Clientes, Catálogo e Automotive.')).toBeVisible();
+  await expect(page.getByText('Automotive exige Clientes. Ordens de serviço exigem Clientes e Catálogo; Veículos é opcional.')).toBeVisible();
   await page.getByRole('checkbox', { name: 'Clientes', exact: true }).check();
   for (const scheme of ['light', 'dark'] as const) { await page.emulateMedia({ colorScheme: scheme }); await expect(page.locator('html')).toHaveAttribute('data-theme', scheme); await layout(page, 'create-' + scheme); }
   await page.getByRole('button', { name: 'Criar empresa', exact: true }).click();

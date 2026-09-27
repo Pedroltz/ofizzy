@@ -115,5 +115,16 @@ public sealed class CatalogFlowTests(OfizzyFactory factory) : IClassFixture<Ofiz
         Assert.Equal(1, byPhone.GetProperty("total").GetInt32());
     }
 
-    private static Task Setup(HttpClient client) => TenantTestSession.BootstrapOperationalTenant(client);
+    private static async Task Setup(HttpClient client)
+    {
+        var session = new TenantTestSession(client);
+        var status = await session.Json(HttpMethod.Get, "/api/setup/status");
+        if (status.GetProperty("required").GetBoolean())
+            await session.Bootstrap();
+        else
+            await session.Login("admin@ofizzy.local");
+        var slug = $"catalog-{Guid.NewGuid():N}";
+        var tenant = await session.Provision("Catalog Test", slug, "admin@ofizzy.local");
+        await session.Select(tenant.GetProperty("id").GetGuid(), onboard: true);
+    }
 }
