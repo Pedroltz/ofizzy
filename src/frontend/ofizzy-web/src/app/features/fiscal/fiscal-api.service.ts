@@ -46,6 +46,7 @@ export interface FiscalPreparation {
 export interface FiscalDocument {
   id: string;
   kind: 'Nfe' | 'Nfse';
+  origin?: 'Unknown' | 'Simulation' | 'Official';
   environment: string;
   state: string;
   number: number;
@@ -54,8 +55,12 @@ export interface FiscalDocument {
   total: number;
   message: string | null;
   canDownload: boolean;
+  canDownloadPdf?: boolean;
 }
+export interface RtcAmounts { base: number; ibsUf: number; ibsMunicipal: number; cbs: number; ibs: number; }
 export interface FiscalOrder {
+  productsRtc?: RtcAmounts | null;
+  servicesRtc?: RtcAmounts | null;
   preparation: FiscalPreparation;
   issues: { field: string; message: string }[];
   servicesTotal: number;

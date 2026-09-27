@@ -40,7 +40,7 @@ export function fiscalForm(fields: FiscalField[], values: Record<string, FiscalV
         return [
           f.key,
           new FormControl<FiscalValue>(
-            values[f.key] ?? (f.type === 'number' || f.type === 'currency' ? null : ''),
+            values[f.key] ?? (f.options?.some(x => x.value === false) ? false : f.type === 'number' || f.type === 'currency' ? null : ''),
             validators,
           ),
         ];
@@ -69,6 +69,18 @@ export const addressFields: FiscalField[] = [
     pattern: /^\d{7}$/,
     patternMessage: 'Código IBGE deve conter 7 dígitos numéricos',
   },
+];
+
+export const rtcFields: FiscalField[] = [
+  { key: 'rtcEnabled', label: 'IBS/CBS neste perfil (validação local)', options: [
+    { label: 'Não configurado', value: false }, { label: 'Configurar IBS/CBS', value: true },
+  ] },
+  { key: 'rtcCst', label: 'CST IBS/CBS', pattern: /^\d{3}$/, patternMessage: 'Informe 3 dígitos' },
+  { key: 'rtcClassTrib', label: 'cClassTrib', pattern: /^\d{6}$/, patternMessage: 'Informe 6 dígitos' },
+  { key: 'rtcBasePercent', label: 'Base IBS/CBS (% do valor)', type: 'number' },
+  { key: 'rtcIbsUfRate', label: 'Alíquota IBS UF (%)', type: 'number' },
+  { key: 'rtcIbsMunicipalRate', label: 'Alíquota IBS municipal (%)', type: 'number' },
+  { key: 'rtcCbsRate', label: 'Alíquota CBS (%)', type: 'number' },
 ];
 
 export const productFields: FiscalField[] = [
@@ -102,6 +114,7 @@ export const productFields: FiscalField[] = [
   { key: 'retainedStAmount', label: 'ICMS ST anterior por unidade', type: 'currency' },
   { key: 'substituteAmount', label: 'ICMS substituto por unidade', type: 'currency' },
   { key: 'stRate', label: 'Alíquota ST (%)', type: 'number' },
+  ...rtcFields,
 ];
 
 export const serviceFields: FiscalField[] = [
@@ -129,6 +142,8 @@ export const serviceFields: FiscalField[] = [
     label: 'Percentual aproximado de tributos do Simples',
     type: 'number',
   },
+  ...rtcFields,
+  { key: 'rtcOperationCode', label: 'cIndOp do serviço', pattern: /^\d{6}$/, patternMessage: 'Informe 6 dígitos' },
 ];
 
 const effectiveFromField: FiscalField = {

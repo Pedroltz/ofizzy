@@ -1,4 +1,6 @@
 using FluentValidation;
+using Ofizzy.Api.Modules.Fiscal;
+using Ofizzy.Api.Shared;
 
 namespace Ofizzy.Api.Modules.Customers;
 
@@ -48,8 +50,8 @@ public sealed class CustomerRequestValidator : AbstractValidator<CustomerRequest
             .MaximumLength(160);
 
         RuleFor(x => x.Document)
-            .Must(value => string.IsNullOrWhiteSpace(value) || new string(value.Where(char.IsDigit).ToArray()).Length is 11 or 14)
-            .WithMessage("Informe um CPF com 11 ou CNPJ com 14 dígitos.");
+            .Must(value => string.IsNullOrWhiteSpace(value) || FiscalValidation.IsDocument(TextNormalization.Document(value)))
+            .WithMessage("Informe CPF ou CNPJ válido; CNPJ pode conter letras.");
 
         RuleFor(x => x.Phone)
             .MaximumLength(20);

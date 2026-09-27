@@ -236,6 +236,7 @@ public sealed class FiscalEmissionTests(OfizzyFactory factory) : IClassFixture<O
     // This replaces only the official network boundary; HTTP, XML signing/XSD and PostgreSQL remain real.
     private sealed class TimeoutGateway : IFiscalGateway
     {
+        public FiscalOrigin Origin => FiscalOrigin.Simulation;
         public int ProductSends { get; private set; }
         public int ServiceSends { get; private set; }
         public List<string> ServicePayloads { get; } = [];

@@ -40,6 +40,7 @@ public sealed class FiscalInutilizationsController(
                 x.FirstNumber,
                 x.LastNumber,
                 x.Environment,
+                x.Origin,
                 x.State,
                 x.Protocol,
                 x.Message,
@@ -89,6 +90,7 @@ public sealed class FiscalInutilizationsController(
         using var cert = vault.Load(settings);
         foreach (var doc in docs)
         {
+            FiscalOriginGuard.EnsureCompatible(doc.Origin, gateway.Origin, doc.Environment);
             var result = await gateway.Query(doc, cert, ct);
             if (!result.NotFound)
             {
@@ -99,6 +101,7 @@ public sealed class FiscalInutilizationsController(
         var record = new FiscalInutilization
         {
             Environment = issuer.Environment,
+            Origin = gateway.Origin,
             Series = request.Series,
             Year = request.Year,
             FirstNumber = request.FirstNumber,
@@ -182,6 +185,7 @@ public sealed class FiscalInutilizationsController(
     private async Task<IActionResult> Process(FiscalInutilization record, bool recovery, CancellationToken ct)
     {
         await FiscalReleaseGate.EnsureAllowedAsync(db, config, record.Environment, ct);
+        FiscalOriginGuard.EnsureCompatible(record.Origin, gateway.Origin, record.Environment);
 
         if (record.State == "Confirmed")
         {
@@ -217,6 +221,11 @@ public sealed class FiscalInutilizationsController(
         if (docs.Count != expectedCount || docs.Any(x => x.AuthorizedXml != null || x.State != FiscalState.AwaitingConfirmation))
         {
             throw new ConflictException("O histórico dos documentos não permite recuperar esta inutilização automaticamente.");
+        }
+
+        foreach (var doc in docs)
+        {
+            FiscalOriginGuard.EnsureCompatible(doc.Origin, gateway.Origin, doc.Environment);
         }
 
         var settings = await db.FiscalSettingsEntries.SingleAsync(ct);

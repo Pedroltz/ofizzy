@@ -22,6 +22,7 @@ public sealed record FiscalGatewayResult(
 
 public interface IFiscalGateway
 {
+    FiscalOrigin Origin => FiscalOrigin.Unknown;
     Task<FiscalGatewayResult> Send(FiscalDocument document, X509Certificate2 certificate, CancellationToken ct);
     Task<FiscalGatewayResult> Query(FiscalDocument document, X509Certificate2 certificate, CancellationToken ct);
     Task<FiscalGatewayResult> Cancel(FiscalDocument document, string signedEvent, X509Certificate2 certificate, CancellationToken ct);
@@ -30,6 +31,7 @@ public interface IFiscalGateway
 
 public sealed class NationalFiscalGateway : IFiscalGateway
 {
+    public FiscalOrigin Origin => FiscalOrigin.Official;
     private static HttpClient Client(X509Certificate2 certificate)
     {
         var handler = new HttpClientHandler
@@ -49,17 +51,15 @@ public sealed class NationalFiscalGateway : IFiscalGateway
     {
         return environment == FiscalEnvironment.Production
             ? "https://sefin.nfse.gov.br/SefinNacional"
-            : "https://sefin.producaorestrita.nfse.gov.br/SefinNacional";
+            : "https://sefin.producaorestrita.nfse.gov.br/API/SefinNacional";
     }
 
     public static string NfseAdnBase(FiscalEnvironment environment)
     {
-        if (environment == FiscalEnvironment.Production)
-        {
-            throw new ConflictException("Endpoint ADN de produção não registrado. Confirme a fonte oficial antes da liberação fiscal.");
-        }
-
-        return "https://adn.producaorestrita.nfse.gov.br/contribuintes";
+        // Official catalogue: gov.br/nfse/.../apis-prod-restrita-e-producao
+        return environment == FiscalEnvironment.Production
+            ? "https://adn.nfse.gov.br/contribuintes"
+            : "https://adn.producaorestrita.nfse.gov.br/contribuintes";
     }
 
     public static string NfeEndpoint(FiscalSnapshot snapshot, string operation)

@@ -8,7 +8,7 @@ public sealed class FiscalSettingsValidator : AbstractValidator<FiscalSettingsDa
     public FiscalSettingsValidator()
     {
         RuleFor(x => x.Cnpj)
-            .Must(FiscalValidation.IsCnpj)
+            .Must(FiscalValidation.IsAlphanumericCnpj)
             .WithMessage("Informe um CNPJ válido, sem máscara.");
 
         RuleFor(x => x.LegalName)
@@ -88,6 +88,10 @@ public sealed class ProductFiscalValidator : AbstractValidator<ProductFiscalData
 {
     public ProductFiscalValidator()
     {
+        RuleFor(x => x).Custom((p, context) =>
+        {
+            foreach (var issue in FiscalRtc.DraftIssues(FiscalRtc.Profile(p))) context.AddFailure(issue.Field, issue.Message);
+        });
         RuleFor(x => x.Ncm)
             .Matches("^[0-9]{8}$");
 
@@ -140,6 +144,10 @@ public sealed class ServiceFiscalValidator : AbstractValidator<ServiceFiscalData
 {
     public ServiceFiscalValidator()
     {
+        RuleFor(x => x).Custom((p, context) =>
+        {
+            foreach (var issue in FiscalRtc.DraftIssues(FiscalRtc.Profile(p))) context.AddFailure(issue.Field, issue.Message);
+        });
         RuleFor(x => x.NationalCode)
             .Matches("^[0-9]{6}$")
             .WithMessage("O código de tributação nacional deve conter exatamente 6 dígitos numéricos.");
@@ -197,8 +205,7 @@ public static class FiscalValidation
 
     public static bool IsCnpj(string? x) => CheckDocument(x, 14);
 
-    // PL_010f's RTC types allow an alphanumeric base. The active 010c/NFS-e schemas
-    // remain numeric, so callers must opt in only as part of that package migration.
+    // Schema/operation compatibility is checked separately before emission.
     public static bool IsAlphanumericCnpj(string? value)
     {
         if (value?.Length != 14 || !value[..12].All(c => c is >= '0' and <= '9' or >= 'A' and <= 'Z') || !value[12..].All(char.IsAsciiDigit))
@@ -215,7 +222,7 @@ public static class FiscalValidation
             && CheckAlphanumericCnpjDigit(value[..13], value[13]);
     }
 
-    public static bool IsDocument(string? x) => CheckDocument(x, x?.Length ?? 0);
+    public static bool IsDocument(string? x) => x?.Length == 14 ? IsAlphanumericCnpj(x) : CheckDocument(x, 11);
 
     private static bool CheckDocument(string? value, int length)
     {

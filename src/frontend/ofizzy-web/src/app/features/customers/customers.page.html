@@ -311,12 +311,12 @@
         <input
           pInputText
           formControlName="document"
-          inputmode="numeric"
-          placeholder="11 dígitos (CPF) ou 14 (CNPJ)"
+          autocapitalize="characters"
+          placeholder="CPF ou CNPJ, inclusive com letras"
         />
         @if (form.controls.document.errors?.['invalidDocument'] && form.controls.document.touched) {
           <small class="field-error-text"
-            >Informe 11 dígitos para CPF ou 14 dígitos para CNPJ</small
+            >Informe CPF com 11 dígitos ou CNPJ com 14 caracteres</small
           >
         }
       </label>

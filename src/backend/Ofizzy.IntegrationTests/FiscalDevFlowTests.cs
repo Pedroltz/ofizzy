@@ -27,6 +27,15 @@ public sealed class FiscalDevFlowTests(OfizzyFactory factory) : IClassFixture<Of
         var settings = new FiscalSettingsData("11222333000181", "OFICINA FICTICIA", "110042490114", Regime: "SimplesNacional", Address: address, NfeEnabled: true, NfseEnabled: true);
         Assert.Equal(HttpStatusCode.NoContent, (await session.Send(HttpMethod.Put, "/api/fiscal/settings", settings)).StatusCode);
         Assert.True((await session.Json(HttpMethod.Get, "/api/fiscal/settings")).GetProperty("devToolsAvailable").GetBoolean());
+        var draftService = await session.Json(HttpMethod.Post, "/api/services", new { name = "Perfil RTC configurável", defaultPrice = 100m });
+        var draftRoute = $"/api/services/{draftService.GetProperty("id").GetGuid()}/fiscal";
+        var draft = new ServiceFiscalData(NationalCode: "010101", RtcEnabled: true, RtcCst: "200", RtcIbsMunicipalRate: 0m);
+        Assert.Equal(HttpStatusCode.NoContent, (await session.Send(HttpMethod.Put, draftRoute, draft)).StatusCode);
+        var savedDraft = await session.Json(HttpMethod.Get, draftRoute);
+        Assert.True(savedDraft.GetProperty("rtcEnabled").GetBoolean());
+        Assert.Equal("200", savedDraft.GetProperty("rtcCst").GetString());
+        Assert.Equal(0m, savedDraft.GetProperty("rtcIbsMunicipalRate").GetDecimal());
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, savedDraft.GetProperty("rtcCbsRate").ValueKind);
         var certificate = await session.Send(HttpMethod.Get, "/api/fiscal/dev/certificate");
         Assert.Equal(HttpStatusCode.OK, certificate.StatusCode);
         Assert.True(certificate.Headers.CacheControl!.NoStore);
@@ -75,13 +84,18 @@ public sealed class FiscalDevFlowTests(OfizzyFactory factory) : IClassFixture<Of
         }
         var config = host.Services.GetRequiredService<IConfiguration>();
         config["Fiscal:SimulateGateway"] = "false";
+        foreach (var doc in result.GetProperty("documents").EnumerateArray())
+        {
+            Assert.Equal("Simulation", doc.GetProperty("origin").GetString());
+            Assert.Equal(HttpStatusCode.Conflict, (await session.Send(HttpMethod.Post,
+                $"/api/fiscal/documents/{doc.GetProperty("id").GetGuid()}/sync")).StatusCode);
+        }
         Assert.False((await session.Json(HttpMethod.Get, "/api/fiscal/settings")).GetProperty("devToolsAvailable").GetBoolean());
         Assert.Equal(HttpStatusCode.NotFound, (await session.Send(HttpMethod.Get, "/api/fiscal/dev/certificate")).StatusCode);
         config["Fiscal:SimulateGateway"] = "true";
         config["Fiscal:ProductionEnabled"] = "true";
-        Assert.Equal(HttpStatusCode.NoContent, (await session.Send(HttpMethod.Put, "/api/fiscal/settings", settings with { Environment = FiscalEnvironment.Production })).StatusCode);
-        Assert.False((await session.Json(HttpMethod.Get, "/api/fiscal/settings")).GetProperty("devToolsAvailable").GetBoolean());
-        Assert.Equal(HttpStatusCode.NotFound, (await session.Send(HttpMethod.Get, "/api/fiscal/dev/certificate")).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await session.Send(HttpMethod.Put, "/api/fiscal/settings", settings with { Environment = FiscalEnvironment.Production })).StatusCode);
+        Assert.Equal("Homologation", (await session.Json(HttpMethod.Get, "/api/fiscal/settings")).GetProperty("settings").GetProperty("environment").GetString());
         Assert.Equal(HttpStatusCode.NoContent, (await session.Send(HttpMethod.Put, "/api/fiscal/settings", settings)).StatusCode);
         var environment = host.Services.GetRequiredService<IWebHostEnvironment>();
         environment.EnvironmentName = "Production";

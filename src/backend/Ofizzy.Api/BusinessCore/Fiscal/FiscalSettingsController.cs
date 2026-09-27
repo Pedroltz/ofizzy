@@ -76,6 +76,7 @@ public sealed class FiscalSettingsController(
     [HttpPut("settings")]
     public async Task<IActionResult> Save(FiscalSettingsData request, CancellationToken ct)
     {
+        request = request with { Cnpj = Ofizzy.Api.Shared.TextNormalization.Document(request.Cnpj) ?? "" };
         var result = new FiscalSettingsValidator().Validate(request);
         if (!result.IsValid)
         {

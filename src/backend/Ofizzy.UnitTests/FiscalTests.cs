@@ -63,7 +63,9 @@ public sealed class FiscalTests
     public void Nfse_event_queries_use_the_official_restricted_adn_base()
     {
         Assert.Equal("https://adn.producaorestrita.nfse.gov.br/contribuintes", NationalFiscalGateway.NfseAdnBase(FiscalEnvironment.Homologation));
-        Assert.Throws<ConflictException>(() => NationalFiscalGateway.NfseAdnBase(FiscalEnvironment.Production));
+        Assert.Equal("https://sefin.producaorestrita.nfse.gov.br/API/SefinNacional", NationalFiscalGateway.NfseBase(FiscalEnvironment.Homologation));
+        Assert.Equal("https://sefin.nfse.gov.br/SefinNacional", NationalFiscalGateway.NfseBase(FiscalEnvironment.Production));
+        Assert.Equal("https://adn.nfse.gov.br/contribuintes", NationalFiscalGateway.NfseAdnBase(FiscalEnvironment.Production));
     }
 
     [Fact]
@@ -417,44 +419,58 @@ public sealed class FiscalTests
         Assert.True(validator.Validate(validProfile).IsValid);
     }
 
-    [Fact]
-    public void Production_requires_both_server_gate_and_tenant_homologation()
+    [Theory]
+    [InlineData(false, false, false)]
+    [InlineData(false, false, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, true, true)]
+    [InlineData(true, false, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, true, true)]
+    public void Production_requires_all_three_gates(bool enabled, bool listed, bool released)
     {
-        // Arrange
         var tenant = Guid.NewGuid();
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Fiscal:ProductionEnabled"] = "true",
-                ["Fiscal:HomologatedTenants:0"] = tenant.ToString()
-            })
-            .Build();
-
-        // Act & Assert
-        FiscalReleaseGate.EnsureAllowed(config, tenant, FiscalEnvironment.Production);
-        Assert.Throws<ConflictException>(() => FiscalReleaseGate.EnsureAllowed(config, Guid.NewGuid(), FiscalEnvironment.Production));
-
-        config["Fiscal:ProductionEnabled"] = "false";
-        Assert.Throws<ConflictException>(() => FiscalReleaseGate.EnsureAllowed(config, tenant, FiscalEnvironment.Production));
-
-        FiscalReleaseGate.EnsureAllowed(config, tenant, FiscalEnvironment.Homologation);
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Fiscal:ProductionEnabled"] = enabled.ToString(),
+            ["Fiscal:HomologatedTenants:0"] = listed ? tenant.ToString().ToUpperInvariant() : Guid.NewGuid().ToString()
+        }).Build();
+        Assert.Equal(enabled && listed && released,
+            FiscalReleaseGate.IsAllowed(config, tenant, FiscalEnvironment.Production, released));
+        Assert.False(FiscalReleaseGate.IsAllowed(config, null, FiscalEnvironment.Production, released));
+        Assert.True(FiscalReleaseGate.IsAllowed(config, tenant, FiscalEnvironment.Homologation));
     }
 
     [Fact]
-    public void Production_allowed_when_tenant_is_released_in_database()
+    public void Empty_allow_list_cannot_release_production()
     {
-        // Arrange
-        var tenant = Guid.NewGuid();
-        var emptyConfig = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>())
-            .Build();
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Fiscal:ProductionEnabled"] = "true"
+        }).Build();
+        Assert.Throws<ConflictException>(() => FiscalReleaseGate.EnsureAllowed(config,
+            Guid.NewGuid(), FiscalEnvironment.Production, true));
+    }
 
-        // Act & Assert
-        Assert.False(FiscalReleaseGate.IsAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: false));
-        Assert.Throws<ConflictException>(() => FiscalReleaseGate.EnsureAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: false));
+    [Theory]
+    [InlineData(FiscalOrigin.Simulation, FiscalOrigin.Official)]
+    [InlineData(FiscalOrigin.Official, FiscalOrigin.Simulation)]
+    [InlineData(FiscalOrigin.Unknown, FiscalOrigin.Official)]
+    [InlineData(FiscalOrigin.Unknown, FiscalOrigin.Simulation)]
+    [InlineData(FiscalOrigin.Official, FiscalOrigin.Unknown)]
+    public void Gateway_changes_never_reinterpret_existing_documents(FiscalOrigin stored, FiscalOrigin active)
+    {
+        Assert.Throws<ConflictException>(() => FiscalOriginGuard.EnsureCompatible(stored, active, FiscalEnvironment.Homologation));
+    }
 
-        Assert.True(FiscalReleaseGate.IsAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: true));
-        FiscalReleaseGate.EnsureAllowed(emptyConfig, tenant, FiscalEnvironment.Production, isTenantReleased: true);
+    [Fact]
+    public void Simulation_cannot_be_used_in_production()
+    {
+        FiscalOriginGuard.EnsureCompatible(FiscalOrigin.Simulation, FiscalOrigin.Simulation, FiscalEnvironment.Homologation);
+        FiscalOriginGuard.EnsureCompatible(FiscalOrigin.Official, FiscalOrigin.Official, FiscalEnvironment.Production);
+        Assert.Throws<ConflictException>(() => FiscalOriginGuard.EnsureCompatible(FiscalOrigin.Simulation,
+            FiscalOrigin.Simulation, FiscalEnvironment.Production));
     }
 
     [Fact]

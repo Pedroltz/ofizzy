@@ -87,6 +87,14 @@ import {
             </div>
           }
         </div>
+        @if (fiscal.productsRtc || fiscal.servicesRtc) {
+          <p-message severity="warn">IBS/CBS calculados para validação local. Transmissão oficial RTC ainda bloqueada.</p-message>
+          @for (rtc of [fiscal.productsRtc, fiscal.servicesRtc]; track $index) {
+            @if (rtc) {
+              <p>Base: {{ rtc.base | currency: 'BRL' }} · IBS: {{ rtc.ibs | currency: 'BRL' }} · CBS: {{ rtc.cbs | currency: 'BRL' }}</p>
+            }
+          }
+        }
         <div class="fiscal-status-row" role="status" aria-live="polite">
           <span class="fiscal-status-label">Situação:</span>
           <p-tag [value]="stateLabel(fiscal.status)" [severity]="statusSeverity(fiscal.status)" />
@@ -158,6 +166,13 @@ import {
                 {{ stateLabel(document.state) }} ·
                 {{ document.environment === 'Homologation' ? 'Homologação' : 'Produção' }}
               </p>
+              @if (document.origin !== 'Official') {
+                <p-message severity="warn">{{
+                  document.origin === 'Simulation'
+                    ? 'Simulação local — sem autorização do órgão fiscal.'
+                    : 'Origem não comprovada — requer reconciliação do histórico.'
+                }}</p-message>
+              }
               @if (document.message) {
                 <p class="fiscal-doc-msg">{{ document.message }}</p>
               }
@@ -172,13 +187,18 @@ import {
                     [outlined]="true"
                     size="small"
                     (onClick)="download(document, 'xml')"
-                  /><p-button
+                  />
+                  @if (document.canDownloadPdf !== false) {
+                  <p-button
                     label="PDF da nota"
                     icon="pi pi-file-pdf"
                     [outlined]="true"
                     size="small"
                     (onClick)="download(document, 'pdf')"
                   />
+                  } @else {
+                    <small>PDF com IBS/CBS ainda depende da adequação do leiaute.</small>
+                  }
                 }
                 @if (tenant.admin() && document.state === 'Authorized') {
                   <p-button
@@ -627,7 +647,7 @@ export class WorkOrderFiscalComponent {
     },
     {
       key: 'document',
-      label: 'CPF/CNPJ (somente números)',
+      label: 'CPF/CNPJ (CNPJ aceita letras)',
       required: true,
       patternMessage: 'Informe CPF ou CNPJ válido',
     },

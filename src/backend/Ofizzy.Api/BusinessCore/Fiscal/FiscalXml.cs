@@ -191,7 +191,7 @@ public static class FiscalXml
         var servicesAggregateDescription = string.Join("; ", s.Lines.Select(x => $"{x.Description} ({x.Quantity.ToString(CultureInfo.InvariantCulture)})"));
         var orderNumberFormatted = s.OrderNumber.ToString("D4");
 
-        return new XDocument(
+        var result = new XDocument(
             E("DPS", new XAttribute("versao", "1.01"),
                 E("infDPS", new XAttribute("Id", document.Identity),
                     E("tpAmb", (int)document.Environment),
@@ -230,6 +230,14 @@ public static class FiscalXml
                             E("totTrib", issuer.Regime == "MEI"
                                 ? E("indTotTrib", 0)
                                 : E("pTotTribSN", Amount(profile.ApproximateTaxRate!.Value))))))));
+        if (s.Lines.Any(x => x.Rtc != null))
+        {
+            result.Root!.Element(Nfse + "infDPS")!.Add(
+                E("IBSCBS", E("finNFSe", 0), E("cIndOp", profile.RtcOperationCode), E("indDest", 0),
+                    E("valores", E("trib", E("gIBSCBS", E("CST", profile.RtcCst), E("cClassTrib", profile.RtcClassTrib))))));
+        }
+        return result;
+
     }
 
     public static XDocument Invoice(FiscalDocument d, FiscalSnapshot s)
@@ -266,7 +274,7 @@ public static class FiscalXml
                     E("vICMSSTRet", Amount(p.RetainedStAmount!.Value * line.Quantity)));
             }
 
-            return E("det", new XAttribute("nItem", index + 1),
+            var detail = E("det", new XAttribute("nItem", index + 1),
                 E("prod",
                     E("cProd", line.Code),
                     E("cEAN", p.Gtin),
@@ -287,6 +295,18 @@ public static class FiscalXml
                     E("ICMS", icms),
                     E("PIS", E("PISNT", E("CST", p.PisCst))),
                     E("COFINS", E("COFINSNT", E("CST", p.CofinsCst)))));
+            if (line.Rtc is { } rtc)
+            {
+                detail.Element(Nfe + "imposto")!.Add(
+                    E("IBSCBS", E("CST", rtc.Cst), E("cClassTrib", rtc.ClassTrib),
+                        E("gIBSCBS", E("vBC", Amount(rtc.Base)),
+                            E("gIBSUF", E("pIBSUF", rtc.IbsUfRate.ToString("F4", CultureInfo.InvariantCulture)), E("vIBSUF", Amount(rtc.IbsUf))),
+                            E("gIBSMun", E("pIBSMun", rtc.IbsMunicipalRate.ToString("F4", CultureInfo.InvariantCulture)), E("vIBSMun", Amount(rtc.IbsMunicipal))),
+                            E("vIBS", Amount(rtc.Ibs)),
+                            E("gCBS", E("pCBS", rtc.CbsRate.ToString("F4", CultureInfo.InvariantCulture)), E("vCBS", Amount(rtc.Cbs))))));
+            }
+            return detail;
+
         });
 
         var total = E("ICMSTot");
@@ -346,7 +366,7 @@ public static class FiscalXml
                         E("indIEDest", r.RecipientIeIndicator),
                         r.RecipientIeIndicator == "1" ? E("IE", r.StateRegistration) : null),
                     details,
-                    E("total", total),
+                    E("total", total, RtcTotal(s)),
                     E("transp", E("modFrete", 9)),
                     E("pag",
                         E("detPag",
@@ -354,4 +374,19 @@ public static class FiscalXml
                             E("vPag", Amount(r.PaymentAmount!.Value)))),
                     E("infAdic", E("infCpl", infCpl)))));
     }
+    private static XElement? RtcTotal(FiscalSnapshot snapshot)
+    {
+        var rows = snapshot.Lines.Where(x => x.Rtc != null).Select(x => x.Rtc!).ToList();
+        if (rows.Count == 0) return null;
+        XElement E(string name, params object?[] content) => new(Nfe + name, content);
+        XElement Group(string name, string amountName, decimal amount) => E(name,
+            E("vDif", "0.00"), E("vDevTrib", "0.00"), E(amountName, Amount(amount)));
+        return E("IBSCBSTot", E("vBCIBSCBS", Amount(rows.Sum(x => x.Base))),
+            E("gIBS", Group("gIBSUF", "vIBSUF", rows.Sum(x => x.IbsUf)),
+                Group("gIBSMun", "vIBSMun", rows.Sum(x => x.IbsMunicipal)),
+                E("vIBS", Amount(rows.Sum(x => x.Ibs))), E("vCredPres", "0.00"), E("vCredPresCondSus", "0.00")),
+            E("gCBS", E("vDif", "0.00"), E("vDevTrib", "0.00"), E("vCBS", Amount(rows.Sum(x => x.Cbs))),
+                E("vCredPres", "0.00"), E("vCredPresCondSus", "0.00")));
+    }
+
 }

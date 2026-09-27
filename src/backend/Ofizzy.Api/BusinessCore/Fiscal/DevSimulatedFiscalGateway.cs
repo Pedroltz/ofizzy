@@ -14,6 +14,7 @@ namespace Ofizzy.Api.Modules.Fiscal;
 /// </summary>
 public sealed class DevSimulatedFiscalGateway : IFiscalGateway
 {
+    public FiscalOrigin Origin => FiscalOrigin.Simulation;
     public Task<FiscalGatewayResult> Send(
         FiscalDocument document,
         X509Certificate2 certificate,

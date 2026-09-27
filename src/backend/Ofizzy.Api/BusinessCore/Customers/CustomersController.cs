@@ -22,9 +22,10 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
         {
             var term = $"%{q.Trim()}%";
             var digits = TextNormalization.Digits(q);
+            var document = TextNormalization.Document(q)!;
             query = string.IsNullOrEmpty(digits)
-                ? query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)))
-                : query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Email != null && EF.Functions.ILike(x.Email, term)) || (x.Phone != null && x.Phone.Contains(digits)) || (x.WhatsApp != null && x.WhatsApp.Contains(digits)) || (x.Document != null && x.Document.Contains(digits)));
+                ? query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Document != null && x.Document.Contains(document)) || (x.Email != null && EF.Functions.ILike(x.Email, term)))
+                : query.Where(x => EF.Functions.ILike(x.Name, term) || (x.Document != null && x.Document.Contains(document)) || (x.Email != null && EF.Functions.ILike(x.Email, term)) || (x.Phone != null && x.Phone.Contains(digits)) || (x.WhatsApp != null && x.WhatsApp.Contains(digits)) || (x.Document != null && x.Document.Contains(digits)));
         }
         var total = await query.CountAsync(ct); var items = await query.OrderBy(x => x.Name).Skip((page - 1) * pageSize).Take(pageSize).Select(Map()).ToListAsync(ct);
         return Ok(new PagedResponse<CustomerResponse>(items, page, pageSize, total));
@@ -51,7 +52,7 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
             return ValidationProblem(new ValidationProblemDetails(validation.ToDictionary()));
         }
 
-        var document = TextNormalization.Digits(request.Document);
+        var document = TextNormalization.Document(request.Document);
         await EnsureDocumentAvailable(document, null, ct);
 
         var street = TextNormalization.Optional(request.Street);
@@ -111,7 +112,7 @@ public sealed class CustomersController(ApplicationDbContext db, IValidator<Cust
             return NotFound();
         }
 
-        var document = TextNormalization.Digits(request.Document);
+        var document = TextNormalization.Document(request.Document);
         await EnsureDocumentAvailable(document, id, ct);
 
         var street = TextNormalization.Optional(request.Street);

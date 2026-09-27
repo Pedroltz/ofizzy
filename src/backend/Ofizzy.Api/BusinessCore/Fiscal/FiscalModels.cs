@@ -3,6 +3,13 @@ using Ofizzy.Api.Modules.Tenancy;
 
 namespace Ofizzy.Api.Modules.Fiscal;
 
+public enum FiscalOrigin
+{
+    Unknown,
+    Simulation,
+    Official
+}
+
 public enum FiscalKind
 {
     Nfe,
@@ -63,14 +70,29 @@ public sealed record ProductFiscalData(
     decimal? RetainedStAmount = null,
     decimal? SubstituteAmount = null,
     decimal? StRate = null,
-    DateOnly EffectiveFrom = default);
+    DateOnly EffectiveFrom = default,
+    bool RtcEnabled = false,
+    string? RtcCst = null,
+    string? RtcClassTrib = null,
+    decimal? RtcBasePercent = null,
+    decimal? RtcIbsUfRate = null,
+    decimal? RtcIbsMunicipalRate = null,
+    decimal? RtcCbsRate = null);
 
 public sealed record ServiceFiscalData(
     string NationalCode = "",
     string? MunicipalCode = null,
     string? Nbs = null,
     decimal? ApproximateTaxRate = null,
-    DateOnly EffectiveFrom = default);
+    DateOnly EffectiveFrom = default,
+    bool RtcEnabled = false,
+    string? RtcCst = null,
+    string? RtcClassTrib = null,
+    decimal? RtcBasePercent = null,
+    decimal? RtcIbsUfRate = null,
+    decimal? RtcIbsMunicipalRate = null,
+    decimal? RtcCbsRate = null,
+    string? RtcOperationCode = null);
 
 public sealed record FiscalPreparationData(
     FiscalAddress? Address = null,
@@ -111,7 +133,9 @@ public sealed record FiscalDocumentResponse(
     decimal Total,
     string? Message,
     DateTimeOffset CreatedAt,
-    bool CanDownload);
+    bool CanDownload,
+    FiscalOrigin Origin = FiscalOrigin.Unknown,
+    bool CanDownloadPdf = true);
 
 public sealed record FiscalOrderResponse(
     FiscalPreparationData Preparation,
@@ -119,7 +143,9 @@ public sealed record FiscalOrderResponse(
     decimal ServicesTotal,
     decimal ProductsTotal,
     string Status,
-    IReadOnlyList<FiscalDocumentResponse> Documents);
+    IReadOnlyList<FiscalDocumentResponse> Documents,
+    RtcAmounts? ProductsRtc = null,
+    RtcAmounts? ServicesRtc = null);
 
 public sealed record CancelFiscalRequest(
     string Reason);
@@ -138,7 +164,8 @@ public sealed record FiscalLine(
     decimal Quantity,
     decimal UnitPrice,
     ProductFiscalData? Product,
-    ServiceFiscalData? Service);
+    ServiceFiscalData? Service,
+    RtcAmounts? Rtc = null);
 
 public sealed record FiscalSnapshot(
     FiscalSettingsData Issuer,
@@ -223,6 +250,7 @@ public sealed class FiscalDocument : ITenantScoped
     public Guid WorkOrderId { get; set; }
     public FiscalKind Kind { get; set; }
     public FiscalEnvironment Environment { get; set; }
+    public FiscalOrigin Origin { get; set; }
     public FiscalState State { get; set; }
     public int Series { get; set; }
     public long Number { get; set; }
@@ -260,6 +288,7 @@ public sealed class FiscalInutilization : ITenantScoped
     public Guid TenantId { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public FiscalEnvironment Environment { get; set; }
+    public FiscalOrigin Origin { get; set; }
     public int Series { get; set; }
     public int Year { get; set; }
     public long FirstNumber { get; set; }

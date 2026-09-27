@@ -76,8 +76,8 @@ export class CustomersPage {
       '',
       [
         (c) => {
-          const v = (c.value || '').replace(/\D/g, '');
-          return !v || v.length === 11 || v.length === 14 ? null : { invalidDocument: true };
+          const v = (c.value || '').replace(/[./\s-]/g, '').toUpperCase();
+          return !v || /^\d{11}$/.test(v) || /^[A-Z0-9]{12}\d{2}$/.test(v) ? null : { invalidDocument: true };
         },
       ],
     ],
@@ -335,7 +335,7 @@ export class CustomersPage {
   }
   formatDocument(doc?: string | null): string {
     if (!doc) return '';
-    const d = doc.replace(/\D/g, '');
+    const d = doc.replace(/[./\s-]/g, '').toUpperCase();
     if (d.length === 11)
       return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
     if (d.length === 14)

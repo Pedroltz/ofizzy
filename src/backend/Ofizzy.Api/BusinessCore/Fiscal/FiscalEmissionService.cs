@@ -15,7 +15,8 @@ public sealed class FiscalEmissionService(
     FiscalPreparationService preparations,
     FiscalCertificateVault vault,
     IFiscalGateway gateway,
-    IConfiguration config)
+    IConfiguration config,
+    ILogger<FiscalEmissionService> logger)
 {
     public async Task Issue(Guid id, CancellationToken ct)
     {
@@ -29,6 +30,9 @@ public sealed class FiscalEmissionService(
         }
 
         var snapshot = prepared.Snapshot;
+        await FiscalReleaseGate.EnsureAllowedAsync(db, config, snapshot.Issuer.Environment, ct);
+        FiscalOriginGuard.EnsureCompatible(gateway.Origin, gateway.Origin, snapshot.Issuer.Environment);
+        EnsureRtcTransmissionAllowed(snapshot);
         var kinds = new List<FiscalKind>();
 
         if (prepared.Order.Parts.Count > 0)
@@ -63,6 +67,7 @@ public sealed class FiscalEmissionService(
 
                 if (existing != null)
                 {
+                    FiscalOriginGuard.EnsureCompatible(existing.Origin, gateway.Origin, existing.Environment);
                     if (existing.State == FiscalState.Rejected)
                     {
                         AddEvent(existing, "PreviousAttempt", existing.SubmittedXml, null, existing.Message);
@@ -121,6 +126,7 @@ public sealed class FiscalEmissionService(
                 var doc = new FiscalDocument
                 {
                     WorkOrderId = id,
+                    Origin = gateway.Origin,
                     Kind = kind,
                     Environment = snapshot.Issuer.Environment,
                     Series = series,
@@ -183,12 +189,15 @@ public sealed class FiscalEmissionService(
         var doc = await db.FiscalDocumentEntries.SingleOrDefaultAsync(x => x.Id == id, ct)
             ?? throw new ConflictException("Documento não encontrado.");
 
+        FiscalOriginGuard.EnsureCompatible(doc.Origin, gateway.Origin, doc.Environment);
+
         if (doc.State is FiscalState.Cancelled or FiscalState.Inutilized || (!queryOnly && cancelReason == null && doc.State == FiscalState.Authorized))
         {
             return;
         }
 
         await FiscalReleaseGate.EnsureAllowedAsync(db, config, doc.Environment, ct);
+        EnsureRtcTransmissionAllowed(FiscalJson.Required<FiscalSnapshot>(doc.Snapshot));
 
         if (doc.Kind == FiscalKind.Nfe)
         {
@@ -308,8 +317,16 @@ public sealed class FiscalEmissionService(
         }
     }
 
+    private void EnsureRtcTransmissionAllowed(FiscalSnapshot snapshot)
+    {
+        if (gateway.Origin == FiscalOrigin.Official && snapshot.Lines.Any(x => x.Rtc != null))
+            throw new ConflictException("RTC configurada e calculada localmente. Transmissão oficial depende da validação do cenário e dos documentos auxiliares na homologação; ainda não habilitada nesta entrega.");
+    }
+
     private void AddEvent(FiscalDocument document, string operation, string? request, string? response, string? message)
     {
+        logger.LogInformation("Fiscal {Operation} tenant {TenantId} document {DocumentId} origin {Origin} state {State}",
+            operation, db.TenantId, document.Id, document.Origin, document.State);
         db.FiscalEventEntries.Add(new FiscalEvent
         {
             DocumentId = document.Id,

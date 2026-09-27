@@ -24,20 +24,11 @@ public static class FiscalReleaseGate
             return true;
         }
 
-        if (isTenantReleased)
-        {
-            return true;
-        }
-
         var allowed = config.GetSection("Fiscal:HomologatedTenants").Get<string[]>() ?? [];
-        if (allowed.Length == 0)
-        {
-            return config.GetValue<bool>("Fiscal:ProductionEnabled");
-        }
-
         return config.GetValue<bool>("Fiscal:ProductionEnabled")
+            && isTenantReleased
             && tenantId.HasValue
-            && allowed.Contains(tenantId.Value.ToString());
+            && allowed.Any(value => Guid.TryParse(value, out var id) && id == tenantId.Value);
     }
 
     public static void EnsureAllowed(

@@ -54,13 +54,16 @@ public sealed class FiscalController(
             servicesTotal,
             productsTotal,
             status,
-            mappedDocs);
+            mappedDocs,
+            SumRtc(prepared.Snapshot.Lines.Where(x => x.Product != null).Select(x => x.Rtc)),
+            prepared.Snapshot.Lines.FirstOrDefault(x => x.Service != null)?.Rtc);
     }
 
     [HttpPut("api/work-orders/{id:guid}/fiscal")]
     [RequestSizeLimit(256_000)]
     public async Task<IActionResult> Save(Guid id, FiscalPreparationData request, CancellationToken ct)
     {
+        request = request with { Document = Ofizzy.Api.Shared.TextNormalization.Document(request.Document) };
         var order = await db.WorkOrders
             .AsNoTracking()
             .Include(x => x.Parts)
@@ -273,6 +276,16 @@ public sealed class FiscalController(
         Response.Headers.CacheControl = "no-store";
         var zipSuffix = docs.Count < expected ? "-parcial" : string.Empty;
         return File(buffer.ToArray(), "application/zip", $"OS-{order.Number:D4}-fiscal{zipSuffix}.zip");
+    }
+
+    private static RtcAmounts? SumRtc(IEnumerable<RtcAmounts?> amounts)
+    {
+        var rows = amounts.Where(x => x != null).Cast<RtcAmounts>().ToList();
+        return rows.Count == 0 ? null : rows[0] with
+        {
+            Base = rows.Sum(x => x.Base), IbsUf = rows.Sum(x => x.IbsUf),
+            IbsMunicipal = rows.Sum(x => x.IbsMunicipal), Cbs = rows.Sum(x => x.Cbs)
+        };
     }
 
     private static string FileName(FiscalDocument doc) => $"{doc.Kind}-{doc.Environment}-{doc.Id:N}";

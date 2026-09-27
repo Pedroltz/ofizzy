@@ -319,10 +319,10 @@ export class FiscalSettingsComponent {
   readonly settingsFields: FiscalField[] = [
     {
       key: 'cnpj',
-      label: 'CNPJ (somente números)',
+      label: 'CNPJ (números ou letras)',
       required: true,
-      pattern: /^\d{14}$/,
-      patternMessage: 'CNPJ deve conter 14 dígitos numéricos',
+      pattern: /^[A-Za-z0-9]{12}\d{2}$/,
+      patternMessage: 'CNPJ deve conter 12 letras/números e 2 dígitos verificadores',
     },
     { key: 'legalName', label: 'Razão social', required: true, maxLength: 60 },
     { key: 'stateRegistration', label: 'Inscrição estadual', maxLength: 14 },

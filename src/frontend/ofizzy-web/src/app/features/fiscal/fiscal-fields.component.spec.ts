@@ -131,3 +131,15 @@ describe('FiscalFieldsComponent - Validation & Red Highlight', () => {
     expect(errorMsg.nativeElement.textContent).toContain('NCM não cadastrado na tabela TIPI');
   });
 });
+
+describe('Configuração RTC por perfil', () => {
+  it('mantém zero explícito e campos ausentes sem substituir por alíquotas padrão', () => {
+    const fields: FiscalField[] = [
+      { key: 'rtcEnabled', label: 'RTC', options: [{ label: 'Não', value: false }, { label: 'Sim', value: true }] },
+      { key: 'rtcIbsUfRate', label: 'IBS UF', type: 'number' },
+      { key: 'rtcIbsMunicipalRate', label: 'IBS municipal', type: 'number' },
+    ];
+    const form = fiscalForm(fields, { rtcIbsMunicipalRate: 0 });
+    expect(form.getRawValue()).toEqual({ rtcEnabled: false, rtcIbsUfRate: null, rtcIbsMunicipalRate: 0 });
+  });
+});

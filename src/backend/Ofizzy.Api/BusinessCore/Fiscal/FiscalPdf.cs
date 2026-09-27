@@ -16,6 +16,8 @@ public static class FiscalPdf
     {
         if (document.AuthorizedXml == null) throw new InvalidOperationException("Documento não autorizado.");
         var xml = FiscalXml.Parse(document.AuthorizedXml);
+        if (xml.Descendants().Any(x => x.Name.LocalName is "IBSCBS" or "IBSCBSTot"))
+            throw new ConflictException("Documento com IBS/CBS: PDF depende da validação do leiaute RTC. O XML permanece disponível para conferência.");
 
         if (document.Kind == FiscalKind.Nfe)
         {

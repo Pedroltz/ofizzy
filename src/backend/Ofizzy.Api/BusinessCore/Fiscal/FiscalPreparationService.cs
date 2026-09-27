@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Ofizzy.Api.Infrastructure.Persistence;
 using Ofizzy.Api.Modules.WorkOrders;
 using Microsoft.EntityFrameworkCore;
@@ -230,6 +231,15 @@ public sealed class FiscalPreparationService(
             issues.Add(new FiscalIssue("document", "Informe CPF/CNPJ válido do cliente."));
         }
 
+        if (issuer.Cnpj.Any(char.IsAsciiLetter))
+        {
+            issues.Add(new FiscalIssue("settings.cnpj", "Emissão com CNPJ alfanumérico do emitente depende de schemas e eventos compatíveis homologados; cadastro preservado, emissão bloqueada."));
+        }
+        if (order.Services.Count > 0 && recipient.Document?.Any(char.IsAsciiLetter) == true)
+        {
+            issues.Add(new FiscalIssue("document", "O pacote NFS-e instalado ainda exige CNPJ numérico. Atualize o pacote oficial compatível antes de emitir para esse tomador."));
+        }
+
         if (string.IsNullOrWhiteSpace(recipient.Name) || recipient.Name.Length > 60)
         {
             issues.Add(new FiscalIssue("name", "Informe o nome fiscal do cliente (até 60 caracteres)."));
@@ -359,6 +369,39 @@ public sealed class FiscalPreparationService(
             issues.Add(new FiscalIssue("environment", "Produção ainda não homologada para esta organização."));
         }
 
+        for (var index = 0; index < lines.Count; index++)
+        {
+            var line = lines[index];
+            var profile = line.Product != null ? FiscalRtc.Profile(line.Product)
+                : line.Service != null ? FiscalRtc.Profile(line.Service) : null;
+            if (profile == null) continue;
+            var prefix = $"{(line.Product != null ? "products" : "services")}.{line.Id}.";
+            if (!profile.Enabled)
+            {
+                if (FiscalRtc.RequiresConfiguration(issuer.Regime, effectiveOn))
+                    issues.Add(new FiscalIssue(prefix + "rtcEnabled", "Configure IBS/CBS por vigência: o fluxo anterior não pode ser usado no marco RTC do Simples Nacional."));
+                continue;
+            }
+            var rtcIssues = FiscalRtc.EmissionIssues(profile, line.Service != null).ToList();
+            if (line.Product?.Csosn == "500")
+                rtcIssues.Add(new FiscalIssue("rtcCst", "RTC com ST anterior ainda exige cenário de cálculo próprio; emissão bloqueada."));
+            issues.AddRange(rtcIssues.Select(x => new FiscalIssue(prefix + x.Field, x.Message)));
+            if (rtcIssues.Count == 0)
+                lines[index] = line with { Rtc = FiscalRtc.Calculate(profile, line.Quantity * line.UnitPrice) };
+        }
+        if (lines.Any(x => x.Service?.RtcEnabled == true))
+        {
+            var serviceLines = lines.Where(x => x.Service != null).ToList();
+            if (serviceLines.All(x => x.Rtc != null))
+            {
+                var p = FiscalRtc.Profile(serviceLines[0].Service!);
+                // NFS-e is calculated over the aggregate service value, not rounded item taxes.
+                var aggregate = FiscalRtc.Calculate(p, serviceLines.Sum(x => x.Quantity * x.UnitPrice));
+                for (var i = 0; i < lines.Count; i++)
+                    if (lines[i].Service != null) lines[i] = lines[i] with { Rtc = aggregate };
+            }
+        }
+
         var snapshot = new FiscalSnapshot(issuer, recipient, order.Number, DateTimeOffset.UtcNow, lines);
         return new FiscalPreparedOrder(order, settings, snapshot, issues);
     }
@@ -376,7 +419,10 @@ public sealed class FiscalPreparationService(
             d.Total,
             d.Message,
             d.CreatedAt,
-            d.AuthorizedXml != null);
+            d.AuthorizedXml != null,
+            d.Origin,
+            d.AuthorizedXml != null && !XDocument.Parse(d.AuthorizedXml).Descendants()
+                .Any(x => x.Name.LocalName is "IBSCBS" or "IBSCBSTot"));
     }
 
     public static string Status(IReadOnlyList<FiscalDocument> documents, int expected)

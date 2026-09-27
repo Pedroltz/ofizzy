@@ -177,7 +177,8 @@ public sealed class FiscalCertificateVault(IConfiguration configuration)
                     ? Encoding.ASCII.GetString(value.ReadOctetString())
                     : value.ReadCharacterString((UniversalTagNumber)tag.TagValue);
 
-                return text == cnpj;
+                return Ofizzy.Api.Shared.TextNormalization.Document(text) == Ofizzy.Api.Shared.TextNormalization.Document(cnpj)
+                    && FiscalValidation.IsAlphanumericCnpj(Ofizzy.Api.Shared.TextNormalization.Document(cnpj));
             }
         }
         catch (AsnContentException)
