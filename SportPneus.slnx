@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/backend/">
-    <Project Path="src/backend/SportPneus.Api/SportPneus.Api.csproj" />
-    <Project Path="src/backend/SportPneus.IntegrationTests/SportPneus.IntegrationTests.csproj" />
-    <Project Path="src/backend/SportPneus.UnitTests/SportPneus.UnitTests.csproj" />
-  </Folder>
-</Solution>

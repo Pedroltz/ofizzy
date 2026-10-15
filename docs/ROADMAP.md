@@ -1,0 +1,163 @@
+# Roadmap
+
+Prioridade vigente: [fase 8 — Fiscal](phases/PHASE-08-FISCAL.md), antes do financeiro. A fundação SaaS tem aceite local concluído. Automotive preservada; novos tenants são provisionados sem deploy.
+
+- [x] Fase 7 — Fundação SaaS e provisionamento, com aceite local.
+- [ ] Fase 8 — Fluxos fiscais implementados localmente; revisão e homologação pendentes.
+
+Sequência executável e critérios de aceite: [NEXT-STEPS.md](NEXT-STEPS.md).
+
+
+- [x] Fase 1 — Fundação: projetos, banco, migration, setup, autenticação, shell, containers e CI.
+- [x] Fase 2 — Clientes, veículos, serviços e peças.
+- [x] Fase 3 — Ordem de Serviço, snapshots, valores e estados (abertura, listagem, detalhes, edição, transições e persistência validadas).
+- [x] Fase 4 — Configuração da oficina, impressão HTML e PDF QuestPDF.
+- [ ] Fase 5 — Pagamentos e financeiro básico.
+- [ ] Fase 6 — Histórico, busca, UX final, E2E, logs e backup/restauração. Responsividade final e matriz E2E foram antecipadas; os demais itens permanecem pendentes.
+
+Os critérios detalhados vivem em `phases/`. Um item só é concluído após build/teste e registro no histórico.
+
+---
+
+## UI/UX Redesign — Modern Workshop Dashboard
+
+### R1 — Auditoria visual
+- [x] Mapear estilos atuais
+- [x] Mapear componentes reutilizáveis
+- [x] Mapear componentes PrimeNG
+- [x] Identificar CSS duplicado
+- [x] Identificar inconsistências de layout
+- [x] Definir estratégia de migração incremental
+
+### R2 — Design System
+- [x] Criar tokens de cores
+- [x] Criar tokens tipográficos
+- [x] Criar escala de spacing
+- [x] Criar radius
+- [x] Criar sombras
+- [x] Criar estados semânticos
+- [x] Implementar Light Mode
+- [x] Implementar Dark Mode
+- [x] Implementar System Theme
+- [x] Implementar persistência do tema
+- [x] Criar ThemeService
+
+### R3 — Componentes compartilhados
+- [x] PageHeader
+- [x] SectionCard
+- [x] StatCard
+- [x] StatusBadge
+- [x] DataToolbar
+- [x] SearchField
+- [x] EmptyState
+- [x] LoadingState
+- [x] DataTableWrapper
+- [x] ThemeToggle
+
+### R4 — App Shell
+- [x] Sidebar desktop
+- [x] Header desktop
+- [x] Navegação
+- [x] Usuário
+- [x] Theme Toggle
+- [x] Drawer mobile
+- [x] Header mobile
+- [x] Responsividade
+
+### R5 — Dashboard
+- [x] Header operacional
+- [x] KPIs
+- [x] Veículos na oficina
+- [x] Ordens recentes
+- [x] Atividade recente
+- [x] Distribuição de status
+- [x] Dashboard responsivo
+- [x] Dark Mode
+
+### R6 — Ordens de Serviço
+- [x] Toolbar
+- [x] Busca
+- [x] Filtros
+- [x] Lista desktop
+- [x] Cards mobile
+- [x] Badges de status
+- [x] Refatorar componentes excessivamente grandes
+- [x] Editor de OS
+- [x] Summary lateral
+- [x] Footer mobile fixo
+- [x] Dark Mode
+
+### R7 — Clientes e Veículos
+- [x] Clientes
+- [x] Veículos
+- [x] CRUD visual padronizado
+- [x] Responsividade
+- [x] Dark Mode
+
+### R8 — Configurações e Catálogo
+- [x] Configurações
+- [x] Serviços
+- [x] Peças
+- [x] Empresa
+- [x] Dark Mode
+
+### R9 — Autenticação
+- [x] Login
+- [x] Setup inicial
+- [x] Dark Mode
+- [x] Estados de erro
+- [x] Estados de loading
+
+### R10 — Polish
+- [x] Skeletons
+- [x] Empty states
+- [x] Feedback visual
+- [x] Toasts
+- [x] Focus states
+- [x] Keyboard navigation
+- [x] Acessibilidade
+- [x] Testes E2E
+- [x] Mobile 320px
+- [x] Tablet
+- [x] Desktop
+- [x] Light Mode
+- [x] Dark Mode
+- [x] System Theme
+
+## Plataforma SaaS
+
+- Fundação tenancy, vínculos, papéis e módulos.
+- Migração legada e isolamento automático com integridade relacional.
+- Autenticação com seleção/troca de tenant e refresh preservado.
+- Provisionamento transacional e administração global separada.
+- Onboarding e frontend Automotive adaptado.
+- Aceite PostgreSQL real, Nginx, responsividade e persistência após restart.
+
+Evoluções posteriores: convites e recuperação de acesso, autosserviço com
+SaaS Subscriptions, outras verticais e branding com upload. Nenhuma dessas
+extensões demanda agora microserviços, bancos dedicados ou frontend por cliente.
+
+---
+
+## PWA & Operação Offline-First (Backlog de Resiliência Operacional)
+
+Capacidade de instalação nativa e resiliência para o pátio e chão de oficina (falta de sinal, oscilações de rede e quedas de energia):
+
+- [ ] **PWA Base (Instalabilidade & App Shell)**:
+  - Adição de `@angular/pwa` e `@angular/service-worker`.
+  - Configuração do `manifest.webmanifest` (ícones responsivos, tema escuro/claro, modo `standalone`).
+  - Cache permanente do App Shell (HTML, CSS, JS, ícones e fontes) para carregamento instantâneo mesmo sem conexão.
+  - Instalação direta no celular, tablet e desktop sem depender de lojas de aplicativos.
+- [ ] **Persistência Local Anti-Queda de Energia (Store & Forward)**:
+  - Armazenamento local persistente em `IndexedDB` (via wrapper tipado `Dexie.js`) para suportar desligamento abrupto do dispositivo ou queda de energia.
+  - Fila de sincronização local (`SyncQueue`) para acumular aberturas/edições de OS, clientes e veículos em estado pendente.
+  - Geração de identificadores únicos no cliente via GUID/UUID (aproveitando as chaves primárias `Guid` nativas da API .NET e do PostgreSQL).
+  - Indicador visual no cabeçalho sobre o estado de conexão (*Online*, *Sem conexão — X pendências salvas*, *Sincronizando...*).
+- [ ] **Sincronização Automática com a Nuvem (Cloud Sync)**:
+  - Detecção automática do retorno da conexão via eventos `online` do navegador e `Background Sync API`.
+  - Despacho em lote/FIFO das operações locais para a API .NET com cabeçalho de idempotência.
+  - Atribuição do número sequencial definitivo da OS (`LastWorkOrderNumber`) pelo backend após confirmação no PostgreSQL.
+
+## Leitura dos registros de evolução — 13/09/2026
+
+Os checklists de UI abaixo/acima registram incrementos já realizados; não significam conclusão de backup, financeiro ou homologação fiscal. PWA continua proposta futura. A ordem operacional vigente é a de [NEXT-STEPS.md](NEXT-STEPS.md).

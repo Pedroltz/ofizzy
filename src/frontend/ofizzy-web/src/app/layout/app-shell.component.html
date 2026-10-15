@@ -1,0 +1,156 @@
+<div class="app-layout">
+  <!-- Desktop Sidebar -->
+  <aside class="desktop-sidebar" aria-label="Navegação principal">
+    <div class="sidebar-logo-container">
+      <a [routerLink]="home" class="sidebar-logo-link" title="Ofizzy — Sistema de Ordem de Serviço">
+        <img src="assets/logo.png" alt="Ofizzy" class="sidebar-logo-image logo-light" />
+        <img src="assets/logo-dark.png" alt="Ofizzy" class="sidebar-logo-image logo-dark" />
+      </a>
+    </div>
+
+    <div class="sidebar-navigation">
+      @for (group of navigation(); track group.label) {
+        <section class="nav-section" [attr.aria-label]="group.label">
+          <p class="nav-section-label">{{ group.label }}</p>
+          <nav class="sidebar-nav">
+            @for (item of group.items; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.exact }"
+                ariaCurrentWhenActive="page"
+                class="nav-item"
+              >
+                <span class="nav-icon"><i [class]="item.icon"></i></span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </nav>
+        </section>
+      }
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          {{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}
+        </div>
+        <div class="user-details">
+          <strong>{{ user()?.name }}</strong>
+          <small>{{ user()?.email }}</small>
+        </div>
+        <button
+          type="button"
+          class="logout-btn"
+          (click)="logout()"
+          title="Encerrar sessão"
+          aria-label="Sair"
+        >
+          <i class="pi pi-sign-out"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="app-main-area">
+    <!-- Desktop Header -->
+    <header class="desktop-header">
+      <div class="desktop-header__left">
+        <app-organization-switcher [home]="home" [platformArea]="platformArea" />
+      </div>
+      <div class="desktop-header__right">
+        <app-theme-toggle mode="switch" />
+      </div>
+    </header>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        (click)="mobileMenu.set(true)"
+        aria-label="Abrir menu"
+      >
+        <i class="pi pi-bars"></i>
+      </button>
+      <app-organization-switcher [home]="home" [platformArea]="platformArea" [compact]="true" />
+      <div class="mobile-header__right">
+        <app-theme-toggle mode="switch" />
+        <div class="user-avatar small">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+      </div>
+    </header>
+
+    @if (mobileMenu()) {
+      <div class="mobile-drawer" (click)="mobileMenu.set(false)" role="presentation">
+        <div
+          class="drawer-panel"
+          (click)="$event.stopPropagation()"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu principal"
+        >
+          <div class="drawer-header">
+            <div class="sidebar-logo-container drawer-logo">
+              <a
+                [routerLink]="home"
+                class="sidebar-logo-link"
+                (click)="mobileMenu.set(false)"
+                title="Ofizzy"
+              >
+                <img src="assets/logo.png" alt="Ofizzy" class="sidebar-logo-image logo-light" />
+                <img src="assets/logo-dark.png" alt="Ofizzy" class="sidebar-logo-image logo-dark" />
+              </a>
+            </div>
+            <button
+              type="button"
+              class="mobile-close-btn"
+              (click)="mobileMenu.set(false)"
+              aria-label="Fechar menu"
+            >
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+
+          <div class="sidebar-navigation">
+            @for (group of navigation(); track group.label) {
+              <section class="nav-section" [attr.aria-label]="group.label">
+                <p class="nav-section-label">{{ group.label }}</p>
+                <nav class="sidebar-nav">
+                  @for (item of group.items; track item.route) {
+                    <a
+                      [routerLink]="item.route"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: item.exact }"
+                      ariaCurrentWhenActive="page"
+                      class="nav-item"
+                      (click)="mobileMenu.set(false)"
+                    >
+                      <span class="nav-icon"><i [class]="item.icon"></i></span>
+                      <span>{{ item.label }}</span>
+                    </a>
+                  }
+                </nav>
+              </section>
+            }
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-user drawer-user">
+              <div class="user-avatar">{{ user()?.name?.charAt(0)?.toUpperCase() || 'U' }}</div>
+              <div class="user-details">
+                <strong>{{ user()?.name }}</strong
+                ><small>{{ user()?.email }}</small>
+              </div>
+            </div>
+            <button type="button" class="drawer-logout" (click)="logout()">
+              <i class="pi pi-sign-out"></i><span>Encerrar sessão</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <main class="app-content"><router-outlet /></main>
+  </div>
+</div>

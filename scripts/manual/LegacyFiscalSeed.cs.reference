@@ -1,0 +1,198 @@
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Ofizzy.Api.Infrastructure.Persistence;
+using Ofizzy.Api.Modules.Fiscal;
+using Ofizzy.Api.Modules.Tenancy;
+using Xunit;
+
+namespace Ofizzy.UnitTests;
+
+public sealed class DevSeedRunner
+{
+    [Fact(Skip = "Manual local DB seed runner")]
+    public async Task Seed_ArrobaPneus_Fiscal_Data()
+    {
+        var connectionString = "Host=127.0.0.1;Port=5432;Database=ofizzy;Username=ofizzy";
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql(connectionString)
+            .Options;
+
+        var tenantId = Guid.Parse("01a08d5f-cd5f-7455-8212-5bdb3fd65728"); // Arroba Pneus
+        var currentTenant = new CurrentTenant();
+        typeof(CurrentTenant).GetProperty("TenantId")!.SetValue(currentTenant, tenantId);
+        typeof(CurrentTenant).GetProperty("UserId")!.SetValue(currentTenant, Guid.NewGuid());
+        typeof(CurrentTenant).GetProperty("Role")!.SetValue(currentTenant, TenantRole.Owner);
+
+        using var db = new ApplicationDbContext(options, currentTenant);
+
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Fiscal:ActiveKeyId"] = "dev-key",
+            ["Fiscal:Keys:dev-key"] = "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA="
+        }).Build();
+        var vault = new FiscalCertificateVault(config);
+
+        // 1. Criar ou Atualizar FiscalSettings
+        var cnpj = "11222333000181";
+        using var rsa = RSA.Create(2048);
+        var request = new CertificateRequest($"CN=ARROBA PNEUS E SERVICOS AUTOMOTIVOS LTDA", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var writer = new System.Formats.Asn1.AsnWriter(System.Formats.Asn1.AsnEncodingRules.DER);
+        var tag = new System.Formats.Asn1.Asn1Tag(System.Formats.Asn1.TagClass.ContextSpecific, 0, true);
+        writer.PushSequence(); writer.PushSequence(tag); writer.WriteObjectIdentifier("2.16.76.1.3.3"); writer.PushSequence(tag);
+        writer.WriteCharacterString(System.Formats.Asn1.UniversalTagNumber.UTF8String, cnpj);
+        writer.PopSequence(tag); writer.PopSequence(tag); writer.PopSequence();
+        request.CertificateExtensions.Add(new X509Extension("2.5.29.17", writer.Encode(), false));
+
+        using var cert = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+        var pfxBytes = cert.Export(X509ContentType.Pkcs12);
+        var protectedCert = vault.Protect(tenantId, pfxBytes);
+
+        var address = new FiscalAddress("Rua XV de Novembro", "100", "Centro", "Igaraçu do Tietê", "3520004", "SP", "17350000");
+        var settingsData = new FiscalSettingsData(cnpj, "ARROBA PNEUS E SERVICOS AUTOMOTIVOS LTDA", "110042490114", "12345", "SimplesNacional", address, true, true, FiscalEnvironment.Homologation, 1, 1);
+
+        var settingsEntity = await db.FiscalSettingsEntries.SingleOrDefaultAsync(x => x.TenantId == tenantId);
+        if (settingsEntity == null)
+        {
+            settingsEntity = new FiscalSettings { TenantId = tenantId };
+            db.FiscalSettingsEntries.Add(settingsEntity);
+        }
+
+        settingsEntity.Data = FiscalJson.Write(settingsData);
+        settingsEntity.Certificate = protectedCert;
+        settingsEntity.KeyId = "dev-key";
+        settingsEntity.CertificateSubject = "CN=ARROBA PNEUS E SERVICOS AUTOMOTIVOS LTDA";
+        settingsEntity.CertificateThumbprint = cert.Thumbprint;
+        settingsEntity.CertificateExpiresAt = new DateTimeOffset(cert.NotAfter.ToUniversalTime());
+        settingsEntity.Version = Guid.NewGuid();
+
+        await db.SaveChangesAsync();
+
+        // 2. Classificar Peças no Catálogo Fiscal
+        var parts = await db.Parts.Where(x => x.TenantId == tenantId).ToListAsync();
+        foreach (var part in parts)
+        {
+            var existingProfile = await db.ProductFiscalProfileEntries.SingleOrDefaultAsync(x => x.PartId == part.Id && x.TenantId == tenantId);
+            if (existingProfile == null)
+            {
+                existingProfile = new ProductFiscalProfile { TenantId = tenantId, PartId = part.Id };
+                db.ProductFiscalProfileEntries.Add(existingProfile);
+            }
+
+            var ncm = part.Code?.StartsWith("PNEU") == true || part.Name.Contains("Pneu") || part.Name.Contains("Válvula")
+                ? "40111000"
+                : part.Code?.StartsWith("OLEO") == true || part.Name.Contains("Óleo")
+                    ? "27101932"
+                    : part.Code?.StartsWith("FLT") == true || part.Name.Contains("Filtro")
+                        ? "84212300"
+                        : "87083090"; // Freios
+
+            var productData = new ProductFiscalData(Ncm: ncm, Origin: "0", Cfop: "5102", Csosn: "102", PisCst: "07", CofinsCst: "07");
+            existingProfile.Data = FiscalJson.Write(productData);
+        }
+        await db.SaveChangesAsync();
+
+        // 3. Classificar Serviços no Catálogo Fiscal
+        var services = await db.Services.Where(x => x.TenantId == tenantId).ToListAsync();
+        foreach (var service in services)
+        {
+            var existingProfile = await db.ServiceFiscalProfileEntries.SingleOrDefaultAsync(x => x.ServiceId == service.Id && x.TenantId == tenantId);
+            if (existingProfile == null)
+            {
+                existingProfile = new ServiceFiscalProfile { TenantId = tenantId, ServiceId = service.Id };
+                db.ServiceFiscalProfileEntries.Add(existingProfile);
+            }
+
+            var serviceData = new ServiceFiscalData(NationalCode: "140101", ApproximateTaxRate: 5m);
+            existingProfile.Data = FiscalJson.Write(serviceData);
+        }
+        await db.SaveChangesAsync();
+
+        // 4. Preparar FiscalPreparation para a OS #5
+        var os5 = await db.WorkOrders.Include(x => x.Parts).Include(x => x.Services).SingleOrDefaultAsync(x => x.Number == 5 && x.TenantId == tenantId);
+        if (os5 != null)
+        {
+            os5.CustomerDocument = "11222333000181"; // CNPJ com DV válido
+
+            var prep5 = await db.FiscalPreparationEntries.SingleOrDefaultAsync(x => x.WorkOrderId == os5.Id && x.TenantId == tenantId);
+            if (prep5 == null)
+            {
+                prep5 = new FiscalPreparation { TenantId = tenantId, WorkOrderId = os5.Id };
+                db.FiscalPreparationEntries.Add(prep5);
+            }
+
+            var partsTotal = os5.Parts.Sum(p => p.Quantity * p.UnitPrice);
+            var prodMap = os5.Parts.ToDictionary(p => p.Id, p => new ProductFiscalData(Ncm: "40111000", Origin: "0", Cfop: "5102", Csosn: "102", PisCst: "07", CofinsCst: "07"));
+            var servMap = os5.Services.ToDictionary(s => s.Id, s => new ServiceFiscalData(NationalCode: "140101", ApproximateTaxRate: 5m));
+
+            var customerAddr = new FiscalAddress("Avenida Industrial", "500", "Distrito Industrial", "Igaraçu do Tietê", "3520004", "SP", "17350000");
+            var prepData5 = new FiscalPreparationData(
+                Address: customerAddr,
+                Document: "11222333000181",
+                Name: "Transportes & Logística Rocha Ltda",
+                RecipientIeIndicator: "9",
+                Competence: DateOnly.FromDateTime(DateTime.UtcNow),
+                PaymentCode: "01",
+                PaymentAmount: partsTotal,
+                Products: prodMap,
+                Services: servMap
+            );
+
+            prep5.Data = FiscalJson.Write(prepData5);
+            prep5.Version = Guid.NewGuid();
+        }
+
+        // 5. Preparar FiscalPreparation para a OS #7
+        var os7 = await db.WorkOrders.Include(x => x.Parts).Include(x => x.Services).SingleOrDefaultAsync(x => x.Number == 7 && x.TenantId == tenantId);
+        if (os7 != null)
+        {
+            os7.CustomerDocument = "12345678909"; // CPF válido com DV
+
+            var prep7 = await db.FiscalPreparationEntries.SingleOrDefaultAsync(x => x.WorkOrderId == os7.Id && x.TenantId == tenantId);
+            if (prep7 == null)
+            {
+                prep7 = new FiscalPreparation { TenantId = tenantId, WorkOrderId = os7.Id };
+                db.FiscalPreparationEntries.Add(prep7);
+            }
+
+            var partsTotal = os7.Parts.Sum(p => p.Quantity * p.UnitPrice);
+            var prodMap = os7.Parts.ToDictionary(p => p.Id, p => new ProductFiscalData(Ncm: "40111000", Origin: "0", Cfop: "5102", Csosn: "102", PisCst: "07", CofinsCst: "07"));
+            var servMap = os7.Services.ToDictionary(s => s.Id, s => new ServiceFiscalData(NationalCode: "140101", ApproximateTaxRate: 5m));
+
+            var customerAddr = new FiscalAddress("Rua das Flores", "250", "Jardim América", "Igaraçu do Tietê", "3520004", "SP", "17350000");
+            var prepData7 = new FiscalPreparationData(
+                Address: customerAddr,
+                Document: "12345678909",
+                Name: "Bruno Bomfim Lima",
+                RecipientIeIndicator: "9",
+                Competence: DateOnly.FromDateTime(DateTime.UtcNow),
+                PaymentCode: "01",
+                PaymentAmount: partsTotal,
+                Products: prodMap,
+                Services: servMap
+            );
+
+            prep7.Data = FiscalJson.Write(prepData7);
+            prep7.Version = Guid.NewGuid();
+        }
+
+        await db.SaveChangesAsync();
+
+        // 6. Validar com FiscalPreparationService que Issues está VAZIO para a OS #5 e OS #7
+        var prepService = new FiscalPreparationService(db, vault, config);
+        if (os5 != null)
+        {
+            var prepared5 = await prepService.Prepare(os5.Id, CancellationToken.None);
+            Assert.NotNull(prepared5);
+            Assert.Empty(prepared5.Issues);
+        }
+
+        if (os7 != null)
+        {
+            var prepared7 = await prepService.Prepare(os7.Id, CancellationToken.None);
+            Assert.NotNull(prepared7);
+            Assert.Empty(prepared7.Issues);
+        }
+    }
+}

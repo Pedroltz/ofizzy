@@ -1,0 +1,386 @@
+<section class="page-container">
+  <app-page-header
+    eyebrow="FROTA"
+    title="Veículos"
+    description="Cadastro da frota de clientes com placas, modelo, ano e quilometragem."
+  />
+
+  <app-data-toolbar
+    [itemCount]="total()"
+    itemLabelSingular="veículo encontrado"
+    itemLabelPlural="veículos encontrados"
+    [(viewMode)]="viewMode"
+  >
+    <div toolbar-search>
+      <app-search-field
+        [formControl]="search"
+        placeholder="Pesquisar por placa, modelo, marca ou proprietário..."
+      />
+    </div>
+
+    <div toolbar-actions>
+      <p-button label="Novo Veículo" icon="pi pi-plus" (onClick)="open()" />
+    </div>
+  </app-data-toolbar>
+
+  @if (loading()) {
+    <app-loading-state [mode]="effectiveViewMode() === 'cards' ? 'cards' : 'table'" [count]="6" />
+  } @else if (items().length === 0) {
+    <app-empty-state
+      icon="pi pi-car"
+      title="Nenhum veículo encontrado"
+      [description]="
+        search.value
+          ? 'Nenhum veículo corresponde à placa ou modelo buscado.'
+          : 'Cadastre um cliente e vincule seu primeiro veículo para iniciar os atendimentos.'
+      "
+      actionLabel="Novo Veículo"
+      actionIcon="pi pi-plus"
+      (action)="open()"
+    />
+  } @else if (effectiveViewMode() === 'cards') {
+    <div class="catalog-grid">
+      @for (item of items(); track item.id) {
+        <article
+          class="catalog-card entity-card entity-card--vehicle"
+          tabindex="0"
+          [attr.aria-label]="'Editar veículo ' + item.plate"
+          (click)="open(item)"
+          (keydown.enter)="open(item)"
+          (keydown.space)="$event.preventDefault(); open(item)"
+        >
+          <!-- Cabeçalho: Placa e Ano/Cor ou Badge de Carro -->
+          <div class="catalog-card-header">
+            <span class="plate-badge large">{{ item.plate }}</span>
+            @if (item.year || item.color) {
+              <span class="doc-badge flex-shrink-0">
+                <i class="pi pi-calendar"></i> {{ item.year ? item.year : ''
+                }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}
+              </span>
+            } @else {
+              <span class="text-xs text-muted font-medium italic flex-shrink-0"
+                ><i class="pi pi-car mr-1"></i>Veículo</span
+              >
+            }
+          </div>
+
+          <!-- Identidade: Modelo e Proprietário -->
+          <div class="catalog-card-identity">
+            <h2 [title]="(item.brand ? item.brand + ' ' : '') + item.model">
+              {{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}
+            </h2>
+            <span class="catalog-card-subtitle" [title]="'Proprietário: ' + item.customerName">
+              <i class="pi pi-user text-muted flex-shrink-0"></i>
+              <span
+                >Proprietário: <strong class="text-primary">{{ item.customerName }}</strong></span
+              >
+            </span>
+          </div>
+
+          <!-- Painel de Especificações do Veículo -->
+          <div class="catalog-card-meta-box">
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"
+                ><i class="pi pi-compass text-muted"></i> Quilometragem</span
+              >
+              @if (item.mileage !== null) {
+                <span class="catalog-meta-value font-mono font-bold"
+                  >{{ item.mileage.toLocaleString('pt-BR') }} km</span
+                >
+              } @else {
+                <span class="text-xs text-muted italic">Não informada</span>
+              }
+            </div>
+
+            <div class="catalog-meta-row">
+              <span class="catalog-meta-label"
+                ><i class="pi pi-id-card text-muted"></i> Chassi</span
+              >
+              @if (item.chassis) {
+                <span
+                  class="catalog-meta-value font-mono text-xs text-secondary bg-surface-primary px-1.5 py-0.5 rounded border border-subtle"
+                  [title]="item.chassis"
+                >
+                  {{ item.chassis }}
+                </span>
+              } @else {
+                <span class="text-xs text-muted italic">Não informado</span>
+              }
+            </div>
+          </div>
+
+          <!-- Observação técnica (se houver) -->
+          @if (item.notes) {
+            <div class="catalog-card-notes" [title]="item.notes">
+              <i class="pi pi-info-circle flex-shrink-0"></i>
+              <span class="truncate">{{ item.notes }}</span>
+            </div>
+          }
+
+          <!-- Rodapé do Card -->
+          <div class="catalog-card-footer">
+            <span class="spacious-date">
+              <i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}
+            </span>
+            <div class="card-actions entity-card-actions" aria-label="Ações do veículo">
+              <button
+                type="button"
+                class="entity-card-action"
+                title="Editar veículo"
+                aria-label="Editar veículo"
+                (click)="$event.stopPropagation(); open(item)"
+                (keydown)="$event.stopPropagation()"
+              >
+                <i class="pi pi-pencil" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                class="entity-card-action danger"
+                title="Arquivar veículo"
+                aria-label="Arquivar veículo"
+                (click)="$event.stopPropagation(); archive(item)"
+                (keydown)="$event.stopPropagation()"
+              >
+                <i class="pi pi-folder-open" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <app-data-table-wrapper>
+      <table class="data-table table-fixed vehicles-list-table" aria-label="Lista de veículos">
+        <colgroup>
+          <col style="width: 7rem" />
+          <col style="width: 18%" />
+          <col style="width: 18%" />
+          <col style="width: 11%" />
+          <col style="width: 11%" />
+          <col style="width: auto" />
+          <col style="width: 9%" />
+          <col style="width: 6.25rem" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Marca & Modelo</th>
+            <th>Proprietário (Cliente)</th>
+            <th>Ano / Cor</th>
+            <th>Quilometragem</th>
+            <th>Chassi</th>
+            <th>Cadastro</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr
+              class="entity-list-row"
+              tabindex="0"
+              [attr.aria-label]="'Editar veículo ' + item.plate"
+              (click)="open(item)"
+              (keydown.enter)="open(item)"
+              (keydown.space)="$event.preventDefault(); open(item)"
+            >
+              <td>
+                <span class="plate-badge">{{ item.plate }}</span>
+              </td>
+              <td>
+                <strong class="font-semibold"
+                  >{{ item.brand ? item.brand + ' ' : '' }}{{ item.model }}</strong
+                >
+              </td>
+              <td>
+                <div class="flex items-center gap-1.5">
+                  <i class="pi pi-user text-muted text-xs"></i>
+                  <span class="font-medium">{{ item.customerName }}</span>
+                </div>
+              </td>
+              <td>
+                @if (item.year || item.color) {
+                  <span class="text-xs text-secondary"
+                    >{{ item.year ? item.year : ''
+                    }}{{ item.color ? (item.year ? ' · ' : '') + item.color : '' }}</span
+                  >
+                } @else {
+                  <span class="text-muted text-xs">—</span>
+                }
+              </td>
+              <td>
+                @if (item.mileage !== null) {
+                  <span class="font-mono text-xs text-secondary font-semibold"
+                    >{{ item.mileage.toLocaleString('pt-BR') }} km</span
+                  >
+                } @else {
+                  <span class="text-muted text-xs">—</span>
+                }
+              </td>
+              <td>
+                @if (item.chassis) {
+                  <span class="font-mono text-xs text-muted">{{ item.chassis }}</span>
+                } @else {
+                  <span class="text-muted text-xs">—</span>
+                }
+              </td>
+              <td>
+                <span class="text-xs text-muted">{{ formatDate(item.createdAt) }}</span>
+              </td>
+              <td class="text-right">
+                <div class="table-actions-group entity-table-actions" aria-label="Ações do veículo">
+                  <button
+                    type="button"
+                    class="tbl-action-btn edit"
+                    title="Editar veículo"
+                    aria-label="Editar veículo"
+                    (click)="$event.stopPropagation(); open(item)"
+                    (keydown)="$event.stopPropagation()"
+                  >
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="tbl-action-btn delete"
+                    title="Arquivar veículo"
+                    aria-label="Arquivar veículo"
+                    (click)="$event.stopPropagation(); archive(item)"
+                    (keydown)="$event.stopPropagation()"
+                  >
+                    <i class="pi pi-folder-open"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table-wrapper>
+  }
+
+  @if (total() > pageSize) {
+    <p-paginator
+      [first]="(page() - 1) * pageSize"
+      [rows]="pageSize"
+      [totalRecords]="total()"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first}–{last} de {totalRecords} veículos"
+      (onPageChange)="changePage($event)"
+    />
+  }
+</section>
+
+<p-dialog
+  [header]="editing() ? 'Editar Veículo' : 'Novo Veículo'"
+  [modal]="true"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [style]="{ width: 'min(42rem, 94vw)' }"
+>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
+    <label
+      >Proprietário (Cliente)
+      <p-autocomplete
+        formControlName="customer"
+        [suggestions]="customerSuggestions()"
+        (completeMethod)="searchCustomers($event)"
+        optionLabel="name"
+        [dropdown]="true"
+        placeholder="Digite o nome, telefone ou CPF do cliente"
+        styleClass="full-control"
+      >
+        <ng-template #item let-customer>
+          <div class="autocomplete-customer-item">
+            <strong>{{ customer.name }}</strong>
+            <small class="text-muted">{{
+              customer.phone || customer.document || 'Sem contato'
+            }}</small>
+          </div>
+        </ng-template>
+      </p-autocomplete>
+      @if (form.controls.customer.errors?.['required'] && form.controls.customer.touched) {
+        <small class="field-error-text">Selecione um cliente cadastrado</small>
+      }
+    </label>
+    <div class="two-columns">
+      <label
+        >Placa do Veículo
+        <input
+          pInputText
+          formControlName="plate"
+          placeholder="ABC1D23 ou ABC-1234"
+          style="text-transform: uppercase"
+        />
+      </label>
+      <label
+        >Modelo
+        <input pInputText formControlName="model" placeholder="Ex: Corolla, Corsa, Onix" />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label
+        >Marca / Fabricante <small class="text-muted">opcional</small>
+        <input pInputText formControlName="brand" placeholder="Ex: Toyota, Chevrolet, Volkswagen" />
+      </label>
+      <label
+        >Ano de Fabricação <small class="text-muted">opcional</small>
+        <p-inputnumber
+          formControlName="year"
+          [useGrouping]="false"
+          [min]="1900"
+          [max]="2035"
+          placeholder="Ex: 2022"
+          styleClass="full-control"
+        />
+      </label>
+    </div>
+    <div class="two-columns">
+      <label
+        >Cor Predominante <small class="text-muted">opcional</small>
+        <input pInputText formControlName="color" placeholder="Ex: Prata, Preto, Branco" />
+      </label>
+      <label
+        >Quilometragem Atual <small class="text-muted">opcional</small>
+        <p-inputnumber
+          formControlName="mileage"
+          [min]="0"
+          suffix=" km"
+          placeholder="Ex: 45000 km"
+          styleClass="full-control"
+        />
+      </label>
+    </div>
+    <label
+      >Número do Chassi <small class="text-muted">opcional</small>
+      <input
+        pInputText
+        formControlName="chassis"
+        placeholder="Número gravado no documento ou chassi"
+        style="text-transform: uppercase"
+      />
+    </label>
+    <label
+      >Observações do Veículo <small class="text-muted">opcional</small>
+      <textarea
+        pTextarea
+        formControlName="notes"
+        rows="3"
+        placeholder="Informações de avarias prévias, modelo do motor, blindagem, etc."
+      ></textarea>
+    </label>
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (onClick)="dialog.set(false)"
+      />
+      <p-button
+        type="submit"
+        [label]="editing() ? 'Salvar Alterações' : 'Cadastrar Veículo'"
+        icon="pi pi-check"
+        [loading]="saving()"
+      />
+    </div>
+  </form>
+</p-dialog>

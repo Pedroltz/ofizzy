@@ -1,0 +1,23 @@
+name: Propor uma melhoria
+description: Explique uma necessidade ou melhoria para o produto.
+title: "[Melhoria]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qual problema você quer resolver?
+      description: Descreva quem enfrenta o problema e em qual fluxo.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Comportamento proposto
+      description: Explique o resultado desejado e como saber que a melhoria funcionou.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas e contexto
+      description: Informe alternativas consideradas e referências, usando apenas dados fictícios.

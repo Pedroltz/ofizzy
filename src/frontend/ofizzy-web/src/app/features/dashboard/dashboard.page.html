@@ -1,0 +1,291 @@
+<section class="page-container dashboard-page-container">
+  <app-page-header
+    eyebrow="Painel Operacional"
+    [title]="automotiveEnabled() ? 'Visão Geral da Oficina' : 'Visão Geral da Operação'"
+    [description]="
+      automotiveEnabled()
+        ? 'Controle em tempo real de veículos no pátio, ordens em andamento e produtividade'
+        : 'Controle em tempo real das ordens em andamento e produtividade'
+    "
+  />
+
+  <!-- Linha 1: KPIs Operacionais -->
+  <section class="dashboard-kpi-grid" aria-label="Métricas principais">
+    <app-stat-card
+      label="OS em Aberto"
+      [value]="openOrders().length"
+      hint="Aguardando diagnóstico/início"
+      icon="pi pi-clock"
+      severity="warning"
+    />
+    <app-stat-card
+      label="Em Execução"
+      [value]="inProgressOrders().length"
+      hint="No pátio / bancada"
+      icon="pi pi-sync"
+      severity="info"
+    />
+    <app-stat-card
+      label="Ordens Concluídas"
+      [value]="totalCompletedOrders()"
+      hint="Histórico finalizado"
+      icon="pi pi-check-circle"
+      severity="success"
+    />
+    <app-stat-card
+      label="Total no Pátio"
+      [value]="money(totalActiveValue())"
+      hint="Soma das OS ativas"
+      icon="pi pi-dollar"
+      severity="primary"
+    />
+  </section>
+
+  <!-- Linha 2: Grid 8 / 4 (Veículos na Oficina + Situação & Cadastros) -->
+  <div class="dashboard-main-grid">
+    <!-- Coluna Principal (8 colunas no desktop) -->
+    <div class="dashboard-main-col">
+      <app-section-card
+        [title]="automotiveEnabled() ? 'Veículos na Oficina' : 'Ordens em andamento'"
+        [subtitle]="
+          automotiveEnabled() ? 'Ordens de serviço ativas no pátio' : 'Ordens de serviço ativas'
+        "
+        [icon]="automotiveEnabled() ? 'pi pi-car' : 'pi pi-file-edit'"
+      >
+        <div card-actions>
+          <a routerLink="/ordens" class="section-link">
+            <span>Ver todas as ordens</span>
+            <i class="pi pi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        @if (loading()) {
+          <app-loading-state mode="table" [count]="4" />
+        } @else if (activeOrders().length === 0) {
+          <app-empty-state
+            icon="pi pi-check-circle"
+            [title]="
+              automotiveEnabled() ? 'Pátio Livre de Pendências' : 'Nenhuma pendência operacional'
+            "
+            [description]="
+              automotiveEnabled()
+                ? 'Não há ordens abertas ou em execução neste momento. Todos os veículos foram liberados.'
+                : 'Não há ordens abertas ou em execução neste momento.'
+            "
+            actionLabel="+ Nova Ordem de Serviço"
+            (action)="navigateToNewOrder()"
+          />
+        } @else {
+          <!-- Visualização em Tabela para Desktop -->
+          <div class="dashboard-table-desktop">
+            <app-data-table-wrapper>
+              <table
+                class="dashboard-table table-fixed dashboard-work-orders-table"
+                aria-label="Ordens ativas na oficina"
+              >
+                <colgroup>
+                  <col style="width: 6rem" />
+                  <col style="width: auto" />
+                  <col style="width: 9.5rem" />
+                  <col style="width: 7.5rem" />
+                  <col style="width: 9rem" />
+                  <col style="width: 8.5rem" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>OS</th>
+                    <th>{{ automotiveEnabled() ? 'Cliente / Veículo' : 'Cliente' }}</th>
+                    <th>Status</th>
+                    <th>Entrada</th>
+                    <th class="text-right">Valor</th>
+                    <th class="text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of activeOrders(); track item.id) {
+                    <tr>
+                      <td>
+                        <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
+                      </td>
+                      <td>
+                        <div class="customer-vehicle-cell">
+                          <strong class="cell-title" [title]="item.customerName">{{
+                            item.customerName
+                          }}</strong>
+                          @if (automotiveEnabled() && item.vehiclePlate) {
+                            <div class="vehicle-subline">
+                              <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                              <span class="vehicle-desc" [title]="item.vehicleDescription">{{
+                                item.vehicleDescription
+                              }}</span>
+                            </div>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <app-status-badge [status]="item.status" />
+                      </td>
+                      <td>
+                        <div class="date-cell-stacked">
+                          <span class="date-main">{{ formatDateOnly(item.createdAt) }}</span>
+                          <span class="date-time">{{ formatTimeOnly(item.createdAt) }}</span>
+                        </div>
+                      </td>
+                      <td class="text-right font-mono font-medium">
+                        {{ money(item.total) }}
+                      </td>
+                      <td class="text-right">
+                        <a routerLink="/ordens" class="row-manage-btn" title="Acessar ordem">
+                          <span>Acessar</span>
+                          <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </app-data-table-wrapper>
+          </div>
+
+          <!-- Visualização em Cartões para Mobile/Tablet -->
+          <div class="dashboard-cards-mobile">
+            @for (item of activeOrders(); track item.id) {
+              <article class="dashboard-order-card surface-card">
+                <div class="dashboard-order-card__header">
+                  <span class="order-code font-mono">#{{ padOrderNumber(item.number) }}</span>
+                  <app-status-badge [status]="item.status" />
+                </div>
+                <div class="dashboard-order-card__body">
+                  <strong class="customer-name">{{ item.customerName }}</strong>
+                  @if (automotiveEnabled() && item.vehiclePlate) {
+                    <div class="vehicle-row">
+                      <span class="plate-badge mini">{{ item.vehiclePlate }}</span>
+                      <span>{{ item.vehicleDescription }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="dashboard-order-card__footer">
+                  <span class="entry-time"
+                    ><i class="pi pi-clock"></i> {{ formatDate(item.createdAt) }}</span
+                  >
+                  <strong class="order-val font-mono">{{ money(item.total) }}</strong>
+                </div>
+                <div class="dashboard-order-card__action">
+                  <a routerLink="/ordens" class="secondary-button w-full">
+                    <span>Gerenciar no Módulo</span>
+                    <i class="pi pi-external-link" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </app-section-card>
+    </div>
+
+    <!-- Coluna Lateral (4 colunas no desktop) -->
+    <div class="dashboard-side-col">
+      <!-- Situação das Ordens (Barras CSS proporcionais) -->
+      <app-section-card
+        title="Situação das Ordens"
+        subtitle="Distribuição no sistema"
+        icon="pi pi-chart-bar"
+      >
+        <div class="order-distribution">
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Abertas</span>
+              <strong>{{ openOrders().length }} ({{ openPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-warning"
+                [style.width.%]="openPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="openPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Em Execução</span>
+              <strong>{{ inProgressOrders().length }} ({{ inProgressPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-info"
+                [style.width.%]="inProgressPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="inProgressPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="distribution-item">
+            <div class="distribution-label">
+              <span>Concluídas</span>
+              <strong>{{ totalCompletedOrders() }} ({{ completedPercentage() }}%)</strong>
+            </div>
+            <div class="distribution-bar-track">
+              <div
+                class="distribution-bar-fill fill-success"
+                [style.width.%]="completedPercentage()"
+                role="progressbar"
+                [attr.aria-valuenow]="completedPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div card-footer class="distribution-footer">
+          <span class="text-muted">Total de Ordens Registradas:</span>
+          <strong>{{ totalAllOrders() }}</strong>
+        </div>
+      </app-section-card>
+
+      <!-- Base Operacional (Cadastros) -->
+      <app-section-card
+        title="Base Operacional"
+        subtitle="Cadastros ativos na oficina"
+        icon="pi pi-database"
+      >
+        <div class="operational-base-list">
+          <div class="operational-base-item">
+            <div class="operational-base-icon">
+              <i class="pi pi-users" aria-hidden="true"></i>
+            </div>
+            <div class="operational-base-info">
+              <span class="operational-base-label">Clientes Cadastrados</span>
+              <strong class="operational-base-value font-mono">{{ totalCustomers() }}</strong>
+            </div>
+            <a routerLink="/clientes" class="operational-base-link" title="Gerenciar clientes">
+              <i class="pi pi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          @if (automotiveEnabled()) {
+            <div class="operational-base-item">
+              <div class="operational-base-icon">
+                <i class="pi pi-car" aria-hidden="true"></i>
+              </div>
+              <div class="operational-base-info">
+                <span class="operational-base-label">Veículos Cadastrados</span>
+                <strong class="operational-base-value font-mono">{{ totalVehicles() }}</strong>
+              </div>
+              <a routerLink="/veiculos" class="operational-base-link" title="Consultar veículos">
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          }
+        </div>
+      </app-section-card>
+    </div>
+  </div>
+</section>
