@@ -7,10 +7,10 @@ O repositório público apresenta o produto em português, usando a marca existe
 - `develop` é a branch padrão e permite o fluxo direto de desenvolvimento.
 - `main` é reservada a releases: PR obrigatório, checks `backend`, `frontend` e `compose` aprovados com a branch atualizada, conversas resolvidas e proteção aplicada também a administradores. Não exige aprovação de outra pessoa.
 - Force push e exclusão de `main` ficam bloqueados. Merge commits e squash são permitidos; rebase merge fica desativado. Branches não são excluídas automaticamente para preservar `develop`.
-- O CI executa em pushes de `develop` e PRs, e continua reutilizável pelo deploy. Validações obsoletas são canceladas; deploys são serializados sem interrupção de um deploy em andamento.
-- Conteúdo tem permissão somente de leitura por padrão; publicação no GHCR recebe escrita em packages apenas no job responsável.
+- O CI executa em pushes de `develop`/`main`, PRs e disparos manuais. Validações obsoletas de desenvolvimento/PR são canceladas. Também valida os Compose adicionais em `infra/compose/`.
+- Conteúdo tem permissão somente de leitura. O workflow de deploy/SSH e publicação no GHCR foi removido; nenhuma tag ou release instala a aplicação remotamente.
 
-Os nomes dos checks foram conferidos na execução aprovada `34226277097`. Alterar nomes exige atualizar a proteção de `main`. O deploy continua em push de `main` ou disparo manual; esta entrega não publica release nem executa deploy.
+Os checks `backend`, `frontend` e `compose` foram preservados. Alterar nomes exige atualizar a proteção de `main`. Releases são publicadas após integrar `develop` em `main` por PR aprovado no CI. A primeira tag é `1.0.0`; consulte as [notas da versão](releases/1.0.0.md).
 
 ## Colaboração e segurança
 

@@ -10,6 +10,6 @@ FROM development AS build
 RUN npm run build
 
 FROM nginx:stable-alpine AS runtime
-COPY deploy/nginx/frontend.conf /etc/nginx/conf.d/default.conf
+COPY infra/nginx/frontend.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/ofizzy-web/browser /usr/share/nginx/html
 EXPOSE 8080

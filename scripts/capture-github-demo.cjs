@@ -13,6 +13,7 @@ const statePath = resolve(__dirname, '../test-results/github-demo/state.json');
 const assets = resolve(__dirname, '../docs/assets/screenshots');
 const verify = process.argv.includes('--verify-restart');
 const existing = verify || process.argv.includes('--capture-existing');
+const capture = !verify && !process.argv.includes('--smoke');
 
 async function main() {
   assert(password?.length >= 12, 'Set OFIZZY_DEMO_PASSWORD (12+ characters) for this isolated fixture.');
@@ -99,7 +100,7 @@ async function main() {
     }
     async function screenshot(name, locator = page) {
       await ready();
-      if (!verify) await locator.screenshot({ path: resolve(assets, name), animations: 'disabled' });
+      if (capture) await locator.screenshot({ path: resolve(assets, name), animations: 'disabled' });
     }
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Visão Geral da Oficina', exact: true })).toBeVisible();
@@ -134,7 +135,7 @@ async function main() {
     }
     assert.deepEqual(failedRequests, []);
     writeFileSync(resolve(__dirname, `../test-results/github-demo/${verify ? 'restart' : 'capture'}-evidence.json`), JSON.stringify({ baseURL, summary, balance: payments.balance, measurements, failedRequests, verifiedAt: new Date().toISOString() }, null, 2));
-    console.log(`${verify ? 'Restart verified' : 'Five screenshots captured'}: 8 customers, 8 vehicles, 8 orders, PDF, payments, responsive layout; no API errors.`);
+    console.log(`${verify ? 'Restart verified' : capture ? 'Five screenshots captured' : 'Smoke verified'}: 8 customers, 8 vehicles, 8 orders, PDF, payments, responsive layout; no API errors.`);
     await context.close();
   } finally { await browser.close(); }
 }

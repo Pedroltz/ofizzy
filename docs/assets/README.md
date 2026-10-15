@@ -31,6 +31,8 @@ docker compose --env-file .env.github-demo -p ofizzy-github-demo up -d --wait
 node scripts/capture-github-demo.cjs
 ```
 
+Para executar o mesmo aceite sem sobrescrever os PNGs versionados, substitua o último comando por `node scripts/capture-github-demo.cjs --smoke`. Use `--verify-restart` depois do reinício para conferir a persistência.
+
 O script exige banco vazio, cria uma empresa fictícia com oito clientes, oito veículos, oito OS e um recebimento com liquidação parcial. Valida respostas da API, PDF, saldo e layout antes de salvar as imagens. A origem é fixa em `127.0.0.1:18091`; a stack não publica PostgreSQL e não usa dados locais existentes.
 
 Para recapturar a mesma fixture, na mesma sessão, use `node scripts/capture-github-demo.cjs --capture-existing`. O script reutiliza somente os IDs salvos em `test-results/github-demo/state.json` e autentica novamente; não salva sessões ou senhas.

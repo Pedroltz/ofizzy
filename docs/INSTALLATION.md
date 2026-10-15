@@ -1,20 +1,28 @@
-# Deploy
+# Instalação e atualização manual
 
-O workflow `deploy.yml` publica imagens com a tag do SHA no GHCR e atualiza um servidor Linux por SSH.
+O Ofizzy é instalado manualmente com Docker Compose. Não há workflow de deploy ou publicação automática de imagens. Pushes em `main`, tags e releases não acessam servidores nem aplicam migrations remotamente.
 
-Secrets exigidos: `SSH_HOST`, `SSH_PORT`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH`, `GHCR_USERNAME` e `GHCR_TOKEN`. O servidor mantém seu próprio `.env`, certificados em `/etc/letsencrypt` e os arquivos `compose.yaml`, `compose.prod.yaml` e `deploy/`.
+O ambiente de destino mantém seu próprio `.env`, certificados em `/etc/letsencrypt`, `compose.yaml` e a pasta `infra/`. Credenciais SSH e GHCR não são requisitos do CI. Caso utilize um registry privado manualmente, autentique o Docker fora do repositório.
 
-O deploy autentica no GHCR, baixa imagens, executa o serviço `migrate`, atualiza containers e verifica `/health/ready`. A primeira publicação exige preparação manual do host e DNS.
+Na raiz do checkout, configure `.env`, construa as imagens, execute a migration e inicie os serviços:
 
-Na primeira publicação da identidade técnica Ofizzy, não execute o deploy automático sobre a instalação anterior. Abra uma janela de manutenção, atualize o `.env` do servidor para o banco e usuário `ofizzy` e siga `docs/BACKUP-RESTORE.md`. Depois do smoke e da confirmação de persistência, os deploys voltam ao fluxo normal do workflow.
+```bash
+docker compose build
+docker compose --profile tools run --rm migrate
+docker compose up -d --wait
+```
 
-O Nginx deve permanecer como origem única. Os arquivos em `deploy/nginx/` habilitam gzip, keep-alive para o proxy da API e cache imutável de um ano somente para assets versionados por hash; HTML não deve receber cache imutável.
+Para usar imagens prontas e HTTPS, configure `BACKEND_IMAGE`, `FRONTEND_IMAGE`, `APP_DOMAIN` e certificados válidos, então utilize `docker compose -f compose.yaml -f infra/compose/production.yaml` nos comandos de instalação. Informe sempre o Compose principal primeiro. A primeira exposição externa exige preparação manual do host, DNS e TLS.
+
+Na primeira migração de uma instalação anterior, abra uma janela de manutenção, confira banco/usuário/volumes e siga [backup e restauração](BACKUP-RESTORE.md). Confirme smoke e persistência antes de reabrir o acesso. Instalações existentes não devem ter volumes removidos ao reorganizar arquivos.
+
+O Nginx deve permanecer como origem única. Os arquivos em `infra/nginx/` habilitam gzip, keep-alive para o proxy da API e cache imutável de um ano somente para assets versionados por hash; HTML não deve receber cache imutável.
 
 Após atualizar, valide login, dashboard, criação/edição de OS, download de PDF e ausência de overflow em um viewport móvel. Migrations devem ser executadas antes da troca definitiva dos containers.
 
-## Deploy único e provisionamento SaaS
+## Instalação única e provisionamento SaaS
 
-Código → CI (backend/frontend/E2E) → imagens GHCR → servidor → migration →
+Código → CI (backend/frontend/E2E) → build ou imagens manuais → servidor → migration →
 containers/healthchecks → todos os tenants utilizam a mesma versão.
 
 Venda → PlatformAdmin → POST /api/platform/tenants → credencial privada → login →

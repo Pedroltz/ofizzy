@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [develop]
+    branches: [develop, main]
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -55,3 +55,9 @@ jobs:
       - uses: actions/checkout@v4
       - run: cp .env.example .env
       - run: docker compose config --quiet
+      - run: docker compose -f infra/compose/local.yaml config --quiet
+      - run: docker compose -f compose.yaml -f infra/compose/development.yaml config --quiet
+      - run: docker compose -f compose.yaml -f infra/compose/production.yaml config --quiet
+        env:
+          BACKEND_IMAGE: ofizzy-backend:validation
+          FRONTEND_IMAGE: ofizzy-frontend:validation

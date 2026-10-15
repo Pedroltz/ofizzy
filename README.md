@@ -104,7 +104,23 @@ docker compose up -d --wait
 
 A origem padrão é `http://localhost:8080`. Em banco vazio, habilite temporariamente `PLATFORM_BOOTSTRAP_ENABLED=true` **em acesso privado**, crie o operador em `/setup` e desabilite o bootstrap. Depois provisione a empresa em `/plataforma` e conclua seu onboarding.
 
-Para desenvolver com hot reload, use **.NET SDK 10**, **Node.js 24** e PostgreSQL no Docker. Comandos, portas, configuração de sessão e testes estão no [guia de início](docs/GETTING-STARTED.md). Para instalar ou atualizar um ambiente, consulte [Deploy](docs/DEPLOYMENT.md).
+Para desenvolver com hot reload, use **.NET SDK 10**, **Node.js 24** e PostgreSQL no Docker. Comandos, portas, configuração de sessão e testes estão no [guia de início](docs/GETTING-STARTED.md). Para instalar ou atualizar um ambiente, consulte [Instalação manual](docs/INSTALLATION.md).
+
+## Organização do repositório
+
+```text
+ofizzy/
+├── .github/          # CI, Dependabot e templates
+├── docs/             # Produto, arquitetura, operação e releases
+├── infra/            # Variantes do Compose e Nginx
+├── scripts/          # Ferramentas de manutenção e demonstração
+├── src/backend/      # API e testes .NET
+├── src/frontend/     # Aplicação Angular e E2E
+├── compose.yaml      # Entrada padrão da stack completa
+└── Ofizzy.slnx       # Solução .NET
+```
+
+A versão publicada está em [Releases](https://github.com/Pedroltz/ofizzy/releases). A publicação de uma versão não dispara deploy; a instalação é manual.
 
 ## Qualidade e contribuição
 
@@ -116,7 +132,7 @@ Desenvolvimento acontece em `develop`; `main` é reservada para releases. Use Co
 
 | Para conhecer | Para desenvolver | Para operar |
 | --- | --- | --- |
-| [Visão do produto](docs/PROJECT.md) | [Início e execução](docs/GETTING-STARTED.md) | [Deploy](docs/DEPLOYMENT.md) |
+| [Visão do produto](docs/PROJECT.md) | [Início e execução](docs/GETTING-STARTED.md) | [Instalação manual](docs/INSTALLATION.md) |
 | [Estratégia](docs/PRODUCT-STRATEGY.md) | [Frontend](docs/FRONTEND.md) | [Segurança](SECURITY.md) |
 | [Roadmap](docs/ROADMAP.md) | [Contratos da API](docs/API.md) | [Backup e restauração](docs/BACKUP-RESTORE.md) |
 | [Status atual](docs/STATUS.md) | [Testes](docs/TESTING.md) | [Operação fiscal](docs/FISCAL.md) |

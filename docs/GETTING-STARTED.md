@@ -16,7 +16,7 @@ docker compose up -d --wait
 
 No PowerShell, use `Copy-Item .env.example .env`. A origem padrão é `http://localhost:8080`.
 
-Em banco vazio, habilite temporariamente `PLATFORM_BOOTSTRAP_ENABLED=true` em acesso privado e recrie o backend. Crie o operador em `/setup`, desabilite a variável e recrie o backend antes de expor a aplicação. Em `/plataforma`, provisione empresas; cada Owner conclui seu onboarding. Consulte [deploy e migração legada](DEPLOYMENT.md) antes de atualizar dados existentes.
+Em banco vazio, habilite temporariamente `PLATFORM_BOOTSTRAP_ENABLED=true` em acesso privado e recrie o backend. Crie o operador em `/setup`, desabilite a variável e recrie o backend antes de expor a aplicação. Em `/plataforma`, provisione empresas; cada Owner conclui seu onboarding. Consulte [deploy e migração legada](INSTALLATION.md) antes de atualizar dados existentes.
 
 ## Desenvolvimento com hot reload
 
@@ -24,7 +24,7 @@ Requisitos: .NET SDK 10, Node.js 24 LTS/npm e Docker. Somente o PostgreSQL roda 
 
 ```bash
 # Banco persistente em localhost:5432
-docker compose -f compose.local.yaml up -d
+docker compose -f infra/compose/local.yaml up -d
 ```
 
 ```bash
@@ -41,7 +41,7 @@ npm start
 
 Acesse `http://localhost:4200/setup` no banco vazio para criar o operador, provisione a empresa em `/plataforma` e conclua seu onboarding. O perfil `local` habilita bootstrap de desenvolvimento e conecta a `127.0.0.1:5432`, banco/usuário `ofizzy`. O proxy Angular encaminha `/api` e `/health` à API na porta 5154.
 
-Encerre API/Angular com Ctrl+C. Pare o banco com `docker compose -f compose.local.yaml stop`. Os dados persistem no volume; não use `down --volumes` para preservá-los. A autenticação `trust` do Compose local é exclusiva de máquina confiável, com porta restrita a localhost; não a utilize em produção.
+Encerre API/Angular com Ctrl+C. Pare o banco com `docker compose -f infra/compose/local.yaml stop`. Os dados persistem no volume; não use `down --volumes` para preservá-los. A autenticação `trust` do Compose local é exclusiva de máquina confiável, com porta restrita a localhost; não a utilize em produção.
 
 A API gera uma chave JWT efêmera; reiniciar exige novo login. User Secrets existentes têm precedência sobre a conexão do perfil local. Se houver uma configuração antiga, remova-a somente após conferir que não é mais necessária:
 
