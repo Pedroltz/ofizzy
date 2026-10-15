@@ -1,5 +1,13 @@
 # Histórico de implementação
 
+## 15/10/2026 — GitHub, README e galeria real
+
+- Reorganizados apresentação e guias; adicionadas cinco capturas de dashboard/OS/editor/financeiro/mobile com API e PostgreSQL reais. Fixtures exclusivas `example.test`, sem cookies ou credenciais em assets. Script reproduzível verifica dados, PDF, saldo e restart.
+- Adicionados templates, direitos reservados e entradas de segurança/contribuição. CI em `develop`, permissões por job e artefatos de falha; Dependabot semanal. Aplicadas e verificadas as proteções de `main`, scanners de segredos, push protection, alertas de dependências e relato privado. Nenhuma aprovação de terceiro é exigida; `develop` permanece com fluxo direto.
+- Corrigido `-text` dos XSDs oficiais: Windows havia convertido LF para CRLF, quebrando hashes. Restaurados os bytes dos próprios blobs Git; schemas não foram modificados. Testes Windows executados com APPDATA isolado para evitar User Secrets locais sobrescrevendo Testcontainers.
+- Evidência: backend Release 0 avisos/erros, 100 unitários/12 integrações; frontend lint, 72 testes, build; E2E 69 aprovados + 4 timeouts, todos os quatro aprovados em repetição serial, 11 skips. Modelo EF sem alterações, migrations existentes aplicadas e runner idempotente; Compose saudável e smoke Nginx em localhost:18091 antes/depois de restart, mesmos IDs, PDF e saldo de R$ 100.
+- Conferidos 48 links/assets, seis YAMLs, cinco imagens <1 MB e logos sem perda. Listagem sem overflow em 1440/768/320/390; medição encontrou 27/35/33/33 controles compactos abaixo de 44 px, preservados nesta entrega documental. Bundle 795,40 kB permanece acima do budget 500 kB. APIs, regras de negócio e produção fiscal inalteradas.
+
 ## 27/09/2026 — RTC configurável, origem fiscal e financeiro manual
 
 - Corrigidos gates produtivos cumulativos e endpoints ADN/Sefin conforme catálogo oficial. `Origin` persiste simulação/oficial/desconhecida; troca de gateway ou origem não comprovada bloqueia operações. Backfill só identifica simulação com evidência positiva.

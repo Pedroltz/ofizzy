@@ -1,5 +1,16 @@
 # Status do projeto
 
+## 15/10/2026 — Apresentação e configuração do GitHub
+
+- README em português com logo centralizado para temas claro/escuro, badges verificáveis, galeria de cinco screenshots reais, recursos, arquitetura e navegação. Execução detalhada em [GETTING-STARTED](GETTING-STARTED.md); reprodução das imagens em [assets](assets/README.md).
+- Formulários de issues, template de PR, contribuição/segurança reconhecidas pelo GitHub e direitos reservados. CI em push de `develop`, permissões mínimas, concorrência e artefatos de falha; Dependabot semanal para npm/NuGet/Actions, sem merge automático.
+- Configuração remota aplicada e relida com a conta proprietária: `develop` permanece padrão e sem proteção adicional; `main` exige PR/checks backend/frontend/compose e conversas resolvidas, inclusive para administradores, sem aprovação de terceiro. Secret scanning, push protection, alertas/correções de dependências e relato privado habilitados. [Manutenção](GITHUB.md).
+- **Validação desta entrega:** backend Release sem avisos/erros, **100 unitários + 12 integrações aprovados**; frontend lint, **72 testes/13 arquivos** e build aprovados. E2E: **69 aprovados, 11 skips e 4 timeouts iniciais**; os quatro cenários passaram na repetição com um worker, totalizando 73 cenários aprovados entre as execuções.
+- Corrigida a configuração Git para preservar byte a byte os XSDs oficiais (`-text`); conteúdo dos schemas permanece idêntico aos blobs originais e hashes passam. Os testes de integração no Windows foram isolados de User Secrets via `--environment APPDATA=<perfil-vazio>`, sem alterar credenciais locais. Modelo EF sem mudanças pendentes; nenhuma migration criada.
+- Compose reconstruído, migrations existentes aplicadas em PostgreSQL descartável e runner repetido sem alterações. Smoke pelo Nginx em **127.0.0.1:18091**, antes/depois de restart: oito clientes, oito veículos, oito OS, PDF e mesmo recebimento persistidos; saldo **R$ 100**. Capturas sem mocks e sem erros de API. Conferidos **48 links/assets**, seis YAMLs e cinco PNGs abaixo de 1 MB; logos com otimização sem perda.
+- Ausência de overflow confirmada na listagem em **1440/768/320/390 px**. A auditoria registrou **27/35/33/33 controles visíveis abaixo de 44 px**, respectivamente, preexistentes no produto; não há declaração de conformidade integral de toque. O CSS da aplicação não foi alterado. Aviso preexistente de bundle: **795,40 kB / budget 500 kB**.
+- Nenhum contrato, schema, regra fiscal ou gate produtivo mudou. Sem emissão oficial, homologação externa, release ou deploy. A inspeção da renderização pública e a execução remota do CI serão acompanhadas após publicar os commits em `develop`.
+
 ## 27/09/2026 — RTC configurável, origem fiscal e financeiro manual
 
 - Corrigidos gates produtivos cumulativos e endpoints ADN/Sefin conforme catálogo oficial. `Origin` persiste simulação/oficial/desconhecida; troca de gateway ou origem não comprovada bloqueia operações. Backfill só identifica simulação com evidência positiva.

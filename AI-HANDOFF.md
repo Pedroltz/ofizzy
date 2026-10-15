@@ -1,6 +1,16 @@
 # Continuidade do Ofizzy
 
-Atualizado em **27/09/2026**, branch `develop`. Fase ativa: [Fase 8](docs/phases/PHASE-08-FISCAL.md). O piloto continua sem homologação externa.
+Atualizado em **15/10/2026**, branch `develop`. Fase ativa: [Fase 8](docs/phases/PHASE-08-FISCAL.md). O piloto continua sem homologação externa.
+
+## GitHub e documentação — 15/10/2026
+
+README visual e cinco capturas com API/PostgreSQL reais e dados fictícios. [Execução](docs/GETTING-STARTED.md), [reprodução das imagens](docs/assets/README.md) e [configuração remota](docs/GITHUB.md) documentadas. Código público com direitos reservados por escolha do usuário; não adicionar MIT por suposição.
+
+`main` exige PR + checks `backend`, `frontend`, `compose`, sem aprovação de outro colaborador. `develop` continua padrão com escrita direta. Recursos de segurança/relato privado habilitados; Dependabot semanal e CI em pushes de `develop`. Não renomear checks sem atualizar a proteção. Nenhum deploy foi disparado.
+
+Validação local: backend 100 unitários + 12 integrações; frontend lint/72 testes/build; E2E 69 passaram inicialmente e quatro timeouts passaram na repetição, 11 skips. Compose/migrations/smoke Nginx e persistência após restart aprovados. Schema hashes protegidos com `-text` no Git, sem mudar XSDs. No Windows, User Secrets interferiam nas integrações; usar perfil APPDATA vazio por processo, conforme o guia, sem apagar secrets.
+
+Limites registrados: bundle 795,40 kB; controles compactos preexistentes abaixo de 44 px nas listagens, inclusive mobile/tablet; nenhuma alteração de CSS nesta entrega. Ausência de overflow conferida em 1440/768/320/390 px. Resultados detalhados em [STATUS](docs/STATUS.md). Evidências temporárias em `test-results/github-demo/` são ignoradas; não versionar sessões, credenciais ou traces.
 
 ## Incremento implementado
 

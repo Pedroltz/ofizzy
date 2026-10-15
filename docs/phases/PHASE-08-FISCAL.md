@@ -53,3 +53,11 @@ O usuário preferiu manter classificações e alíquotas editáveis em Configura
 Origem `Unknown`/`Simulation`/`Official` persiste em documentos e inutilizações; migration marca somente evidências positivas de simulação. Gateway incompatível não pode transmitir ou recuperar o documento. Legados desconhecidos exigem reconciliação, sem backfill presumido como oficial.
 
 Financeiro manual da OS prepara vínculo documento/liquidação/segregação/estorno, sem executar Split Payment automático. Migrations `AddFiscalOrigin` e `AddManualPayments` aplicadas em banco descartável. Resultados locais e limitações em [STATUS](../STATUS.md) e [log](../IMPLEMENTATION-LOG.md); homologação externa permanece pendente.
+
+## Continuidade documental — 15/10/2026
+
+A apresentação do GitHub foi reorganizada com capturas reais e dados fictícios. README mantém explícitas as pendências de homologação externa, RTC/PDF, cadeia alfanumérica e ausência de Split Payment automático. A fase permanece no estado fiscal registrado em 27/09; nenhuma liberação, transmissão ou mudança de regra foi feita.
+
+Validação desta entrega: backend Release sem avisos/erros, 100 unitários/12 integrações; frontend lint/72 testes/build; E2E 69 aprovados e quatro timeouts que passaram em repetição, com 11 skips. Modelo EF sem alterações; migrations existentes e smoke operacional com PDF/recebimento pelo Nginx em stack descartável passaram antes/depois de restart. Não é nova homologação fiscal. Git agora preserva os bytes oficiais dos XSDs em Windows; os schemas permanecem idênticos aos blobs originais.
+
+Controles compactos preexistentes e aviso de bundle foram documentados sem alterar o frontend do produto. Evidências em [STATUS](../STATUS.md), [log](../IMPLEMENTATION-LOG.md) e [guia de capturas](../assets/README.md).
