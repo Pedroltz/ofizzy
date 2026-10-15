@@ -4,13 +4,19 @@ Todas as alterações relevantes serão registradas aqui seguindo Keep a Changel
 
 ## [Unreleased]
 
+Nenhuma alteração adicional registrada.
+
+## [1.0.0] — 2026-10-15
+
+Primeira release versionada. [Notas completas](releases/1.0.0.md).
+
 ### Added
 
 - Fundação do monólito modular em .NET 10 e Angular 21.
-- Setup inicial transacional da oficina e do administrador.
+- Setup inicial transacional do administrador da plataforma e onboarding de organizações.
 - Autenticação JWT com cookies, refresh rotation, CSRF e logout.
 - Shell responsivo PrimeNG/Tailwind e infraestrutura Docker/Nginx/PostgreSQL.
-- Migrations, health checks, testes e pipelines de CI/CD.
+- Migrations, health checks, testes e pipeline de CI.
 - Cadastros integrados de clientes, veículos, serviços e peças, com busca, validação, arquivamento e migration `AddCatalogs`.
 - Ordens de serviço com numeração sequencial, snapshots históricos, serviços, peças, totalização no backend, estados e migration `AddWorkOrders`.
 - Tela integrada para abertura, busca e acompanhamento de ordens de serviço.
@@ -19,6 +25,8 @@ Todas as alterações relevantes serão registradas aqui seguindo Keep a Changel
 - Experiência responsiva completa para login, setup, dashboard, cadastros, configurações e OS.
 - Editor móvel de serviços e peças em cards, com criação/edição de OS em tela cheia.
 - Matriz Playwright para desktop, celular e tablet, cobrindo todas as rotas atuais.
+- Financeiro manual por OS, incluindo recebimentos, liquidações, taxas e estornos persistidos.
+- Apresentação do GitHub com screenshots reais, guias, templates e alertas de segurança.
 
 ### Changed
 
@@ -30,12 +38,21 @@ Todas as alterações relevantes serão registradas aqui seguindo Keep a Changel
 - Impressão da OS passou a preservar termos e assinaturas em documentos longos e não gerar páginas vazias em documentos curtos.
 - Atalho de Nova OS foi centralizado no cabeçalho global e o seletor de tema na barra lateral/drawer móvel.
 - Documentação geral foi centralizada em `docs/`; apenas o índice `README.md` e os arquivos de orientação para IA permanecem na raiz.
+- Versões do frontend e backend alinhadas em `1.0.0`; infraestrutura adicional centralizada em `infra/`.
+- Entradas convencionais de contribuição, segurança e licença preservadas na raiz para descoberta no GitHub.
 
-## Atualizações ainda não publicadas — 13/09/2026
+### Removed
+
+- Workflow de deploy por SSH e publicação automática de imagens no GHCR. Instalação passa a ser exclusivamente manual.
+
+### Fundação SaaS e fiscal incluída
 
 - Fundação SaaS com tenants, vínculos, permissões, provisionamento e isolamento persistido.
 - Módulo fiscal com preparação, A1 cifrado, emissão/consulta/cancelamento e downloads de serviços/produtos; recuperação de inutilização e lease persistido.
 - Três migrations fiscais e interface PrimeNG integrada à OS/configurações.
 - Consolidação documental e [próximos passos](NEXT-STEPS.md).
 
-Aceite local registrado em [STATUS](STATUS.md). Não representa release publicada ou homologação fiscal externa.
+Aceite local registrado em [STATUS](STATUS.md). A publicação da versão `1.0.0` não representa homologação fiscal externa nem liberação produtiva.
+
+[Unreleased]: https://github.com/Pedroltz/ofizzy/compare/1.0.0...develop
+[1.0.0]: https://github.com/Pedroltz/ofizzy/releases/tag/1.0.0

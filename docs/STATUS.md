@@ -1,5 +1,15 @@
 # Status do projeto
 
+## 15/10/2026 — Release 1.0.0 e remoção do deploy automático
+
+- Removido `.github/workflows/deploy.yml`; o workflow remoto foi desativado antes de preparar a integração em `main`. Não há publicação automática no GHCR, SSH ou instalação disparada por push/tag/release. Instalação agora é [manual](INSTALLATION.md).
+- Raiz mantém entradas convencionais, solução e `compose.yaml`. Variantes movidas para `infra/compose/`, Nginx para `infra/nginx/`; caminhos de build e guias atualizados. Volume local `ofizzy_postgres_data` preservado. Registros históricos não foram reescritos.
+- Backend/frontend/lockfile alinhados em **1.0.0**, sem alteração de dependências. Changelog e [notas da versão](releases/1.0.0.md) consolidam a primeira release. Integração deve ocorrer por PR de `develop` para `main`, com os três checks obrigatórios, e a tag exata `1.0.0` deve apontar ao merge aprovado.
+- **Validação local desta preparação:** backend Release sem avisos/erros, **100 unitários + 12 integrações**; frontend lint, **72 testes**, build e E2E: **72 aprovados/11 skips/1 falha inicial de tablet**, com o cenário aprovado na repetição serial. Aviso conhecido de bundle preservado.
+- Quatro configurações Compose válidas, imagens reconstruídas com os caminhos novos, migrations existentes aplicadas em PostgreSQL descartável e runner repetido idempotente. Modelo EF sem mudanças pendentes; nenhuma migration criada. Smoke pelo Nginx **127.0.0.1:18091**, antes/depois de restart: oito clientes, oito veículos, oito OS, mesmo recebimento/PDF e saldo **R$ 100**, sem erros de API. PNGs versionados não foram sobrescritos.
+- Verificados **60 links/assets**, versões e ausência de jobs de deploy/publicação. O CI também passa a validar pushes em `main` e as quatro configurações Compose. O build da imagem reportou 13 alertas npm (3 críticos/8 altos/2 moderados); não houve atualização automática de dependências. Consulte os scanners para o estado vigente.
+- A versão de código **não homologa fiscal nem habilita produção**. Pendências regulatórias, alertas de dependências e controles compactos preexistentes continuam explícitos nas notas. Os checks remotos do PR são o gate final de publicação.
+
 ## 15/10/2026 — Apresentação e configuração do GitHub
 
 - README em português com logo centralizado para temas claro/escuro, badges verificáveis, galeria de cinco screenshots reais, recursos, arquitetura e navegação. Execução detalhada em [GETTING-STARTED](GETTING-STARTED.md); reprodução das imagens em [assets](assets/README.md).

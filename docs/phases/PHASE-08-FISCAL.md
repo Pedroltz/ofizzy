@@ -65,3 +65,9 @@ Controles compactos preexistentes e aviso de bundle foram documentados sem alter
 Após publicação, README foi conferido nos temas claro/escuro e em celular no GitHub. Os alertas recém-habilitados encontraram 18 vulnerabilidades preexistentes em dependências, incluindo duas críticas; triagem/correção é uma pendência de manutenção, sem alterar os critérios fiscais desta fase.
 
 O CI também revelou uma dependência de ordem no setup do QuestPDF dos testes de simulação fiscal. A própria classe agora inicializa a licença como os demais testes de PDF. Falha reproduzida isoladamente antes do ajuste; seis testes isolados e 100 unitários passaram após o ajuste. Nenhum comportamento fiscal de produção foi alterado.
+
+## Versionamento 1.0.0 — 15/10/2026
+
+O usuário solicitou remover o deploy automático, organizar a infraestrutura e consolidar `develop` em `main` com tag `1.0.0`. Essa versão identifica o código entregue, sem declarar homologação fiscal ou liberação de produção. O workflow de deploy foi desativado/removido; instalação permanece manual.
+
+Revalidação local: backend Release sem avisos/erros, 100 unitários/12 integrações; frontend lint/72 testes/build; E2E 72 aprovados/11 skips e um cenário aprovado na repetição. Migrations existentes idempotentes, modelo EF sem mudanças e smoke operacional pelo Nginx antes/depois de restart. Nenhuma migration ou regra fiscal nova. Ver [notas](../releases/1.0.0.md) e [status](../STATUS.md) para limites e evidências.

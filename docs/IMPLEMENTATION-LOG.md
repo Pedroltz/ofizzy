@@ -1,5 +1,13 @@
 # Histórico de implementação
 
+## 15/10/2026 — Preparação da release 1.0.0 e instalação manual
+
+- A pedido do usuário, workflow remoto de deploy desativado e arquivo removido; excluídos jobs de publicação GHCR/SSH. CI permanece em PRs e pushes `develop`/`main`, com validação das quatro configurações Compose.
+- Variantes Compose saíram da raiz para `infra/compose/`; Nginx movido de `deploy/` para `infra/nginx/`. Atualizados build, guias e README; `INSTALLATION.md` substitui `DEPLOYMENT.md`. Nenhum volume/dado operacional movido; registros históricos preservados.
+- Versões backend/frontend/lockfile em 1.0.0; changelog e notas preparados para tag `1.0.0` sobre merge protegido de `develop` em `main`. Dependências e regras fiscais inalteradas.
+- Evidência local: backend Release 0 avisos/erros, 100 unitários/12 integrações; frontend lint/72 unitários/build. E2E 72 aprovados/11 skips, uma falha de tablet aprovada na repetição serial. Quatro Compose válidos; imagens reconstruídas, migrations idempotentes e modelo sem mudanças. Smoke Nginx em 18091 antes/depois de restart, oito clientes/veículos/OS, PDF e recebimento persistidos, saldo R$ 100, zero erros de API. Conferidos 60 links/assets; capturas mantidas.
+- Npm na construção reportou 13 alertas (3 críticos/8 altos/2 moderados), mantidos como pendência de manutenção. Não foi executado audit fix nem habilitada produção fiscal. CI remoto do PR é exigido antes da release.
+
 ## 15/10/2026 — GitHub, README e galeria real
 
 - Reorganizados apresentação e guias; adicionadas cinco capturas de dashboard/OS/editor/financeiro/mobile com API e PostgreSQL reais. Fixtures exclusivas `example.test`, sem cookies ou credenciais em assets. Script reproduzível verifica dados, PDF, saldo e restart.

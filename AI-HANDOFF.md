@@ -2,6 +2,16 @@
 
 Atualizado em **15/10/2026**, branch `develop`. Fase ativa: [Fase 8](docs/phases/PHASE-08-FISCAL.md). O piloto continua sem homologação externa.
 
+## Release 1.0.0 e infraestrutura
+
+Por solicitação do usuário, deploy automático removido e workflow remoto previamente desativado. Apenas CI permanece; tags/releases não instalam o produto. Variantes Compose e Nginx agora ficam em `infra/`; `compose.yaml`, solução e entradas convencionais permanecem na raiz. [Instalação manual](docs/INSTALLATION.md) substitui o guia antigo. Não recriar automação SSH/GHCR sem nova solicitação.
+
+Versão do backend/frontend/lockfile: **1.0.0**, sem atualizar dependências. [Notas da release](docs/releases/1.0.0.md) e [changelog](docs/CHANGELOG.md). Publicar via PR `develop` → `main`, mantendo proteção e checks; tag exata `1.0.0` no merge. Desenvolvimento continua em `develop`, branch padrão.
+
+Preparação validada: backend 100 unitários/12 integrações; frontend lint/72 unitários/build; E2E 72 aprovados/11 skips e um cenário de tablet que passou na repetição. Quatro Compose válidos, migrations idempotentes/modelo EF sem mudança e smoke Nginx com persistência após restart. Resultados completos em [STATUS](docs/STATUS.md). Modo `--smoke` do script de demonstração não sobrescreve screenshots.
+
+Alertas de dependências e limitações fiscais continuam pendentes; a release não constitui homologação nem liberação produtiva. O histórico documental permanece preservado com seus caminhos da época.
+
 ## GitHub e documentação — 15/10/2026
 
 README visual e cinco capturas com API/PostgreSQL reais e dados fictícios. [Execução](docs/GETTING-STARTED.md), [reprodução das imagens](docs/assets/README.md) e [configuração remota](docs/GITHUB.md) documentadas. Código público com direitos reservados por escolha do usuário; não adicionar MIT por suposição.
