@@ -7,6 +7,7 @@
 - Corrigido `-text` dos XSDs oficiais: Windows havia convertido LF para CRLF, quebrando hashes. Restaurados os bytes dos próprios blobs Git; schemas não foram modificados. Testes Windows executados com APPDATA isolado para evitar User Secrets locais sobrescrevendo Testcontainers.
 - Evidência: backend Release 0 avisos/erros, 100 unitários/12 integrações; frontend lint, 72 testes, build; E2E 69 aprovados + 4 timeouts, todos os quatro aprovados em repetição serial, 11 skips. Modelo EF sem alterações, migrations existentes aplicadas e runner idempotente; Compose saudável e smoke Nginx em localhost:18091 antes/depois de restart, mesmos IDs, PDF e saldo de R$ 100.
 - Conferidos 48 links/assets, seis YAMLs, cinco imagens <1 MB e logos sem perda. Listagem sem overflow em 1440/768/320/390; medição encontrou 27/35/33/33 controles compactos abaixo de 44 px, preservados nesta entrega documental. Bundle 795,40 kB permanece acima do budget 500 kB. APIs, regras de negócio e produção fiscal inalteradas.
+- Após publicação: README conferido no GitHub em claro/escuro (dez imagens, logo correto) e 390 px sem overflow; formulários publicados, mas seu seletor exige login no navegador usado. Corrigida codificação do script para PowerShell 5.1. Os scanners identificaram 18 vulnerabilidades preexistentes (2 críticas, 7 altas, 5 médias, 4 baixas); Dependabot abriu propostas sem merge automático. Atualizações de dependências não integram esta entrega.
 
 ## 27/09/2026 — RTC configurável, origem fiscal e financeiro manual
 

@@ -61,3 +61,5 @@ A apresentação do GitHub foi reorganizada com capturas reais e dados fictício
 Validação desta entrega: backend Release sem avisos/erros, 100 unitários/12 integrações; frontend lint/72 testes/build; E2E 69 aprovados e quatro timeouts que passaram em repetição, com 11 skips. Modelo EF sem alterações; migrations existentes e smoke operacional com PDF/recebimento pelo Nginx em stack descartável passaram antes/depois de restart. Não é nova homologação fiscal. Git agora preserva os bytes oficiais dos XSDs em Windows; os schemas permanecem idênticos aos blobs originais.
 
 Controles compactos preexistentes e aviso de bundle foram documentados sem alterar o frontend do produto. Evidências em [STATUS](../STATUS.md), [log](../IMPLEMENTATION-LOG.md) e [guia de capturas](../assets/README.md).
+
+Após publicação, README foi conferido nos temas claro/escuro e em celular no GitHub. Os alertas recém-habilitados encontraram 18 vulnerabilidades preexistentes em dependências, incluindo duas críticas; triagem/correção é uma pendência de manutenção, sem alterar os critérios fiscais desta fase.

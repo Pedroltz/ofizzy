@@ -16,7 +16,7 @@ Os nomes dos checks foram conferidos na execução aprovada `34226277097`. Alter
 
 Formulários de bug e melhoria e o template de PR ficam em `.github/`. As entradas `CONTRIBUTING.md` e `SECURITY.md` apontam às referências técnicas, com relato privado de vulnerabilidades.
 
-Configurações remotas: secret scanning, push protection, alertas de dependências, correções automáticas de segurança e relato privado habilitados. Correções automáticas significam PRs propostos pelo Dependabot; nenhum merge automático foi configurado.
+Configurações remotas: secret scanning, push protection, alertas de dependências, correções automáticas de segurança e relato privado habilitados. Correções automáticas significam PRs propostos pelo Dependabot; nenhum merge automático foi configurado. Na habilitação em 15/10/2026 foram encontrados 18 alertas preexistentes, incluindo dois críticos; confira a [fila de segurança](https://github.com/Pedroltz/ofizzy/security/dependabot) para o estado atualizado.
 
 O Dependabot verifica npm, os três projetos NuGet e GitHub Actions semanalmente, às segundas-feiras, às 09:00 de São Paulo. PRs de versão usam `develop` e agrupam minor/patch. Major permanece separado. O GitHub lê a configuração da branch padrão; PRs de segurança podem seguir o comportamento próprio do serviço.
 

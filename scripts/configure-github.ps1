@@ -1,4 +1,4 @@
-# Run with gh authenticated as an administrator of Pedroltz/ofizzy.
+﻿# Run with gh authenticated as an administrator of Pedroltz/ofizzy.
 $ErrorActionPreference = 'Stop'
 $repo = 'repos/Pedroltz/ofizzy'
 $outputDirectory = Join-Path $PSScriptRoot '../test-results/github-demo'

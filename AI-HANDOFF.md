@@ -12,6 +12,8 @@ Validação local: backend 100 unitários + 12 integrações; frontend lint/72 t
 
 Limites registrados: bundle 795,40 kB; controles compactos preexistentes abaixo de 44 px nas listagens, inclusive mobile/tablet; nenhuma alteração de CSS nesta entrega. Ausência de overflow conferida em 1440/768/320/390 px. Resultados detalhados em [STATUS](docs/STATUS.md). Evidências temporárias em `test-results/github-demo/` são ignoradas; não versionar sessões, credenciais ou traces.
 
+README publicado e inspecionado no GitHub em claro/escuro e mobile, com dez imagens carregadas. Alertas revelaram 18 vulnerabilidades preexistentes (2 críticas/7 altas/5 médias/4 baixas); há PRs automáticos de proposta, nenhum mesclado. Próxima revisão de manutenção deve triar [Dependabot](https://github.com/Pedroltz/ofizzy/security/dependabot), separadamente das pendências fiscais. O script PowerShell de configuração usa UTF-8 com BOM para preservar acentos no Windows PowerShell 5.1.
+
 ## Incremento implementado
 
 - Produção exige as três travas: `Fiscal:ProductionEnabled`, tenant na allow-list e `FiscalProductionReleased`. Lista vazia bloqueia; liberação no banco não contorna o servidor.
