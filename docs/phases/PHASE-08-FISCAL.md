@@ -63,3 +63,5 @@ Validação desta entrega: backend Release sem avisos/erros, 100 unitários/12 i
 Controles compactos preexistentes e aviso de bundle foram documentados sem alterar o frontend do produto. Evidências em [STATUS](../STATUS.md), [log](../IMPLEMENTATION-LOG.md) e [guia de capturas](../assets/README.md).
 
 Após publicação, README foi conferido nos temas claro/escuro e em celular no GitHub. Os alertas recém-habilitados encontraram 18 vulnerabilidades preexistentes em dependências, incluindo duas críticas; triagem/correção é uma pendência de manutenção, sem alterar os critérios fiscais desta fase.
+
+O CI também revelou uma dependência de ordem no setup do QuestPDF dos testes de simulação fiscal. A própria classe agora inicializa a licença como os demais testes de PDF. Falha reproduzida isoladamente antes do ajuste; seis testes isolados e 100 unitários passaram após o ajuste. Nenhum comportamento fiscal de produção foi alterado.

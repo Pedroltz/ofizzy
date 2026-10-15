@@ -9,6 +9,12 @@ namespace Ofizzy.UnitTests;
 
 public sealed class FiscalDevSimulationTests
 {
+    public FiscalDevSimulationTests()
+    {
+        // PDF tests must initialize their own license instead of relying on another test running first.
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+    }
+
     private static X509Certificate2 CreateTestCertificate(string cnpj = "11222333000181")
     {
         using var rsa = RSA.Create(2048);

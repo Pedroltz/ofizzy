@@ -14,6 +14,8 @@ Limites registrados: bundle 795,40 kB; controles compactos preexistentes abaixo 
 
 README publicado e inspecionado no GitHub em claro/escuro e mobile, com dez imagens carregadas. Alertas revelaram 18 vulnerabilidades preexistentes (2 críticas/7 altas/5 médias/4 baixas); há PRs automáticos de proposta, nenhum mesclado. Próxima revisão de manutenção deve triar [Dependabot](https://github.com/Pedroltz/ofizzy/security/dependabot), separadamente das pendências fiscais. O script PowerShell de configuração usa UTF-8 com BOM para preservar acentos no Windows PowerShell 5.1.
 
+O CI remoto revelou que `FiscalDevSimulationTests` dependia da configuração global do QuestPDF realizada por outro teste. Corrigido o setup da própria classe; a falha foi reproduzida em execução isolada antes da correção e seus seis testes + os 100 unitários passaram depois. Produção não mudou. A execução remota anterior já aprovou as 12 integrações e todo o frontend/E2E; acompanhar o commit corrigido em Actions.
+
 ## Incremento implementado
 
 - Produção exige as três travas: `Fiscal:ProductionEnabled`, tenant na allow-list e `FiscalProductionReleased`. Lista vazia bloqueia; liberação no banco não contorna o servidor.

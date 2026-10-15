@@ -12,6 +12,7 @@
 - Renderização pública conferida no GitHub: dez imagens carregadas, logo correspondente nos temas claro/escuro e README em 390 px sem overflow. O seletor de issues exige login para inspeção interativa; os dois formulários foram validados localmente e publicados. Metadados corrigidos para preservar acentos também em Windows PowerShell 5.1.
 - Alertas recém-habilitados identificaram **18 vulnerabilidades preexistentes nas dependências: 2 críticas, 7 altas, 5 médias e 4 baixas**. Dependabot abriu propostas, sem merge automático. A atualização das dependências exige entrega e validação próprias; scanners habilitados não significam ausência de vulnerabilidades.
 - Nenhum contrato, schema, regra fiscal ou gate produtivo mudou. Sem emissão oficial, homologação externa, release ou deploy. Commits publicados em `develop`; CI remoto é acompanhado em [Actions](https://github.com/Pedroltz/ofizzy/actions/workflows/pull-request.yml).
+- A execução remota `38780675683` aprovou Compose, as 12 integrações e lint/unitários/build/E2E do frontend, mas revelou dependência de ordem na inicialização do QuestPDF em `FiscalDevSimulationTests`. Falha reproduzida localmente com a classe isolada; corrigido seu setup para selecionar a mesma licença já usada pelos testes, sem alterar código de produção. Build sem avisos/erros, seis testes isolados e 100 unitários passaram após a correção. Nova execução remota valida o commit corrigido.
 
 ## 27/09/2026 — RTC configurável, origem fiscal e financeiro manual
 
