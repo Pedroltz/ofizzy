@@ -42,7 +42,7 @@ jobs:
       - run: npm run e2e
       - name: Upload Playwright failure artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-failures
           path: src/frontend/ofizzy-web/test-results/
