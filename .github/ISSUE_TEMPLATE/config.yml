@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Segurança e vulnerabilidades
+    url: https://github.com/Pedroltz/ofizzy/blob/develop/SECURITY.md
+    about: Consulte o canal privado de relato antes de compartilhar detalhes.
+  - name: Documentação e instalação
+    url: https://github.com/Pedroltz/ofizzy/blob/develop/docs/GETTING-STARTED.md
+    about: Consulte os guias de execução, testes e deploy.

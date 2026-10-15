@@ -1,0 +1,40 @@
+name: Relatar um bug
+description: Descreva um problema reproduzível no Ofizzy.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Use apenas dados fictícios. Para vulnerabilidades, siga SECURITY.md e não envie detalhes aqui."
+  - type: textarea
+    id: problem
+    attributes:
+      label: O que aconteceu?
+      description: Explique o resultado observado e o comportamento esperado.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Como reproduzir?
+      description: Informe os passos e o estado inicial necessários, com dados fictícios.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versão ou commit
+      placeholder: "SHA do commit ou tag"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      description: "Navegador, sistema, tamanho da tela e execução local/Compose. Não inclua .env ou credenciais."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Screenshots ou trechos mínimos de erro, revisados para remover dados sensíveis.

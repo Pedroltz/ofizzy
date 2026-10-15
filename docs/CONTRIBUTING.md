@@ -1,11 +1,13 @@
 # Contribuição
 
 - Trabalhe em `develop`; use `main` somente para releases, conforme AGENTS.md.
+- `main` exige PR e checks `backend`, `frontend` e `compose`; não exige aprovação de outro colaborador. [Configuração do GitHub](GITHUB.md).
 - Commits Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:` e `docs:`.
 - Antes de abrir PR, execute `dotnet test Ofizzy.slnx`, `npm run lint`, `npm test`, `npm run e2e` e `npm run build`.
 - O Playwright requer `npx playwright install chromium` na primeira execução.
 - Alterações responsivas devem ser validadas em desktop, celular e tablet, sem overflow horizontal.
 - Não versionar `.env`, tokens, senhas, certificados ou dados reais de clientes.
+- Capturas para documentação usam a [demonstração isolada](assets/README.md), com API real, persistência e dados fictícios.
 - Atualize `STATUS.md`, `AI-HANDOFF.md`, `IMPLEMENTATION-LOG.md` e o documento da fase com as evidências reais da validação.
 
 ## Continuidade e evidências — 13/09/2026

@@ -3,13 +3,18 @@ on:
   push: { branches: [main] }
   workflow_dispatch:
 
-permissions: { contents: read, packages: write }
+permissions: { contents: read }
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
   validate:
     uses: ./.github/workflows/pull-request.yml
 
   publish:
+    permissions: { contents: read, packages: write }
     needs: validate
     runs-on: ubuntu-latest
     outputs:

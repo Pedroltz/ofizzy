@@ -1,6 +1,6 @@
 # Segurança
 
-Reporte vulnerabilidades de forma privada ao responsável pela instalação. Não abra issues públicas com credenciais ou dados de clientes.
+Reporte vulnerabilidades de forma privada conforme a [política de relato do repositório](../SECURITY.md) ou ao responsável pela instalação. Não abra issues públicas com credenciais ou dados de clientes.
 
 As sessões usam cookies HttpOnly/SameSite, proteção CSRF e refresh token com hash e rotação. Produção exige HTTPS, chave JWT aleatória com no mínimo 32 bytes e senhas exclusivas. Logs não devem conter senha, token, documento ou payload completo de clientes.
 
@@ -39,4 +39,4 @@ continua separada e não é evidência de isolamento de banco.
 
 A1 é armazenado cifrado com AES-GCM, chave externa versionada e vínculo ao tenant/keyId. A senha do upload não é persistida; leitura expõe apenas metadados. Manter chaves anteriores enquanto houver certificados dependentes e não registrar XMLs completos, senhas, tokens ou certificados em logs.
 
-Respostas oficiais exigem correlação de identidade/protocolo; XML recebido proíbe DTD e schemas resolvem somente arquivos locais autorizados. Incerteza não autoriza liberar numeração. Produção exige Fiscal:ProductionEnabled e tenant em Fiscal:HomologatedTenants. [Operação](FISCAL.md), [restauração](BACKUP-RESTORE.md) e [próximos passos](NEXT-STEPS.md).
+Respostas oficiais exigem correlação de identidade/protocolo; XML recebido proíbe DTD e schemas resolvem somente arquivos locais autorizados. Incerteza não autoriza liberar numeração. Produção exige cumulativamente Fiscal:ProductionEnabled, tenant em Fiscal:HomologatedTenants e FiscalProductionReleased persistido. [Operação](FISCAL.md), [restauração](BACKUP-RESTORE.md) e [próximos passos](NEXT-STEPS.md).
